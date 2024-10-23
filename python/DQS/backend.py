@@ -1,7 +1,7 @@
  
 
 
-
+import prueba
 
 
 class DistributeBackends:
@@ -12,3 +12,7 @@ class DistributeBackends:
 	def dist_backend(self, dict_backends_QPUs=0):
 		
 		print("Distribuimos los backends a los recursos")
+
+	def sum(self):
+		res = prueba.sum(2,3)
+		return res
