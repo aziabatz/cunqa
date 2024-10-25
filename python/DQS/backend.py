@@ -1,22 +1,17 @@
- 
-
-
 import prueba
 from qiskit import QuantumCircuit
-from qiskit.providers import Backend
+#from qiskit.providers import Backend
 from qiskit_aer import AerSimulator
 
 
-class QPU(AerSimulator):
-	def __init__(self, backend=None, configuration=None, properties=None, provider=None, 
-			**backend_options):
-		
-		super().__init__()
+class Backend:
+	def __init__(self):
+		pass
+		#super().__init__()
 
-	def from_backend(self, backend):
-		
-		self = backend
-		return self
+	def set_backend(self, method="statevector", noise_model=None):
+		return AerSimulator(method=method, noise_model = noise_model)
+
 
 class DQS:
 	
