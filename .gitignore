@@ -198,6 +198,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-############### ALVARO IGNORES ####################
 
+############ ALVARO IGNORES ################
 cargar_modulos.sh
+
+# ----------- VSCODE IGNORES -----------
+
+main*
+.vscode
+
