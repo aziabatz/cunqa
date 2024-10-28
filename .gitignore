@@ -210,7 +210,10 @@ main*
 
 # ============================= Marta ignore ======================================
 cluster.ipynb
-
+lanzar_server.py
+cliente.py
+prueba_dist.py
+server.py
 
 
 
