@@ -19,6 +19,28 @@ public:
           IPs{_getIPAddresses()},
           port{std::to_string(n_port)} { }
 
+    IPConfig(const std::string& hostname, const int& n_port)
+        : hostname{hostname},
+          IPs{_getIPAddresses()},
+          port{std::to_string(n_port)} { }
+    
+    IPConfig(const std::string& hostname, const std::string& n_port)
+        : hostname{hostname},
+          IPs{_getIPAddresses()},
+          port{n_port} { }
+    
+
+    IPConfig& operator=(const IPConfig& other) {
+        
+        // Check for self-assignment
+        if (this != &other) {
+            hostname = other.hostname;
+            IPs = other.IPs;
+            port = other.port;
+        }
+        return *this;
+    }
+
     json to_json(const int& qpu_id){
         json config_json = {
             {std::to_string(qpu_id), {
