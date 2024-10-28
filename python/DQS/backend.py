@@ -1,8 +1,7 @@
-import prueba
 from qiskit import QuantumCircuit
 #from qiskit.providers import Backend
 from qiskit_aer import AerSimulator
-
+#import prueba
 
 #class Backend:
 #	def __init__(self):
@@ -24,6 +23,9 @@ class QPU:
 		else:
 			print("No valid simualtor.")
 
+	def from_backend(self,backend):
+		return backend
+	
 	def dist_backend(self, list_backends, dict_backend_QPUs=None):
 		"""The dictionary that relates backends to QPUs is optional. 
 		It would only make sense if we knew how to raise QPUs 
