@@ -7,14 +7,28 @@ class SLURMJob():
 
     _script_template = []
 
-    def __init__(self,parameter_dict=None,cores=None,walltime=None, mem_per_cpu=None, job_name=None):
-        self.cores=cores; self.walltime=walltime; self.mem_per_cpe=mem_per_cpu; self.job_name=job_name
-
+    def __init__(self,parameter_dict=None,cores=None,walltime=None, mem_per_cpu=None, job_name="myjob",disp=True):
+        keys=["cores","walltime","mem_per_cpu","job_name"]
         if parameter_dict is not None:
-            self.cores=parameter_dict["cores"]; self.walltime=parameter_dict["walltime"]; self.mem_per_cpu=parameter_dict["mem_per_cpu"]
-            self.job_name=parameter_dict["job_name"]
+            for k in keys:
+                if k in parameter_dict.keys():
+                    setattr(self,k,parameter_dict[k])
+        for k in keys:
+            if locals()[k] is not None:
+                setattr(self,k,locals()[k])
+        
+        if hasattr(self, "cores") is False or hasattr(self, "walltime")is False or hasattr(self, "mem_per_cpu") is False:
+            raise ValueError("You must at least specify cores, walltime and mem_per_cpu.")
+         
+        if disp is True:
+            cadena="Job object crated with: "
+            for k in keys:
+                try:
+                    cadena+="\n"+k+": "+str(getattr(self, k))
+                except:
+                    pass# en caso de que no se haya definido alguna característica del SLURM, este la asigna por defecto, no la api
+            print(cadena)
 
-        print(f"Me he creado con {cores} cores y {walltime} tiempo")
         header_lines=[]; header_lines.append("#!/bin/bash")
 
         if job_name is not None:
@@ -49,15 +63,24 @@ class SLURMJob():
     
     def generate_script(self,script_name=None):
         if script_name is None:
-            if self.job_name is None:
-                script_name="myjob"
-            elif self.job_name is not None:
-                script_name=self.job_name
-        with open('./'+script_name+'.sh', 'w') as archivo:
+            self.script_name=self.job_name # por defecto, si no lo definimos al instaciar la clase, toma "myjob"
+        else:
+            self.script_name=script_name
+        with open('./'+self.script_name+'.sh', 'w') as archivo:
             archivo.write(self.job_header)
             archivo.write(self.conda_env)
             archivo.write("\n\n\n"+"module load qmio/hpc gcc/12.3.0 impi/2021.13.0")
-        print("Script generado")
+        print(f"Job script was generated with name {self.script_name}.sh")
+
+    def job_script():
+        try:
+            print(f"Job script {self.script_name}.sh :")
+            print("-------------------------------------------")
+            with open('./'+self.script_name+'.sh', 'r') as archivo:
+                print(load(archivo))
+        except:
+            raise FileNotFoundError("Make sure you already generated the job script using .generate_script() method before trying to print it.")
+        
 
 
 class Cluster(SLURMJob):
