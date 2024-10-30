@@ -1,0 +1,1 @@
+add_definitions(-DCOMM_LIB=ASIO)

@@ -6,13 +6,26 @@
 # the terms of the Apache License 2.0 which accompanies this distribution.     #
 # ============================================================================ #
 
-set(LIBRARY_NAME custom-json)
+# Building custom-json 
+set(LIBRARY1_NAME custom-json)
 
-set(NLOHMANN ON)
 find_package(nlohmann_json 3.11.3 REQUIRED)
+if(nlohmann_json_FOUND)
+    add_library(${LIBRARY1_NAME} SHARED custom_json.cpp)
+    target_include_directories(${LIBRARY1_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(${LIBRARY1_NAME} PRIVATE nlohmann_json::nlohmann_json)
+else()
+    message(FATAL_ERROR "nlohman/json library not found!")
+endif()
 
-add_library(${LIBRARY_NAME} SHARED custom_json.cpp)
+# Building ip-config
+set(LIBRARY2_NAME )
 
-target_include_directories(${LIBRARY_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${LIBRARY_NAME} PRIVATE nlohmann_json::nlohmann_json)
+find_package(Boost 1.85.0 REQUIRED)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    target_include_directories(${LIBRARY2_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(${LIBRARY2_NAME} PRIVATE ${Boost_LIBRARIES})
+else()
+    message(FATAL_ERROR "Boost library not found!")
+endif()
