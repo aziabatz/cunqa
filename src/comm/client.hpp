@@ -21,7 +21,8 @@ class Client {
 public:
 
     Client() :
-    strategy{std::make_unique<SelectedClient>()} { }
+        strategy{std::make_unique<SelectedClient>()} 
+    { }
 
     void connect() {
         
@@ -47,28 +48,12 @@ public:
         strategy->connect(server_ip_config);
     }
 
-    void write(const std::string& data) {
-        strategy->write(data);
-    }
+    void read_result() { strategy->read_result(); }
 
-    void read(){
-        strategy->read();
-    }
+    void send_data(const std::string& data) { strategy->send_data(data); }
 
-    void stop(){
-        strategy->stop();
-    }
-
-    /* void send(const std::string& message) {
-        strategy->sendMessage(message);
-    }
-
-    std::string receive() {
-        return strategy->receiveMessage();
-    }
- */
-private:
-
-
+    void send_data(std::ifstream& file) { strategy->send_data(file); }
+    
+    void stop() { strategy->stop(); }
 
 };
