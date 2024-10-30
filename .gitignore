@@ -198,6 +198,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+############ JORGE IGNORES ################
+*.qasm
 
 ############ ALVARO IGNORES ################
 cargar_modulos.sh
