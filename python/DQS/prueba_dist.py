@@ -32,8 +32,10 @@ qc.measure([0, 1], [0, 1])
 
 
 #result = backend.run(circ=qc, qpu=qpus[0], shots = 100).result()
-result_2 = backend.run(qc, list_qpus=qpus, id="1", shots=200).result()
-print(result_2)
+#result_2 = backend.run(qc, list_qpus=qpus, id="1", shots=200).result()
+result_3 = backend.run(qc, id="1", shots=150).result()
+
+print(result_3)
 
 
 
