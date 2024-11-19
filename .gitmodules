@@ -1,0 +1,3 @@
+[submodule "aer-cpp"]
+	path = src/third-party/aer-cpp
+	url = git@github.com:Qiskit/qiskit-aer.git
