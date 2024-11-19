@@ -3,89 +3,106 @@
 #include <fstream>
 #include <mpi.h>
 #include <exception>
-#include <sys/file.h>  
+#include <sys/file.h>
 
 #include "custom_json.hpp"
 
-CustomJson::CustomJson() { 
+CustomJson::CustomJson()
+{
     custom_json = json::object();
 }
-CustomJson::~CustomJson() { }
+CustomJson::~CustomJson() {}
 
-void CustomJson::write(json local_data, const std::string &filename) {
+void CustomJson::write(json local_data, const std::string &filename)
+{
     int flag;
     MPI_Initialized(&flag);
     this->filename = filename;
     flag ? CustomJson::_write_MPI(local_data) : CustomJson::_write_locks(local_data);
 }
 
-const std::string CustomJson::dump(){
+const std::string CustomJson::dump()
+{
     return custom_json.dump(4);
 }
 
-void CustomJson::_write_MPI(json local_data) {
+void CustomJson::_write_MPI(json local_data)
+{
     int world_rank, world_size;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank); 
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
     // Prepare all the sending data
     std::string local_data_str;
     int local_length;
-    const char* send_data;
+    const char *send_data;
     local_data_str = local_data.dump();
     local_length = local_data_str.size();
     send_data = local_data_str.c_str();
 
     // Gather lengths to calculate the displacements
-    int* recv_lengths;
-    if (world_rank == 0) recv_lengths = new int[world_size];
+    int *recv_lengths;
+    if (world_rank == 0)
+        recv_lengths = new int[world_size];
     MPI_Gather(&local_length, 1, MPI_INT, recv_lengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     // Calculate displacements at root
-    int* displs;
+    int *displs;
     int total_length = 0;
-    if (world_rank == 0) {
-        
+    if (world_rank == 0)
+    {
+
         displs = new int[world_size];
         displs[0] = 0;
-        for (int i = 0; i < world_size; ++i) {
-            if (i > 0) displs[i] = displs[i - 1] + recv_lengths[i - 1];
+        for (int i = 0; i < world_size; ++i)
+        {
+            if (i > 0)
+                displs[i] = displs[i - 1] + recv_lengths[i - 1];
             total_length += recv_lengths[i];
         }
     }
 
     // Gather variable-length data at root
-    char* recv_data;
-    if (world_rank == 0) recv_data = new char[total_length];
+    char *recv_data;
+    if (world_rank == 0)
+        recv_data = new char[total_length];
 
     MPI_Gatherv(send_data, local_length, MPI_CHAR,
                 recv_data, recv_lengths, displs, MPI_CHAR,
                 0, MPI_COMM_WORLD);
 
     // Reconstruct strings at root
-    if (world_rank == 0) {    
+    if (world_rank == 0)
+    {
         std::vector<json> all_json_data(world_size);
-        for (int i = 0; i < world_size; ++i) {
+        for (int i = 0; i < world_size; ++i)
+        {
             std::string data_str(recv_data + displs[i], recv_lengths[i]);
-            all_json_data[std::to_string(i)] = json::parse(data_str);
+            all_json_data[i] = json::parse(data_str);
         }
 
-        for (const auto& obj : all_json_data) {
+        for (const auto &obj : all_json_data)
+        {
             custom_json.update(obj);
         }
 
-        try {
+        try
+        {
             std::fstream file(filename, std::ios::out);
             file << custom_json.dump(4) << "\n";
-        } catch(std::exception& e){
+        }
+        catch (std::exception &e)
+        {
             std::cerr << "Error, cannot open JSON file: " << e.what() << std::endl;
         }
     }
 }
 
-void CustomJson::_write_locks(json local_data) {
+void CustomJson::_write_locks(json local_data)
+{
     int file = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
-    if (file == -1) {
+    if (file == -1)
+    {
         std::cerr << "Error al abrir el archivo" << std::endl;
         return;
     }
@@ -95,7 +112,8 @@ void CustomJson::_write_locks(json local_data) {
     json j;
     std::ifstream file_in(filename);
 
-    if (file_in.peek() != std::ifstream::traits_type::eof()) file_in >> j;
+    if (file_in.peek() != std::ifstream::traits_type::eof())
+        file_in >> j;
     file_in.close();
 
     std::cout << j << "\n";

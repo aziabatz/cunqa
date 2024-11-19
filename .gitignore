@@ -198,19 +198,16 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-############ JORGE IGNORES ################
-*.qasm
-
-############ ALVARO IGNORES ################
-cargar_modulos.sh
-
-# ----------- VSCODE IGNORES -----------
-
-main*
+# vscode
 .vscode
 
+############ CUSTOM IGNORES ################
+*.qasm
+prueba*
+main*
 
-# ============================= Marta ignore ======================================
+cargar_modulos.sh
+
 cluster.ipynb
 lanzar_server.sh
 cliente.py
