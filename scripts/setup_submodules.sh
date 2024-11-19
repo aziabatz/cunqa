@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ../
 
-if [ ! -f "../.gitmodules" ] || ! grep -q 'aer' "../.gitmodules"; then
+if [ ! -f ".gitmodules" ] || ! grep -q 'aer' ".gitmodules"; then
     git submodule add --name aer-cpp git@github.com:Qiskit/qiskit-aer.git src/third-party/aer-cpp
 fi
 
