@@ -1,0 +1,6 @@
+{
+    "shots": 2344,
+    "method": "statevector",
+    "library_dir": "/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/api-simulator/src/third-party/aer/examples/cpp",
+    "memory_slots": 7
+}

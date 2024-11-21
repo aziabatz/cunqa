@@ -1,8 +1,11 @@
 #include <boost/asio.hpp>
-#include "../../../utils/ip_config.hpp"
+#include "../../ip_config.hpp"
+#include "../../../utils/constants.hpp"
 #include "asio_common.hpp"
+#include <string>
 
 using boost::asio::ip::tcp;
+using namespace std::literals;
 
 class AsioClient {
     boost::asio::io_context io_context;
@@ -14,31 +17,32 @@ public:
         socket{std::make_shared<tcp::socket>(io_context)} 
     { }
     
-    void connect(const IPConfig& server_ipconfig) 
+    inline void connect(const ip_config::IPConfig& server_ipconfig, const std::string_view& net = INFINIBAND) 
     {
         tcp::resolver resolver{io_context};
-        auto endpoint = resolver.resolve(server_ipconfig.hostname, server_ipconfig.port);
+        // TODO: probar con el enpoint del IPconfig directamente
+        auto endpoint = resolver.resolve(server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
         boost::asio::connect(*socket, endpoint);
     }
 
-    void send_data(const std::string& data) 
+    inline void send_data(const std::string& data) 
     {
         send_string(socket, data);
     }
 
-    void send_data(std::ifstream& file) 
+    inline void send_data(std::ifstream& file) 
     {
         std::string data((std::istreambuf_iterator<char>(file)),
                         (std::istreambuf_iterator<char>()) );
         send_string(socket, data);
     }
 
-    void read_result() 
+    inline void read_result() 
     {
         auto result = read_string(*socket);
     }
 
-    void stop() 
+    inline void stop() 
     {
         boost::system::error_code ec;
         socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);

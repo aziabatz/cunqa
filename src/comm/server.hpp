@@ -1,6 +1,8 @@
 #include <iostream>
 #include <memory>
-#include "../utils/ip_config.hpp"
+#include "ip_config.hpp"
+
+using namespace ip_config;
 
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_server.hpp"
@@ -20,26 +22,11 @@ class Server {
 public:
 
     Server(const IPConfig& ip_config) :
-    strategy{std::make_unique<SelectedServer>(ip_config)} { }
+        strategy{std::make_unique<SelectedServer>(ip_config)} 
+    { }
 
-    void start() {
-        strategy->start();
-    }
+    inline void start() { strategy->start(); }
 
-    void stop() {
-        strategy->stop();
-    }
-    /* void send(const std::string& message) {
-        strategy->sendMessage(message);
-    }
-
-    std::string receive() {
-        return strategy->receiveMessage();
-    }
- */
-private:
-
-
-
+    inline void stop() { strategy->stop(); }
 };
 

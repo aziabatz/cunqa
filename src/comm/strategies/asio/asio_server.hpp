@@ -2,9 +2,12 @@
 #include <iostream>
 #include <string>
 #include "../../../utils/helpers.hpp"
+#include "../../ip_config.hpp"
 #include "asio_common.hpp"
+#include  "../../../utils/constants.hpp"
 
 using namespace std::string_literals;
+using namespace ip_config;
 using boost::asio::ip::tcp;
 
 class AsioServer {
@@ -14,9 +17,10 @@ class AsioServer {
     tcp::acceptor acceptor;
 
 public:
-    AsioServer(const IPConfig& ip_config) :
-        ip_config{ip_config}, 
-        acceptor{io_context, tcp::endpoint(tcp::v4(), std::stoi(ip_config.port))} 
+    AsioServer(const IPConfig& ipconfig, const std::string_view& net = INFINIBAND) :
+        ip_config{ipconfig},
+        acceptor{io_context, tcp::endpoint{boost::asio::ip::address::from_string(ip_config.IPs.at(std::string(net))), 
+                            static_cast<unsigned short>(stoul(ip_config.port))}} 
     { }
 
     void start() 
@@ -25,7 +29,7 @@ public:
         io_context.run();
     }
 
-    void stop() { io_context.stop(); }
+    inline void stop() { io_context.stop(); }
 
 private:
 
@@ -35,7 +39,7 @@ private:
             if (!error) {
                 std::cout << "Client connected: " << socket->remote_endpoint() << std::endl;
                 auto result = read_string(*socket);
-                send_result(result);
+                _send_result(result);
             } else {
                 std::cerr << "Accept error: " << error.message() << std::endl;
             }
@@ -43,7 +47,7 @@ private:
         });
     }
 
-    void send_result(const std::string& result) {
+    inline void _send_result(const std::string& result) {
         send_string(socket, result);    
     }
 };

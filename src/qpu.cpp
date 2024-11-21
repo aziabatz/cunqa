@@ -1,4 +1,5 @@
 #include "comm/server.hpp"
+#include "../include"
 
 class QPU {
 
