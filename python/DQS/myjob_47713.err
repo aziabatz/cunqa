@@ -1,0 +1,12 @@
+qmio/hpc unloaded
+        Preparing the environment for use of the sistema software stack.
+        Please rebuild modules cache: module --ignore-cache avail
+     
+qmio/hpc loaded
+gcccore/12.3.0 loaded
+binutils/2.40 loaded
+gcc/12.3.0 loaded
+impi/2021.13.0 loaded
+srun: slurm_job_submit: Partition not specified. Set to default partition: ilk
+srun: job 47714 queued and waiting for resources
+srun: job 47714 has been allocated resources
