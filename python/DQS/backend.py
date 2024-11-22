@@ -2,6 +2,9 @@ from qiskit import QuantumCircuit, transpile
 #from qiskit.providers import Backend
 from qiskit_aer import AerSimulator
 import json
+from cluster import SLURMJob
+
+=======
 
 _qpus = []
 
@@ -53,9 +56,6 @@ def run(circ, qpu=None, id=None, **kwargs):
 	return result
 
 
-
-
-
 class QPU:
 	def __init__(self, backend=None,id=None, hostname=None, port=None):
 		self.backend = AerSimulator()
@@ -68,6 +68,73 @@ class QPU:
 		result = self.backend.run(circ, **kwargs)
 		return result
 
+#========================================================================================================================================
+#========================================================================================================================================
+#========================================================================================================================================
+
+class QPU_:
+    def __init__(self, id_=None, server_endpoint=None,backend=None):
+
+        """
+        Initializes th QPU class.
+
+        Attributes:
+        -----------
+        id_ (int): Id assigned to the qpu, simply a int from 0 to n_qpus-1.
+        
+        server_endpoint (str): Ip and port route that identifies the server that represents the qpu itself which the worker will
+            communicate with.
+            
+        backend (<class backend.Backend>): Backend object <====== AUN POR DEFINIR PORQUE DEPENDE DE LO DE ABAJO !!!!!!!
+            By default, it will be set to AerSimulator().
+        
+        """
+        if id_ is not None and type(id_) is int:
+            self.id=id_
+        else:
+            raise ValueError("id not correct")
+
+
+        # asignamos server
+        if server_endpoint is not None and type(server_endpoint) is str:
+            self.server_endpoint=server_endpoint
+        else:
+            raise ValueError("Server not assigned")
+    
+        # asignamos backend, será el nombre del archivo de configuración para FakeQmio
+        if backend is None:
+            sef.backend=AerSimulator()
+        else:
+            self.backend=backend
+
+class Cluster:
+    def __init__(self,nqpus=1, config=None, slurm_config=None):
+        self.nqpus=nqpus
+        default_config={}
+        default_slurm_config={"cores":10, "ntasks":self.nqpus, "walltime":"00:02:00","mem_per_cpu":"1G"}
+        if config is None:
+            self.config=default_config
+        else:
+            self.config=config
+        if slurm_config is None:
+            self.slurm_config=default_slurm_config
+        else:
+            self.slurm_config=slurm_config
+
+        # creamos el script para levantar el cluster y lanzamos el trabajo
+        job=SLURMJob(parameter_dict=self.slurm_config); job.generate_script(); job.launch()
+
+        while job.status()=='RUNNING':
+            return
+
+
+
+
+
+
+#==============================================================================================================================================
+#==============================================================================================================================================
+#==============================================================================================================================================
 	def set_backend(self, backend):
 		self.backend = backend
 

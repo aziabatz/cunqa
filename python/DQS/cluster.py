@@ -2,12 +2,17 @@
 Module to deploy cluster
 """
 
+import subprocess
+import re
+import os
+
 class SLURMJob():
     """ Class to create and launch a SLURM Jobsript """
 
     _script_template = []
 
     def __init__(self,parameter_dict=None,cores=None,ntasks=None,walltime=None, mem_per_cpu=None, job_name="myjob",disp=True):
+        self.job_info=None
         keys=["cores","ntasks","walltime","mem_per_cpu","job_name"]
         if parameter_dict is not None:
             for k in keys:
@@ -80,9 +85,14 @@ class SLURMJob():
                 archivo.write(self.conda_env)
             except:
                 pass
-            archivo.write("\n\n\n# loading impi...\n"+"module load qmio/hpc gcc/12.3.0 impi/2021.13.0\n\n\n")
+            archivo.write("\n\n\n")
+            archivo.write("# loading impi...\n"+"module load qmio/hpc gcc/12.3.0 impi/2021.13.0")
+            archivo.write("\n\n\n")
             archivo.write("""echo Soy la RESERVA: SLURM_NTASKS: $SLURM_NTASKS \necho Soy la RESERVA: SLURM_CPUS_PER_TASK: $SLURM_CPUS_PER_TASK """)
-            archivo.write("\nsrun bash hola.sh")
+            archivo.write("\n\n\n")
+            archivo.write('unset $(compgen -v | grep "^SLURM")')
+            archivo.write("\n\n\n")
+            archivo.write(f"srun -c {self.cores} -n {self.ntasks} --mem-per-cpu={self.mem_per_cpu} -t {self.walltime} python lanza_.py")
         print(f"Job script was generated with name {self.script_name}.sh")
 
     def job_script(self):
@@ -96,19 +106,33 @@ class SLURMJob():
             raise FileNotFoundError("Make sure you already generated the job script using .generate_script() method before trying to print it.")
         
     def launch(self):
-        from os import system
-        command="sbatch "+self.script_name+".sh"
-        system(command)
+        # command="sbatch "+self.script_name+".sh"
+        # os.system("sbatch "+self.script_name+".sh")
+        submission=subprocess.check_output(["sbatch", self.script_name+".sh"])
+        self.job_id= [int(s) for s in submission.split() if s.isdigit()][0]
+
+    def status(self):
+        job_info=subprocess.check_output(["scontrol","show","job",str(self.job_id)])
+        cadena=job_info.decode('utf-8')
+        job_state=re.search(r'JobState=(\w+)', cadena)
+        # print("JobState= ",job_state.group(1))
+        return job_state.group(1)
 
 
 
 
 
 
-
-class Cluster(SLURMJob):
+class Cluster__():
     """ Clase que levanta Cluster de QPUS """
-    def __init__(self):
+    
+    def __init__(self,n_qpus=None,config_dict=None,slurm_parameters=None):
+
+        if slurm_parameters is not None:
+        
+            job=SLURMJob(parameter_dict=parameter_dict,)
+
+        
         return
 
     def deploy(self, config_dict=0):
