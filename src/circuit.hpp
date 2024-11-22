@@ -1,0 +1,1 @@
+// Clase para parsear el json del circuito prácticamente

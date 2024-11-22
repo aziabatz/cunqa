@@ -1,5 +1,6 @@
 #pragma once
 
+// Secure cast of size
 template<typename TO, typename FROM>
 TO legacy_size_cast(FROM value)
 {

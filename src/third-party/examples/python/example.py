@@ -6,10 +6,12 @@ from qiskit_aer import AerSimulator
 from qiskit_aer.backends.aer_compiler import assemble_circuits
 from qiskit.visualization import plot_histogram, plot_state_city
 import qiskit.quantum_info as qi
+from qmiotools.integrations.qiskitqmio import FakeQmio
 
 import json
 
-simulator = AerSimulator()
+simulator = FakeQmio()
+#print(simulator.configuration.__str__())
 
 # Create circuit
 circ = QuantumCircuit(2)
@@ -17,11 +19,18 @@ circ.h(0)
 circ.cx(0, 1)
 circ.measure_all()
 
+print
+
+circ = transpile(circ, simulator)
+
+print(circ.layout)
+
+"""
 print(circ.num_qubits)
 
 circuit, _ = assemble_circuits([circ])
 
-print(circuit)
+print(circuit) """
 
 """# Transpile for simulator
 simulator = AerSimulator()
