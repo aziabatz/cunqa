@@ -7,6 +7,7 @@
 #include "config/qpu_config.hpp"
 #include "utils/custom_json.hpp"
 
+using json = nlohmann::json;
 using namespace std::string_literals;
 using namespace config::net;
 
@@ -34,9 +35,7 @@ private:
 
 template <SimType sim_type>
 QPU<sim_type>::QPU(json qpu_config_json) : 
-    qpu_config{qpu_config_json},
-    server{std::make_unique<Server>(qpu_config.net_config)},
-    _running{true}
+    qpu_config{qpu_config_json}
 {
     CustomJson c_json{};
 
@@ -48,11 +47,12 @@ QPU<sim_type>::QPU(json qpu_config_json) :
 
 template <SimType sim_type>
 void QPU<sim_type>::turn_ON() {
+    server = std::make_unique<Server>(qpu_config.net_config);
+    _running = true;
 
     std::thread listen([this](){this->_recv_data();});
     std::thread compute([this](){this->_compute_result();});
     
-    // Esperar a que los hilos terminen
     listen.join();
     compute.join();
 
@@ -82,12 +82,10 @@ void QPU<sim_type>::_compute_result()
             _message_queue.pop();
             lock.unlock();
 
-            std::cout << "Recibimos el mensaje: \n"; 
-            std::cout << message << "\n";
-
             //Computacion
-            std::string response{"resultado"};
-            server->send_result(response);
+            json kernel = json::parse(message);
+            json response = backend.run(kernel, config::run::RunConfig(kernel.at("config")));
+            server->send_result(to_string(response));
 
             lock.lock();
         }
@@ -103,7 +101,6 @@ void QPU<sim_type>::_recv_data()
         {
             std::lock_guard<std::mutex> lock(_queue_mutex);
             if (message.compare("CLOSE"s) == 0) {
-                std::cout << "detectamos el close\n";
                 turn_OFF();
             }
             else

@@ -24,5 +24,9 @@ public:
         backend_config{config}
     { }
 
+    json run(json circuit_json, const config::run::RunConfig& run_config) 
+    {
+        return simulator->execute(circuit_json, run_config);
+    }
 
 };

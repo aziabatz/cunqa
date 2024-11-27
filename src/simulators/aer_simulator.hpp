@@ -9,19 +9,27 @@
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
 #include <string>
+#include "../config/run_config.hpp"
 
 using json = nlohmann::json;
 using namespace std::literals;
 using namespace AER;
+using namespace config::run;
 
 class AerSimulator {
 public:
 
-    static json execute_circuit(json circuit_json, json noise_model_json, json config_json) {
+    // TODO: Añadir el modelo de ruido
+    json execute(json circuit_json, const config::run::RunConfig& run_config) {
 
         Circuit circuit(circuit_json);
         Noise::NoiseModel noise_default;
-        Config aer_default(config_json);
+
+        json run_config_json(run_config);
+        std::cout << run_config_json.dump(4) << "\n";
+
+        Config aer_default(run_config_json);
+
 
         std::vector<std::shared_ptr<Circuit>> circuits;
         circuits.push_back(std::make_shared<Circuit>(circuit));

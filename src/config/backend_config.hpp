@@ -29,6 +29,7 @@ public:
     std::string basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
+    
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>

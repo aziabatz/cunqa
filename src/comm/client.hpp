@@ -24,7 +24,7 @@ using namespace config::net;
 
 class Client {
     std::unique_ptr<SelectedClient> strategy;
-    json qpus;
+    json qpus_json;
 
 public:
 
@@ -37,14 +37,14 @@ public:
         }
 
         try {
-            file >> qpus;
+            file >> qpus_json;
         } catch (const json::parse_error& e) {
             std::cerr << "Error parsing the QPU info into JSON: " << e.what() << "\n";
         }
     }
 
     void connect(const int& qpu_id, const std::string_view& net = INFINIBAND) {
-        json server_ip_config_json = qpus.at(std::to_string(qpu_id));
+        json server_ip_config_json = qpus_json.at(std::to_string(qpu_id));
         auto server_ip_config = server_ip_config_json.template get<NetConfig>();
         strategy->connect(server_ip_config);
     }

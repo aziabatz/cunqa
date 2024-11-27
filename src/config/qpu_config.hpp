@@ -25,8 +25,9 @@ public:
         // If no net is specified in the config file, then the process net is defined
         if (config.contains("net"))
             this->net_config = net::NetConfig(config.at("net"));
-        else
+        else {
             this->net_config = net::NetConfig::myNetConfig();
+        }
     }
 
     void set_backendconfig(json backend_conf_json){

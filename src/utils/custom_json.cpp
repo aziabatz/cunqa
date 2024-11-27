@@ -11,7 +11,7 @@ CustomJson::CustomJson()
 {
     custom_json = json::object();
 }
-CustomJson::~CustomJson() {}
+CustomJson::~CustomJson() = default;
 
 void CustomJson::write(json local_data, const std::string &filename)
 {

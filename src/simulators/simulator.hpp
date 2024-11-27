@@ -31,15 +31,17 @@ struct SimClass<SimType::Munich> {
     using type = MunichSimulator;
 };
 
-
+/* 
 template <SimType sim_type>
 class Simulator {
     std::unique_ptr<typename SimClass<sim_type>::type> simulator;
 
 public:
 
-    Simulator();
+    Simulator() : simulator{std::make_unique<typename SimClass<sim_type>::type>()} { }
 
-    inline void execute_circuit();
+    inline json execute(json circuit_json, const config::run::RunConfig& run_config) {
+        return simulator->execute(circuit_json, run_config);
+    }
 
-};
+}; */
