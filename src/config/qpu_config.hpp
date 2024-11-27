@@ -9,38 +9,41 @@ using json = nlohmann::json;
 
 namespace config {
 
-template <typename SimType>
-class QPUConfig {
+template <SimType sim_type = SimType::Aer>
+class QPUConfig : Config {
 public:
-    BackendConfig<SimType> backend_conf;
-    NetConfig net_conf;
+    backend::BackendConfig<sim_type> backend_config;
+    net::NetConfig net_config;
 
-    QPUConfig(json config_json)
+    QPUConfig(const json& config)
     {
-        if (config_json.at("backend")){
-            this->backend_conf = _def_backendconfig(config_json["backend"]);
-        } else {
-            //TODO: aquí ponemos el por defecto ???
-            this->backend_conf = BackendConfig<SimType>();
-        }
-            
-        this->net_conf = _def_netconfig();
+        if (config.contains("backend"))
+            this->backend_config = backend::BackendConfig<sim_type>(config.at("backend"));
+        else
+            this->backend_config = backend::BackendConfig<sim_type>();
+        
+        // If no net is specified in the config file, then the process net is defined
+        if (config.contains("net"))
+            this->net_config = net::NetConfig(config.at("net"));
+        else
+            this->net_config = net::NetConfig::myNetConfig();
     }
 
     void set_backendconfig(json backend_conf_json){
-        this->backend_conf = _def_backendconfig(backend_conf_json);
+        this->backend_config = backend::BackendConfig<sim_type>(backend_conf_json);
     }
 
-private:
-
-    BackendConfig<SimType> _def_backendconfig(json config_json) {
-        // TODO: define how to read the json
+    void set_netconfig(json net_conf_json){
+        this->net_config = net::NetConfig(net_conf_json);
     }
 
-    NetConfig _def_netconfig() {
-        return config::ip::NetConfig.myNetConfig();
+    inline void load(const json& config) override {
+
     }
 
+    inline json dump() const override {
+        return {};
+    }
 };
 
 }

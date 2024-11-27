@@ -1,8 +1,10 @@
+#pragma once
+
 #include <iostream>
 #include <memory>
-#include "ip_config.hpp"
+#include "../config/net_config.hpp"
 
-using namespace ip_config;
+using namespace config::net;
 
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_server.hpp"
@@ -21,12 +23,12 @@ class Server {
     std::unique_ptr<SelectedServer> strategy;
 public:
 
-    Server(const IPConfig& ip_config) :
-        strategy{std::make_unique<SelectedServer>(ip_config)} 
+    Server(const NetConfig& net_config) :
+        strategy{std::make_unique<SelectedServer>(net_config)} 
     { }
 
-    inline void start() { strategy->start(); }
+    inline std::string recv_data() { return strategy->recv_data(); }
 
-    inline void stop() { strategy->stop(); }
+    inline void send_result(const std::string& result) { strategy->send_result(result); }
 };
 

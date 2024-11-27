@@ -22,6 +22,79 @@ using json = nlohmann::json;
 namespace config {
 namespace net {
 
+class NetConfig : Config {
+public:
+    std::string hostname;
+    std::unordered_map<std::string, std::string> IPs;
+    std::string port;
+
+    NetConfig();
+    NetConfig(const std::string& hostname, std::unordered_map<std::string, std::string> IPs, std::string port);
+    NetConfig(const json& server_info);
+
+    static NetConfig myNetConfig();
+    std::string get_endpoint(const std::string_view& net = INFINIBAND) const;
+
+    inline void load(const json& config) override;
+    inline json dump() const override;
+
+    NetConfig& operator=(const NetConfig& other);
+};
+
+std::string get_hostname();
+std::unordered_map<std::string, std::string> get_IP_addresses();
+std::string get_port();
+
+void to_json(json& j, const NetConfig& net_config);
+void from_json(const json& j, NetConfig& NetConfig);
+
+NetConfig::NetConfig() = default;
+
+NetConfig::NetConfig(const std::string& hostname, std::unordered_map<std::string, std::string> IPs, std::string port)
+    : hostname{hostname},
+        IPs{IPs},
+        port{port} 
+{ }
+
+NetConfig::NetConfig(const json& server_info)
+{
+    load(server_info);
+}
+
+NetConfig NetConfig::myNetConfig() 
+{
+    return NetConfig(get_hostname(), get_IP_addresses(), get_port());
+}
+
+std::string NetConfig::get_endpoint(const std::string_view& net) const 
+{
+    return IPs.at(std::string(net)) + ":" + port;
+}
+
+inline void NetConfig::load(const json& config) 
+{
+    from_json(config, *this);
+}
+
+inline json NetConfig::dump() const 
+{
+    return json(*this);
+}
+
+NetConfig& NetConfig::operator=(const NetConfig& other) 
+{
+    if (this != &other) {
+        hostname = other.hostname;
+        IPs = other.IPs;
+        port = other.port;
+    }
+    return *this;
+}
+
+// ------------------------------------------------
+// ------------- Net getter functions -------------
+// ------------------------------------------------
+
 std::string get_hostname(){
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
@@ -84,57 +157,22 @@ std::string get_port()
     }
 }
 
-class NetConfig : Config {
-public:
-    std::string hostname;
-    std::unordered_map<std::string, std::string> IPs;
-    std::string port;
+// ------------------------------------------------
+// ----- Conversion functions for json format -----
+// ------------------------------------------------
 
-    NetConfig() = default;
-
-    NetConfig(const std::string& hostname, std::unordered_map<std::string, std::string> IPs, std::string port)
-        : hostname{hostname},
-          IPs{IPs},
-          port{port} { }
-    
-    NetConfig(json server_info)
-        : hostname{server_info["hostname"]},
-          IPs{server_info["IPs"]},
-          port{server_info["port"]} { }
-
-    ~NetConfig() { }
-
-    static NetConfig myNetConfig() {
-        return NetConfig(get_hostname(), get_IP_addresses(), get_port());
-    }
-
-    std::string get_endpoint(const std::string_view& net = INFINIBAND) const {
-        return IPs.at(std::string(net)) + ":" + port;
-    }
-
-    NetConfig& operator=(const NetConfig& other) 
-    {
-        if (this != &other) {
-            hostname = other.hostname;
-            IPs = other.IPs;
-            port = other.port;
-        }
-        return *this;
-    }
-};
-
-void to_json(json& j, const NetConfig& ip_config)
+void to_json(json& j, const NetConfig& net_config)
 {
     json ips{};
 
-    for (const auto& net_bind : ip_config.IPs) {
+    for (const auto& net_bind : net_config.IPs) {
         ips[net_bind.first] = net_bind.second;
     }
 
     j = {   
-            {"hostname", ip_config.hostname}, 
+            {"hostname", net_config.hostname}, 
             {"IPs", ips},
-            {"port", ip_config.port},
+            {"port", net_config.port},
         };
 }
 
@@ -148,10 +186,11 @@ void from_json(const json& j, NetConfig& NetConfig)
     j.at("port").get_to(NetConfig.port);
 }; 
 
+
 }
 };
 
-std::ostream& operator<<(std::ostream& os, const ip_config::NetConfig& config) {
+std::ostream& operator<<(std::ostream& os, const config::net::NetConfig& config) {
     os << "\nIPs: \n";
     for (const auto& net_bind : config.IPs) {
             os << net_bind.first << " ---> " << net_bind.second << "\n";

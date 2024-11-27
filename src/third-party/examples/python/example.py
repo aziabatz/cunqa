@@ -36,7 +36,7 @@ print(circuit) """
 simulator = AerSimulator()
 circ = transpile(circ, simulator)
 
-# Run and get counts
+# Run and  get counts
 result = simulator.run(circ, shots=10, memory=True).result()
 memory = result.get_memory(circ)
 print(memory)

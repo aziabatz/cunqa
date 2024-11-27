@@ -1,11 +1,13 @@
+#pragma once
+
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include "ip_config.hpp"
 #include "../utils/constants.hpp"
+#include "../config/net_config.hpp"
 
 using json = nlohmann::json;
-using namespace ip_config;
+using namespace config::net;
 
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_client.hpp"
@@ -42,16 +44,12 @@ public:
     }
 
     void connect(const int& qpu_id, const std::string_view& net = INFINIBAND) {
-        
         json server_ip_config_json = qpus.at(std::to_string(qpu_id));
-        std::cout << server_ip_config_json.dump(4) << "\n";
-        auto server_ip_config = server_ip_config_json.template get<IPConfig>();
-        std::cout << server_ip_config << "\n";
-
+        auto server_ip_config = server_ip_config_json.template get<NetConfig>();
         strategy->connect(server_ip_config);
     }
 
-    inline void read_result() { strategy->read_result(); }
+    inline std::string read_result() { return strategy->read_result(); }
 
     inline void send_data(const std::string& data) { strategy->send_data(data); }
 

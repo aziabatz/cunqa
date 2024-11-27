@@ -116,7 +116,6 @@ void CustomJson::_write_locks(json local_data)
         file_in >> j;
     file_in.close();
 
-    std::cout << j << "\n";
     j[std::to_string(j.size())] = local_data;
 
     std::ofstream file_out(filename, std::ios::trunc);

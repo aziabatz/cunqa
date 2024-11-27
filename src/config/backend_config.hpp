@@ -4,32 +4,23 @@
 #include <iostream>
 #include "config.hpp"
 #include "../utils/constants.hpp"
+#include "../simulators/simulator.hpp"
 
 using namespace std::literals;
 using json = nlohmann::json;
 
-enum class Simulator {
-    Aer,
-    Munich
-};
-
-template<Simulator T, Simulator U>
-struct is_same : std::false_type {};
- 
-template<Simulator T>
-struct is_same<T, T> : std::true_type {};
-
 namespace config {
 namespace backend {
 
-template <Simulator sim = Simulator::Aer>
+template <SimType sim_type = SimType::Aer>
 class BackendConfig : Config {
 public:
     std::string name;
     std::string version;
+    std::string simulator;
     int n_qubits;
     std::string url;
-    bool simulator;
+    bool is_simulator;
     bool conditional;
     bool memory;
     int max_shots;
@@ -39,72 +30,105 @@ public:
     std::string custom_instructions;
     std::vector<std::string> gates;
 
-    template<Simulator T = sim,
-             typename std::enable_if_t<is_same<T, Simulator::Aer>::value, bool> = true>
-    BackendConfig() 
-        : name{"AerSimulator"},
-          version{}
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+    BackendConfig() : 
+        name{"BasicAer"},
+        version{"0.0.1"},
+        simulator{"AerSimulator"},
+        n_qubits{32},
+        url{"https://github.com/Qiskit/qiskit-aer"},
+        is_simulator{true},
+        conditional{true},
+        memory{true},
+        max_shots{10000},
+        description{"Usual AER simulator."}
     { }
 
-    template<Simulator T = sim,
-             typename std::enable_if_t<is_same<T, Simulator::Munich>::value, bool> = true>
-    BackendConfig() 
-        : name{"MunichSimulator"}
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
+    BackendConfig() :
+        name{"BasicMunich"},
+        version{"0.0.1"},
+        simulator{"MunichSimulator"},
+        n_qubits{32},
+        url{"https://github.com/cda-tum/mqt-ddsim"},
+        is_simulator{true},
+        conditional{true},
+        memory{true},
+        max_shots{10000},
+        description{"Usual Munich simulator."}
     { }
 
-    template<Simulator T = sim,
-             typename std::enable_if_t<is_same<T, Simulator::Aer>::value, bool> = true>
-    BackendConfig(const json& config) 
-        : name{"AerSimulator"}
-    { }
-
-    template<Simulator T = sim,
-             typename std::enable_if_t<is_same<T, Simulator::Munich>::value, bool> = true>
-    BackendConfig(const json& config) 
-        : name{"MunichSimulator"}
-    { }
-
-
-    void load(const json& config) override {
-        json
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+    BackendConfig(const json& config)
+        : simulator{"AerSimulator"}
+    {
+        load(config);
     }
 
-    json dump() const override {
-        return {};
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
+    BackendConfig(const json& config) 
+        : simulator{"MunichSimulator"}
+    {
+        load(config);
     }
-};  
 
-void to_json(json& j, const BackendConfig<Simulator::Aer>& backend_conf)
+    inline void load(const json& config) override {
+        from_json(config, *this);
+    }
+
+    inline json dump() const override {
+        return json(*this);
+    }
+};
+
+template <SimType sim_type>
+void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 {
-    
-    /* json ips{};
-
-    for (const auto& net_bind : backend_conf.IPs) {
-        ips[net_bind.first] = net_bind.second;
-    }
-
     j = {   
-            {"hostname", backend_conf.hostname}, 
-            {"IPs", ips},
-            {"port", backend_conf.port},
-        }; */
+            {"name", backend_conf.name}, 
+            {"version", backend_conf.version},
+            {"simulator", backend_conf.simulator},
+            {"n_qubits", backend_conf.n_qubits}, 
+            {"url", backend_conf.url},
+            {"is_simulator", backend_conf.is_simulator},
+            {"conditional", backend_conf.conditional}, 
+            {"memory", backend_conf.memory},
+            {"max_shots", backend_conf.max_shots},
+            {"description", backend_conf.description},
+            //{"coupling_map", backend_conf.coupling_map},
+            {"basis_gates", backend_conf.basis_gates}, 
+            {"custom_instructions", backend_conf.custom_instructions},
+            //{"gates", backend_conf.gates}
+        };
 }
 
-// TODO: Generalizar esto
-void from_json(const json& j, BackendConfig<Simulator::Aer>& NetConfig) 
+template <SimType sim_type>
+void from_json(const json& j, BackendConfig<sim_type>& backend_conf) 
 {
-    j.at("hostname").get_to(NetConfig.hostname);
-    /* j.at("hostname").get_to(NetConfig.hostname);
-    for (auto& netbind : j.at("IPs").items()) {
-        NetConfig.IPs[netbind.key()] = netbind.value();
-    }
-    j.at("port").get_to(NetConfig.port); */
+    j.at("name").get_to(backend_conf.name);
+    j.at("version").get_to(backend_conf.version);
+    j.at("simulator").get_to(backend_conf.simulator);
+    j.at("n_qubits").get_to(backend_conf.n_qubits);
+    j.at("url").get_to(backend_conf.url);
+    j.at("is_simulator").get_to(backend_conf.is_simulator);
+    j.at("conditional").get_to(backend_conf.conditional);
+    j.at("memory").get_to(backend_conf.memory);
+    j.at("max_shots").get_to(backend_conf.max_shots);
+    j.at("description").get_to(backend_conf.description);
+    //j.at("coupling_map").get_to(backend_conf.coupling_map);
+    j.at("basis_gates").get_to(backend_conf.basis_gates);
+    j.at("custom_instructions").get_to(backend_conf.custom_instructions);
+    //j.at("gates").get_to(backend_conf.gates);
 }; 
 
 }
 };
 
-std::ostream& operator<<(std::ostream& os, const config::backend::BackendConfig<Simulator::Aer>& config) {
+std::ostream& operator<<(std::ostream& os, const config::backend::BackendConfig<SimType::Aer>& config) {
     /* os << "\nIPs: \n";
     for (const auto& net_bind : config.IPs) {
             os << net_bind.first << " ---> " << net_bind.second << "\n";

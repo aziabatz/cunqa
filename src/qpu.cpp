@@ -1,10 +1,5 @@
-#include "comm/server.hpp"
-#include "../include"
+#include "qpu.hpp"
 
-class QPU {
+using json = nlohmann::json;
+using namespace config;
 
-    Server comm_server;
-    
-public:
-
-}

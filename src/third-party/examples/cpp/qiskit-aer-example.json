@@ -1,8 +1,4 @@
 {
-  "header": {
-    "number_of_qubits": 2,
-    "number_of_clbits": 2
-  },
   "config": {
       "shots": 1024,
       "memory": false,
