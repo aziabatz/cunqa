@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
-#include "../utils/helpers.hpp"
+#include "utils/helpers.hpp"
 
 using json = nlohmann::json;
 

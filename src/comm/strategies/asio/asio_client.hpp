@@ -1,10 +1,10 @@
 #pragma once
 
 #include <boost/asio.hpp>
-#include "../../../utils/constants.hpp"
-#include "asio_common.hpp"
 #include <string>
-#include "../../../config/net_config.hpp"
+#include "config/net_config.hpp"
+#include "utils/constants.hpp"
+#include "asio_common.hpp"
 
 using boost::asio::ip::tcp;
 using namespace std::literals;

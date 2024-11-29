@@ -3,20 +3,21 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include "../utils/constants.hpp"
-#include "../config/net_config.hpp"
+#include "strategy_def.h"
+#include "utils/constants.hpp"
+#include "config/net_config.hpp"
 
 using json = nlohmann::json;
 using namespace config::net;
 
 #if COMM_LIB == ASIO
-    #include "strategies/asio/asio_client.hpp"
+    #include "strategy/asio_client.hpp"
     using SelectedClient = AsioClient;
 #elif COMM_LIB == ZMQ
-    #include "strategies/zmq/zmq_comm.hpp"
+    #include "strategy/zmq_comm.hpp"
     using SelectedClient = ZMQClient;
 #elif COMM_LIB == CROW
-    #include "strategies/crow/crow_comm.hpp"
+    #include "strategy/crow_comm.hpp"
     using SelectedClient = CrowClient;
 #else
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."

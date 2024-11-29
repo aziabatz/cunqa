@@ -9,7 +9,7 @@
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
 #include <string>
-#include "../config/run_config.hpp"
+#include "config/run_config.hpp"
 
 using json = nlohmann::json;
 using namespace std::literals;

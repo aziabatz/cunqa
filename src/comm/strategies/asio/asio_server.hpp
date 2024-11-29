@@ -3,10 +3,10 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
-#include "../../../utils/helpers.hpp"
+#include "utils/helpers.hpp"
 #include "asio_common.hpp"
-#include  "../../../utils/constants.hpp"
-#include "../../../config/net_config.hpp"
+#include "utils/constants.hpp"
+#include "config/net_config.hpp"
 
 using namespace config::net;
 using namespace std::string_literals;

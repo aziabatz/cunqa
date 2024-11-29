@@ -2,18 +2,19 @@
 
 #include <iostream>
 #include <memory>
-#include "../config/net_config.hpp"
+#include "config/net_config.hpp"
+#include "strategy_def.h"
 
 using namespace config::net;
 
 #if COMM_LIB == ASIO
-    #include "strategies/asio/asio_server.hpp"
+    #include "strategy/asio_server.hpp"
     using SelectedServer = AsioServer;
 #elif COMM_LIB == ZMQ
-    #include "strategies/zmq/zmq_comm.hpp"
+    #include "strategy/zmq_comm.hpp"
     using SelectedServer = ZMQServer;
 #elif COMM_LIB == CROW
-    #include "strategies/crow/crow_comm.hpp"
+    #include "strategy/crow_comm.hpp"
     using SelectedServer = CrowServer;
 #else
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
