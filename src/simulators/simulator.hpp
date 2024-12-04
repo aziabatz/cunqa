@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include "aer_simulator.hpp"
 #include "munich_simulator.hpp"
 
@@ -7,6 +8,11 @@
 enum class SimType {
     Aer,
     Munich
+};
+
+const std::unordered_map<std::string, SimType> sim_names = {
+    {"Aer", SimType::Aer},
+    {"Munich", SimType::Munich}
 };
 
 template<SimType T, SimType U>

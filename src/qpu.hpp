@@ -17,7 +17,7 @@ public:
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend;
 
-    QPU(json qpu_config_json);
+    QPU(config::QPUConfig<sim_type> qpu_config);
 
     void turn_ON();
     inline void turn_OFF();
@@ -34,14 +34,12 @@ private:
 };
 
 template <SimType sim_type>
-QPU<sim_type>::QPU(json qpu_config_json) : 
-    qpu_config{qpu_config_json}
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) : 
+    qpu_config{qpu_config}
 {
     CustomJson c_json{};
-
-    // TODO: CAMBIAR PARA QUE PONGA TODO EL ARCHIVO
     json config_json(qpu_config.net_config);
-    c_json.write(config_json, "qpu.json");
+    c_json.write(config_json, qpu_config.filepath);
 }
 
 

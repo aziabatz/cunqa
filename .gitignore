@@ -205,6 +205,7 @@ cython_debug/
 *.qasm
 prueba*
 main*
+installation
 
 cargar_modulos.sh
 
@@ -218,5 +219,6 @@ prueba.cpp
 myjob.sh
 .myjob_*
 hola.sh
+
 
 

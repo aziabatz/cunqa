@@ -11,7 +11,7 @@ using json = nlohmann::json;
 using namespace config::net;
 
 #if COMM_LIB == ASIO
-    #include "strategy/asio_client.hpp"
+    #include "strategies/asio/asio_client.hpp"
     using SelectedClient = AsioClient;
 #elif COMM_LIB == ZMQ
     #include "strategy/zmq_comm.hpp"
@@ -29,10 +29,16 @@ class Client {
 
 public:
 
-    Client() :
+    Client(const std::optional<std::string> &filepath) :
         strategy{std::make_unique<SelectedClient>()} 
     { 
-        std::ifstream file("qpu.json");
+        std::string final_filepath;
+        if (filepath.has_value())
+            final_filepath = filepath.value();
+        else
+            final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
+        std::ifstream file(final_filepath);  
+
         if (!file.is_open()) {
             std::cerr << "Cannot open the JSON file\n";
         }

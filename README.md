@@ -17,4 +17,18 @@ The list of modules employed (available in the QMIO partition).
 - nlohmann_json/3.11.3
 - impi/2021.13.0
 
+# Installation
+
+```console
+ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 scalapack/2.2.0 openblas/system boost
+
+export INSTALL_PATH=<your/installation/path>
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/lib
+export PATH=$PATH:$INSTALL_PATH/bin
+
+cmake -B build/
+cmake --build build/
+cmake --install build/
+```
+
 

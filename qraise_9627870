@@ -1,0 +1,9 @@
+slurmstepd: info: Setting TMPDIR to /scratch/9627870. Previous errors about TMPDIR can be discarded
+argc: 3argv: /mnt/netapp1/Store_CESGA//home/cesga/jvazquez/.api_simulator/qpu.json Aer
+{
+    "memory_slots": 7,
+    "method": "statevector",
+    "shots": 1024
+}
+Main: Program terminated.
+slurmstepd: error: Could not run user task_epilog [/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/api-simulator/epilog.sh]: access denied

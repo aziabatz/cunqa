@@ -14,8 +14,10 @@ class QPUConfig : Config {
 public:
     backend::BackendConfig<sim_type> backend_config;
     net::NetConfig net_config;
+    std::string filepath;
 
-    QPUConfig(const json& config)
+    QPUConfig(const json& config, const std::string& filepath) :
+        filepath{filepath}
     {
         if (config.contains("backend"))
             this->backend_config = backend::BackendConfig<sim_type>(config.at("backend"));

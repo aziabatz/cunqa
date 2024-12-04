@@ -1,3 +1,6 @@
 [submodule "aer-cpp"]
 	path = src/third-party/aer-cpp
 	url = git@github.com:Qiskit/qiskit-aer.git
+[submodule "argparse"]
+	path = src/third-party/argparse
+	url = git@github.com:morrisfranken/argparse.git

@@ -8,7 +8,7 @@
 using namespace config::net;
 
 #if COMM_LIB == ASIO
-    #include "strategy/asio_server.hpp"
+    #include "strategies/asio/asio_server.hpp"
     using SelectedServer = AsioServer;
 #elif COMM_LIB == ZMQ
     #include "strategy/zmq_comm.hpp"
