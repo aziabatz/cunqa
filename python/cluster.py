@@ -333,7 +333,7 @@ class Backend():
 
         elif self.name in default_backends.keys():
             print("Creating default backend {} ".format(self.name))
-            self.from_json(name = self.name, config_json = defaul_backends[self.name])
+            self.from_json(name = self.name, config_json = default_backends[self.name])
 
         elif config_json != None:
             print("Creating backend from config_json")

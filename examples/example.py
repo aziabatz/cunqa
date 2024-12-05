@@ -1,13 +1,24 @@
 import os
 import sys
+import json
+from qiskit import QuantumCircuit
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-#print(sys.path)
+print(sys.path)
 from python.client import Client
-#from python.cluster import QPU, from_qc_to_json
+from python.cluster import QPU, from_qc_to_json
+#from python import backend_options
 
-qpu = QPU(id=0)
+json_path = "/mnt/netapp1/Store_CESGA/home/cesga/acarballido/.api_simulator"
+with open("{}/qpu.json".format(json_path)) as net_json:
+    qpus = json.load(net_json)
+    aux_server_endpoint = "tcp://" + qpus["{}".format(0)]["IPs"]["bond0.117"] + ":" + str(qpus["{}".format(0)]["port"])
+
+
+
+
+qpu = QPU(id_=0, server_endpoint = aux_server_endpoint)
 
 qc = QuantumCircuit(2)
 qc.h(0)
