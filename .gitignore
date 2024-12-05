@@ -206,6 +206,7 @@ cython_debug/
 prueba*
 main*
 installation
+qraise*
 
 cargar_modulos.sh
 

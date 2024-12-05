@@ -36,9 +36,10 @@ circuit = """
 }
 """
 
-client = Client("/mnt/netapp1/Store_CESGA//home/cesga/jvazquez/.api_simulator/qpu.json")
+STORE = os.getenv("STORE")
+client = Client(STORE + "/.api_simulator/qpu.json")
 
-client.connect(1)
+client.connect(2)
 client.send_data(circuit)
 result = client.read_result()
 client.send_data("CLOSE")

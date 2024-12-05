@@ -6,29 +6,43 @@ In order to get all the submodules correctly loaded do:
 
 ```console
 git clone --recursive git@github.com:CESGA-Quantum-Spain/api-simulator.git
-bash scripts/setup_submodules.sh
+cd api-simulator/scripts/
+bash setup_submodules.sh
 ```
 
 # C++ Dependecies
-The list of modules employed (available in the QMIO partition).
+TO BE EXPLICITED
 
-- gcc/12.3.0
-- boost/1.85.0
-- nlohmann_json/3.11.3
-- impi/2021.13.0
+# Installation 
+First of all, some modules have to be loaded.
 
-# Installation
-
+- In the FT3, load the modules:
 ```console
 ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 scalapack/2.2.0 openblas/system boost
+```
+- In the QMIO, **TO BE DETERMINED**.
 
+Now, using the environment path `INSTALL_PATH`, define the directory that you want to install to. **Use absolute paths for a consistent usage**. 
+
+```console
 export INSTALL_PATH=<your/installation/path>
+```
+
+Once your `INSTALL_PATH` variable has been set, export the next two variables. They will be employed in the execution process of the commands created in the build process (standard practice in C++ installation process).
+
+```console
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/lib
 export PATH=$PATH:$INSTALL_PATH/bin
+```
 
+Now everything is set for the installation. 
+
+```console
 cmake -B build/
 cmake --build build/
 cmake --install build/
 ```
+
+
 
 

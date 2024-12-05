@@ -4,11 +4,11 @@
  
 namespace py = pybind11;
  
-PYBIND11_MODULE(client, m) {
+PYBIND11_MODULE(qclient, m) {
  
-    m.doc() = "Modulo de la clase Client() en c++";
+    m.doc() = "Clase QClient, que corresponde con la clase Client() en C++";
  
-    py::class_<Client>(m, "Client")
+    py::class_<Client>(m, "QClient")
  
         .def(py::init<const std::optional<std::string> &>(), py::arg("filepath") = std::nullopt)  // Constructor sin argumentos
  
