@@ -4,7 +4,7 @@ import sys
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
 
-from python.client import Client
+from python.qclient import QClient
 
 circuit = """
 {
@@ -37,7 +37,7 @@ circuit = """
 """
 
 STORE = os.getenv("STORE")
-client = Client(STORE + "/.api_simulator/qpu.json")
+client = QClient(STORE + "/.api_simulator/qpu.json")
 
 client.connect(2)
 client.send_data(circuit)

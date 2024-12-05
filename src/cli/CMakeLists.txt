@@ -4,14 +4,14 @@ target_include_directories(qraise PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                           "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                           "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
                               
-message(STATUS "Python Libraries: ${PYTHON_LIBRARIES}")
+message(STATUS "Python Libraries: ${Python_LIBRARIES}")
 
 target_link_libraries(qraise PUBLIC compiler_flags
                              INTERFACE API-Simulator
                              PRIVATE custom-json 
                                      nlohmann_json::nlohmann_json 
                                      Threads::Threads 
-                                     m ${PYTHON_LIBRARIES} MPI::MPI_CXX
+                                     m ${Python_LIBRARIES} MPI::MPI_CXX
                                      OpenMP::OpenMP_CXX LAPACK::LAPACK)
 
 install(TARGETS qraise DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -28,7 +28,7 @@ target_link_libraries(setup_qpus PUBLIC compiler_flags
                              PRIVATE custom-json 
                              nlohmann_json::nlohmann_json 
                              Threads::Threads 
-                             m ${PYTHON_LIBRARIES} MPI::MPI_CXX
+                             m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK)
 
 install(TARGETS setup_qpus DESTINATION ${CMAKE_INSTALL_BINDIR})

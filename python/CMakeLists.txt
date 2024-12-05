@@ -1,7 +1,7 @@
 
-pybind11_add_module(client bindings.cpp)
+pybind11_add_module(qclient bindings.cpp)
 
-target_include_directories(client PRIVATE "${CMAKE_SOURCE_DIR}/src"
+target_include_directories(qclient PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                           "${PROJECT_BINARY_DIR}/src/comm")
 
-install(TARGETS client DESTINATION python)
+install(TARGETS qclient DESTINATION python)

@@ -18,7 +18,7 @@ First of all, some modules have to be loaded.
 
 - In the FT3, load the modules:
 ```console
-ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 scalapack/2.2.0 openblas/system boost
+ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
 ```
 - In the QMIO, **TO BE DETERMINED**.
 
@@ -28,10 +28,9 @@ Now, using the environment path `INSTALL_PATH`, define the directory that you wa
 export INSTALL_PATH=<your/installation/path>
 ```
 
-Once your `INSTALL_PATH` variable has been set, export the next two variables. They will be employed in the execution process of the commands created in the build process (standard practice in C++ installation process).
+Once your `INSTALL_PATH` variable has been set, export the bin folder to PATH in order to execute correctly the `qraise` and, inside of it, the `setup-qpus`.
 
 ```console
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/lib
 export PATH=$PATH:$INSTALL_PATH/bin
 ```
 
@@ -42,7 +41,3 @@ cmake -B build/
 cmake --build build/
 cmake --install build/
 ```
-
-
-
-
