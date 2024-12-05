@@ -36,7 +36,7 @@ circuit = """
 }
 """
 
-client = Client("/mnt/netapp1/Store_CESGA//home/cesga/jvazquez/.api_simulator/qpu.json")
+client = Client("/mnt/netapp1/Store_CESGA//home/cesga/mlosada/.api_simulator/qpu.json")
 
 client.connect(1)
 client.send_data(circuit)
