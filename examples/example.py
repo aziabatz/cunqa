@@ -3,8 +3,21 @@ import sys
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-
+#print(sys.path)
 from python.client import Client
+#from python.cluster import QPU, from_qc_to_json
+
+qpu = QPU(id=0)
+
+qc = QuantumCircuit(2)
+qc.h(0)
+qc.cx(0,1)
+qc.measure_all()
+
+result = qpu.c_run(qc, shots=199)
+
+
+
 
 circuit = """
 {
@@ -36,11 +49,11 @@ circuit = """
 }
 """
 
-client = Client("/mnt/netapp1/Store_CESGA//home/cesga/jvazquez/.api_simulator/qpu.json")
+#client = Client("/mnt/netapp1/Store_CESGA//home/cesga/acarballido/.api_simulator/qpu.json")
 
-client.connect(1)
-client.send_data(circuit)
-result = client.read_result()
-client.send_data("CLOSE")
+#client.connect(2)
+#client.send_data(circuit)
+#result = client.read_result()
+#client.send_data("CLOSE")
 
 print(result)
