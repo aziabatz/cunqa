@@ -11,7 +11,7 @@ import dask.distributed
 import numpy as np
 from qmiotools.integrations.qiskitqmio import FakeQmio
 
-from client import QClient
+from python.qclient import QClient
 
 
 
@@ -119,7 +119,7 @@ class QPU():
         -----------
     """
     
-    def __init__(self, id_=None, server_endpoint=None, backend=None):
+    def __init__(self, id_=None, server_endpoint=None, net="ib0", backend=None):
         """
         Initializes th QPU class.
 
@@ -146,7 +146,13 @@ class QPU():
         if server_endpoint is not None and type(server_endpoint) is str:
             self.server_endpoint=server_endpoint
         else:
-            raise ValueError("Server not assigned")
+            try:
+                with open(STORE + "/.api_simulator/qpu.json") as net_data:
+                    net_json = json.load(net_data)
+                    serv_end = net_json["{}".format(self.id)]["IPs"][net] + net_json["{}".format(self.id)]["port"]
+                    self.server_endpoint = serv_end
+            except:
+                print("Problem when assigning server endpoint")
 
         # asignamos backend, será el nombre del archivo de configuración para FakeQmio
         if backend is None:
