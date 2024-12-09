@@ -26,7 +26,7 @@ set(CMAKE_INSTALL_LIBDIR "lib")
 set(CMAKE_INSTALL_INCLDIR "include")
 set(CMAKE_INSTALL_BINDIR "bin")
 
-find_package(Python 3.9 COMPONENTS Interpreter Development)
+find_package(Python 3.10 COMPONENTS Interpreter Development)
 
 if(DEFINED PYBIND_PATH)
     list(APPEND CMAKE_PREFIX_PATH "${PYBIND_PATH}")
@@ -44,6 +44,7 @@ else(NOT DEFINED PYBIND_PATH)
     endif()
 endif()
 
+set(PYBIND11_PYTHON_VERSION 3.10 CACHE STRING "")
 find_package(pybind11 2.12 REQUIRED)
 
 add_subdirectory(src)
