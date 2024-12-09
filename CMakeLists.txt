@@ -15,8 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I/mnt/netapp1/Optcesga_FT2_RHEL7/2022/g
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 if(NOT DEFINED ENV{INSTALL_PATH})
-    message(STATUS "Install location will be: $ENV{STORE}/api-simulator/installation")
-    set(CMAKE_INSTALL_PREFIX "$ENV{STORE}/api-simulator/installation")
+    message(FATAL_ERROR "Install location is not set: define INSTALL_PATH environment variables")
 else()
     message(STATUS "Install location will be: (INSTALL_PATH) $ENV{INSTALL_PATH}")
     set(CMAKE_INSTALL_PREFIX "$ENV{INSTALL_PATH}")
