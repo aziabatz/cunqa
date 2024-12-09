@@ -6,29 +6,38 @@ In order to get all the submodules correctly loaded do:
 
 ```console
 git clone --recursive git@github.com:CESGA-Quantum-Spain/api-simulator.git
-bash scripts/setup_submodules.sh
+cd api-simulator/scripts/
+bash setup_submodules.sh
 ```
 
 # C++ Dependecies
-The list of modules employed (available in the QMIO partition).
+TO BE EXPLICITED
 
-- gcc/12.3.0
-- boost/1.85.0
-- nlohmann_json/3.11.3
-- impi/2021.13.0
+# Installation 
+First of all, some modules have to be loaded.
 
-# Installation
+- In the FT3, load the modules:
+```console
+ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
+```
+- In the QMIO, **TO BE DETERMINED**.
+
+Now, using the environment path `INSTALL_PATH`, define the directory that you want to install to. **Use absolute paths for a consistent usage**. 
 
 ```console
-ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 scalapack/2.2.0 openblas/system boost
-
 export INSTALL_PATH=<your/installation/path>
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$INSTALL_PATH/lib
-export PATH=$PATH:$INSTALL_PATH/bin
+```
 
+Once your `INSTALL_PATH` variable has been set, export the bin folder to PATH in order to execute correctly the `qraise` and, inside of it, the `setup-qpus`.
+
+```console
+export PATH=$PATH:$INSTALL_PATH/bin
+```
+
+Now everything is set for the installation. 
+
+```console
 cmake -B build/
 cmake --build build/
 cmake --install build/
 ```
-
-
