@@ -8,7 +8,7 @@
 #include "utils/constants.hpp"
 #include "config/net_config.hpp"
 
-using namespace config::net;
+using namespace config;
 using namespace std::string_literals;
 using boost::asio::ip::tcp;
 

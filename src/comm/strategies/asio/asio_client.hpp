@@ -8,7 +8,7 @@
 
 using boost::asio::ip::tcp;
 using namespace std::literals;
-using namespace config::net;
+using namespace config;
 
 
 class AsioClient {

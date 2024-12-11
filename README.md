@@ -21,7 +21,11 @@ First of all, some modules have to be loaded and, also, if miniconda is activate
 ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
 conda deactivate
 ```
-- In the QMIO, **TO BE DETERMINED**.
+
+- In the QMIO, load:
+```console
+ml load qmio/hpc gcc/system gcccore/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.13.6-python-3.11.9 nlohmann_json/3.11.3
+```
 
 Now, using the environment path `INSTALL_PATH`, define the directory that you want to install to. **Use absolute paths for a consistent usage**. 
 

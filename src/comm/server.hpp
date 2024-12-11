@@ -5,7 +5,7 @@
 #include "config/net_config.hpp"
 #include "strategy_def.h"
 
-using namespace config::net;
+using namespace config;
 
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_server.hpp"

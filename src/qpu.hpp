@@ -9,7 +9,7 @@
 
 using json = nlohmann::json;
 using namespace std::string_literals;
-using namespace config::net;
+using namespace config;
 
 template <SimType sim_type = SimType::Aer>
 class QPU {
@@ -38,7 +38,7 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) :
     qpu_config{qpu_config}
 {
     CustomJson c_json{};
-    json config_json(qpu_config.net_config);
+    json config_json(qpu_config);
     c_json.write(config_json, qpu_config.filepath);
 }
 
@@ -82,7 +82,7 @@ void QPU<sim_type>::_compute_result()
 
             //Computacion
             json kernel = json::parse(message);
-            json response = backend.run(kernel, config::run::RunConfig(kernel.at("config")));
+            json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
             server->send_result(to_string(response));
 
             lock.lock();
