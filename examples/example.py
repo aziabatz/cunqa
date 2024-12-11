@@ -39,7 +39,7 @@ circuit = """
 STORE = os.getenv("STORE")
 client = QClient(STORE + "/.api_simulator/qpu.json")
 
-client.connect(0)
+client.connect("68802_1")
 client.send_data(circuit)
 result = client.read_result()
 client.send_data("CLOSE")

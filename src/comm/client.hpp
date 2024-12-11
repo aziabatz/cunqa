@@ -8,7 +8,7 @@
 #include "config/net_config.hpp"
 
 using json = nlohmann::json;
-using namespace config::net;
+using namespace config;
 
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_client.hpp"
@@ -50,8 +50,8 @@ public:
         }
     }
 
-    void connect(const int& qpu_id, const std::string_view& net = INFINIBAND) {
-        json server_ip_config_json = qpus_json.at(std::to_string(qpu_id));
+    void connect(const std::string& task_id, const std::string_view& net = INFINIBAND) {
+        json server_ip_config_json = qpus_json.at(task_id).at("net");
         auto server_ip_config = server_ip_config_json.template get<NetConfig>();
         strategy->connect(server_ip_config);
     }
