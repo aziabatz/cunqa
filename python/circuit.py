@@ -44,6 +44,7 @@ def qasm2_to_json(qasm_str):
                     else:
                         parts_split = parts[1].rstrip(";").split(",")
                         q_first = parts_split[0].split("[")[1].rstrip("]")
+                        print(parts_split)
                         q_second = parts_split[1].split("[")[1].rstrip("]")
                         json_data["instructions"].append({"name":operation_name, "qubits":[q_first, q_second]})
                 else:
