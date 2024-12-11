@@ -40,6 +40,7 @@ int main(int argc, char* argv[]) {
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH -c 2 \n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
+    sbatchFile << "#SBATCH -N 1 \n";
 
     // TODO: Can the user decide the number of cores?
     if (check_mem_format(args.mem_per_qpu)) 
