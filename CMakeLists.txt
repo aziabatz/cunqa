@@ -42,7 +42,6 @@ else(NOT DEFINED PYBIND_PATH)
         )
     endif()
 endif()
-
 set(PYBIND11_PYTHON_VERSION 3.10 CACHE STRING "")
 find_package(pybind11 2.12 REQUIRED)
 
