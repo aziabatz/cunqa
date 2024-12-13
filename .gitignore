@@ -234,6 +234,8 @@ prueba.cpp
 myjob.sh
 .myjob_*
 hola.sh
+test*
+generar_circuito.py
 
 
 
