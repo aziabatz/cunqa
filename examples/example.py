@@ -72,21 +72,16 @@ circuit = """
 
 #print(result)
 
-print(circuit)
-
-ju
-
-
 STORE = os.getenv("STORE")
 client = QClient(STORE + "/.api_simulator/qpu.json")
 
-client.connect("68802_1")
-client.send_data(circuit)
-result = client.read_result()
-client.send_data("CLOSE")
+client.connect("71943_3")
+future = client.send_circuit(circuit)
 
-result_dict = json.loads(result)
+print(future.get())
+
+""" result_dict = json.loads(result)
 
 counts = result_dict['results'][0]['data']['counts']
 
-print(counts)
+print(counts) """
