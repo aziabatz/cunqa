@@ -3,8 +3,8 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
+#include <fstream>
 #include "utils/helpers.hpp"
-//#include "asio_common.hpp"
 #include "utils/constants.hpp"
 #include "config/net_config.hpp"
 
@@ -41,6 +41,11 @@ public:
             uint32_t data_length = ntohl(data_length_network);
             std::string data(data_length, '\0');
             boost::asio::read(socket_, boost::asio::buffer(&data[0], data_length));
+
+            std::string nombreArchivoLog = "/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/pruebas/api-simulator/examples/logger.log";
+            std::ofstream archivoLog(nombreArchivoLog, std::ios::app);
+            archivoLog << "Leemos la data: " << data << "\n\n";
+            archivoLog.close();
 
             return data;
         } else if (ec == boost::asio::error::eof) {

@@ -73,6 +73,7 @@ void QPU<sim_type>::_compute_result()
             lock.unlock();
 
             //Computacion
+            std::cout << "Ejecutamos\n";
             json kernel = json::parse(message);
             json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
             server->send_result(to_string(response));
