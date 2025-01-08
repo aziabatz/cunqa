@@ -10,7 +10,6 @@ struct MyArgs : public argparse::Args {
     std::string& time                   = kwarg("t,time", "Time for the QPUs to be raised.");
     std::optional<std::string>& backend = kwarg("b,backend_path", "Path to the backend config file.");
     std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer"); 
-    std::string& info_path              = kwarg("i,info_path", "Path for saving the QPUs information (configuration and net).").set_default(std::getenv("STORE") + "/.api_simulator/qpu.json"s);
     std::string& mem_per_qpu            = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
 
 
@@ -67,12 +66,11 @@ int main(int argc, char* argv[]) {
 
     if (var_install_path) {
         sbatchFile << "BINARIES_DIR=" << var_install_path << "/bin\n";
-        sbatchFile << "echo \"Binaries directory: $BINARIES_DIR\"\n";
     } else {
         std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
     }
 
-    sbatchFile << "export INFO_PATH=" << args.info_path.c_str() << "\n";
+    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
     if(args.backend.has_value())
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
     else

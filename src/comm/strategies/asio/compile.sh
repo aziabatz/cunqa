@@ -1,0 +1,2 @@
+g++ -std=c++20 server.cpp -o server -I/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/pruebas/api-simulator/src -lboost_system -lpthread
+g++ -std=c++20 client.cpp -o client -I/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/pruebas/api-simulator/src -lboost_system -lpthread

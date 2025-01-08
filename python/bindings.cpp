@@ -1,24 +1,25 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "comm/client.hpp"
+#include "comm/future_wrapper.hpp"
  
 namespace py = pybind11;
- 
+
 PYBIND11_MODULE(qclient, m) {
+
+    m.doc() = "TODO";
  
-    m.doc() = "Clase QClient, que corresponde con la clase Client() en C++";
- 
+    py::class_<FutureWrapper>(m, "FutureWrapper")
+        .def("get", &FutureWrapper::get)
+        .def("valid", &FutureWrapper::valid);
+
     py::class_<Client>(m, "QClient")
  
         .def(py::init<const std::optional<std::string> &>(), py::arg("filepath") = std::nullopt)  // Constructor sin argumentos
  
         .def("connect", &Client::connect, py::arg("task_id") = "", py::arg("net") = "ib0") // Metodo
  
-        .def("read_result", &Client::read_result) // Metodo
- 
-        .def("send_data", py::overload_cast<const std::string&>(&Client::send_data)) 
-        .def("send_data", py::overload_cast<std::ifstream&>(&Client::send_data)) 
-
-        .def("stop", &Client::stop); // Metodo
- 
+        .def("send_circuit", [](Client &c, const std::string& circuit) { 
+            return FutureWrapper(c.send_circuit(circuit)); 
+        });
 }

@@ -1,6 +1,12 @@
 #include <thread>
 #include <queue>
 #include <atomic>
+#include <iostream>
+#include <fstream>
+
+#include <cstdlib>   // For rand() and srand()
+#include <ctime> 
+
 #include "comm/server.hpp"
 #include "backend.hpp"
 #include "simulators/simulator.hpp"
@@ -24,10 +30,9 @@ public:
 
 private:
     std::unique_ptr<Server> server;
-    std::queue<std::string> _message_queue;
-    std::condition_variable _queue_condition;
-    std::mutex _queue_mutex;
-    std::atomic<bool> _running;
+    std::queue<std::string> message_queue_;
+    std::condition_variable queue_condition_;
+    std::mutex queue_mutex_;
 
     void _compute_result();
     void _recv_data();
@@ -46,7 +51,6 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) :
 template <SimType sim_type>
 void QPU<sim_type>::turn_ON() {
     server = std::make_unique<Server>(qpu_config.net_config);
-    _running = true;
 
     std::thread listen([this](){this->_recv_data();});
     std::thread compute([this](){this->_compute_result();});
@@ -58,33 +62,24 @@ void QPU<sim_type>::turn_ON() {
 }
 
 template <SimType sim_type>
-void QPU<sim_type>::turn_OFF(){
-    std::string response{"Cerrando conexión..."};
-    server->send_result(response);
-    _running = false;
-    _queue_condition.notify_all();
-}
-
-template <SimType sim_type>
 void QPU<sim_type>::_compute_result()
-{
-    while (_running) 
+{    
+    while (true) 
     {
-        std::unique_lock<std::mutex> lock(_queue_mutex);
+        std::unique_lock<std::mutex> lock(queue_mutex_);
+        queue_condition_.wait(lock, [this] { return !message_queue_.empty(); });
 
-        _queue_condition.wait(lock, [this] { return !_message_queue.empty() || !_running; });
-
-        while (!_message_queue.empty() && _running) 
+        while (!message_queue_.empty()) 
         {
-            std::string message = _message_queue.front();
-            _message_queue.pop();
+            std::string message = message_queue_.front();
+            message_queue_.pop();
             lock.unlock();
 
-            //Computacion
             json kernel = json::parse(message);
             json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
-            server->send_result(to_string(response));
 
+            server->send_result(to_string(response));
+            //archivoSalida.close();
             lock.lock();
         }
     }
@@ -93,17 +88,19 @@ void QPU<sim_type>::_compute_result()
 template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
 {
-    while (_running) 
+    // TODO: Hago que se pueda parar?
+    while (true) 
     {
-        auto message = server->recv_data();
+        auto message = server->recv_circuit();
         {
-            std::lock_guard<std::mutex> lock(_queue_mutex);
+            std::lock_guard<std::mutex> lock(queue_mutex_);
             if (message.compare("CLOSE"s) == 0) {
-                turn_OFF();
+                server->accept();
+                continue;
             }
             else
-                _message_queue.push(message);
+                message_queue_.push(message);
         }
-        _queue_condition.notify_one(); // Notificar al otro hilo
+        queue_condition_.notify_one(); // Notificar al otro hilo
     }
 }

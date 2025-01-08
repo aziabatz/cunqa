@@ -6,6 +6,7 @@
 #include "strategy_def.h"
 #include "utils/constants.hpp"
 #include "config/net_config.hpp"
+#include "future_wrapper.hpp"
 
 using json = nlohmann::json;
 using namespace config;
@@ -13,12 +14,15 @@ using namespace config;
 #if COMM_LIB == ASIO
     #include "strategies/asio/asio_client.hpp"
     using SelectedClient = AsioClient;
+    using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
     #include "strategy/zmq_comm.hpp"
     using SelectedClient = ZMQClient;
+    using Future = std::future<std::string>;
 #elif COMM_LIB == CROW
     #include "strategy/crow_comm.hpp"
     using SelectedClient = CrowClient;
+    using Future = std::future<std::string>;
 #else
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
 #endif
@@ -56,12 +60,7 @@ public:
         strategy->connect(server_ip_config);
     }
 
-    inline std::string read_result() { return strategy->read_result(); }
+    inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(strategy->submit(circuit)); }
 
-    inline void send_data(const std::string& data) { strategy->send_data(data); }
-
-    inline void send_data(std::ifstream& file) { strategy->send_data(file); }
-    
-    inline void stop() { strategy->stop(); }
-
+    //inline std::future<std::string> send_circuit(std::ifstream& file) { strategy->submit(file); }
 };

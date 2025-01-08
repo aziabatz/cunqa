@@ -6,7 +6,7 @@ set(CMAKE_INSTALL_PREFIX "")
 
 # Adding C++17 standard as required
 add_library(compiler_flags INTERFACE)
-target_compile_features(compiler_flags INTERFACE cxx_std_17)
+target_compile_features(compiler_flags INTERFACE cxx_std_20)
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
 
 cmake_policy(SET CMP0144 OLD)
