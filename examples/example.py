@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import time
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
@@ -70,8 +71,6 @@ circuit = """
 
 #result = qpu.c_run(circuit, shots=199)
 
-#print(result)
-
 STORE = os.getenv("STORE")
 conf_file = STORE + "/.api_simulator/qpu.json"
 
@@ -81,12 +80,22 @@ with open(conf_file, 'r', encoding='utf-8') as archivo:
 if isinstance(datos, dict):
     claves_primer_nivel = list(datos.keys())
 
-for clave in claves_primer_nivel:
-    client = QClient(conf_file)
-    client.connect(clave)
-    future = client.send_circuit(circuit)
+#for clave in claves_primer_nivel:
+client = QClient(conf_file)
+print("result")
 
-    print(future.get())
+client.connect(claves_primer_nivel[0])
+
+
+print("Cliente: " + claves_primer_nivel[0])
+future1 = client.send_circuit(circuit)
+future2 = client.send_circuit(circuit)
+
+print("GET DEL FUTURE 1:" + future1.get())
+print("GET DEL FUTURE 2:" + future2.get())
+
+""" for fut in future:
+    print(fut.get()) """
 
 """ result_dict = json.loads(result)
 

@@ -1,6 +1,12 @@
 #include <thread>
 #include <queue>
 #include <atomic>
+#include <iostream>
+#include <fstream>
+
+#include <cstdlib>   // For rand() and srand()
+#include <ctime> 
+
 #include "comm/server.hpp"
 #include "backend.hpp"
 #include "simulators/simulator.hpp"
@@ -27,7 +33,6 @@ private:
     std::queue<std::string> message_queue_;
     std::condition_variable queue_condition_;
     std::mutex queue_mutex_;
-    std::atomic<bool> running_;
 
     void _compute_result();
     void _recv_data();
@@ -46,7 +51,6 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) :
 template <SimType sim_type>
 void QPU<sim_type>::turn_ON() {
     server = std::make_unique<Server>(qpu_config.net_config);
-    running_ = true;
 
     std::thread listen([this](){this->_recv_data();});
     std::thread compute([this](){this->_compute_result();});
@@ -59,25 +63,23 @@ void QPU<sim_type>::turn_ON() {
 
 template <SimType sim_type>
 void QPU<sim_type>::_compute_result()
-{
-    while (running_) 
+{    
+    while (true) 
     {
         std::unique_lock<std::mutex> lock(queue_mutex_);
+        queue_condition_.wait(lock, [this] { return !message_queue_.empty(); });
 
-        queue_condition_.wait(lock, [this] { return !message_queue_.empty() || !running_; });
-
-        while (!message_queue_.empty() && running_) 
+        while (!message_queue_.empty()) 
         {
             std::string message = message_queue_.front();
             message_queue_.pop();
             lock.unlock();
 
-            //Computacion
-            std::cout << "Ejecutamos\n";
             json kernel = json::parse(message);
             json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
-            server->send_result(to_string(response));
 
+            server->send_result(to_string(response));
+            //archivoSalida.close();
             lock.lock();
         }
     }
@@ -87,7 +89,7 @@ template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
 {
     // TODO: Hago que se pueda parar?
-    while (running_) 
+    while (true) 
     {
         auto message = server->recv_circuit();
         {

@@ -6,43 +6,57 @@
 #include "config/net_config.hpp"
 #include "utils/constants.hpp"
 #include "utils/helpers.hpp"
-//#include "asio_common.hpp"
 #include <future>
 #include <thread>
 
-using boost::asio::ip::tcp;
+#include <thread> // For std::this_thread::sleep_for
+#include <chrono> // For std::chrono::seconds
+
+namespace as = boost::asio;
+using as::ip::tcp;
 using namespace std::literals;
 using namespace config;
 
+class AsioClient;
+
+class AsioFuture {
+public:
+    AsioFuture(AsioClient *client);
+    std::string get();
+    inline bool valid();
+private:
+    AsioClient *client;
+};
+
 class AsioClient {
 public:
+    friend class AsioFuture;
 
     AsioClient() :
-        socket_{io_context_} 
-    { }
+        io_context_{},
+        socket_{io_context_}
+    { 
+        /* tcp::resolver resolver{io_context_};
+        auto endpoint = resolver.resolve(tcp::endpoint{as::ip::address::from_string("127.0.0.1"), 17000});
+        as::connect(socket_, endpoint); */
+    }
 
     ~AsioClient() {
         socket_.close();
         io_context_.stop();
-        if (worker_.joinable()) {
-            worker_.join();
-        }
     }
-    
+
     inline void connect(const NetConfig& server_ipconfig, const std::string_view& net = INFINIBAND) 
     {
         tcp::resolver resolver{io_context_};
         auto endpoint = resolver.resolve(server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
-        boost::asio::connect(socket_, endpoint);
-
-        worker_ = std::thread([this]() { io_context_.run(); });
+        as::connect(socket_, endpoint);
     }
 
-    std::future<std::string> submit(const std::string& data) 
+    AsioFuture submit(const std::string& circuit) 
     {        
-        _send_data(data);
-        auto promise = _recv_result();
-        return promise->get_future();
+        _send_data(circuit);
+        return AsioFuture(this);
     }
 
 private:
@@ -50,41 +64,35 @@ private:
     void _send_data(const std::string& data) {
         auto data_length = legacy_size_cast<uint32_t, std::size_t>(data.size());
         auto data_length_network = htonl(data_length);
-        auto buffer = boost::asio::buffer(&data_length_network, sizeof(data_length_network));
 
-        socket_.write_some(buffer);
-        socket_.write_some(boost::asio::buffer(data));
+        as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
+        as::write(socket_, as::buffer(data)); 
     }
 
-    std::shared_ptr<std::promise<std::string>> _recv_result(){
-        auto promise = std::make_shared<std::promise<std::string>>();
-        auto result = std::make_shared<std::string>(); // Crear el objeto antes del callback
-        auto data_length_network = std::make_shared<uint32_t>();
-        socket_.async_read_some(
-            boost::asio::buffer(data_length_network.get(), sizeof(uint32_t)),
-            [this, data_length_network, result, promise](const boost::system::error_code& ec, std::size_t bytes_transferred) {
-                if (!ec) {
-                    auto data_length = ntohl(*data_length_network);
-                    *result = std::string(data_length, '\0');
-                    socket_.async_read_some(
-                        boost::asio::buffer(*result),
-                        [result, promise](const boost::system::error_code& ec, std::size_t bytes_transferred) {
-                            if (!ec) {
-                                promise->set_value(result->data());
-                            } else {
-                                std::cerr << "Error en la segunda lectura: " << ec.message() << std::endl;
-                            }
-                        }
-                    );
-                } else {
-                    std::cerr << "Error en la lectura: " << ec.message() << std::endl;
-                }
-            }
-        );
-        return promise;
+    std::string _recv_result() {
+        uint32_t result_length_network;
+        as::read(socket_, as::buffer(&result_length_network, sizeof(result_length_network)));
+        uint32_t result_length = ntohl(result_length_network);
+
+        std::string result(result_length, '\0');
+        as::read(socket_, as::buffer(&result[0], result_length));
+
+        return result;
     }
 
-    boost::asio::io_context io_context_;
+    as::io_context io_context_;
     tcp::socket socket_;
-    std::thread worker_;
+};
+
+
+AsioFuture::AsioFuture(AsioClient *client) : client{client} {};
+
+
+std::string AsioFuture::get() {
+    std::string result = client->_recv_result();
+    return result;
+};
+
+inline bool AsioFuture::valid() {
+    return true;
 };

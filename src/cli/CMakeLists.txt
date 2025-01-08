@@ -12,7 +12,7 @@ target_link_libraries(qraise PUBLIC compiler_flags
                                      nlohmann_json::nlohmann_json 
                                      Threads::Threads 
                                      m ${Python_LIBRARIES} MPI::MPI_CXX
-                                     OpenMP::OpenMP_CXX LAPACK::LAPACK)
+                                     OpenMP::OpenMP_CXX LAPACK::LAPACK stdc++fs)
 
 install(TARGETS qraise DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION ${CMAKE_INSTALL_BINDIR})
