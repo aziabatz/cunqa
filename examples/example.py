@@ -47,7 +47,8 @@ circuit = """
     "instructions": [
     {
         "name": "h",
-        "qubits": [0]
+        "qubits": [0],
+        "params":[]
     },
     {
         "name": "cx",
@@ -83,6 +84,9 @@ if isinstance(datos, dict):
 #for clave in claves_primer_nivel:
 client = QClient(conf_file)
 print("result")
+
+print(type(client))
+
 
 client.connect(claves_primer_nivel[1])
 

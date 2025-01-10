@@ -70,8 +70,10 @@ def qc_to_json(qc):
     ---------
     json dict with the circuit information.
     """
+    
     json_data = {
-        "instructions":[]
+        "instructions":[],
+        "num_clbits":sum([c.size for c in qc.cregs])
     }
     for i in range(len(qc.data)):
         if qc.data[i].name == "barrier":

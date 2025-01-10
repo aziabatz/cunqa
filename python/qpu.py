@@ -8,16 +8,16 @@ sys.path.append(installation_path)
 
 # path para acceder a la informacion sobre las qpus
 info_path = os.getenv("INFO_PATH")
-STORE = os.getenv("STORE")
-info_path = STORE + "/.api_simulator/qpu.json"
+if info_path is None:
+    STORE = os.getenv("STORE")
+    info_path = STORE+"/.api_simulator/qpu.json"
 # importamos api en C++
 from python.qclient import QClient
 # importamos la clase Backend
 from backend import Backend
-from result import Result
+from qjob import QJob, gather
 # importamos funciones para transformar circuitos a json
 from circuit import qasm2_to_json, qc_to_json
-
 
 
 class QPU():
@@ -28,7 +28,7 @@ class QPU():
         -----------
     """
     
-    def __init__(self, id_=None, server_id=None, backend=None):
+    def __init__(self, id_=None, qclient=None, backend=None):
         """
         Initializes th QPU class.
 
@@ -54,14 +54,14 @@ class QPU():
             print("QPU id must be int.")
             return
 
-        # server_id
-        if server_id == None:
-            print("QPU server not assigned.")
+        # qclient
+        if qclient == None:
+            print("QPU client not assigned.")
             return
-        elif type(server_id) == str:
-            self.server_id = server_id
+        elif isinstance(qclient, QClient):
+            self._qclient = qclient
         else:
-            print("Invalid server id.")
+            print("Invalid QPU client.")
             return
 
         # backend
@@ -73,7 +73,7 @@ class QPU():
         else:
             print("backend type must be class Backend.")
             return
-        
+
 
     def run(self, circ, **run_parameters):
         """
@@ -82,6 +82,27 @@ class QPU():
             Args:
             --------
             circ (json): circuit to be run in the QPU.
+            **run_parameters : any simulation instructions such as shots, method, parameter_binds, meas_level, init_qubits, ...
+
+            Return:
+            --------
+            Result object.
+        """
+        qjob = QJob(self, circ, **run_parameters)
+        qjob.submit()
+        return qjob
+
+    
+        
+
+    def _run(self, circ, **run_parameters):
+        """
+            Class method to run a circuit in the QPU.
+
+            Args:
+            --------
+            circ (json): circuit to be run in the QPU.
+            circ (Quantumcircuit or QASM or json): circuit to be run in the QPU.
             **run_parameters : any simulation instructions such as shots, method, parameter_binds, meas_level, init_qubits, ...
 
             Return:
@@ -117,7 +138,8 @@ class QPU():
 
 
         execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
-
+        
+        STORE = os.getenv("STORE")
         client = QClient(STORE + "/.api_simulator/qpu.json")
         
         client.connect(self.id_)
@@ -140,24 +162,17 @@ def getQPUs():
     with open(info_path, "r") as qpus_json:
         dumps = json.load(qpus_json)
         
-    if isinstance(datos, dict):
-
-        
+    if isinstance(dumps, dict):
         qpus = []
         i = 0
-        for k, v in dumps.items():# instancio nuestra clase backend pasándole directamente el diccionario
-            qpus.append(  QPU(id_ = i, server_id = k, backend = Backend(v['backend'])  )  )
+        for k, v in dumps.items():
+            client = QClient(info_path)
+            client.connect(k)
+            qpus.append(  QPU(id_ = i, qclient = client, backend = Backend(v['backend'])  )  )
             i+=1
         return qpus
     else:
         print("Incorrect format for "+info_path)
-
-    
-
-
-
-
-
 
 
 
