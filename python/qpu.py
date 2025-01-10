@@ -8,7 +8,8 @@ sys.path.append(installation_path)
 
 # path para acceder a la informacion sobre las qpus
 info_path = os.getenv("INFO_PATH")
-
+STORE = os.getenv("STORE")
+info_path = STORE + "/.api_simulator/qpu.json"
 # importamos api en C++
 from python.qclient import QClient
 # importamos la clase Backend
@@ -116,8 +117,7 @@ class QPU():
 
 
         execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
-        
-        STORE = os.getenv("STORE")
+
         client = QClient(STORE + "/.api_simulator/qpu.json")
         
         client.connect(self.id_)
@@ -139,14 +139,20 @@ def getQPUs():
 
     with open(info_path, "r") as qpus_json:
         dumps = json.load(qpus_json)
+        
+    if isinstance(datos, dict):
 
-    qpus = []
-    i = 0
-    for k, v in dumps.items():# instancio nuestra clase backend pasándole directamente el diccionario
-        qpus.append(  QPU(id_ = i, server_id = k, backend = Backend(v['backend'])  )  )
-        i+=1
+        
+        qpus = []
+        i = 0
+        for k, v in dumps.items():# instancio nuestra clase backend pasándole directamente el diccionario
+            qpus.append(  QPU(id_ = i, server_id = k, backend = Backend(v['backend'])  )  )
+            i+=1
+        return qpus
+    else:
+        print("Incorrect format for "+info_path)
 
-    return qpus
+    
 
 
 

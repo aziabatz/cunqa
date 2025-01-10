@@ -84,10 +84,10 @@ if isinstance(datos, dict):
 client = QClient(conf_file)
 print("result")
 
-client.connect(claves_primer_nivel[0])
+client.connect(claves_primer_nivel[1])
 
 
-print("Cliente: " + claves_primer_nivel[0])
+print("Cliente: " + claves_primer_nivel[1])
 future1 = client.send_circuit(circuit)
 future2 = client.send_circuit(circuit)
 
