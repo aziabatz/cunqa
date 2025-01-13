@@ -223,6 +223,7 @@ installation
 qraise_*
 client.cpp
 server.cpp
+compile.sh
 
 cargar_modulos.sh
 

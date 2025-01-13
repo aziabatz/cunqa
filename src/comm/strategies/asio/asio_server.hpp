@@ -16,13 +16,6 @@ using as::ip::tcp;
 class AsioServer {
     NetConfig net_config;
 public:
-    AsioServer() :
-        acceptor_{io_context_, tcp::endpoint{as::ip::address::from_string("127.0.0.1"), 17000}},
-        socket_{acceptor_.get_executor()}
-    { 
-        acceptor_.accept(socket_);
-    }
-
     AsioServer(const NetConfig& net_config, const std::string_view& net = INFINIBAND) :
         net_config{net_config},
         acceptor_{io_context_, tcp::endpoint{as::ip::address::from_string(net_config.IPs.at(std::string(net))), 

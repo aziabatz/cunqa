@@ -35,11 +35,7 @@ public:
     AsioClient() :
         io_context_{},
         socket_{io_context_}
-    { 
-        /* tcp::resolver resolver{io_context_};
-        auto endpoint = resolver.resolve(tcp::endpoint{as::ip::address::from_string("127.0.0.1"), 17000});
-        as::connect(socket_, endpoint); */
-    }
+    { }
 
     ~AsioClient() {
         socket_.close();
