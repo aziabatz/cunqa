@@ -17,13 +17,15 @@ using json = nlohmann::json;
 using namespace std::string_literals;
 using namespace config;
 
-template <SimType sim_type = SimType::Aer>
+template <SimType sim_type = SimType::Aer> //Alvaro: Aer->AerNoise
 class QPU {
 public:
     config::QPUConfig<sim_type> qpu_config;
-    Backend<sim_type> backend;
+    Backend<sim_type> backend; 
+    bool is_noise = false; //Alvaro
+    std::string filepath; //Alvaro
 
-    QPU(config::QPUConfig<sim_type> qpu_config);
+    QPU(config::QPUConfig<sim_type> qpu_config, const std::string& filepath); //Alvaro: añadi const std::string& filepath
 
     void turn_ON();
     inline void turn_OFF();
@@ -38,15 +40,28 @@ private:
     void _recv_data();
 };
 
+// Este constructor es de Alvaro
 template <SimType sim_type>
-QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) : 
-    qpu_config{qpu_config},
-    backend{qpu_config.backend_config}
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, const std::string& noise_path) : 
+    qpu_config{qpu_config}, filepath{noise_path}, backend{noise_path}
 {
+    if (qpu_config.is_noise)
+        is_noise = true;
+    CustomJson c_json{};
+    json config_json(qpu_config);
+
+    c_json.write(config_json, qpu_config.filepath);
+} 
+
+/* template <SimType sim_type> //Anterior constructor
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config)
+{
+    if 
     CustomJson c_json{};
     json config_json(qpu_config);
     c_json.write(config_json, qpu_config.filepath);
-}
+} */
+
 
 
 template <SimType sim_type>

@@ -9,15 +9,37 @@ using json = nlohmann::json;
 
 namespace config {
 
-template <SimType sim_type = SimType::Aer>
+template <SimType sim_type = SimType::Aer> //Alvaro Aer -> AerNoise
 class QPUConfig {
 public:
     BackendConfig<sim_type> backend_config;
     NetConfig net_config;
     std::string filepath;
+    bool is_noise = false; //Alvaro
 
     QPUConfig(const json& config, const std::string& filepath) :
         filepath{filepath}
+    {
+        if (config.contains("backend"))
+            this->backend_config = BackendConfig<sim_type>(config.at("backend"));
+        else
+            this->backend_config = BackendConfig<sim_type>();
+
+        if (config.contains("errors")){
+            this->backend_config = BackendConfig<sim_type>();
+            this->is_noise = true;
+        }
+        
+        // If no net is specified in the config file, then the process net is defined
+        if (config.contains("net"))
+            this->net_config = NetConfig(config.at("net"));
+        else {
+            this->net_config = NetConfig::myNetConfig();
+        }
+    }
+/*     //Constructor de Alvaro para ruido
+    QPUConfig(const json& config, const std::string& filepath, const bool& noise) :
+        filepath{filepath}, is_noise{noise}
     {
         if (config.contains("backend"))
             this->backend_config = BackendConfig<sim_type>(config.at("backend"));
@@ -30,7 +52,8 @@ public:
         else {
             this->net_config = NetConfig::myNetConfig();
         }
-    }
+    } */  
+
 
     void set_backendconfig(json backend_conf_json){
         this->backend_config = BackendConfig<sim_type>(backend_conf_json);

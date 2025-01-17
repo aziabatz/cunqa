@@ -1,0 +1,1 @@
+from python.translator_qc_to_json import from_qc_to_json

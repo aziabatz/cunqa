@@ -1,0 +1,12 @@
+ml load qmio/hpc gcc/system gcccore/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.13.6-python-3.11.9 nlohmann_json/3.11.3
+
+AER_INCL_DIR=/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/src/third-party/aer-cpp/src/
+PYBIND_INCL_DIR=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/include/
+PYTHON_INCL_DIR=/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/python/3.11.9/include/python3.11/
+PYTHON_LIB=/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/python/3.11.9/lib
+FAKEQMIO_INCL=/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/src
+BLAS_LIB=/opt/cesga/qmio/hpc/software/Compiler/gcc/system/flexiblas/3.3.0/lib
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PYTHON_LIB
+
+g++ -std=c++20 main.cpp -o main.out -I$AER_INCL_DIR -I$PYBIND_INCL_DIR -I$PYTHON_INCL_DIR -I$FAKEQMIO_INCL -L$BLAS_LIB -L$PYTHON_LIB -fopenmp -fPIC -lflexiblas -lpython3.11

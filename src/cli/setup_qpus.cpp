@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
         if(auto search = SIM_NAMES.find(argv[2]); search != SIM_NAMES.end()) {
             if (search->second == SimType::Aer) {
                 config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, argv[1]};
-                QPU<SimType::Aer> qpu(qpu_config);
+                QPU<SimType::Aer> qpu(qpu_config, argv[3]);
                 SPDLOG_LOGGER_DEBUG(loggie::logger,"Turning ON the QPUs with the AER simulator.");
                 qpu.turn_ON();
             } else if (search->second == SimType::Munich) {
                 config::QPUConfig<SimType::Munich> qpu_config{qpu_config_json, argv[1]};
-                QPU<SimType::Munich> qpu(qpu_config);
+                QPU<SimType::Munich> qpu(qpu_config, argv[3]);
                 SPDLOG_LOGGER_DEBUG(loggie::logger,"Turning ON the QPUs with the Munich simulator.");
                 qpu.turn_ON();
             }  
