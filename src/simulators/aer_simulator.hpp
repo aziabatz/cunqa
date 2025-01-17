@@ -31,7 +31,6 @@ public:
 
         Config aer_default(run_config_json);
 
-
         std::vector<std::shared_ptr<Circuit>> circuits;
         circuits.push_back(std::make_shared<Circuit>(circuit));
 

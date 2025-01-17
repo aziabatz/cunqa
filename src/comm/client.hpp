@@ -55,12 +55,14 @@ public:
     }
 
     void connect(const std::string& task_id, const std::string_view& net = INFINIBAND) {
-        json server_ip_config_json = qpus_json.at(task_id).at("net");
-        auto server_ip_config = server_ip_config_json.template get<NetConfig>();
-        strategy->connect(server_ip_config);
+        try {
+            json server_ip_config_json = qpus_json.at(task_id).at("net");
+            auto server_ip_config = server_ip_config_json.template get<NetConfig>();
+            strategy->connect(server_ip_config);
+        } catch (const json::out_of_range& e){
+            SPDLOG_LOGGER_ERROR(loggie::logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
+        }
     }
 
     inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(strategy->submit(circuit)); }
-
-    //inline std::future<std::string> send_circuit(std::ifstream& file) { strategy->submit(file); }
 };

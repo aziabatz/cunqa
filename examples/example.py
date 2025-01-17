@@ -84,7 +84,7 @@ if isinstance(datos, dict):
 client = QClient(conf_file)
 print("result")
 
-client.connect(claves_primer_nivel[0])
+client.connect("0")
 
 
 print("Cliente: " + claves_primer_nivel[0])

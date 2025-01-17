@@ -15,3 +15,4 @@ target_include_directories(argparse INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/argpa
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/argparse/include/argparse"
         DESTINATION include/argparse
        )
+

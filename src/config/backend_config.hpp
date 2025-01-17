@@ -11,6 +11,7 @@ using json = nlohmann::json;
 
 namespace config {
 
+//TODO: Add the coupling map and the gates supported
 template <SimType sim_type = SimType::Aer>
 class BackendConfig {
 public:
@@ -118,13 +119,3 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 }; 
 
 };
-
-std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) {
-    /* os << "\nIPs: \n";
-    for (const auto& net_bind : config.IPs) {
-            os << net_bind.first << " ---> " << net_bind.second << "\n";
-    }
-    os << "\nPuerto: " << config.port
-       << "\nHostname: " << config.hostname << "\n\n"; */
-    return os;
-}

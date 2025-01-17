@@ -212,6 +212,9 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# Logging
+logs/
+
 # vscode
 .vscode
 
