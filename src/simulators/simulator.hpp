@@ -11,7 +11,7 @@ enum class SimType {
     AerNoise
 };
 
-const std::unordered_map<std::string, SimType> sim_names = {
+const std::unordered_map<std::string, SimType> SIM_NAMES = {
     {"Aer", SimType::Aer},
     {"Munich", SimType::Munich},
     {"AerNoise", SimType::AerNoise}
@@ -43,18 +43,3 @@ template <>
 struct SimClass<SimType::AerNoise> {
     using type = AerNoise;
 };
-
-/* 
-template <SimType sim_type>
-class Simulator {
-    std::unique_ptr<typename SimClass<sim_type>::type> simulator;
-
-public:
-
-    Simulator() : simulator{std::make_unique<typename SimClass<sim_type>::type>()} { }
-
-    inline json execute(json circuit_json, const config::RunConfig& run_config) {
-        return simulator->execute(circuit_json, run_config);
-    }
-
-}; */

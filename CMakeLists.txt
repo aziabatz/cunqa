@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(API-Simulator VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_SYSTEM_PREFIX_PATH "")
 set(CMAKE_INSTALL_PREFIX "")
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 # Adding C++17 standard as required
 add_library(compiler_flags INTERFACE)
@@ -23,7 +24,7 @@ set(CMAKE_INSTALL_LIBDIR "lib")
 set(CMAKE_INSTALL_INCLDIR "include")
 set(CMAKE_INSTALL_BINDIR "bin")
 
-find_package(Python 3.11 COMPONENTS Interpreter Development)
+find_package(Python 3.9 COMPONENTS Interpreter Development)
 
 if(DEFINED PYBIND_PATH)
     list(APPEND CMAKE_PREFIX_PATH "${PYBIND_PATH}")
@@ -31,8 +32,8 @@ else(NOT DEFINED PYBIND_PATH)
     string(FIND "$ENV{LOADEDMODULES}" "pybind11" module_pos)
     if(module_pos GREATER -1)
         #list(APPEND CMAKE_PREFIX_PATH "/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/share/cmake/pybind11")
-        set(PYBIND_DIR "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.13.6-python-3.11.9/lib64/python3.11/site-packages/pybind11")
-        list(APPEND CMAKE_PREFIX_PATH "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.13.6-python-3.11.9/lib64/python3.11/site-packages/pybind11/share/cmake/pybind11")
+        set(PYBIND_DIR "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11")
+        list(APPEND CMAKE_PREFIX_PATH "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11/share/cmake/pybind11")
         message(STATUS "Loading the default path for pybind11...")
     else()
         message(WARNING
@@ -44,8 +45,8 @@ else(NOT DEFINED PYBIND_PATH)
     endif()
 endif()
 
-set(PYBIND11_PYTHON_VERSION 3.11 CACHE STRING "")
-find_package(pybind11 2.13 REQUIRED)
+set(PYBIND11_PYTHON_VERSION 3.9 CACHE STRING "")
+find_package(pybind11 2.12 REQUIRED)
 
 include_directories("${PYBIND_DIR}/include")
 

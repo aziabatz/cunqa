@@ -13,6 +13,7 @@ using json = nlohmann::json;
 
 namespace config {
 
+//TODO: Add the coupling map and the gates supported
 template <SimType sim_type = SimType::Aer> //Alvaro: Aer -> AerNoise
 class BackendConfig {
 public:

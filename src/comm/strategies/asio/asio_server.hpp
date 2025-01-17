@@ -32,36 +32,41 @@ public:
 
     std::string recv_data() 
     { 
-        // Receive string size
-        uint32_t data_length_network;
-        boost::system::error_code ec;
-        as::read(socket_, as::buffer(&data_length_network, sizeof(data_length_network)), ec);
-        
-        if (!ec) {
+        try {
+            uint32_t data_length_network;
+            as::read(socket_, as::buffer(&data_length_network, sizeof(data_length_network)));
+            
             uint32_t data_length = ntohl(data_length_network);
             std::string data(data_length, '\0');
             as::read(socket_, as::buffer(&data[0], data_length));
-
             return data;
-        } else if (ec == as::error::eof) {
-            std::cout << "Client disconnected, closing conection.\n";
-            socket_.close();
-
-            return std::string("CLOSE");
-        } else {
-            // Otros errores
-            std::cerr << "Error en la lectura: " << ec.message() << std::endl;
+        //TODO: Can I differ by error class in boost avoiding error codes?
+        } catch (const boost::system::system_error& e) {
+            if (e.code() == as::error::eof) {
+                SPDLOG_LOGGER_DEBUG(loggie::logger, "Client disconnected, closing conection.");
+                socket_.close();
+                return std::string("CLOSE");
+            } else {
+                SPDLOG_LOGGER_ERROR(loggie::logger, "Error receiving the circuit.");
+                throw;
+            }
         }
 
         return std::string();
     }
 
-    inline void send_result(const std::string& result) {
-        auto data_length = legacy_size_cast<uint32_t, std::size_t>(result.size());
-        auto data_length_network = htonl(data_length);
+    inline void send_result(const std::string& result) 
+    {
+        try {    
+            auto data_length = legacy_size_cast<uint32_t, std::size_t>(result.size());
+            auto data_length_network = htonl(data_length);
 
-        as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
-        as::write(socket_, as::buffer(result)); 
+            as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
+            as::write(socket_, as::buffer(result));
+        } catch (const boost::system::system_error& e) {
+            SPDLOG_LOGGER_ERROR(loggie::logger, "Error sending the result.");
+            throw;
+        }
     }
 
 private:

@@ -75,7 +75,8 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config)
 
 
 template <SimType sim_type>
-void QPU<sim_type>::turn_ON() {
+void QPU<sim_type>::turn_ON() 
+{
     server = std::make_unique<Server>(qpu_config.net_config);
 
     std::thread listen([this](){this->_recv_data();});
@@ -83,8 +84,6 @@ void QPU<sim_type>::turn_ON() {
     
     listen.join();
     compute.join();
-
-    std::cout << "Main: Program terminated.\n";
 }
 
 template <SimType sim_type>
@@ -102,10 +101,17 @@ void QPU<sim_type>::_compute_result()
             lock.unlock();
 
             json kernel = json::parse(message);
+
+            //TODO: CAPTURAR AQUÍ CUALQUIER ERROR DEL SIMULADOR
             json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
 
-            server->send_result(to_string(response));
-            //archivoSalida.close();
+            try {
+                server->send_result(to_string(response));
+            } catch(const std::exception& e){
+                SPDLOG_LOGGER_INFO(loggie::logger, "There has happened an error sending the result, the server keeps on iterating.");
+                SPDLOG_LOGGER_ERROR(loggie::logger, "Official message of the error: {}", e.what());
+            }
+            
             lock.lock();
         }
     }
@@ -114,19 +120,24 @@ void QPU<sim_type>::_compute_result()
 template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
 {
-    // TODO: Hago que se pueda parar?
+    // TODO: Should the QPU be stoppable??
     while (true) 
     {
-        auto message = server->recv_circuit();
-        {
-            std::lock_guard<std::mutex> lock(queue_mutex_);
-            if (message.compare("CLOSE"s) == 0) {
-                server->accept();
-                continue;
+        try {
+            auto message = server->recv_circuit();
+                {
+                std::lock_guard<std::mutex> lock(queue_mutex_);
+                if (message.compare("CLOSE"s) == 0) {
+                    server->accept();
+                    continue;
+                }
+                else
+                    message_queue_.push(message);
             }
-            else
-                message_queue_.push(message);
+            queue_condition_.notify_one();
+        } catch (const std::exception& e) {
+            SPDLOG_LOGGER_INFO(loggie::logger, "There has happened an error receiving the circuit, the server keeps on iterating.");
+            SPDLOG_LOGGER_ERROR(loggie::logger, "Official message of the error: {}", e.what());
         }
-        queue_condition_.notify_one(); // Notificar al otro hilo
     }
 }

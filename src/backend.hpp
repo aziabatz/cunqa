@@ -14,7 +14,7 @@ class Backend {
     BackendConfig<sim_type> backend_config; //Alvaro: sim_type -> SimType::Aer
 public:
 
-    Backend() :
+    Backend(config::BackendConfig<sim_type> backend_config) :
         simulator{std::make_unique<typename SimClass<sim_type>::type>()},
         backend_config{}
     { } 
