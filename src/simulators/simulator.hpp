@@ -7,12 +7,14 @@
 // Define Sim Types as a closed list
 enum class SimType {
     Aer,
-    Munich
+    Munich,
+    AerNoise
 };
 
 const std::unordered_map<std::string, SimType> sim_names = {
     {"Aer", SimType::Aer},
-    {"Munich", SimType::Munich}
+    {"Munich", SimType::Munich},
+    {"AerNoise", SimType::AerNoise}
 };
 
 template<SimType T, SimType U>
@@ -25,7 +27,7 @@ struct is_same<T, T> : std::true_type {};
 template <SimType = SimType::Aer>
 struct SimClass {
     using type = AerSimulator;
-};
+};  
 
 template <>
 struct SimClass<SimType::Aer> {
@@ -35,6 +37,11 @@ struct SimClass<SimType::Aer> {
 template <>
 struct SimClass<SimType::Munich> {
     using type = MunichSimulator;
+};
+
+template <>
+struct SimClass<SimType::AerNoise> {
+    using type = AerNoise;
 };
 
 /* 

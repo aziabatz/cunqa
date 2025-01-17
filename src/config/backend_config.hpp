@@ -11,7 +11,7 @@ using json = nlohmann::json;
 
 namespace config {
 
-template <SimType sim_type = SimType::Aer>
+template <SimType sim_type = SimType::Aer> //Alvaro: Aer -> AerNoise
 class BackendConfig {
 public:
     std::string name;
@@ -31,7 +31,7 @@ public:
     
 
     template<SimType T = sim_type,
-             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> //Alvaro: Aer -> AerNoise
     BackendConfig() : 
         name{"BasicAer"},
         version{"0.0.1"},
@@ -44,6 +44,7 @@ public:
         max_shots{10000},
         description{"Usual AER simulator."}
     { }
+
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
@@ -61,7 +62,7 @@ public:
     { }
 
     template<SimType T = sim_type,
-             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> //Alvaro: Aer -> AerNoise
     BackendConfig(const json& config)
         : simulator{"AerSimulator"}
     {
@@ -119,7 +120,7 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 
 };
 
-std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) {
+std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) { //Alvaro: Aer -> AerNoise
     /* os << "\nIPs: \n";
     for (const auto& net_bind : config.IPs) {
             os << net_bind.first << " ---> " << net_bind.second << "\n";

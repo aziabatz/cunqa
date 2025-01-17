@@ -24,23 +24,29 @@ int main(int argc, char *argv[])
     } 
     else  if (argc < 2)
         std::cerr << "Error, not a QPU configuration was given\n";
-
+    
     if(auto search = sim_names.find(argv[2]); search != sim_names.end()) 
     {
     //if (sim_names.contains(argv[2]))
-        if (search->second == SimType::Aer) 
+        if (search->second == SimType::Aer) //Alvaro: Aer -> AerNoise 
         {
-            config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, argv[1]};
-            QPU<SimType::Aer> qpu(qpu_config);
+            config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, argv[1]}; //Alvaro: Aer -> AerNoise
+            QPU<SimType::Aer> qpu(qpu_config, argv[3]); //Alvaro: Aer -> AerNoise y + argv[1]
             qpu.turn_ON();
         } 
         else if (search->second == SimType::Munich)
         {
             config::QPUConfig<SimType::Munich> qpu_config{qpu_config_json, argv[1]};
-            QPU<SimType::Munich> qpu(qpu_config);
+            QPU<SimType::Munich> qpu(qpu_config, argv[3]);
             qpu.turn_ON();
         }  
-    }
+/*         else if (search ->second == SimType::AerNoise) //Esto es de Alvaro y es lo unico que hace que falle el build. Esta relacionado con "Constructor de Alvaro para ruido" en qpu_config.hpp
+        {
+            config::QPUConfig<SimType::AerNoise> qpu_config{argv[1], argv[2]};
+            QPU<SimType::AerNoise> qpu(qpu_config);
+            qpu.turn_ON();
+        } */  
+    } 
     
 
     else
