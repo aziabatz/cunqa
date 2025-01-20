@@ -88,7 +88,7 @@ private:
             SPDLOG_LOGGER_DEBUG(loggie::logger, "Result received: {}", result);
             return result;
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(loggie::logger, "Error receiveing the circuit: {}", e.code());
+            SPDLOG_LOGGER_ERROR(loggie::logger, "Error receiveing the circuit: {}", e.code().message());
         }
 
         return std::string("{}");

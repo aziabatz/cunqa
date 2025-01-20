@@ -8,6 +8,7 @@
 #include "utils/constants.hpp"
 #include "utils/logger.hpp"
 #include "config/net_config.hpp"
+#include "utils/logger.hpp"
 
 namespace as = boost::asio;
 using namespace config;
