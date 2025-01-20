@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 #include <spdlog/spdlog.h>
 #include <spdlog/logger.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -30,7 +31,7 @@ std::shared_ptr<spdlog::logger> get_logger()
         console_sink->set_level(spdlog::level::warn);
 
         auto store_path = std::getenv("STORE");
-        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", true);
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>((std::string)store_path + "/.api_simulator/logs/logging.log", true);
         file_sink->set_level(spdlog::level::trace);
 
         spdlog::sinks_init_list sinks = { file_sink, console_sink };

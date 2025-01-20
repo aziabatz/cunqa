@@ -11,7 +11,7 @@ using namespace config;
 template <SimType sim_type>
 class Backend {
     std::unique_ptr<typename SimClass<sim_type>::type> simulator;
-    BackendConfig<sim_type> backend_config; //Alvaro: sim_type -> SimType::Aer
+    BackendConfig<sim_type> backend_config; 
 public:
 
     Backend(config::BackendConfig<sim_type> backend_config) :

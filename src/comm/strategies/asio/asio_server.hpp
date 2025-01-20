@@ -6,6 +6,7 @@
 #include <fstream>
 #include "utils/helpers.hpp"
 #include "utils/constants.hpp"
+#include "utils/logger.hpp"
 #include "config/net_config.hpp"
 
 namespace as = boost::asio;
