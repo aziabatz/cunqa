@@ -1,6 +1,7 @@
 //#include "qpu.hpp"
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <fstream>
 #include <thread>
 #include <queue>
 #include <chrono>
@@ -21,17 +22,26 @@ int main(int argc, char *argv[])
     {
         std::ifstream f(argv[3]);
         qpu_config_json = json::parse(f);
+
     } 
     else  if (argc < 2)
         std::cerr << "Error, not a QPU configuration was given\n";
 
     try {
         if(auto search = SIM_NAMES.find(argv[2]); search != SIM_NAMES.end()) {
-            if (search->second == SimType::Aer) {
+            if (search->second == SimType::Aer)  
+            {
                 config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, argv[1]};
-                QPU<SimType::Aer> qpu(qpu_config, argv[3]);
-                SPDLOG_LOGGER_DEBUG(loggie::logger,"Turning ON the QPUs with the AER simulator.");
-                qpu.turn_ON();
+                    if(argc == 4) {
+                        QPU<SimType::Aer> qpu(qpu_config, argv[3]);
+                        SPDLOG_LOGGER_DEBUG(loggie::logger,"Turning ON the QPUs with the AER simulator.");
+                        qpu.turn_ON();
+                    } else {
+                        QPU<SimType::Aer> qpu(qpu_config);
+                        SPDLOG_LOGGER_DEBUG(loggie::logger,"Turning ON the QPUs with the AER simulator.");
+                        qpu.turn_ON();
+                    }
+                
             } else if (search->second == SimType::Munich) {
                 config::QPUConfig<SimType::Munich> qpu_config{qpu_config_json, argv[1]};
                 QPU<SimType::Munich> qpu(qpu_config, argv[3]);

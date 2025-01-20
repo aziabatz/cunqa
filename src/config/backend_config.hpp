@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <fstream>//Alvaro
+#include <string>//Alvaro
 
 #include "../utils/constants.hpp"
 #include "../simulators/simulator.hpp"
@@ -63,7 +65,7 @@ public:
     { }
 
     template<SimType T = sim_type,
-             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> //Alvaro: Aer -> AerNoise
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
     BackendConfig(const json& config)
         : simulator{"AerSimulator"}
     {
@@ -96,13 +98,18 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
             //{"coupling_map", backend_conf.coupling_map},
             {"basis_gates", backend_conf.basis_gates}, 
             {"custom_instructions", backend_conf.custom_instructions},
-            //{"gates", backend_conf.gates}
+            {"gates", backend_conf.gates}
         };
 }
 
 template <SimType sim_type>
 void from_json(const json& j, BackendConfig<sim_type>& backend_conf) 
 {
+    std::string filename = "/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/logs.log";
+    std::ofstream outFile(filename);
+    outFile << j.at("name") << "\n";
+    outFile.close();
+    
     j.at("name").get_to(backend_conf.name);
     j.at("version").get_to(backend_conf.version);
     j.at("simulator").get_to(backend_conf.simulator);
@@ -116,7 +123,8 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
     //j.at("coupling_map").get_to(backend_conf.coupling_map);
     j.at("basis_gates").get_to(backend_conf.basis_gates);
     j.at("custom_instructions").get_to(backend_conf.custom_instructions);
-    //j.at("gates").get_to(backend_conf.gates);
+    j.at("gates").get_to(backend_conf.gates);
+    
 }; 
 
 };

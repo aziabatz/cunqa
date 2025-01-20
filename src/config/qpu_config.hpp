@@ -15,7 +15,6 @@ public:
     BackendConfig<sim_type> backend_config;
     NetConfig net_config;
     std::string filepath;
-    bool is_noise = false; //Alvaro
 
     QPUConfig(const json& config, const std::string& filepath) :
         filepath{filepath}
@@ -24,11 +23,6 @@ public:
             this->backend_config = BackendConfig<sim_type>(config.at("backend"));
         else
             this->backend_config = BackendConfig<sim_type>();
-
-        if (config.contains("errors")){
-            this->backend_config = BackendConfig<sim_type>();
-            this->is_noise = true;
-        }
         
         // If no net is specified in the config file, then the process net is defined
         if (config.contains("net"))

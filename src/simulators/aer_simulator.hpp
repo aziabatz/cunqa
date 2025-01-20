@@ -33,21 +33,27 @@ public:
         noise_model = noise_default;
     }
 
-    AerSimulator(const std::string& path_to_noise){
-        json noise_model_json;
-        std::ifstream noise_file(path_to_noise);
+    AerSimulator(const std::string& backend_path){
+        json backend_json;
+        std::ifstream backend_file(backend_path);
 
-        if (noise_file.is_open()) {
+        if (backend_file.is_open()) {
 
-            noise_file >> noise_model_json;
-            noise_file.close();
+            backend_file >> backend_json;
+            backend_file.close();
 
         } else {
-            std::cerr << "Error: File cannot be open: " << path_to_noise << std::endl;
+            std::cerr << "Error: File cannot be open: " << backend_path << std::endl;
         }
 
-        Noise::NoiseModel noise_from_file(noise_model_json);
-        noise_model = noise_from_file;
+        if (backend_json.contains("noise")){
+            Noise::NoiseModel noise_from_file(backend_json["noise"]);
+            noise_model = noise_from_file; 
+        } else {
+            Noise::NoiseModel noise_model;
+        }
+
+        
     }
 
 

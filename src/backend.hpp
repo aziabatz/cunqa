@@ -19,8 +19,8 @@ public:
         backend_config{}
     { } 
 
-    Backend(const std::string& pathFile) :
-        simulator{std::make_unique<typename SimClass<sim_type>::type>(pathFile)},
+    Backend(const std::string& backend_path) :
+        simulator{std::make_unique<typename SimClass<sim_type>::type>(backend_path)},
         backend_config{}
     { } 
 
