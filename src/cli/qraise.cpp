@@ -11,7 +11,7 @@ struct MyArgs : public argparse::Args
     int& n_qpus                         = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                   = kwarg("t,time", "Time for the QPUs to be raised.");
     std::optional<std::string>& backend = kwarg("b,backend_path", "Path to the backend config file.");
-    std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer"); // Alvaro: Aer -> AerSNoise
+    std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::string& mem_per_qpu            = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
 
     void welcome() {
@@ -82,7 +82,6 @@ int main(int argc, char* argv[])
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
         SPDLOG_LOGGER_DEBUG(loggie::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
     }
-    //sbatchFile << "rm -rf $STORE/.api_simulator\n";
     sbatchFile.close();
 
     std::system("sbatch qraise_sbatch_tmp.sbatch");

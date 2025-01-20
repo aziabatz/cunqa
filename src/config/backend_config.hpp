@@ -2,8 +2,8 @@
 
 #include <nlohmann/json.hpp>
 #include <iostream>
-#include <fstream>//Alvaro
-#include <string>//Alvaro
+#include <fstream>
+#include <string>
 
 #include "../utils/constants.hpp"
 #include "../simulators/simulator.hpp"
@@ -14,7 +14,7 @@ using json = nlohmann::json;
 namespace config {
 
 //TODO: Add the coupling map and the gates supported
-template <SimType sim_type = SimType::Aer> //Alvaro: Aer -> AerNoise
+template <SimType sim_type = SimType::Aer>
 class BackendConfig {
 public:
     std::string name;
@@ -32,9 +32,11 @@ public:
     std::string custom_instructions;
     std::vector<std::string> gates;
     
+    json noise_model;
+    
 
     template<SimType T = sim_type,
-             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> //Alvaro: Aer -> AerNoise
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
     BackendConfig() : 
         name{"BasicAer"},
         version{"0.0.1"},
@@ -66,16 +68,16 @@ public:
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
-    BackendConfig(const json& config)
-        : simulator{"AerSimulator"}
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"AerSimulator"}, noise_model{noise_model}
     {
         from_json(config, *this);
     }
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
-    BackendConfig(const json& config) 
-        : simulator{"MunichSimulator"}
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"MunichSimulator"}, noise_model{noise_model}
     {
         from_json(config, *this);
     }
@@ -128,13 +130,3 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 }; 
 
 };
-
-std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) { //Alvaro: Aer -> AerNoise
-    /* os << "\nIPs: \n";
-    for (const auto& net_bind : config.IPs) {
-            os << net_bind.first << " ---> " << net_bind.second << "\n";
-    }
-    os << "\nPuerto: " << config.port
-       << "\nHostname: " << config.hostname << "\n\n"; */
-    return os;
-}
