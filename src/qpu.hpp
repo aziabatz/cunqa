@@ -12,6 +12,7 @@
 #include "simulators/simulator.hpp"
 #include "config/qpu_config.hpp"
 #include "utils/custom_json.hpp"
+#include "utils/logger.hpp"
 
 using json = nlohmann::json;
 using namespace std::string_literals;

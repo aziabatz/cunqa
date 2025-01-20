@@ -4,6 +4,7 @@
 #include <exception>
 #include <sys/file.h>
 #include <unistd.h>
+#include "logger.hpp"
 
 #include "custom_json.hpp"
 
@@ -92,7 +93,8 @@ void CustomJson::_write_MPI(json local_data)
         }
         SPDLOG_LOGGER_DEBUG(loggie::logger, "Succesfully resconstruction of the strings at root.");
     } catch(const std::exception& e) {
-        throw std::runtime_error("Error writing the JSON simultaneously using MPI.\nError message thrown by the system: " + e.what());
+        std::string msg("Error writing the JSON simultaneously using MPI.\nError message thrown by the system: "); 
+        throw std::runtime_error(msg + e.what());
     }
 }
 
@@ -131,6 +133,7 @@ void CustomJson::_write_locks(json local_data)
         flock(file, LOCK_UN);
         close(file);
     } catch(const std::exception& e) {
-        throw std::runtime_error("Error writing the JSON simultaneously using locks.\nError message thrown by the system: " + e.what());
+        std::string msg("Error writing the JSON simultaneously using locks.\nError message thrown by the system: "); 
+        throw std::runtime_error(msg + e.what());
     }
 }

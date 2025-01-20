@@ -7,6 +7,7 @@
 #include "utils/constants.hpp"
 #include "config/net_config.hpp"
 #include "future_wrapper.hpp"
+#include "utils/logger.hpp"
 
 using json = nlohmann::json;
 using namespace config;
