@@ -38,8 +38,3 @@ template <>
 struct SimClass<SimType::Munich> {
     using type = MunichSimulator;
 };
-
-template <>
-struct SimClass<SimType::AerNoise> {
-    using type = AerNoise;
-};

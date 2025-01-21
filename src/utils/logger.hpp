@@ -31,8 +31,10 @@ inline std::shared_ptr<spdlog::logger> get_logger()
         console_sink->set_level(spdlog::level::warn);
 
         std::string store_path = std::getenv("STORE");
-        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", true);
-        file_sink->set_level(spdlog::level::trace);
+
+        // TODO: Create a logger for the backend and a logger for the client?
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", false);
+        file_sink->set_level(spdlog::level::debug);
 
         spdlog::sinks_init_list sinks = { file_sink, console_sink };
 
@@ -41,6 +43,8 @@ inline std::shared_ptr<spdlog::logger> get_logger()
                                                     std::end(sinks));
         logger->sinks()[0]->set_pattern("%s: %^%l: %v %$ %oms");
         logger->sinks()[1]->set_pattern("%@\n\t%^%l: %v %$ %oms");
+        logger->set_level(spdlog::level::debug);
+
         spdlog::register_logger(logger);
     }
 

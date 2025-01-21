@@ -11,7 +11,11 @@ struct MyArgs : public argparse::Args
     int& n_qpus                         = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                   = kwarg("t,time", "Time for the QPUs to be raised.");
     std::optional<std::string>& backend = kwarg("b,backend_path", "Path to the backend config file.");
+<<<<<<< HEAD
     std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer"); 
+=======
+    std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
     std::string& mem_per_qpu            = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
 

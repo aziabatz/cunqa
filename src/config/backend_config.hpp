@@ -14,7 +14,11 @@ using json = nlohmann::json;
 namespace config {
 
 //TODO: Add the coupling map and the gates supported
+<<<<<<< HEAD
 template <SimType sim_type = SimType::Aer> 
+=======
+template <SimType sim_type = SimType::Aer>
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
 class BackendConfig {
 public:
     std::string name;
@@ -32,9 +36,15 @@ public:
     std::string custom_instructions;
     std::vector<std::string> gates;
     
+    json noise_model;
+    
 
     template<SimType T = sim_type,
+<<<<<<< HEAD
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
+=======
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
     BackendConfig() : 
         name{"BasicAer"},
         version{"0.0.1"},
@@ -66,16 +76,16 @@ public:
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
-    BackendConfig(const json& config)
-        : simulator{"AerSimulator"}
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"AerSimulator"}, noise_model{noise_model}
     {
         from_json(config, *this);
     }
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
-    BackendConfig(const json& config) 
-        : simulator{"MunichSimulator"}
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"MunichSimulator"}, noise_model{noise_model}
     {
         from_json(config, *this);
     }
@@ -128,13 +138,3 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 }; 
 
 };
-
-std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) { 
-    /* os << "\nIPs: \n";
-    for (const auto& net_bind : config.IPs) {
-            os << net_bind.first << " ---> " << net_bind.second << "\n";
-    }
-    os << "\nPuerto: " << config.port
-       << "\nHostname: " << config.hostname << "\n\n"; */
-    return os;
-}

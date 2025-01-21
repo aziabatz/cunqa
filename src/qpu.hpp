@@ -23,9 +23,7 @@ template <SimType sim_type = SimType::Aer>
 class QPU {
 public:
     config::QPUConfig<sim_type> qpu_config;
-    Backend<sim_type> backend; 
-    bool is_noise = false; 
-    std::string backend_path; 
+    Backend<sim_type> backend;
 
     QPU(config::QPUConfig<sim_type> qpu_config);
 
@@ -47,33 +45,13 @@ private:
 
 template <SimType sim_type>
 QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) : 
-    qpu_config{qpu_config}
+    qpu_config{qpu_config}, backend{qpu_config.backend_config}
 {
     CustomJson c_json{};
     json config_json(qpu_config);
 
     c_json.write(config_json, qpu_config.filepath);
-} 
-
-template <SimType sim_type>
-QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, const std::string& backend_path) : 
-    qpu_config{qpu_config}, backend_path{backend_path}, backend{backend_path}
-{
-    CustomJson c_json{};
-    json config_json(qpu_config);
-
-    c_json.write(config_json, qpu_config.filepath);
-} 
-
-/* template <SimType sim_type> //Anterior constructor
-QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config)
-{
-    if 
-    CustomJson c_json{};
-    json config_json(qpu_config);
-    c_json.write(config_json, qpu_config.filepath);
-} */
-
+}
 
 
 template <SimType sim_type>

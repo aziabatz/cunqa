@@ -19,25 +19,13 @@ public:
         backend_config{}
     { }
 
-    Backend(config::BackendConfig<sim_type> backend_config) :
-        simulator{std::make_unique<typename SimClass<sim_type>::type>()},
-        backend_config{}
+    Backend(BackendConfig<sim_type> backend_config) :
+        backend_config{backend_config}
     { } 
-
-    Backend(const std::string& backend_path) :
-        simulator{std::make_unique<typename SimClass<sim_type>::type>(backend_path)},
-        backend_config{}
-    { } 
-
-    Backend(const json& config) :
-        simulator{std::make_unique<typename SimClass<sim_type>::type>()},
-        backend_config{config}
-    { }
-
 
     json run(json circuit_json, const config::RunConfig& run_config) 
     {
-        return simulator->execute(circuit_json, run_config);
+        return SimClass<sim_type>::type::execute(circuit_json, backend_config.noise_model, run_config);
     }
 
 };
