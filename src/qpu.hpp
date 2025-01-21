@@ -3,6 +3,7 @@
 #include <atomic>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include <cstdlib>   // For rand() and srand()
 #include <ctime> 

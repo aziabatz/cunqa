@@ -8,6 +8,8 @@
 
 #include "custom_json.hpp"
 
+#include "logger.hpp"
+
 CustomJson::CustomJson()
 {
     custom_json = json::object();

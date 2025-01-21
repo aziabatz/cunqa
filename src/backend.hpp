@@ -10,13 +10,18 @@ using namespace config;
 
 template <SimType sim_type>
 class Backend {
-    BackendConfig<sim_type> backend_config;
+    std::unique_ptr<typename SimClass<sim_type>::type> simulator;
+    BackendConfig<sim_type> backend_config; 
 public:
+
+    Backend() :
+        simulator{std::make_unique<typename SimClass<sim_type>::type>()},
+        backend_config{}
+    { }
 
     Backend(BackendConfig<sim_type> backend_config) :
         backend_config{backend_config}
     { } 
-
 
     json run(json circuit_json, const config::RunConfig& run_config) 
     {

@@ -11,8 +11,13 @@ struct MyArgs : public argparse::Args
     int& n_qpus                         = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                   = kwarg("t,time", "Time for the QPUs to be raised.");
     std::optional<std::string>& backend = kwarg("b,backend_path", "Path to the backend config file.");
+<<<<<<< HEAD
+    std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer"); 
+=======
     std::string& simulator              = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
     std::string& mem_per_qpu            = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
+    std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -74,14 +79,41 @@ int main(int argc, char* argv[])
         std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
     }
 
+
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
-    if(args.backend.has_value()) {
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
-        SPDLOG_LOGGER_DEBUG(qpu::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+
+    if (args.fakeqmio.has_value()) {
+        if (args.fakeqmio.value() != "last_calibrations"){
+            std::system(("source " + (std::string)std::getenv("INSTALL_PATH") + "/python/noise.sh " + args.fakeqmio.value()).c_str());
+
+            args.backend = (std::string)std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json";
+
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
+
+            SPDLOG_LOGGER_DEBUG(qpu::logger, "FakeQmio last calibrations. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+        } else {
+            std::system(("source " + (std::string)std::getenv("INSTALL_PATH") + "/python/noise.sh " + args.fakeqmio.value()).c_str());
+
+            args.backend = (std::string)std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json";
+
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
+
+            SPDLOG_LOGGER_DEBUG(qpu::logger, "FakeQmio with calibrations path. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+        }
     } else {
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
-        SPDLOG_LOGGER_DEBUG(qpu::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
-    }
+        if (args.backend.has_value()){
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
+
+            SPDLOG_LOGGER_DEBUG(qpu::logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+        } else {
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
+
+            SPDLOG_LOGGER_DEBUG(qpu::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
+        }
+    } 
+
+
+    //sbatchFile << "rm -rf $STORE/.api_simulator\n";
     sbatchFile.close();
 
     std::system("sbatch qraise_sbatch_tmp.sbatch");

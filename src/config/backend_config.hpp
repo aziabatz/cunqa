@@ -14,7 +14,11 @@ using json = nlohmann::json;
 namespace config {
 
 //TODO: Add the coupling map and the gates supported
+<<<<<<< HEAD
+template <SimType sim_type = SimType::Aer> 
+=======
 template <SimType sim_type = SimType::Aer>
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
 class BackendConfig {
 public:
     std::string name;
@@ -36,7 +40,11 @@ public:
     
 
     template<SimType T = sim_type,
+<<<<<<< HEAD
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
+=======
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
+>>>>>>> 0e4ebc11393c12b5310b0c1284a00e9239dd3b60
     BackendConfig() : 
         name{"BasicAer"},
         version{"0.0.1"},

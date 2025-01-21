@@ -5,6 +5,7 @@
 #include <memory>
 #include "strategy_def.h"
 #include "utils/constants.hpp"
+#include "utils/logger.hpp"
 #include "config/net_config.hpp"
 #include "future_wrapper.hpp"
 #include "utils/logger.hpp"
