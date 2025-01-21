@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
 
-    SPDLOG_LOGGER_DEBUG(loggie::logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
+    SPDLOG_LOGGER_DEBUG(qpu::logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
 
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
@@ -77,17 +77,17 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
     if(args.backend.has_value()) {
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
     } else {
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
     }
     sbatchFile.close();
 
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");
 
-    SPDLOG_LOGGER_DEBUG(loggie::logger, "Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
+    SPDLOG_LOGGER_DEBUG(qpu::logger, "Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
 
     return 0;
 }

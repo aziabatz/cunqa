@@ -42,14 +42,14 @@ void CustomJson::_write_MPI(json local_data)
         local_data_str = local_data.dump();
         local_length = local_data_str.size();
         send_data = local_data_str.c_str();
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "JSON processed to write the data.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "JSON processed to write the data.");
 
         // Gather lengths to calculate the displacements
         int *recv_lengths;
         if (world_rank == 0)
             recv_lengths = new int[world_size];
         MPI_Gather(&local_length, 1, MPI_INT, recv_lengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Lengths gathered in order to calculate the displacements.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Lengths gathered in order to calculate the displacements.");
 
         // Calculate displacements at root
         int *displs;
@@ -65,7 +65,7 @@ void CustomJson::_write_MPI(json local_data)
                 total_length += recv_lengths[i];
             }
         }
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Calculate displacements at root.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Calculate displacements at root.");
 
         // Gather variable-length data at root
         char *recv_data;
@@ -75,7 +75,7 @@ void CustomJson::_write_MPI(json local_data)
         MPI_Gatherv(send_data, local_length, MPI_CHAR,
                     recv_data, recv_lengths, displs, MPI_CHAR,
                     0, MPI_COMM_WORLD);
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Gather variable-length data at root.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Gather variable-length data at root.");
 
         // Reconstruct strings at root
         if (world_rank == 0) {
@@ -91,7 +91,7 @@ void CustomJson::_write_MPI(json local_data)
             std::fstream file(filename, std::ios::out);
             file << custom_json.dump(4) << "\n";
         }
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Succesfully resconstruction of the strings at root.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Succesfully resconstruction of the strings at root.");
     } catch(const std::exception& e) {
         std::string msg("Error writing the JSON simultaneously using MPI.\nError message thrown by the system: "); 
         throw std::runtime_error(msg + e.what());
@@ -128,7 +128,7 @@ void CustomJson::_write_locks(json local_data)
         std::ofstream file_out(filename, std::ios::trunc);
         file_out << j.dump(4);
         file_out.close();
-        SPDLOG_LOGGER_DEBUG(loggie::logger, "Succesfully written this process JSON into the file.");
+        SPDLOG_LOGGER_DEBUG(qpu::logger, "Succesfully written this process JSON into the file.");
 
         flock(file, LOCK_UN);
         close(file);

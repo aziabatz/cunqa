@@ -35,7 +35,7 @@ public:
         json run_config_json(run_config);
         Config aer_default(run_config_json);
     
-        SPDLOG_LOGGER_ERROR(loggie::logger, "json de ruido es: {}", noise_model_json.dump(4).substr(0, 500));
+        SPDLOG_LOGGER_ERROR(qpu::logger, "json de ruido es: {}", noise_model_json.dump(4).substr(0, 500));
 
         Noise::NoiseModel noise_model(noise_model_json[0]);
 

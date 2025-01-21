@@ -41,7 +41,7 @@ public:
         if (filepath.has_value())
             final_filepath = filepath.value();
         else
-            final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
+            final_filepath = std::getenv("STORE") + "/.api_simulator/QClient.json"s;
         std::ifstream file(final_filepath);  
 
         if (!file.is_open()) {
@@ -51,7 +51,7 @@ public:
         try {
             file >> qpus_json;
         } catch (const json::parse_error& e) {
-            std::cerr << "Error parsing the QPU info into JSON: " << e.what() << "\n";
+            std::cerr << "Error parsing the QClient info into JSON: " << e.what() << "\n";
         }
     }
 
@@ -61,7 +61,7 @@ public:
             auto server_ip_config = server_ip_config_json.template get<NetConfig>();
             strategy->connect(server_ip_config);
         } catch (const json::out_of_range& e){
-            SPDLOG_LOGGER_ERROR(loggie::logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
+            SPDLOG_LOGGER_ERROR(client::logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
         }
     }
 

@@ -45,9 +45,9 @@ public:
             tcp::resolver resolver{io_context_};
             auto endpoint = resolver.resolve(server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
             as::connect(socket_, endpoint);
-            SPDLOG_LOGGER_DEBUG(loggie::logger, "Client succesfully connected to server.");
+            SPDLOG_LOGGER_DEBUG(client::logger, "Client succesfully connected to server.");
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(loggie::logger,"Imposible to connect to endpoint {}:{}. Server not available.", server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
+            SPDLOG_LOGGER_ERROR(client::logger,"Imposible to connect to endpoint {}:{}. Server not available.", server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
         }
     }
 
@@ -67,10 +67,10 @@ private:
         try {
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(data));
-            SPDLOG_LOGGER_DEBUG(loggie::logger, "Circuit sent.");
-            SPDLOG_LOGGER_DEBUG(loggie::logger, "Circuit sent: {}", data);
+            SPDLOG_LOGGER_DEBUG(client::logger, "Circuit sent.");
+            SPDLOG_LOGGER_DEBUG(client::logger, "Circuit sent: {}", data);
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(loggie::logger, "Error sending the circuit.");
+            SPDLOG_LOGGER_ERROR(client::logger, "Error sending the circuit.");
         }
         
     }
@@ -84,11 +84,11 @@ private:
 
             std::string result(result_length, '\0');
             as::read(socket_, as::buffer(&result[0], result_length));
-            SPDLOG_LOGGER_DEBUG(loggie::logger, "Result correctly revceived.");
-            SPDLOG_LOGGER_DEBUG(loggie::logger, "Result received: {}", result);
+            SPDLOG_LOGGER_DEBUG(client::logger, "Result correctly revceived.");
+            SPDLOG_LOGGER_DEBUG(client::logger, "Result received: {}", result);
             return result;
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(loggie::logger, "Error receiveing the circuit: {}", e.code().message());
+            SPDLOG_LOGGER_ERROR(client::logger, "Error receiveing the circuit: {}", e.code().message());
         }
 
         return std::string("{}");

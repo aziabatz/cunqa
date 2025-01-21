@@ -87,8 +87,8 @@ void QPU<sim_type>::_compute_result()
             try {
                 server->send_result(to_string(response));
             } catch(const std::exception& e){
-                SPDLOG_LOGGER_INFO(loggie::logger, "There has happened an error sending the result, the server keeps on iterating.");
-                SPDLOG_LOGGER_ERROR(loggie::logger, "Official message of the error: {}", e.what());
+                SPDLOG_LOGGER_INFO(qpu::logger, "There has happened an error sending the result, the server keeps on iterating.");
+                SPDLOG_LOGGER_ERROR(qpu::logger, "Official message of the error: {}", e.what());
             }
             
             lock.lock();
@@ -115,8 +115,8 @@ void QPU<sim_type>::_recv_data()
             }
             queue_condition_.notify_one();
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_INFO(loggie::logger, "There has happened an error receiving the circuit, the server keeps on iterating.");
-            SPDLOG_LOGGER_ERROR(loggie::logger, "Official message of the error: {}", e.what());
+            SPDLOG_LOGGER_INFO(qpu::logger, "There has happened an error receiving the circuit, the server keeps on iterating.");
+            SPDLOG_LOGGER_ERROR(qpu::logger, "Official message of the error: {}", e.what());
         }
     }
 }
