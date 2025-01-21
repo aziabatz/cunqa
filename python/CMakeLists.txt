@@ -7,3 +7,4 @@ target_include_directories(qclient PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                           "${PROJECT_BINARY_DIR}/src/comm")
 
 install(TARGETS qclient DESTINATION python)
+install(FILES "fakeqmio.py" "noise.sh" DESTINATION python)

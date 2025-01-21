@@ -24,7 +24,7 @@ class QPU {
 public:
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend; 
-    bool is_noise = false; //Alvaro
+    bool is_noise = false; 
     std::string backend_path; 
 
     QPU(config::QPUConfig<sim_type> qpu_config);

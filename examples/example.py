@@ -117,6 +117,8 @@ print("Futures creados.")
 print("GET DEL FUTURE 1:" + future1.get())
 print("GET DEL FUTURE 2:" + future2.get())
 
+print("Finaliza el ejemplo")
+
 """ for fut in future:
     print(fut.get()) """
 

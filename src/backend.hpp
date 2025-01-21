@@ -14,6 +14,11 @@ class Backend {
     BackendConfig<sim_type> backend_config; 
 public:
 
+    Backend() :
+        simulator{std::make_unique<typename SimClass<sim_type>::type>()},
+        backend_config{}
+    { }
+
     Backend(config::BackendConfig<sim_type> backend_config) :
         simulator{std::make_unique<typename SimClass<sim_type>::type>()},
         backend_config{}

@@ -30,13 +30,8 @@ inline std::shared_ptr<spdlog::logger> get_logger()
         auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         console_sink->set_level(spdlog::level::warn);
 
-<<<<<<< HEAD
-        auto store_path = std::getenv("STORE");
-        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>((std::string)store_path + "/.api_simulator/logs/logging.log", true);
-=======
         std::string store_path = std::getenv("STORE");
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", true);
->>>>>>> 555b63f387af5401a7186275bc7c03be5051ea08
         file_sink->set_level(spdlog::level::trace);
 
         spdlog::sinks_init_list sinks = { file_sink, console_sink };
