@@ -27,7 +27,3 @@ target_link_libraries(API-Simulator INTERFACE compiler_flags config-json
                                               ${Python_LIBRARIES})
 
 add_subdirectory(cli)
-
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/qpu.hpp" "${CMAKE_CURRENT_SOURCE_DIR}/backend.hpp"
-        DESTINATION include
-       )
