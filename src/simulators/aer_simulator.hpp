@@ -12,10 +12,6 @@
 #include "config/run_config.hpp"
 #include <nlohmann/json.hpp>
 
-#include "logger/logger.hpp"
-//#include <utils/fakeqmio.hpp>
-
-
 using json = nlohmann::json;
 using namespace std::literals;
 using namespace AER;

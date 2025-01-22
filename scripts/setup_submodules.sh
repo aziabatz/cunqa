@@ -2,7 +2,10 @@
 cd ../
 
 if [ ! -f ".gitmodules" ] || ! grep -q 'aer' ".gitmodules"; then
+    # How to load a new module
     git submodule add --name aer-cpp git@github.com:Qiskit/qiskit-aer.git src/third-party/aer-cpp
+    # How to update a module if --recursive option was forgotten in clone
+    git submodule update src/third-party/spdlog
 fi
 
 cd src/third-party/aer-cpp/ && git config core.sparsecheckout true && cd ../../../
