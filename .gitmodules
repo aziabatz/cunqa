@@ -4,3 +4,6 @@
 [submodule "argparse"]
 	path = src/third-party/argparse
 	url = git@github.com:morrisfranken/argparse.git
+[submodule "spdlog"]
+	path = src/third-party/spdlog
+	url = git@github.com:gabime/spdlog.git

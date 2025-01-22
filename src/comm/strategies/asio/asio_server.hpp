@@ -6,9 +6,9 @@
 #include <fstream>
 #include "utils/helpers.hpp"
 #include "utils/constants.hpp"
-#include "utils/logger.hpp"
+#include "logger/logger.hpp"
 #include "config/net_config.hpp"
-#include "utils/logger.hpp"
+#include "logger/logger.hpp"
 
 namespace as = boost::asio;
 using namespace config;
@@ -45,11 +45,11 @@ public:
         //TODO: Can I differ by error class in boost avoiding error codes?
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
-                SPDLOG_LOGGER_DEBUG(qpu::logger, "Client disconnected, closing conection.");
+                SPDLOG_LOGGER_DEBUG(logger, "Client disconnected, closing conection.");
                 socket_.close();
                 return std::string("CLOSE");
             } else {
-                SPDLOG_LOGGER_ERROR(qpu::logger, "Error receiving the circuit.");
+                SPDLOG_LOGGER_ERROR(logger, "Error receiving the circuit.");
                 throw;
             }
         }
@@ -66,7 +66,7 @@ public:
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(result));
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(qpu::logger, "Error sending the result.");
+            SPDLOG_LOGGER_ERROR(logger, "Error sending the result.");
             throw;
         }
     }
