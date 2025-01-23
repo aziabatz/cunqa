@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include "comm/client.hpp"
 #include "comm/future_wrapper.hpp"
+#include "logger/logger.hpp"
  
 namespace py = pybind11;
 

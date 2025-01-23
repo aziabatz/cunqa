@@ -9,13 +9,13 @@
 #include "config/qpu_config.hpp"
 #include "comm/server.hpp"
 #include "comm/client.hpp"
-#include "utils/logger.hpp"
+#include "logger/logger.hpp"
 
 using json = nlohmann::json;
 
 int main(int argc, char *argv[])
 {
-    SPDLOG_LOGGER_DEBUG(qpu::logger,"Setup QPUs arguments: argc={} argv= {} {}", argc, argv[1], argv[2]);
+    SPDLOG_LOGGER_DEBUG(logger,"Setup QPUs arguments: argc={} argv= {} {}", argc, argv[1], argv[2]);
     std::string info_path(argv[1]);
     std::string simulator(argv[2]);
     std::string backend;
@@ -33,17 +33,17 @@ int main(int argc, char *argv[])
             if (search->second == SimType::Aer) {
                 config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, info_path};
                 QPU<SimType::Aer> qpu(qpu_config);
-                SPDLOG_LOGGER_DEBUG(qpu::logger,"Turning ON the QPUs with the AER simulator.");
+                SPDLOG_LOGGER_DEBUG(logger,"Turning ON the QPUs with the AER simulator.");
                 qpu.turn_ON();
             } else if (search->second == SimType::Munich) {
                 config::QPUConfig<SimType::Munich> qpu_config{qpu_config_json, info_path};
                 QPU<SimType::Munich> qpu(qpu_config);
-                SPDLOG_LOGGER_DEBUG(qpu::logger,"Turning ON the QPUs with the Munich simulator.");
+                SPDLOG_LOGGER_DEBUG(logger,"Turning ON the QPUs with the Munich simulator.");
                 qpu.turn_ON();
             }  
         } else
             throw std::runtime_error(std::string("No simulator named ") + simulator);
     } catch (const std::exception& e) {
-        SPDLOG_LOGGER_ERROR(qpu::logger, "Failed turning ON the QPUs because: \n\t{}", e.what());
+        SPDLOG_LOGGER_ERROR(logger, "Failed turning ON the QPUs because: \n\t{}", e.what());
     }
 }

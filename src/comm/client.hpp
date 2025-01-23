@@ -5,10 +5,10 @@
 #include <memory>
 #include "strategy_def.h"
 #include "utils/constants.hpp"
-#include "utils/logger.hpp"
+#include "logger/logger.hpp"
 #include "config/net_config.hpp"
 #include "future_wrapper.hpp"
-#include "utils/logger.hpp"
+#include "logger/logger.hpp"
 
 using json = nlohmann::json;
 using namespace config;
@@ -62,7 +62,7 @@ public:
             auto server_ip_config = server_ip_config_json.template get<NetConfig>();
             strategy->connect(server_ip_config);
         } catch (const json::out_of_range& e){
-            SPDLOG_LOGGER_ERROR(client::logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
+            SPDLOG_LOGGER_ERROR(logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
         }
     }
 
