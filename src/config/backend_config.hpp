@@ -49,7 +49,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{(std::vector<std::string>)(basis_gates::basis_gates()["statevector"])},
+        basis_gates{(basis_gates::basis_gates()["statevector"]).get<std::vector<std::string>>()},
         description{"Usual AER simulator."}
     { }
 
