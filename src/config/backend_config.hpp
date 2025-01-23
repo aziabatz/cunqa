@@ -11,6 +11,7 @@
 using namespace std::literals;
 using json = nlohmann::json;
 
+
 namespace config {
 
 //TODO: Add the coupling map and the gates supported
@@ -47,6 +48,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
+        basis_gates{"statevector"},
         description{"Usual AER simulator."}
     { }
 
