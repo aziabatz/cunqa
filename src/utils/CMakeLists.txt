@@ -6,4 +6,6 @@ target_link_libraries(custom-json PRIVATE nlohmann_json::nlohmann_json Threads::
 
 #For the constants.hpp file
 target_include_directories(API-Simulator INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+install(FILES "backend_utils.hpp" DESTINATION include/utils)
+install(FILES "basis_gates.json"  DESTINATION include/utils)
 

@@ -7,9 +7,10 @@
 
 using json = nlohmann::json;
 
-namespace basis_gates{ 
+std::string install_path = std::getenv("INSTALL_PATH");
 
-    json basis_gates(std::string path_to_basis_gates_json = "./basis_gates.json")
+namespace basis_gates {
+    json basis_gates(std::string path_to_basis_gates_json = install_path + "/include/utils/basis_gates.json")
     {
         json gates_json;
         std::string path = path_to_basis_gates_json;
@@ -23,5 +24,8 @@ namespace basis_gates{
 
         return gates_json;
     }
+
+
 }
+
 

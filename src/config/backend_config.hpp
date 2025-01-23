@@ -7,6 +7,7 @@
 
 #include "../utils/constants.hpp"
 #include "../simulators/simulator.hpp"
+#include "../utils/backend_utils.hpp"
 
 using namespace std::literals;
 using json = nlohmann::json;
@@ -48,7 +49,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{"statevector"},
+        basis_gates{"default"},
         description{"Usual AER simulator."}
     { }
 
@@ -65,6 +66,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
+        basis_gates{"default"},
         description{"Usual Munich simulator."}
     { }
 
@@ -88,6 +90,7 @@ public:
 template <SimType sim_type>
 void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 {
+    json b_gates = basis_gates::basis_gates();
     j = {   
             {"name", backend_conf.name}, 
             {"version", backend_conf.version},
@@ -100,7 +103,7 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
             {"max_shots", backend_conf.max_shots},
             {"description", backend_conf.description},
             //{"coupling_map", backend_conf.coupling_map},
-            {"basis_gates", backend_conf.basis_gates}, 
+            {"basis_gates", b_gates[backend_conf.basis_gates]}, 
             {"custom_instructions", backend_conf.custom_instructions},
             {"gates", backend_conf.gates}
         };
