@@ -8,6 +8,7 @@ from qmiotools.integrations.qiskitqmio import FakeQmio
 from qiskit_aer.noise import NoiseModel
 
 STORE_PATH = os.getenv("STORE")
+INSTALL_PATH = os.getenv("INSTALL_PATH")
 
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
@@ -24,6 +25,9 @@ else:
 noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
 
+with open(INSTALL_PATH + "/include/utils/basis_gates.json", "r") as gates_file:
+    gates = json.load(gates_file)
+
 backend_json = {
     "backend":{
         "name": "FakeQmio", 
@@ -36,7 +40,7 @@ backend_json = {
         "memory": True,
         "max_shots": 1000000,
         "description": "FakeQmio backend",
-        "basis_gates": "", 
+        "basis_gates": gates["statevector"], 
         "custom_instructions": "",
         "gates": []
     },

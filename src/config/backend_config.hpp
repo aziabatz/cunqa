@@ -30,7 +30,7 @@ public:
     int max_shots;
     std::string description;
     std::optional<std::string> coupling_map;
-    std::string basis_gates;
+    std::vector<std::string> basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
     
@@ -49,7 +49,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{"default"},
+        basis_gates{(std::vector<std::string>)(basis_gates::basis_gates()["statevector"])},
         description{"Usual AER simulator."}
     { }
 
@@ -66,7 +66,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{"default"},
+        basis_gates{{"TODO"}},
         description{"Usual Munich simulator."}
     { }
 
@@ -90,7 +90,7 @@ public:
 template <SimType sim_type>
 void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 {
-    json b_gates = basis_gates::basis_gates();
+    
     j = {   
             {"name", backend_conf.name}, 
             {"version", backend_conf.version},
@@ -103,7 +103,7 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
             {"max_shots", backend_conf.max_shots},
             {"description", backend_conf.description},
             //{"coupling_map", backend_conf.coupling_map},
-            {"basis_gates", b_gates[backend_conf.basis_gates]}, 
+            {"basis_gates", backend_conf.basis_gates}, 
             {"custom_instructions", backend_conf.custom_instructions},
             {"gates", backend_conf.gates}
         };

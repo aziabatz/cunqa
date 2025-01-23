@@ -10,7 +10,7 @@
         "memory": true,
         "max_shots": 1000000,
         "description": "FakeQmio backend",
-        "basis_gates": "", 
+        "basis_gates": ["h", "x"], 
         "custom_instructions": "",
         "gates": []
     },
