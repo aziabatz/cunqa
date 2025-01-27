@@ -107,7 +107,7 @@ void QPU<sim_type>::_compute_result()
 
                 if (kernel.empty()){
                     SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                    break;
+                    server->close();
                 }
 
                 kernel = update_circuit_parameters(kernel, parameters);
