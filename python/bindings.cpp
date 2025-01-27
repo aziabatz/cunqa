@@ -22,5 +22,9 @@ PYBIND11_MODULE(qclient, m) {
  
         .def("send_circuit", [](Client &c, const std::string& circuit) { 
             return FutureWrapper(c.send_circuit(circuit)); 
+        })
+
+        .def("send_parameters", [](Client &c, const std::string& parameters) { 
+            return FutureWrapper(c.send_parameters(parameters)); 
         });
 }

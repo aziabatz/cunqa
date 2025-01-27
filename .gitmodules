@@ -7,3 +7,6 @@
 [submodule "spdlog"]
 	path = src/third-party/spdlog
 	url = git@github.com:gabime/spdlog.git
+[submodule "mqt-ddsim"]
+	path = src/third-party/mqt-ddsim
+	url = git@github.com:cda-tum/mqt-ddsim.git

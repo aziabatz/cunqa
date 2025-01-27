@@ -14,6 +14,7 @@
 #include "config/qpu_config.hpp"
 #include "custom_json.hpp"
 #include "logger/logger.hpp"
+#include "utils/parametric_circuit.hpp"
 
 using json = nlohmann::json;
 using namespace std::string_literals;
@@ -69,6 +70,7 @@ void QPU<sim_type>::turn_ON()
 template <SimType sim_type>
 void QPU<sim_type>::_compute_result()
 {    
+    json kernel = {}; 
     while (true) 
     {
         std::unique_lock<std::mutex> lock(queue_mutex_);
@@ -80,19 +82,47 @@ void QPU<sim_type>::_compute_result()
             message_queue_.pop();
             lock.unlock();
 
-            json kernel = json::parse(message);
-
-            //TODO: CAPTURAR AQUÍ CUALQUIER ERROR DEL SIMULADOR
-            json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
-
-            try {
-                server->send_result(to_string(response));
-            } catch(const std::exception& e){
-                SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
-                SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
-            }
+            json message_json = json::parse(message); 
             
-            lock.lock();
+            std::vector<double> parameters; 
+
+            
+            if (!message_json.contains("parameters")){ 
+
+                kernel = message_json;
+
+                //TODO: CAPTURAR AQUÍ CUALQUIER ERROR DEL SIMULADOR
+                json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
+
+                try {
+                    server->send_result(to_string(response));
+                } catch(const std::exception& e){
+                    SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
+                    SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+                }
+                
+                lock.lock();
+            } else {
+                std::vector<double> parameters = message_json.at("parameters");
+
+                if (kernel.empty()){
+                    SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                    break;
+                }
+
+                kernel = update_circuit_parameters(kernel, parameters);
+                parameters.clear();
+                json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
+                try {
+                    server->send_result(to_string(response));
+                } catch(const std::exception& e){
+                    SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
+                    SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+                }
+                
+                lock.lock();
+
+            } 
         }
     }
 }

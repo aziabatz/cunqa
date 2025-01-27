@@ -246,5 +246,7 @@ generar_circuito.py
 modules_alvaro.sh
 installations/
 local_tests/
+main_param.cpp
+mqt-ddsim/
 
 
