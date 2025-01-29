@@ -41,7 +41,7 @@ circuit = """
 {
     "config": {
         "shots": 1024,
-        "method": "statevector",
+        "method": "automatic",
         "memory_slots": 7
     },
     "instructions": [
@@ -49,6 +49,11 @@ circuit = """
         "name": "h",
         "qubits": [0],
         "params":[]
+    },
+     {
+        "name": "measure",
+        "qubits": [0],
+        "memory": [2]
     },
     {
         "name": "cx",

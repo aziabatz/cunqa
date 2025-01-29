@@ -75,7 +75,7 @@ class QPU():
             return
 
 
-    def run(self, circ, **run_parameters):
+    def run(self, circ, transpile = False, **run_parameters):
         """
             Class method to run a circuit in the QPU.
 
@@ -88,65 +88,11 @@ class QPU():
             --------
             Result object.
         """
-        qjob = QJob(self, circ, **run_parameters)
+        
+        qjob = QJob(self, circ, transpile = transpile,**run_parameters)
         qjob.submit()
         return qjob
 
-    
-        
-
-    def _run(self, circ, **run_parameters):
-        """
-            Class method to run a circuit in the QPU.
-
-            Args:
-            --------
-            circ (json): circuit to be run in the QPU.
-            circ (Quantumcircuit or QASM or json): circuit to be run in the QPU.
-            **run_parameters : any simulation instructions such as shots, method, parameter_binds, meas_level, init_qubits, ...
-
-            Return:
-            --------
-            Result in a dictionary
-        """
-
-        #if type(circ) == str:
-        #    if circ.lstrip().startswith("OPENQASM"):
-        #        circuit = qasm2_to_json(circ)
-        #    else:
-        #        circuito = None
-                
-        if isinstance(circ, dict):
-            circuit = circ
-
-        else:
-            circuit = None
-            
-    
-        run_config = {"shots":1024, "method":"statevector", "memory_slots":7}
-        
-        if len(run_parameters) == 0:
-            pass
-        else:
-            for k,v in run_parameters.items():
-                run_config[k] = v
-        
-        try:
-            instructions = circuit['instructions']
-        except:
-            raise ValueError("Circuit format not valid, only json is supported.")
-
-
-        execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
-        
-        STORE = os.getenv("STORE")
-        client = QClient(STORE + "/.api_simulator/qpu.json")
-        
-        client.connect(self.id_)
-        client.send_data(execution_config)
-        result = client.read_result()
-        client.send_data("CLOSE")
-        return Result(json.loads(result))
 
 
 def getQPUs():
@@ -176,7 +122,7 @@ def getQPUs():
 
 
 
-
+    
 
 
 
