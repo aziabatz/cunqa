@@ -29,7 +29,7 @@ public:
     bool memory;
     int max_shots;
     std::string description;
-    std::optional<std::string> coupling_map;
+    std::vector<std::vector<int>> coupling_map;
     std::vector<std::string> basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
@@ -49,6 +49,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
+        coupling_map{{}},
         basis_gates{(basis_gates::basis_gates()["default"]).get<std::vector<std::string>>()},
         description{"Usual AER simulator."}
     { }
@@ -102,7 +103,7 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
             {"memory", backend_conf.memory},
             {"max_shots", backend_conf.max_shots},
             {"description", backend_conf.description},
-            //{"coupling_map", backend_conf.coupling_map},
+            {"coupling_map", backend_conf.coupling_map},
             {"basis_gates", backend_conf.basis_gates}, 
             {"custom_instructions", backend_conf.custom_instructions},
             {"gates", backend_conf.gates}
@@ -127,7 +128,7 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
     j.at("memory").get_to(backend_conf.memory);
     j.at("max_shots").get_to(backend_conf.max_shots);
     j.at("description").get_to(backend_conf.description);
-    //j.at("coupling_map").get_to(backend_conf.coupling_map);
+    j.at("coupling_map").get_to(backend_conf.coupling_map);
     j.at("basis_gates").get_to(backend_conf.basis_gates);
     j.at("custom_instructions").get_to(backend_conf.custom_instructions);
     j.at("gates").get_to(backend_conf.gates);
