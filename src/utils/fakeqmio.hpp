@@ -1,3 +1,6 @@
+// ------------ ESTE SCRIPT NO SE USA ------------
+
+
 #include <iostream>
 #include <string>
 #include <fstream>
