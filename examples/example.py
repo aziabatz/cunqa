@@ -11,13 +11,19 @@ circuit = """
 {
     "config": {
         "shots": 1024,
-        "method": "statevector",
+        "method": "automatic",
         "memory_slots": 7
     },
     "instructions": [
     {
         "name": "h",
-        "qubits": [0]
+        "qubits": [0],
+        "params":[]
+    },
+     {
+        "name": "measure",
+        "qubits": [0],
+        "memory": [2]
     },
     {
         "name": "cx",
@@ -76,13 +82,15 @@ if isinstance(datos, dict):
 client = QClient(conf_file)
 print("Cliente instanciado")
 
-client.connect(claves_primer_nivel[0])
-print("Cliente conectado")
+print(type(client))
 
-print("Cliente: " + claves_primer_nivel[0])
-#future1 = client.send_circuit(qc)
-#future2 = client.send_circuit(qc)
-future_param = client.send_parameters(params)
+
+client.connect(claves_primer_nivel[1])
+
+
+print("Cliente: " + claves_primer_nivel[1])
+future1 = client.send_circuit(circuit)
+future2 = client.send_circuit(circuit)
 
 print("Futures creados.")
 

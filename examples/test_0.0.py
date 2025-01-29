@@ -19,6 +19,7 @@ for q in lista:
     print(" ")
     q.backend.info()
 
+kk
 
 # we define a circuit, first as a json
 

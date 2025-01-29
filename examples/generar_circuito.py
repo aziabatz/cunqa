@@ -22,7 +22,7 @@ for l in range(layers):
 
 print(params)
                   
-qc = QuantumCircuit(num_qubits,num_qubits)
+qc = QuantumCircuit(num_qubits,num_qubits+10)
 
 qc.h(range(num_qubits))
 
