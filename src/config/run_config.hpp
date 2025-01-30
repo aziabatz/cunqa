@@ -13,6 +13,7 @@ public:
     int shots;
     std::string method;
     int memory_slots;
+    int seed;
 
     RunConfig();
     RunConfig(json config);
@@ -24,7 +25,8 @@ void from_json(const json& j, RunConfig& run_conf);
 RunConfig::RunConfig() :
     shots{1024},
     method{"statevector"},
-    memory_slots{1}
+    memory_slots{1},
+    seed{23423}
 { }
 
 RunConfig::RunConfig(json config)
@@ -37,7 +39,8 @@ void to_json(json& j, const RunConfig& run_conf)
     j = {   
             {"shots", run_conf.shots}, 
             {"method", run_conf.method},
-            {"memory_slots", run_conf.memory_slots}
+            {"memory_slots", run_conf.memory_slots},
+            {"seed", run_conf.seed}
         };
 }
 
@@ -46,6 +49,7 @@ void from_json(const json& j, RunConfig& run_conf)
     j.at("shots").get_to(run_conf.shots);
     j.at("method").get_to(run_conf.method);
     j.at("memory_slots").get_to(run_conf.memory_slots);
+    j.at("seed").get_to(run_conf.seed);
 }; 
 
 };

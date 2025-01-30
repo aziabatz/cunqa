@@ -1,0 +1,24 @@
+{
+    "backend":{
+        "name": "FakeMunich", 
+        "version": "",
+        "simulator": "Munich Simulator",
+        "n_qubits": 32,
+        "url": "",
+        "is_simulator": true,
+        "conditional": true,
+        "memory": true,
+        "max_shots": 1000000,
+        "description": "FakeMunich backend",
+        "basis_gates": "",
+        "custom_instructions": "",
+        "gates": []
+    },
+    "noise": {
+        "step_fidelity": 1,
+        "approx_steps": 1,
+        "noise_prob": 0.001,
+        "noise_prob_t1": 0.002,
+        "noise_prob_multi": 2
+    }
+}

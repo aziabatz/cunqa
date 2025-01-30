@@ -7,6 +7,10 @@ set(CMAKE_INSTALL_PREFIX "")
 
 # Adding C++20 standard as required
 add_library(compiler_flags INTERFACE)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE "Release")
 target_compile_features(compiler_flags INTERFACE cxx_std_20)
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
 cmake_policy(SET CMP0144 OLD)

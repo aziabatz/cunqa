@@ -14,7 +14,6 @@ enum class SimType {
 const std::unordered_map<std::string, SimType> SIM_NAMES = {
     {"Aer", SimType::Aer},
     {"Munich", SimType::Munich},
-    {"AerNoise", SimType::AerNoise}
 };
 
 template<SimType T, SimType U>

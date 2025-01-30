@@ -1,7 +1,8 @@
-#include "argparse.hpp"
-#include "simulators/simulator.hpp"
 #include <string>
+#include <fstream>
 #include <regex>
+
+#include "argparse.hpp"
 #include "logger/logger.hpp"
 
 using namespace std::literals;

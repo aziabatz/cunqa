@@ -13,8 +13,8 @@ find_package(LAPACK REQUIRED)
 add_subdirectory(third-party)
 add_subdirectory(utils)
 add_subdirectory(comm)
-add_subdirectory(config)
-add_subdirectory(simulators)
+#add_subdirectory(config)
+#add_subdirectory(simulators)
 
 include_directories(${Python_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/utils")
 

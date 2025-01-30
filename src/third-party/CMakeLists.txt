@@ -13,3 +13,6 @@ set(SPDLOG_BUILD_PIC ON)
 set(SPDLOG_SYSTEM_INCLUDES ON)
 add_subdirectory(spdlog)
 target_compile_options(spdlog PRIVATE -Wno-covered-switch-default)
+
+# TODO: Generalize the build type for all the project 
+add_subdirectory(mqt-ddsim)

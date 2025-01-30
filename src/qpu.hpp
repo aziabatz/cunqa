@@ -26,7 +26,6 @@ public:
     Backend<sim_type> backend;
 
     QPU(config::QPUConfig<sim_type> qpu_config);
-
     QPU(config::QPUConfig<sim_type> qpu_config, const std::string& backend_path);
 
     void turn_ON();
@@ -88,8 +87,7 @@ void QPU<sim_type>::_compute_result()
             try {
                 server->send_result(to_string(response));
             } catch(const std::exception& e){
-                SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
-                SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+                SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result: {}", e.what());
             }
             
             lock.lock();

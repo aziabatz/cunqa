@@ -7,10 +7,9 @@ target_include_directories(qraise PRIVATE "${CMAKE_SOURCE_DIR}/src"
 message(STATUS "Python Libraries: ${Python_LIBRARIES}")
 
 target_link_libraries(qraise PUBLIC compiler_flags
-                             INTERFACE API-Simulator
                              PRIVATE custom-json logger_client
                                      nlohmann_json::nlohmann_json 
-                                     Threads::Threads 
+                                     Threads::Threads
                                      m ${Python_LIBRARIES} MPI::MPI_CXX
                                      OpenMP::OpenMP_CXX LAPACK::LAPACK stdc++fs)
 
@@ -24,10 +23,9 @@ target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                               "${PROJECT_BINARY_DIR}/src/comm")
 target_link_libraries(setup_qpus PUBLIC compiler_flags
-                             INTERFACE API-Simulator
                              PRIVATE custom-json logger_qpu
                              nlohmann_json::nlohmann_json 
-                             Threads::Threads 
+                             Threads::Threads MQT::DDSim
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK)
 
