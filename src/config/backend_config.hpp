@@ -49,7 +49,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        coupling_map{{{}}},
+        coupling_map{{}},
         basis_gates{(basis_gates::basis_gates()["default"]).get<std::vector<std::string>>()},
         description{"Usual AER simulator."}
     { }
