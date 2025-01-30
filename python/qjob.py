@@ -75,7 +75,7 @@ class Result():
 
 
 class QJob():
-    def __init__(self, QPU, circ, transpile, **run_parameters):
+    def __init__(self, QPU, circ, transpile, initial_layout = None, **run_parameters):
 
         self._QPU = QPU
         self._future = None
@@ -84,8 +84,10 @@ class QJob():
         # compruebo si hay que realizar la transpilación
 
         if transpile:
-            circt = transpiler( circ, QPU.backend )
+            circt = transpiler( circ, QPU.backend, initial_layout = initial_layout )
         else:
+            if initial_layout is not None:
+                raise Warning("Transpilation was not done, initial_layout provided was ignored. If you want to map the circuit to the given qubits of the backend you must set transpile=True and provide the list of qubits which lenght has to be equal to the number of qubits of the circuit.")
             circt = circ
 
         # convierto el circuito a json

@@ -75,7 +75,7 @@ class QPU():
             return
 
 
-    def run(self, circ, transpile = False, **run_parameters):
+    def run(self, circ, transpile = False, initial_layout = None, **run_parameters):
         """
             Class method to run a circuit in the QPU.
 
@@ -89,7 +89,7 @@ class QPU():
             Result object.
         """
         
-        qjob = QJob(self, circ, transpile = transpile,**run_parameters)
+        qjob = QJob(self, circ, transpile = transpile, initial_layout = initial_layout, **run_parameters)
         qjob.submit()
         return qjob
 
