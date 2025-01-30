@@ -1,6 +1,6 @@
 import os
 import sys
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, ClassicalRegister
 import numpy as np
 import json
 
@@ -12,7 +12,7 @@ from circuit import qc_to_json
 
 num_qubits = 15
 
-layers = 10
+layers = 2
 
 params = []
 
@@ -23,6 +23,8 @@ for l in range(layers):
 print(params)
                   
 qc = QuantumCircuit(num_qubits,num_qubits)
+
+qc.add_register(ClassicalRegister(3,'medidas'))
 
 qc.h(range(num_qubits))
 
