@@ -29,7 +29,6 @@
             "cp",
             "cu",
             "cu1",
-            "cu2",
             "cu3",
             "rxx",
             "ryy",
@@ -40,10 +39,7 @@
             "crx",
             "cry",
             "crz",
-            "cswap",
-            "mcx",
-            "mcy",
-            "mcz"
+            "cswap"
         ],
     "fakeqmio":
         [

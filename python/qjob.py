@@ -127,12 +127,14 @@ class QJob():
     def submit(self):
         if self._future is not None:
             raise QJobError("QJob has already been submitted.")
+        print(self._execution_config)
         self._future = self._QPU._qclient.send_circuit(self._execution_config)
 
     def result(self):
         if self._future is not None and self._future.valid():
             if self._result is None:
                 self._result = Result(json.loads(self._future.get()), registers=self._circuit['classical_registers'])
+                #self._result = json.loads(self._future.get())
             return self._result
 
     def time_taken():

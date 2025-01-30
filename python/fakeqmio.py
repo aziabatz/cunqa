@@ -40,6 +40,7 @@ backend_json = {
         "memory": True,
         "max_shots": 1000000,
         "description": "FakeQmio backend",
+        "coupling_map":[],
         "basis_gates": gates["fakeqmio"], 
         "custom_instructions": "",
         "gates": []
