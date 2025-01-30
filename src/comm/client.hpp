@@ -67,4 +67,6 @@ public:
     }
 
     inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(strategy->submit(circuit)); }
+
+    inline FutureWrapper send_parameters(const std::string& parameters) { return FutureWrapper(strategy->submit(parameters)); }
 };

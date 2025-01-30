@@ -7,13 +7,12 @@
 // Define Sim Types as a closed list
 enum class SimType {
     Aer,
-    Munich,
-    AerNoise
+    Munich
 };
 
 const std::unordered_map<std::string, SimType> SIM_NAMES = {
     {"Aer", SimType::Aer},
-    {"Munich", SimType::Munich},
+    {"Munich", SimType::Munich}
 };
 
 template<SimType T, SimType U>

@@ -71,6 +71,11 @@ public:
         }
     }
 
+    inline void close()
+    {
+        this->socket_.close();
+    }
+
 private:
     as::io_context io_context_;
     tcp::acceptor acceptor_;

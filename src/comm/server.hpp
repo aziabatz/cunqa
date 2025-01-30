@@ -33,5 +33,7 @@ public:
     inline void accept() { strategy->accept(); }
 
     inline void send_result(const std::string& result) { strategy->send_result(result); }
+
+    inline void close() {strategy->close(); }
 };
 

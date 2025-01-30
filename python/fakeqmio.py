@@ -8,6 +8,7 @@ from qmiotools.integrations.qiskitqmio import FakeQmio
 from qiskit_aer.noise import NoiseModel
 
 STORE_PATH = os.getenv("STORE")
+INSTALL_PATH = os.getenv("INSTALL_PATH")
 
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
@@ -24,6 +25,45 @@ else:
 noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
 
+with open(INSTALL_PATH + "/include/utils/basis_gates.json", "r") as gates_file:
+    gates = json.load(gates_file)
+
+fakeqmio_coupling_map = [
+    [0,1],
+    [2,1],
+    [2,3],
+    [4,3],
+    [5,4],
+    [6,3],
+    [6,12],
+    [7,0],
+    [7,9],
+    [9,10],
+    [11,10],
+    [11,12],
+    [13,21],
+    [14,11],
+    [14,18],
+    [15,8],
+    [15,16],
+    [18,17],
+    [18,19],
+    [20,19],
+    [22,21],
+    [22,31],
+    [23,20],
+    [23,30],
+    [24,17],
+    [24,27],
+    [25,16],
+    [25,26],
+    [26,27],
+    [28,27],
+    [28,29],
+    [30,29],
+    [30,31]
+]
+
 backend_json = {
     "backend":{
         "name": "FakeQmio", 
@@ -36,7 +76,8 @@ backend_json = {
         "memory": True,
         "max_shots": 1000000,
         "description": "FakeQmio backend",
-        "basis_gates": "", 
+        "coupling_map": fakeqmio_coupling_map,
+        "basis_gates": gates["fakeqmio"], 
         "custom_instructions": "",
         "gates": []
     },
