@@ -4,7 +4,12 @@ from circuit import from_json_to_qc, qc_to_json
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.backend_compat import convert_to_target
-from qjob import QJobError
+
+
+class TranspilerError(Exception):
+    """Exception for error during the transpilation of a circuit to a given Backend. """
+    def __init__(self, mensaje):
+        super().__init__(mensaje)
 
 
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
@@ -12,12 +17,12 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     # transformo el circuito a QuantumCircuit
     if isinstance(circuit, QuantumCircuit):
         if initial_layout is not None and len(initial_layout) != circuit.num_qubits:
-            raise QJobError("initial_layout must be of the size of the circuit.")
+            raise TranspilerError("initial_layout must be of the size of the circuit.")
         else:
             circuit = circuit
     elif isinstance(circuit, dict):
         if initial_layout is not None and len(initial_layout) != circuit['num_qubits']:
-            raise QJobError("initial_layout must be of the size of the circuit.")
+            raise TranspilerError("initial_layout must be of the size of the circuit.")
         else:
             try:
                 circuit = from_json_to_qc(circuit)

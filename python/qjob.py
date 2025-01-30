@@ -38,7 +38,8 @@ class Result():
         else:
             raise TypeError("Result format not supported, must be dict or list.")
             return
-
+        
+        counts = None
         for k,v in result.items():
             if k == "metadata":
                 for i, m in v.items():
@@ -56,14 +57,17 @@ class Result():
                 setattr(self, k, v)
 
         self.counts = {}
-        for j,w in counts.items():
-            if registers is None:
-                self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-            elif isinstance(registers, dict):
-                lengths = []
-                for v in registers.values():
-                    lengths.append(len(v))
-                self.counts[divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+        if counts:
+            for j,w in counts.items():
+                if registers is None:
+                    self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                elif isinstance(registers, dict):
+                    lengths = []
+                    for v in registers.values():
+                        lengths.append(len(v))
+                    self.counts[divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+        else:
+            raise QJobError("Some error occured with results file, no counts found. Check avaliability of the QPUs.")
                     
         
     def get_dict(self):
@@ -129,17 +133,15 @@ class QJob():
     def submit(self):
         if self._future is not None:
             raise QJobError("QJob has already been submitted.")
-        print(self._execution_config)
         self._future = self._QPU._qclient.send_circuit(self._execution_config)
 
     def result(self):
         if self._future is not None and self._future.valid():
             if self._result is None:
                 self._result = Result(json.loads(self._future.get()), registers=self._circuit['classical_registers'])
-                #self._result = json.loads(self._future.get())
             return self._result
 
-    def time_taken():
+    def time_taken(self):
         if self._future is not None and self._future.valid():
             if self._result is not None:
                 return self._result.get_dict()["results"][0]["time_taken"]
