@@ -1,5 +1,5 @@
-# API-simulator
-API definition for communicating the user with the simulator.
+# CUNQA
+Quantum simulation platform for distributed quantum computing.
 
 ## Clone repository
 In order to get all the submodules correctly loaded do:
