@@ -23,18 +23,23 @@ public:
     
     static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) {
         
-        //TODO: Maybe improve them to send several circuits at once
-        Circuit circuit(circuit_json);
-        std::vector<std::shared_ptr<Circuit>> circuits;
-        circuits.push_back(std::make_shared<Circuit>(circuit));
+        try {
+            //TODO: Maybe improve them to send several circuits at once
+            Circuit circuit(circuit_json);
+            std::vector<std::shared_ptr<Circuit>> circuits;
+            circuits.push_back(std::make_shared<Circuit>(circuit));
 
-        json run_config_json(run_config);
-        Config aer_default(run_config_json);
+            json run_config_json(run_config);
+            Config aer_default(run_config_json);
 
-        Noise::NoiseModel noise_model(noise_model_json[0]);
-        Result result = controller_execute<Controller>(circuits, noise_model, aer_default);
-
+            Noise::NoiseModel noise_model(noise_model_json);
+            Result result = controller_execute<Controller>(circuits, noise_model, aer_default);
         return result.to_json();
+        } catch (const std::exception& e) {
+            // TODO: specify the circuit format in the docs.
+            SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
+        }
+        return {};
     }
 
 };

@@ -11,9 +11,9 @@ info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
     info_path = STORE+"/.api_simulator/qpu.json"
-
-# importing cunqa modules
-from python.qclient import QClient
+# importamos api en C++
+from cunqa.qclient import QClient
+# importamos la clase Backend
 from backend import Backend
 from qjob import QJob, gather
 from circuit import qc_to_json

@@ -23,9 +23,14 @@ public:
         backend_config{backend_config}
     { } 
 
-    json run(json circuit_json, const config::RunConfig& run_config) 
+    json run(json circuit_json) 
     {
-        return SimClass<sim_type>::type::execute(circuit_json, backend_config.noise_model, run_config);
+        try {
+            return SimClass<sim_type>::type::execute(circuit_json, backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
+        } catch (const std::exception& e) {
+            SPDLOG_LOGGER_ERROR(logger, "Error parsin the run configuration - {}", e.what());
+        }
+        return {};
     }
 
 };

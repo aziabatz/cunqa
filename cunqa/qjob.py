@@ -12,7 +12,7 @@ import qpu
 installation_path = os.getenv("INSTALL_PATH")
 sys.path.append(installation_path)
 
-from python.qclient import QClient
+from cunqa.qclient import QClient
 
 # importing logger
 from logger import logger

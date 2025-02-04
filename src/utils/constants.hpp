@@ -2,6 +2,9 @@
 
 #include <string_view>
 #include <unordered_map>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 // NETWORK INTERFACES NAMES
 constexpr std::string_view INFINIBAND = "ib0";
@@ -60,3 +63,16 @@ std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {CY, "cy"},
     {CZ, "cz"},
 };
+
+json BASIS_GATES_JSON = {
+        { "default", {
+            "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
+            "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
+            "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
+            "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
+            "cswap"
+        }},
+        { "fakeqmio", {
+            "sx", "x", "rz", "ecr"
+        }}
+    };

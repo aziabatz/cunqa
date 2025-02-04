@@ -5,7 +5,7 @@ import time
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-from python.qclient import QClient
+from cunqa.qclient import QClient
 
 circuit = """
 {
@@ -48,7 +48,8 @@ qc = """ {
     "config": {
         "shots": 1024,
         "method": "automatic",
-        "memory_slots": 7
+        "memory_slots": 7,
+        "seed": 1223
     },
     "instructions": [
     {"name": "rz", "qubits": [23], "params": [1.5707963267948966]}, 
@@ -66,8 +67,9 @@ qc = """ {
 } """
 
 params = """ {
-    "parameters":[1.11111, 2.22222, 3.3333]
+    "params":[1.11111, 2.22222, 3.3333]
 } """
+
 
 STORE = os.getenv("STORE")
 conf_file = STORE + "/.api_simulator/qpu.json"
