@@ -77,59 +77,45 @@ void QPU<sim_type>::_compute_result()
 
         while (!message_queue_.empty()) 
         {
-            std::string message = message_queue_.front();
-            message_queue_.pop();
-            lock.unlock();
+            try {
+                std::string message = message_queue_.front();
+                message_queue_.pop();
+                lock.unlock();
 
-            json message_json = json::parse(message); 
-            
-            std::vector<double> parameters; 
+                json message_json = json::parse(message);
 
-            
-            if (!message_json.contains("parameters")){ 
-
-                kernel = message_json;
-
-                //TODO: CAPTURAR AQUÍ CUALQUIER ERROR DEL SIMULADOR
-                json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
-
-                try {
+                // This does not refer to the field `params` for a specific gate, but
+                // for a separated field specifying the new set of parameters
+                if (!message_json.contains("params")){ 
+                    kernel = message_json;
+                    json response = backend.run(kernel);
                     server->send_result(to_string(response));
-                } catch(const std::exception& e){
-                    SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
-                    SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
-                }
-                
-                lock.lock();
-            } else {
-                std::vector<double> parameters = message_json.at("parameters");
+                    lock.lock();
+                } else {
+                    std::vector<double> parameters = message_json.at("params");
 
-                if (kernel.empty()){
-                    SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                    server->close();
-                }
-
-                kernel = update_circuit_parameters(kernel, parameters);
-                parameters.clear();
-                json response = backend.run(kernel, config::RunConfig(kernel.at("config")));
-                try {
-                    server->send_result(to_string(response));
-                } catch(const std::exception& e){
-                    SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
-                    SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
-                }
-                
-                lock.lock();
-
-            } 
+                    if (kernel.empty()){
+                        SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                    } else {
+                        kernel = update_circuit_parameters(kernel, parameters);
+                        parameters.clear();
+                        json response = backend.run(kernel);
+                        server->send_result(to_string(response));
+                        lock.lock();
+                    }
+                } 
+            } catch(const std::exception& e) {
+                SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
+                SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+            }
         }
+        
     }
 }
 
 template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
 {
-    // TODO: Should the QPU be stoppable??
     while (true) 
     {
         try {

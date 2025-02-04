@@ -10,9 +10,10 @@
         "memory": true,
         "max_shots": 1000000,
         "description": "FakeMunich backend",
-        "basis_gates": "",
+        "basis_gates": [],
         "custom_instructions": "",
-        "gates": []
+        "gates": [], 
+        "coupling_map": []
     },
     "noise": {
         "step_fidelity": 1,

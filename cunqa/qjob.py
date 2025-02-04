@@ -13,7 +13,7 @@ sys.path.append(installation_path)
 
 
 # importamos api en C++
-from python.qclient import QClient
+from cunqa.qclient import QClient
 
 
 class QJobError(Exception):

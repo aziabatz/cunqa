@@ -1,4 +1,4 @@
-add_library(API-Simulator INTERFACE)
+add_library(CUNQA INTERFACE)
 
 set(COMM_LIB "ASIO")
 
@@ -13,17 +13,7 @@ find_package(LAPACK REQUIRED)
 add_subdirectory(third-party)
 add_subdirectory(utils)
 add_subdirectory(comm)
-#add_subdirectory(config)
-#add_subdirectory(simulators)
 
 include_directories(${Python_INCLUDE_DIRS} ${MPI_INCLUDE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/utils")
-
-#TODO: Is it necessary this linkage?
-#link_libraries(spdlog)
-
-target_link_libraries(API-Simulator INTERFACE compiler_flags config-json
-                                              nlohmann_json::nlohmann_json 
-                                              aer-cpp comm Threads::Threads m
-                                              ${Python_LIBRARIES})
 
 add_subdirectory(cli)

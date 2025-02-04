@@ -31,7 +31,7 @@ RunConfig::RunConfig() :
 
 RunConfig::RunConfig(json config)
 { 
-    from_json(config, *this);
+        from_json(config, *this);
 }
 
 void to_json(json& j, const RunConfig& run_conf)

@@ -5,7 +5,7 @@ import time
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-from python.qclient import QClient
+from cunqa.qclient import QClient
 
 # Define the OpenQASM 3.0 circuit as a string
 qasm = """OPENQASM 3.0;

@@ -12,7 +12,7 @@ if info_path is None:
     STORE = os.getenv("STORE")
     info_path = STORE+"/.api_simulator/qpu.json"
 # importamos api en C++
-from python.qclient import QClient
+from cunqa.qclient import QClient
 # importamos la clase Backend
 from backend import Backend
 from qjob import QJob, gather
