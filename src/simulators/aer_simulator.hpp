@@ -34,10 +34,11 @@ public:
 
             Noise::NoiseModel noise_model(noise_model_json);
             Result result = controller_execute<Controller>(circuits, noise_model, aer_default);
-        return result.to_json();
+            return result.to_json();
         } catch (const std::exception& e) {
             // TODO: specify the circuit format in the docs.
             SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
+            return {"ERROR", e.what()};
         }
         return {};
     }

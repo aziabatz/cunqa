@@ -19,6 +19,7 @@ target_include_directories(qdrop PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/ar
 target_link_libraries(qdrop PRIVATE logger_client SLURM::SLURM)
 install(TARGETS qdrop DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES "slurm.conf" DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)

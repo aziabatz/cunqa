@@ -93,9 +93,9 @@ void QPU<sim_type>::_compute_result()
                     lock.lock();
                 } else {
                     std::vector<double> parameters = message_json.at("params");
-
                     if (kernel.empty()){
                         SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                        throw std::runtime_error("You sent the parameters before the circuit.");
                     } else {
                         kernel = update_circuit_parameters(kernel, parameters);
                         parameters.clear();
@@ -105,8 +105,9 @@ void QPU<sim_type>::_compute_result()
                     }
                 } 
             } catch(const std::exception& e) {
-                SPDLOG_LOGGER_INFO(logger, "There has happened an error sending the result, the server keeps on iterating.");
+                SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+                server->send_result("{\"ERROR\":"s + e.what() + "}"s);
             }
         }
         
