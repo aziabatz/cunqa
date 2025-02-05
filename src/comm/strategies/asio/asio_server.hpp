@@ -42,7 +42,6 @@ public:
             std::string data(data_length, '\0');
             as::read(socket_, as::buffer(&data[0], data_length));
             return data;
-        //TODO: Can I differ by error class in boost avoiding error codes?
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
                 SPDLOG_LOGGER_DEBUG(logger, "Client disconnected, closing conection.");

@@ -5,9 +5,8 @@
 #include <fstream>
 #include <string>
 
-#include "../utils/constants.hpp"
-#include "../simulators/simulator.hpp"
-#include "../utils/backend_utils.hpp"
+#include "utils/constants.hpp"
+#include "simulators/simulator.hpp"
 
 using namespace std::literals;
 using json = nlohmann::json;
@@ -15,7 +14,6 @@ using json = nlohmann::json;
 
 namespace config {
 
-//TODO: Add the coupling map and the gates supported
 template <SimType sim_type = SimType::Aer>
 class BackendConfig {
 public:
@@ -50,7 +48,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{(basis_gates::basis_gates()["default"]).get<std::vector<std::string>>()},
+        basis_gates{BASIS_GATES_JSON["default"].get<std::vector<std::string>>()},
         description{"Usual AER simulator."}
     { }
 
@@ -74,7 +72,7 @@ public:
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
     BackendConfig(const json& config, const json& noise_model)
-        : simulator{"AerSimulator"}, noise_model{noise_model}
+        : simulator{"AerSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
     }
@@ -82,7 +80,7 @@ public:
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
     BackendConfig(const json& config, const json& noise_model)
-        : simulator{"MunichSimulator"}, noise_model{noise_model}
+        : simulator{"MunichSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
     }
@@ -113,11 +111,6 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 template <SimType sim_type>
 void from_json(const json& j, BackendConfig<sim_type>& backend_conf) 
 {
-    std::string filename = "/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/logs.log";
-    std::ofstream outFile(filename);
-    outFile << j.at("name") << "\n";
-    outFile.close();
-    
     j.at("name").get_to(backend_conf.name);
     j.at("version").get_to(backend_conf.version);
     j.at("simulator").get_to(backend_conf.simulator);

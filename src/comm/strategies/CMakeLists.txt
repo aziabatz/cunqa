@@ -1,7 +1,7 @@
 
 if(COMM_LIB STREQUAL "ASIO")
     add_library(strategy INTERFACE)
-    target_link_libraries(strategy INTERFACE compiler_flags Boost::Boost)
+    target_link_libraries(strategy INTERFACE Boost::Boost)
     target_include_directories(strategy INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/asio")
     message(DEBUG "ASIO library added.")
 elseif(COMM_LIB == "ZMQ")

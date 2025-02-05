@@ -88,7 +88,7 @@ private:
             SPDLOG_LOGGER_DEBUG(logger, "Result received: {}", result);
             return result;
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error receiveing the circuit: {}", e.code().message());
+            SPDLOG_LOGGER_ERROR(logger, "Error receiving the circuit: {} (HINT: Check the circuit format and/or if QPUs are still up working.)", e.code().message());
         }
 
         return std::string("{}");
@@ -109,6 +109,5 @@ std::string AsioFuture::get()
 
 inline bool AsioFuture::valid() 
 {
-    //TODO: Complete the future semantics
     return true;
 };

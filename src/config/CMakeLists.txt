@@ -1,1 +1,0 @@
-target_include_directories(API-Simulator INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")

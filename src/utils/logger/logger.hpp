@@ -13,5 +13,4 @@
 
 using namespace std::literals;
 
-//TODO: This generates a client logger for the QPUs also (improve this)
 extern std::shared_ptr<spdlog::logger> logger;
