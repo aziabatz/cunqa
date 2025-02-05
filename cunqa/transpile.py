@@ -41,7 +41,10 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
             logger.error(f"initial_layout must be of the size of the circuit: {circuit.num_qubits} [{TypeError.__name__}].")
             raise TranspilerError
         else:
-            circuit = from_json_to_qc(circuit)
+            try:
+                circuit = from_json_to_qc(circuit)
+            except Exception as error:
+                raise TranspilerError
     else:
         logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict [{TypeError.__name__}].")
         raise TranspilerError # I capture this error when creating QJob
@@ -76,11 +79,11 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
         circuit_transpiled = pm.run(circuit)
     
     except KeyError as error:
-        logger.error(f"Error in cofiguration of the backend, some keys are missing [{error.__name__}].")
+        logger.error(f"Error in cofiguration of the backend, some keys are missing [{type(error).__name__}].")
         raise TranspilerError
     
     except Exception as error:
-        logger.error(f"Some error occured with configuration of the backend, please check that the formats are correct [{error.__name__}].")
+        logger.error(f"Some error occured with configuration of the backend, please check that the formats are correct [{type(error).__name__}].")
         raise TranspilerError # I capture this error when creating QJob
 
     return qc_to_json(circuit_transpiled)

@@ -151,7 +151,7 @@ def qc_to_json(qc):
         return json_data
     
     except Exception as error:
-        logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{error.__name__}].")
+        logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
         raise error
 
 
@@ -189,7 +189,7 @@ def from_json_to_qc(circuit_dict):
         classical_registers = circuit['classical_registers']
 
     except KeyError as error:
-        logger.error(f"Circuit json not correct, requiered keys must be: 'instructions', 'num_qubits', 'num_clbits', 'quantum_resgisters' and 'classical_registers' [{error.__name__}].")
+        logger.error(f"Circuit json not correct, requiered keys must be: 'instructions', 'num_qubits', 'num_clbits', 'quantum_resgisters' and 'classical_registers' [{type(error).__name__}].")
         raise error
         
         
@@ -240,19 +240,19 @@ def from_json_to_qc(circuit_dict):
                 qc.append(inst)
         return qc
     except KeyError as error:
-        logger.error(f"Some error with the keys of `instructions` occured, please check the format [{error.__name__}].")
+        logger.error(f"Some error with the keys of `instructions` occured, please check the format [{type(error).__name__}].")
         raise error
     
     except TypeError as error:
-        logger.error(f"Error when reading instructions, check that the given elements have the correct type [{error.__name__}].")
-        raise error
+        logger.error(f"Error when reading instructions, check that the given elements have the correct type [{type(error).__name__}].")
+        raise TypeError
     
     except IndexError as error:
-        logger.error(f"Error with format for classical_registers [{error.__name__}].")
+        logger.error(f"Error with format for classical_registers [{type(error).__name__}].")
         raise error
 
     except Exception as error:
-        logger.error(f"Error when converting json dict to QuantumCircuit [{error.__name__}].")
+        logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
         raise error
 
 

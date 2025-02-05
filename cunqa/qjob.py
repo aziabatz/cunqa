@@ -8,10 +8,6 @@ from circuit import qc_to_json
 from transpile import transpiler
 import qpu
 
-# path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
-
 from cunqa.qclient import QClient
 
 # importing logger
@@ -82,6 +78,13 @@ class Result():
         if len(result) == 0:
             logger.error(f"Results dictionary is empty, some error occured [{ValueError.__name__}].")
             raise ValueError # I capture this error in QJob.result() when creating the object.
+        
+        elif "ERROR" in result:
+            message = result["ERROR"]
+            logger.debug(message)
+            logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}.")
+            raise QJobError
+
         else:
             counts = None
             for k,v in result.items():
@@ -100,20 +103,20 @@ class Result():
                 else:
                     setattr(self, k, v)
 
-            self.counts = {}
-            if counts:
-                for j,w in counts.items():
-                    if registers is None:
-                        self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                    elif isinstance(registers, dict):
-                        lengths = []
-                        for v in registers.values():
-                            lengths.append(len(v))
-                        self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
-            else:
-                logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
-                raise KeyError # I capture this error in QJob.result() when creating the object.
-            
+        self.counts = {}
+        if counts:
+            for j,w in counts.items():
+                if registers is None:
+                    self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                elif isinstance(registers, dict):
+                    lengths = []
+                    for v in registers.values():
+                        lengths.append(len(v))
+                    self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+        else:
+            logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
+            raise KeyError # I capture this error in QJob.result() when creating the object.
+
         logger.debug("Results correctly loaded.")
         
     def get_dict(self):
@@ -187,8 +190,8 @@ class QJob():
                     circt = transpiler( circ, QPU.backend, initial_layout = initial_layout )
                     logger.debug("Transpilation done.")
                 except Exception as error:
-                    logger.error(f"Transpilation failed [{error.__name__}].")
-                    raise QJobError # I capture the error in QPU.run() when creating the job
+                    logger.error(f"Transpilation failed [{type(error).__name__}].")
+                    raise error # I capture the error in QPU.run() when creating the job
                 
             else:
                 if initial_layout is not None:
@@ -231,11 +234,11 @@ class QJob():
 
         
         except KeyError as error:
-            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{error.__name__}].")
+            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
         
         except Exception as error:
-            logger.error(f"Some error occured when generating configuration for the simulation [{error.__name__}]")
+            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}]")
             raise QJobError # I capture the error in QPU.run() when creating the job
 
 
@@ -249,7 +252,7 @@ class QJob():
             try:
                 self._future = self._QPU._qclient.send_circuit(self._execution_config)
             except Exception as error:
-                logger.error(f"Some error occured when submitting the job [{error.__name__}].")
+                logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
 
     def result(self):
@@ -261,7 +264,7 @@ class QJob():
                 try:
                     self._result = Result(json.loads(self._future.get()), registers=self._circuit['classical_registers'])
                 except Exception as error:
-                    logger.error(f"Error while creating Results object [{error.__name__}]")
+                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
                     raise SystemExit # User's level
 
         return self._result

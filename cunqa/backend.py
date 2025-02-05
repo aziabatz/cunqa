@@ -1,6 +1,4 @@
 
-
-
 class Backend():
     """
         Class to define backend information of a QPU server.

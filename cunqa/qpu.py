@@ -2,9 +2,6 @@ import os
 import sys
 from json import JSONDecodeError, load
 
-# path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
 
 # path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
@@ -110,7 +107,7 @@ class QPU():
             qjob.submit()
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:
-            logger.error(f"Error when submitting QJob [{error.__name__}].")
+            logger.error(f"Error when submitting QJob [{type(error).__name__}].")
             raise SystemExit # User's level
 
         return qjob
@@ -132,19 +129,19 @@ def getQPUs(path = info_path):
             dumps = load(qpus_json)
 
     except FileNotFoundError as error:
-        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{error.__name__}].")
+        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{type(error).__name__}].")
         raise SystemExit # User's level
 
     except TypeError as error:
-        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{error.__name__}].")
+        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{type(error).__name__}].")
         raise SystemExit # User's level
 
     except JSONDecodeError as error:
-        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{error.__name__}].")
+        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
         raise SystemExit # User's level
 
     except Exception as error:
-        logger.error(f"Some exception occurred [{error.__name__}].")
+        logger.error(f"Some exception occurred [{type(error).__name__}].")
         raise SystemExit # User's level
     
     logger.debug(f"File accessed correctly.")

@@ -61,7 +61,7 @@ qc = """ {
     {"name": "sx", "qubits": [23], "params": []}, 
     {"name": "sx", "qubits": [23], "params": []}, 
     {"name": "measure", "qubits": [23], "memory": [0]}, 
-    {"name": "measure", "qubits": [30], "memory": 1]}
+    {"name": "measure", "qubits": [30], "memory": [1]}
     ] 
 
 } """
