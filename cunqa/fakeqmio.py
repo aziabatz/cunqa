@@ -1,4 +1,5 @@
 import os
+import glob
 import argparse
 import json
 
@@ -44,7 +45,28 @@ COUPLING_MAP = [
     [30,31]
 ]
 
+parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
+parser.add_argument("backend_path", type = str, help = "Path to backend config json")
+
+args = parser.parse_args()
+
+if (args.backend_path == "last_calibrations"):
+    jsonpath=os.getenv("QMIO_CALIBRATIONS",".")
+    files=jsonpath+"/????_??_??__??_??_??.json"
+    files = glob.glob(files)
+    calibration_file=max(files, key=os.path.getctime) 
+    args.backend_path = calibration_file
+    fakeqmio = FakeQmio()
+else:
+    fakeqmio = FakeQmio(calibration_file = args.backend_path)
+    """ calibration_file = str(args.backend_path) """
+
+noise_model = NoiseModel.from_backend(fakeqmio)
+noise_model_json = noise_model.to_dict(serializable = True)
+
+with open(INSTALL_PATH + "/include/utils/basis_gates.json", "r") as gates_file:
+    gates = json.load(gates_file)
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
@@ -63,7 +85,7 @@ noise_model_json = noise_model.to_dict(serializable = True)
 backend_json = {
     "backend":{
         "name": "FakeQmio", 
-        "version": "",
+        "version": args.backend_path,
         "simulator": "AerSimulator",
         "n_qubits": 32, 
         "url": "",
