@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
 
     if (args.fakeqmio.has_value()) {
-        std::string command("python "s + std::getenv("INSTALL_PATH") + "/python/fakeqmio.py "s + args.fakeqmio.value());
+        std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value());
         std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9\n"s + command).c_str());
         args.backend = std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json"s;    
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";  
