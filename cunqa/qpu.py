@@ -1,12 +1,12 @@
 import os
 import sys
-import pickle, json
+from json import JSONDecodeError, load
 
-# path para acceder a los paquetes de c++
+# path to access c++ files
 installation_path = os.getenv("INSTALL_PATH")
 sys.path.append(installation_path)
 
-# path para acceder a la informacion sobre las qpus
+# path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
@@ -16,114 +16,154 @@ from cunqa.qclient import QClient
 # importamos la clase Backend
 from backend import Backend
 from qjob import QJob, gather
-# importamos funciones para transformar circuitos a json
-from circuit import qasm2_to_json, qc_to_json
+from circuit import qc_to_json
+
+# importing logger
+from logger import logger
 
 
 class QPU():
     """
-        Class to define a QPU.
-
-        Class methods defined here:
-        -----------
+    Class to define a QPU.
+    -----------
     """
     
-    def __init__(self, id_=None, qclient=None, backend=None):
+    def __init__(self, id=None, qclient=None, backend=None):
         """
-        Initializes th QPU class.
+        Initializes the QPU class.
 
-        Attributes:
+        Args:
         -----------
         id_ (int): Id assigned to the qpu, simply a int from 0 to n_qpus-1.
 
-        server_endpoint (str): Ip and port route that identifies the server that represents the qpu itself which the worker will
-            communicate with.
+        qclient (<class 'python.qclient.QClient'>): object that holds the information to communicate with the server
+            endpoint for a given QPU.
             
-        backend (str): Name of the configuration file for the FakeQmio() class that the server will instanciate. By default is None,
-            in that case the server will estabish a default configuration /opt/cesga/qmio/hpc/calibrations/2024_11_04__12_00_02.json.
-
+        backend (<class 'backend.Backend'>): object that provides information about the QPU backend.
         """
+        
+        if id == None:
+            logger.error(f"QPU id not provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+            
+        elif type(id) == int:
+            self.id = id
 
-        # id
-        if id_ == None:
-            print("QPU id not provided.")
-            return
-        elif type(id_) == int:
-            self.id_ = id_
         else:
-            print("QPU id must be int.")
-            return
+            logger.error(f"QPU id must be int, but {type(id)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
 
-        # qclient
+
         if qclient == None:
-            print("QPU client not assigned.")
-            return
+            logger.error(f"QPU client not assigned [{TypeError.__name__}].")
+            raise SystemExit # User's level
+            
         elif isinstance(qclient, QClient):
             self._qclient = qclient
-        else:
-            print("Invalid QPU client.")
-            return
 
-        # backend
+        else:
+            logger.error(f"QPU qclient must be <class 'python.qclient.QClient'>, but {type(qclient)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+
+
         if backend == None:
-            print("QPU has no backend info.")
-            return
+            logger.error(f"QPU backend not provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+            
         elif isinstance(backend, Backend):
             self.backend = backend
+
         else:
-            print("backend type must be class Backend.")
-            return
+            logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+        
+        logger.debug(f"Object for QPU {id} created correctly.")
 
 
     def run(self, circ, transpile = False, initial_layout = None, **run_parameters):
         """
-            Class method to run a circuit in the QPU.
+        Class method to run a circuit in the QPU.
 
-            Args:
-            --------
-            circ (json): circuit to be run in the QPU.
-            **run_parameters : any simulation instructions such as shots, method, parameter_binds, meas_level, init_qubits, ...
+        It is important to note that  if `transpilation` is set False, we asume user has already done the transpilation, otherwise some errors during the simulation
+        can occur, for example if the QPU has a noise model with error associated to specific gates, if the circuit is not transpiled errors might not appear.
 
-            Return:
-            --------
-            Result object.
+        If `transpile` is False and `initial_layout` is provided, it will be ignored.
+
+        Possible instructions to add as `**run_parameters` can be: shots, method, parameter_binds, meas_level, ...
+
+        Args:
+        --------
+        circ (json dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to be run in the QPU.
+
+        transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
+
+        initial_layout (list[int]): Initial position of virtual qubits on physical qubits for transpilation.
+
+        **run_parameters : any other simulation instructions.
+
+        Return:
+        --------
+        <class 'qjob.Result'> object.
         """
-        
-        qjob = QJob(self, circ, transpile = transpile, initial_layout = initial_layout, **run_parameters)
-        qjob.submit()
+        try:
+            qjob = QJob(self, circ, transpile = transpile, initial_layout = initial_layout, **run_parameters)
+            qjob.submit()
+            logger.debug(f"Qjob submitted to QPU {self.id}.")
+        except Exception as error:
+            logger.error(f"Error when submitting QJob [{error.__name__}].")
+            raise SystemExit # User's level
+
         return qjob
 
 
 
-def getQPUs():
+def getQPUs(path = info_path):
     """
-        Global function to get the QPU objects corresponding (......)
+    Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
-        Return:
-        ---------
-        List of QPU objects.
+    Return:
+    ---------
+    List of QPU objects.
     
     """
 
-    with open(info_path, "r") as qpus_json:
-        dumps = json.load(qpus_json)
-        
-    if isinstance(dumps, dict):
+    try:
+        with open(path, "r") as qpus_json:
+            dumps = load(qpus_json)
+
+    except FileNotFoundError as error:
+        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{error.__name__}].")
+        raise SystemExit # User's level
+
+    except TypeError as error:
+        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{error.__name__}].")
+        raise SystemExit # User's level
+
+    except JSONDecodeError as error:
+        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{error.__name__}].")
+        raise SystemExit # User's level
+
+    except Exception as error:
+        logger.error(f"Some exception occurred [{error.__name__}].")
+        raise SystemExit # User's level
+    
+    logger.debug(f"File accessed correctly.")
+
+
+    
+    if len(dumps) != 0:
         qpus = []
         i = 0
         for k, v in dumps.items():
-            client = QClient(info_path)
+            client = QClient(path)
             client.connect(k)
-            qpus.append(  QPU(id_ = i, qclient = client, backend = Backend(v['backend'])  )  )
+            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend'])  )  ) # errors captured above
             i+=1
+        logger.debug(f"{len(qpus)} QPU objects were created.")
         return qpus
     else:
-        print("Incorrect format for "+info_path)
-
-
-
-    
-
+        logger.error(f"No QPUs were found, {path} is empty.")
+        raise SystemExit
 
 
         

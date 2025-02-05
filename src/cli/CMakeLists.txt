@@ -3,13 +3,12 @@ add_executable(qraise qraise.cpp)
 target_include_directories(qraise PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                           "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                           "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
-message(STATUS "Python Libraries: ${Python_LIBRARIES}")
 target_link_libraries(qraise PRIVATE custom-json logger_client
                                      nlohmann_json::nlohmann_json 
                                      Threads::Threads
                                      m ${Python_LIBRARIES} MPI::MPI_CXX
                                      OpenMP::OpenMP_CXX LAPACK::LAPACK stdc++fs)
-install(TARGETS qraise DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS qraise DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # QDROP executable
 include(${CMAKE_SOURCE_DIR}/cmake/FindSLURM.cmake)
@@ -17,12 +16,12 @@ include(${CMAKE_SOURCE_DIR}/cmake/FindSLURM.cmake)
 add_executable(qdrop qdrop.cpp)
 target_include_directories(qdrop PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 target_link_libraries(qdrop PRIVATE logger_client SLURM::SLURM)
-install(TARGETS qdrop DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS qdrop DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(FILES "slurm.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
-message(STATUS "${PROJECT_BINARY_DIR}")
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                               "${PROJECT_BINARY_DIR}/src/comm")
@@ -31,6 +30,6 @@ target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              Threads::Threads MQT::DDSim
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK)
-install(TARGETS setup_qpus DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 

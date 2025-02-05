@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <unistd.h> 
+#include <stdlib.h>
 #include <stdexcept>
 
 #include "argparse.hpp"
@@ -48,7 +49,9 @@ int isValidSlurmJobID(uint32_t jobID)
 int main(int argc, char* argv[]) 
 {
     auto args = argparse::parse<MyArgs>(argc, argv);
-    
+    std::string install_path = getenv("INSTALL_PATH");
+    setenv("SLURM_CONF", (install_path + "/slurm.conf").c_str(), 1);
+
     std::string id_str;
     std::string cmd;
     for(const auto& id : args.ids){

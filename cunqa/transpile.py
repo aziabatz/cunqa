@@ -4,58 +4,83 @@ from circuit import from_json_to_qc, qc_to_json
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.backend_compat import convert_to_target
-from qjob import QJobError
+
+from logger import logger
+
+
+class TranspilerError(Exception):
+    """Exception for error during the transpilation of a circuit to a given Backend. """
+    pass
 
 
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
+    """
+    Function to transpile a circuit according to a given backend.
+
+    Args:
+    -----------
+    circuit (dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to be transpiled.
+
+    backend (<class 'backend.Backend'>): backend which transpilation will be done respect to.
+
+    opt_level (int): optimization level for creating the `qiskit.transpiler.passmanager.StagedPassManager`. Default set to 1.
+
+    initial_layout (list[int]): initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
+    """
     
-    # transformo el circuito a QuantumCircuit
     if isinstance(circuit, QuantumCircuit):
         if initial_layout is not None and len(initial_layout) != circuit.num_qubits:
-            raise QJobError("initial_layout must be of the size of the circuit.")
+            logger.error(f"initial_layout must be of the size of the circuit: {circuit.num_qubits} [{TypeError.__name__}].")
+            raise TranspilerError # I capture this error when creating QJob
         else:
             circuit = circuit
-    elif isinstance(circuit, dict):
-        if initial_layout is not None and len(initial_layout) != circuit['num_qubits']:
-            raise QJobError("initial_layout must be of the size of the circuit.")
-        else:
-            try:
-                circuit = from_json_to_qc(circuit)
-            except:
-                raise KeyError("Circuit json not correct, requiered keys must be: 'instructions', 'num_qubits', 'num_clbits', 'quantum_resgisters' and 'classical_registers'.")
-    else:
-        raise TypeError("Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict.")
-    
 
-    # Limpio bien el diccionario de configuración para generar el target apropiado
+    elif isinstance(circuit, dict):
+        logger.debug("In transpilation: circuit is dict.")
+        if initial_layout is not None and len(initial_layout) != circuit['num_qubits']:
+            logger.error(f"initial_layout must be of the size of the circuit: {circuit.num_qubits} [{TypeError.__name__}].")
+            raise TranspilerError
+        else:
+            circuit = from_json_to_qc(circuit)
+    else:
+        logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict [{TypeError.__name__}].")
+        raise TranspilerError # I capture this error when creating QJob
+    
 
     if isinstance(backend, Backend):
         configuration = backend.__dict__
     else:
-        raise TypeError("backend must be <class 'python.backend.Backend'>")
+        logger.error(f"Transpilation backend must be <class 'python.backend.Backend'> [{TypeError.__name__}].")
+        raise TranspilerError # I capture this error when creating QJob
     
     
+    try:
+        args = {
+            "backend_name": configuration["name"],
+            "backend_version": configuration["version"],
+            "n_qubits":configuration["n_qubits"],
+            "basis_gates": configuration["basis_gates"],
+            "gates":[], # might not work
+            "local":False,
+            "simulator":configuration["is_simulator"],
+            "conditional":configuration["conditional"],
+            "open_pulse":False,# TODO: another simulator distinct from Aer might suppor open pulse.
+            "memory":configuration["memory"],
+            "max_shots":configuration["max_shots"],
+            "coupling_map":configuration["coupling_map"]
+        }
+
+        backend_configuration = BackendConfiguration(**args)
+        target =  convert_to_target(backend_configuration)
+        pm = generate_preset_pass_manager(optimization_level = opt_level, target = target, initial_layout = initial_layout)
+        circuit_transpiled = pm.run(circuit)
     
-    args = {
-        "backend_name": configuration["name"],
-        "backend_version": configuration["version"],
-        "n_qubits": configuration["n_qubits"],
-        "basis_gates": configuration["basis_gates"],
-        "gates":[],# TODO: comprobar que esto no peta y que funciona adecuadamente
-        "local":False,
-        "simulator":configuration["is_simulator"],
-        "conditional":configuration["conditional"],
-        "open_pulse":False,# TODO: lo ponemos así porque Aer no soporta OpenPulse, habría que modificarlo en caso de usar un backend que lo soporte.
-        "memory":configuration["memory"],
-        "max_shots":configuration["max_shots"],
-        "coupling_map":[]#configuration["coupling_map"]
-    }
-
-    backend_configuration = BackendConfiguration(**args)
-
-    target =  convert_to_target(backend_configuration)
-    pm = generate_preset_pass_manager(optimization_level = opt_level, target = target, initial_layout = initial_layout)
-
-    circuit_transpiled = pm.run(circuit)
+    except KeyError as error:
+        logger.error(f"Error in cofiguration of the backend, some keys are missing [{error.__name__}].")
+        raise TranspilerError
+    
+    except Exception as error:
+        logger.error(f"Some error occured with configuration of the backend, please check that the formats are correct [{error.__name__}].")
+        raise TranspilerError # I capture this error when creating QJob
 
     return qc_to_json(circuit_transpiled)
