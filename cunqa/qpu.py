@@ -43,38 +43,38 @@ class QPU():
         """
         
         if id == None:
-            logger.error(f"QPU id not provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU id not provided [{TypeError.__name__}].")
             raise SystemExit # User's level
             
         elif type(id) == int:
             self.id = id
 
         else:
-            logger.error(f"QPU id must be int, but {type(id)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU id must be int, but {type(id)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
 
 
         if qclient == None:
-            logger.error(f"QPU client not assigned [{type(TypeError).__name__}].")
+            logger.error(f"QPU client not assigned [{TypeError.__name__}].")
             raise SystemExit # User's level
             
         elif isinstance(qclient, QClient):
             self._qclient = qclient
 
         else:
-            logger.error(f"QPU qclient must be <class 'python.qclient.QClient'>, but {type(qclient)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU qclient must be <class 'python.qclient.QClient'>, but {type(qclient)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
 
 
         if backend == None:
-            logger.error(f"QPU backend not provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU backend not provided [{TypeError.__name__}].")
             raise SystemExit # User's level
             
         elif isinstance(backend, Backend):
             self.backend = backend
 
         else:
-            logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
         logger.debug(f"Object for QPU {id} created correctly.")
@@ -110,7 +110,7 @@ class QPU():
             qjob.submit()
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:
-            logger.error(f"Error when submitting QJob [{type(error).__name__}].")
+            logger.error(f"Error when submitting QJob [{error.__name__}].")
             raise SystemExit # User's level
 
         return qjob
@@ -132,19 +132,19 @@ def getQPUs(path = info_path):
             dumps = load(qpus_json)
 
     except FileNotFoundError as error:
-        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{type(error).__name__}].")
+        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{error.__name__}].")
         raise SystemExit # User's level
 
     except TypeError as error:
-        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{type(error).__name__}].")
+        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{error.__name__}].")
         raise SystemExit # User's level
 
     except JSONDecodeError as error:
-        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
+        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{error.__name__}].")
         raise SystemExit # User's level
 
     except Exception as error:
-        logger.error(f"Some exception occurred [{type(error).__name__}].")
+        logger.error(f"Some exception occurred [{error.__name__}].")
         raise SystemExit # User's level
     
     logger.debug(f"File accessed correctly.")

@@ -77,7 +77,7 @@ def qc_to_json(qc):
     elif isinstance(qc,QuantumCircuit):
         pass
     else:
-        logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict, but {type(qc)} was provided [{type(TypeError).__name__}].")
+        logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict, but {type(qc)} was provided [{TypeError.__name__}].")
         raise TypeError # this error should not be raised bacause in QPU we already check type of the circuit
 
     try:
@@ -151,7 +151,7 @@ def qc_to_json(qc):
         return json_data
     
     except Exception as error:
-        logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
+        logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{error.__name__}].")
         raise error
 
 
@@ -180,7 +180,7 @@ def from_json_to_qc(circuit_dict):
     elif isinstance(circuit_dict, dict):
         circuit = circuit_dict
     else:
-        logger.error(f"circuit_dict must be dict, but {type(circuit_dict)} was provided [{type(TypeError).__name__}]")
+        logger.error(f"circuit_dict must be dict, but {type(circuit_dict)} was provided [{TypeError.__name__}]")
         raise TypeError
 
     try:
@@ -240,19 +240,19 @@ def from_json_to_qc(circuit_dict):
                 qc.append(inst)
         return qc
     except KeyError as error:
-        logger.error(f"Some error with the keys of `instructions` occured, please check the format [{type(error).__name__}].")
+        logger.error(f"Some error with the keys of `instructions` occured, please check the format [{error.__name__}].")
         raise error
     
     except TypeError as error:
-        logger.error(f"Error when reading instructions, check that the given elements have the correct type [{type(error).__name__}].")
+        logger.error(f"Error when reading instructions, check that the given elements have the correct type [{error.__name__}].")
         raise error
     
     except IndexError as error:
-        logger.error(f"Error with format for classical_registers [{type(error).__name__}].")
+        logger.error(f"Error with format for classical_registers [{error.__name__}].")
         raise error
 
     except Exception as error:
-        logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
+        logger.error(f"Error when converting json dict to QuantumCircuit [{error.__name__}].")
         raise error
 
 
