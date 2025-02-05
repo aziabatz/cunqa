@@ -27,7 +27,7 @@ if (args.backend_path == "last_calibrations"):
     fakeqmio = FakeQmio()
 else:
     fakeqmio = FakeQmio(calibration_file = args.backend_path)
-    """ calibration_file = str(args.backend_path) """
+
 
 noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
