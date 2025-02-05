@@ -49,7 +49,7 @@ def _divide(string, lengths):
         return ' '.join(parts)
     
     except Exception as error:
-        logger.error(f"Something failed with division of string [{type(error).__name__}].")
+        logger.error(f"Something failed with division of string [{error.__name__}].")
         raise SystemExit # User's level
 
 
@@ -72,13 +72,16 @@ class Result():
 
         if type(result) == dict:
             self.result = result
+        elif result is None:
+            logger.error(f"Something failed at server, result is {None} [{ValueError.__name__}].")
+            raise ValueError
         else:
-            logger.error(f"result must be dict, but {type(result)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"result must be dict, but {type(result)} was provided [{TypeError.__name__}].")
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         if len(result) == 0:
-            logger.error(f"Results dictionary is empty, some error occured [{type(Exception).__name__}].")
-            raise Exception # I capture this error in QJob.result() when creating the object.
+            logger.error(f"Results dictionary is empty, some error occured [{ValueError.__name__}].")
+            raise ValueError # I capture this error in QJob.result() when creating the object.
         else:
             counts = None
             for k,v in result.items():
@@ -108,7 +111,7 @@ class Result():
                             lengths.append(len(v))
                         self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
             else:
-                logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{type(KeyError).__name__}].")
+                logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
                 raise KeyError # I capture this error in QJob.result() when creating the object.
             
         logger.debug("Results correctly loaded.")
@@ -170,7 +173,7 @@ class QJob():
         if isinstance(QPU, qpu.QPU):
             self._QPU = QPU
         else:
-            logger.error(f"QPU must be <class 'qpu.QPU'>, but {type(QPU)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"QPU must be <class 'qpu.QPU'>, but {type(QPU)} was provided [{TypeError.__name__}].")
             raise QJobError # I capture this error in QPU.run() when creating the job
         
         self._future = None
@@ -184,7 +187,7 @@ class QJob():
                     circt = transpiler( circ, QPU.backend, initial_layout = initial_layout )
                     logger.debug("Transpilation done.")
                 except Exception as error:
-                    logger.error(f"Transpilation failed [{type(error).__name__}].")
+                    logger.error(f"Transpilation failed [{error.__name__}].")
                     raise QJobError # I capture the error in QPU.run() when creating the job
                 
             else:
@@ -204,13 +207,13 @@ class QJob():
             self._circuit = circuit
 
         else:
-            logger.error(f"Circuit must be dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circ)} was provided [{type(TypeError).__name__}].")
+            logger.error(f"Circuit must be dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circ)} was provided [{TypeError.__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
         try:
             # config dict
-            run_config = {"shots":1024, "method":"statevector", "memory_slots":circuit["num_clbits"]}
+            run_config = {"shots":1024, "method":"statevector", "memory_slots":circuit["num_clbits"], "seed":188}
 
             if run_parameters == None:
                 logger.debug("No run parameters provided, default were set.")
@@ -228,11 +231,11 @@ class QJob():
 
         
         except KeyError as error:
-            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
+            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{error.__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
         
         except Exception as error:
-            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}]")
+            logger.error(f"Some error occured when generating configuration for the simulation [{error.__name__}]")
             raise QJobError # I capture the error in QPU.run() when creating the job
 
 
@@ -246,7 +249,7 @@ class QJob():
             try:
                 self._future = self._QPU._qclient.send_circuit(self._execution_config)
             except Exception as error:
-                logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
+                logger.error(f"Some error occured when submitting the job [{error.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
 
     def result(self):
@@ -258,7 +261,7 @@ class QJob():
                 try:
                     self._result = Result(json.loads(self._future.get()), registers=self._circuit['classical_registers'])
                 except Exception as error:
-                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                    logger.error(f"Error while creating Results object [{error.__name__}]")
                     raise SystemExit # User's level
 
         return self._result
@@ -272,10 +275,10 @@ class QJob():
             if self._result is not None:
                 return self._result.get_dict()["results"][0]["time_taken"]
             else:
-                logger.error(f"QJob not finished [{type(QJob).__name__}].")
+                logger.error(f"QJob not finished [{QJobError.__name__}].")
                 raise SystemExit # User's level
         else:
-            logger.error(f"No QJob submited [{type(QJob).__name__}].")
+            logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
         
 
@@ -296,14 +299,14 @@ def gather(qjobs):
         if all([isinstance(q, QJob) for q in qjobs]):
             return [q.result() for q in qjobs]
         else:
-            logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{type(TypeError).__name__}].")
+            logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level
             
     elif isinstance(qjobs, QJob):
         return qjobs.result()
 
     else:
-        logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{type(TypeError).__name__}].")
+        logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")
         raise SystemError # User's level
 
       

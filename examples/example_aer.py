@@ -61,7 +61,7 @@ qc = """ {
     {"name": "sx", "qubits": [23], "params": []}, 
     {"name": "sx", "qubits": [23], "params": []}, 
     {"name": "measure", "qubits": [23], "memory": [0]}, 
-    {"name": "measure", "qubits": [30], "memory": [1]}
+    {"name": "measure", "qubits": [30], "memory": 1]}
     ] 
 
 } """
@@ -86,11 +86,12 @@ print("Cliente instanciado")
 
 print(type(client))
 
+print(claves_primer_nivel)
 
-client.connect(claves_primer_nivel[1])
+client.connect(claves_primer_nivel[-1])
 
 
-print("Cliente: " + claves_primer_nivel[1])
+print("Cliente: " + claves_primer_nivel[-1])
 future1 = client.send_circuit(qc)
 future2 = client.send_circuit(qc)
 
