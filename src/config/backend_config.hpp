@@ -48,7 +48,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{BASIS_GATES_JSON["default"].get<std::vector<std::string>>()},
+        basis_gates{BASIS_GATES_JSON},
         description{"Usual AER simulator."}
     { }
 

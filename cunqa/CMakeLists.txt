@@ -8,4 +8,6 @@ target_include_directories(qclient PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                           "${CMAKE_SOURCE_DIR}/src/utils")
 
 install(TARGETS qclient DESTINATION cunqa)
-install(FILES "fakeqmio.py" DESTINATION cunqa)
+
+file(GLOB PYTHON_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/*.py")
+install(FILES ${PYTHON_SCRIPTS} DESTINATION cunqa)

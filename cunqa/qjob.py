@@ -217,7 +217,7 @@ class QJob():
 
         try:
             # config dict
-            run_config = {"shots":1024, "method":"statevector", "memory_slots":circuit["num_clbits"], "seed":188}
+            run_config = {"shots":1024, "method":"statevector", "memory_slots":circuit["num_clbits"], "seed": 188}
 
             if run_parameters == None:
                 logger.debug("No run parameters provided, default were set.")

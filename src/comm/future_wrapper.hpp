@@ -1,9 +1,9 @@
 #pragma once
 
-#include "strategy_def.h"
+#include "comm_strat_def.h"
 
 #if COMM_LIB == ASIO
-    #include "strategies/asio/asio_client.hpp"
+    #include "comm-strats/asio/asio_client.hpp"
     using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
     using Future = std::future;

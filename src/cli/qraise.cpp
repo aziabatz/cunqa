@@ -50,13 +50,17 @@ int main(int argc, char* argv[])
     if (check_mem_format(args.mem_per_qpu)){
         int mem_per_qpu = args.mem_per_qpu[0] - '0';
         sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu*2 << "G\n";
-    } else
-        std::cerr << "ERROR: Memory format is incorrect, must be: xG (where x is the number of Gigabytes)\n";
+    } else {
+        SPDLOG_LOGGER_DEBUG(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
+        return -1;
+    }
 
     if (check_time_format(args.time))
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
-    else
-        std::cerr << "ERROR: Time format is incorrect, must be: xx:xx:xx\n";
+    else {
+        SPDLOG_LOGGER_DEBUG(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        return -1;
+    }
 
     sbatchFile << "#SBATCH --output=qraise_%j\n";
 
@@ -77,8 +81,8 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
 
     if (args.fakeqmio.has_value()) {
-        std::string command("python "s + std::getenv("INSTALL_PATH") + "/python/fakeqmio.py "s + args.fakeqmio.value());
-        std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9\n"s + command).c_str());
+        std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value());
+        std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
         args.backend = std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json"s;    
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";  
         SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include "strategy_def.h"
+#include "comm_strat_def.h"
 #include "utils/constants.hpp"
 #include "logger/logger.hpp"
 #include "config/net_config.hpp"
@@ -14,15 +14,15 @@ using json = nlohmann::json;
 using namespace config;
 
 #if COMM_LIB == ASIO
-    #include "strategies/asio/asio_client.hpp"
+    #include "comm-strats/asio/asio_client.hpp"
     using SelectedClient = AsioClient;
     using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
-    #include "strategy/zmq_comm.hpp"
+    #include "comm-strats/zmq_comm.hpp"
     using SelectedClient = ZMQClient;
     using Future = std::future<std::string>;
 #elif COMM_LIB == CROW
-    #include "strategy/crow_comm.hpp"
+    #include "comm-strats/crow_comm.hpp"
     using SelectedClient = CrowClient;
     using Future = std::future<std::string>;
 #else
@@ -30,19 +30,19 @@ using namespace config;
 #endif
 
 class Client {
-    std::unique_ptr<SelectedClient> strategy;
+    std::unique_ptr<SelectedClient> comm_strat;
     json qpus_json;
 
 public:
 
     Client(const std::optional<std::string> &filepath) :
-        strategy{std::make_unique<SelectedClient>()} 
+        comm_strat{std::make_unique<SelectedClient>()} 
     { 
         std::string final_filepath;
         if (filepath.has_value())
             final_filepath = filepath.value();
         else
-            final_filepath = std::getenv("STORE") + "/.api_simulator/QClient.json"s;
+            final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
         std::ifstream file(final_filepath);  
 
         if (!file.is_open()) {
@@ -60,13 +60,13 @@ public:
         try {
             json server_ip_config_json = qpus_json.at(task_id).at("net");
             auto server_ip_config = server_ip_config_json.template get<NetConfig>();
-            strategy->connect(server_ip_config);
+            comm_strat->connect(server_ip_config);
         } catch (const json::out_of_range& e){
             SPDLOG_LOGGER_ERROR(logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
         }
     }
 
-    inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(strategy->submit(circuit)); }
+    inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(comm_strat->submit(circuit)); }
 
-    inline FutureWrapper send_parameters(const std::string& parameters) { return FutureWrapper(strategy->submit(parameters)); }
+    inline FutureWrapper send_parameters(const std::string& parameters) { return FutureWrapper(comm_strat->submit(parameters)); }
 };

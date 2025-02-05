@@ -64,15 +64,9 @@ std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {CZ, "cz"},
 };
 
-json BASIS_GATES_JSON = {
-        { "default", {
+const std::vector<std::string> BASIS_GATES_JSON = {
             "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
             "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
             "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
             "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
-            "cswap"
-        }},
-        { "fakeqmio", {
-            "sx", "x", "rz", "ecr"
-        }}
-    };
+            "cswap"};
