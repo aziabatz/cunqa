@@ -40,7 +40,7 @@ public:
         } catch (const std::exception& e) {
             // TODO: specify the circuit format in the docs.
             SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the Munich simulator.\nTry checking the format of the circuit sent and/or of the noise model.");
-            return {"ERROR", e.what()};
+            return {{"ERROR", e.what()}};
         }
         return {};
     }

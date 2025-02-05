@@ -1,6 +1,6 @@
 add_library(comm INTERFACE)
 
-configure_file(comm-strat_def.h.in comm-strat_def.h)
+configure_file(comm_strat_def.h.in comm_strat_def.h)
 
 add_subdirectory(comm-strats)
 
