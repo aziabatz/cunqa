@@ -73,6 +73,7 @@ class Result():
             raise ValueError
         else:
             logger.error(f"result must be dict, but {type(result)} was provided [{TypeError.__name__}].")
+            logger.debug(result)
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         if len(result) == 0:

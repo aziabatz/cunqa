@@ -256,4 +256,3 @@ def from_json_to_qc(circuit_dict):
         raise error
 
 
-
