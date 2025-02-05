@@ -45,15 +45,15 @@ qc = """ {
         "memory_slots": 7
     },
     "instructions": [
-    {"name": "rz", "qubits": [0], "params": [1.5707963267948966]}, 
-    {"name": "sx", "qubits": [0], "params": []}, 
+    {"name": "rz", "qubits": [2], "params": [1.5707963267948966]}, 
+    {"name": "sx", "qubits": [2], "params": []}, 
     {"name": "rz", "qubits": [1], "params": [-3.141592653589793]}, 
     {"name": "sx", "qubits": [1], "params": []}, 
     {"name": "rz", "qubits": [1], "params": [-3.141592653589793]}, 
-    {"name": "ecr", "qubits": [0, 1], "params": []}, 
-    {"name": "sx", "qubits": [0], "params": []}, 
-    {"name": "sx", "qubits": [0], "params": []}, 
-    {"name": "measure", "qubits": [0], "memory": [0]}, 
+    {"name": "ecr", "qubits": [2, 1], "params": []}, 
+    {"name": "sx", "qubits": [2], "params": []}, 
+    {"name": "sx", "qubits": [2], "params": []}, 
+    {"name": "measure", "qubits": [2], "memory": [0]}, 
     {"name": "measure", "qubits": [1], "memory": [1]}
     ] 
 
@@ -80,12 +80,12 @@ client.connect(claves_primer_nivel[0])
 print("Cliente conectado")
 
 print("Cliente: " + claves_primer_nivel[0])
-#future1 = client.send_circuit(qc)
+future1 = client.send_circuit(qc)
 #future2 = client.send_circuit(qc)
-future_param = client.send_parameters(params)
+#future_param = client.send_parameters(params)
 
 print("Futures creados.")
 
-#print("GET DEL FUTURE 1:" + future1.get())
+print("GET DEL FUTURE 1:" + future1.get())
 #print("GET DEL FUTURE 2:" + future2.get())
-print("RESULT DEL PARAMETERS:" + future_param.get())
+#print("RESULT DEL PARAMETERS:" + future_param.get())
