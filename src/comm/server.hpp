@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 #include "config/net_config.hpp"
-#include "comm-strat_def.h"
+#include "comm_strat_def.h"
 
 using namespace config;
 
@@ -21,19 +21,19 @@ using namespace config;
 #endif
 
 class Server {
-    std::unique_ptr<SelectedServer> comm-strat;
+    std::unique_ptr<SelectedServer> comm_strat;
 public:
 
     Server(const NetConfig& net_config) :
-        comm-strat{std::make_unique<SelectedServer>(net_config)} 
+        comm_strat{std::make_unique<SelectedServer>(net_config)} 
     { }
 
-    inline std::string recv_circuit() { return comm-strat->recv_data(); }
+    inline std::string recv_circuit() { return comm_strat->recv_data(); }
     
-    inline void accept() { comm-strat->accept(); }
+    inline void accept() { comm_strat->accept(); }
 
-    inline void send_result(const std::string& result) { comm-strat->send_result(result); }
+    inline void send_result(const std::string& result) { comm_strat->send_result(result); }
 
-    inline void close() {comm-strat->close(); }
+    inline void close() {comm_strat->close(); }
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "comm-strat_def.h"
+#include "comm_strat_def.h"
 
 #if COMM_LIB == ASIO
     #include "comm-strats/asio/asio_client.hpp"
