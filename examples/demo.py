@@ -40,6 +40,7 @@ qc.measure_all()
 qpu = qpus[0]
 
 counts = []
+
 for qpu in [qpus[0], qpus[2], qpus[4]]:
 
     print(f"For QPU {qpu.id}, with backend {qpu.backend.name}:")
@@ -56,6 +57,53 @@ for qpu in [qpus[0], qpus[2], qpus[4]]:
 
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
-plot_histogram(counts)
-plt.savefig('histogram.png')
+plot_histogram(counts[:-1])
+plt.savefig('counts.png')
 plt.show()
+
+# Cool isn't it? But this circuit is too simple, let's try with a more complex one!
+
+import json
+
+with open("circuits/circuit_15qubits_10layers.json", "r") as file:
+    circuit = json.load(file)
+
+# This circuit has 15 qubits and 10 intermidiate measurements, let's run it in AerSimulator
+
+for qpu in qpus:
+    if qpu.backend.name == "BasicAer":
+        qpu0 = qpu
+        break
+
+qjob = qpu0.run(circuit, transpile = True, shots = 1000)
+
+result = qjob.result() # bloking call
+
+time = qjob.time_taken()
+
+counts.append(result.get_counts())
+
+print(f"Result: \n{result.get_counts()}\n Time taken: {time} s.")
+
+# Takes much longer ... let's parallelize 3 executions in 3 different QPUs
+
+# Remenber that sending circuits to a given QPU is a non blocking call, so we can use a loop, keeping the QJOb objects in a list:
+
+qjobs = []
+
+for qpu in [qpus[0], qpus[2], qpus[4]]:
+    qjobs.append(qpu.run(circuit, transpile = True, shots = 1000))
+
+# Then, we can wait for all the jobs to finish with the gather function. Let's measure time to check that we are parallelizing:
+import time
+from qpu import gather
+
+tick = time.time()
+results = gather(qjobs) # this is a bloking call
+tack = time.time()
+
+print(f"Time taken to run 3 circuits in parallel: {tack - tick} s.")
+print("Time for each execution:")
+for i, result in enumerate(results):
+    print(f"For job {i}, time taken: {result.time_taken} s.")
+

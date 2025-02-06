@@ -122,8 +122,7 @@ class Result():
             self.counts = counts_munich
         else:
             logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
-            self.counts = result
-            #raise KeyError # I capture this error in QJob.result() when creating the object.
+            raise KeyError # I capture this error in QJob.result() when creating the object.
 
         logger.debug("Results correctly loaded.")
         
