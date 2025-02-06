@@ -8,12 +8,12 @@ __attribute__((constructor)) void initializeLogger() {
     console_sink->set_level(spdlog::level::warn);
 
     std::string store_path = std::getenv("STORE");
-    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", true);
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", 1024*1024, 5, false);
     file_sink->set_level(spdlog::level::debug);
 
     spdlog::sinks_init_list sinks = { file_sink, console_sink };
     logger = std::make_shared<spdlog::logger>("client_logger", std::begin(sinks), std::end(sinks));
-    logger->sinks()[0]->set_pattern("[QClient] %s: %^%l: %v %$ %oms");
+    logger->sinks()[0]->set_pattern("(%D %r) [QClient] %s: %^%l: %v %$ %oms");
     logger->sinks()[1]->set_pattern("%@\n\t%^%l: %v %$ %oms");
 
     logger->set_level(spdlog::level::debug);
