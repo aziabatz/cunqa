@@ -1,6 +1,6 @@
 from logger import logger
 
-def _qasm2_to_json(qasm_str):
+def _qasm2_to_json(qasm_str, version = None):
     """
     Transforms a QASM circuit to json.
 

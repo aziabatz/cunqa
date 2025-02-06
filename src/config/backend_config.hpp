@@ -65,7 +65,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{{"TODO"}},
+        basis_gates{BASIS_GATES_JSON},
         description{"Usual Munich simulator."}
     { }
 

@@ -4,7 +4,8 @@ import sys
 import pickle, json
 import time
 from qiskit import QuantumCircuit
-from circuit import qc_to_json
+from qiskit.qasm3 import dumps
+from circuit import qc_to_json, from_json_to_qc
 from transpile import transpiler
 import qpu
 
@@ -82,8 +83,7 @@ class Result():
         
         elif "ERROR" in result:
             message = result["ERROR"]
-            logger.debug(message)
-            logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}.")
+            logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}")
             raise QJobError
 
         else:
@@ -182,9 +182,11 @@ class QJob():
         
         self._future = None
         self._result = None
+            
 
 
-        if isinstance(circ, QuantumCircuit) or isinstance(circ, dict):
+        if isinstance(circ, QuantumCircuit) or isinstance(circ, dict) or isinstance(circ, str):
+
 
             if transpile:
                 try:
@@ -202,11 +204,22 @@ class QJob():
 
 
             if isinstance(circt, dict):
-                circuit = circt
-                
-            elif isinstance(circt, QuantumCircuit):
-                circuit = qc_to_json(circt)
+                if QPU.backend.simulator == "AerSimulator":
+                    circuit = circt['instructions']
+                elif QPU.backend.simulator == "MunichSimulator":
+                    circuit = dumps(from_json_to_qc(circt))
 
+            elif isinstance(circt, QuantumCircuit):
+                if QPU.backend.simulator == "AerSimulator":
+                    circuit = qc_to_json(circt)['instructions']
+                elif QPU.backend.simulator == "MunichSimulator":
+                    circuit = dumps(circt)
+
+            elif isinstance(circt, str):
+                if QPU.backend.simulator == "AerSimulator":
+                    circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
+                elif QPU.backend.simulator == "MunichSimulator":
+                    circuit = circt
             
             self._circuit = circuit
 
@@ -228,8 +241,8 @@ class QJob():
             else:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
-            # instructions dict
-            instructions = circuit['instructions']
+            # instructions dict/string
+            instructions = circuit
 
             self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
 
