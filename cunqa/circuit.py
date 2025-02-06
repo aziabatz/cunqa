@@ -170,7 +170,6 @@ def from_json_to_qc(circuit_dict):
             for i in lista: 
                 bits.append(i)
             qc.add_register(ClassicalRegister(len(lista), cr))
-            logger.debug(f"ClassicalRegister {cr} created with {len(lista)} bits.")
 
 
         for instruction in instructions:

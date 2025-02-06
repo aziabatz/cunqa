@@ -39,7 +39,6 @@ def transpiler(qc, backend, opt_level = 1, initial_layout = None):
             circuit = qc
 
     elif isinstance(qc, dict):
-        logger.debug("In transpilation: circuit is dict.")
         if initial_layout is not None and len(initial_layout) != qc['num_qubits']:
             logger.error(f"initial_layout must be of the size of the circuit: {qc.num_qubits} [{TypeError.__name__}].")
             raise TranspilerError

@@ -8,6 +8,7 @@ from qiskit.qasm2 import dumps
 from circuit import qc_to_json, from_json_to_qc, registers_dict
 from transpile import transpiler
 import qpu
+from json import JSONDecodeError
 
 from cunqa.qclient import QClient
 
@@ -74,7 +75,6 @@ class Result():
             raise ValueError
         else:
             logger.error(f"result must be dict, but {type(result)} was provided [{TypeError.__name__}].")
-            logger.debug(result)
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         if len(result) == 0:
@@ -172,7 +172,7 @@ class QJob():
         -----------
         QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-        circ (json dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to be run.
+        circ (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -275,7 +275,7 @@ class QJob():
             self._circuit = circuit
 
         else:
-            logger.error(f"Circuit must be dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circ)} was provided [{TypeError.__name__}].")
+            logger.error(f"Circuit must be dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
@@ -295,7 +295,12 @@ class QJob():
             # instructions dict/string
             instructions = circuit
 
-            self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+
+            if QPU.backend.simulator == "AerSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+
+            elif QPU.backend.simulator == "MunichSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
         
         except KeyError as error:
@@ -327,7 +332,8 @@ class QJob():
         if (self._future is not None) and (self._future.valid()):
             if self._result is None:
                 try:
-                    self._result = Result(json.loads(self._future.get()), registers=self._cregisters)
+                    res = self._future.get()
+                    self._result = Result(json.loads(res), registers=self._cregisters)
                 except Exception as error:
                     logger.error(f"Error while creating Results object [{type(error).__name__}]")
                     raise SystemExit # User's level
@@ -341,7 +347,11 @@ class QJob():
 
         if self._future is not None and self._future.valid():
             if self._result is not None:
-                return self._result.get_dict()["results"][0]["time_taken"]
+                try:
+                    return self._result.time_taken
+                except AttributeError:
+                    logger.warning("Time taken not available.")
+                    return None
             else:
                 logger.error(f"QJob not finished [{QJobError.__name__}].")
                 raise SystemExit # User's level
