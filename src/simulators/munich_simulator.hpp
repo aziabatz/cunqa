@@ -28,11 +28,11 @@ public:
                 StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, run_config.seed, "APD", noise_model_json["noise_prob"],
                                                 noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
                 auto result = sim.simulate(1024);
-                result_json = json(result);
+                result ? result_json = json(*result) : throw std::runtime_error("Error executing the circuit in the Munich simulator.");
             } else {
                 CircuitSimulator sim(std::move(mqt_circuit));
                 auto result = sim.simulate(1024);
-                result_json = json(result);
+                result ? result_json = json(*result) : throw std::runtime_error("Error executing the circuit in the Munich simulator.");
             }        
 
             SPDLOG_LOGGER_DEBUG(logger, "Results: {}", result_json.dump(4));
