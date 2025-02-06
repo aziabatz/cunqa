@@ -68,20 +68,6 @@ noise_model_json = noise_model.to_dict(serializable = True)
 with open(INSTALL_PATH + "/include/utils/basis_gates.json", "r") as gates_file:
     gates = json.load(gates_file)
 
-parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
-
-parser.add_argument("backend_path", type = str, help = "Path to backend config json")
-
-args = parser.parse_args()
-
-if (args.backend_path == "last_calibrations"):
-    fakeqmio = FakeQmio()
-else:
-    fakeqmio = FakeQmio(calibration_file = args.backend_path)
-
-noise_model = NoiseModel.from_backend(fakeqmio)
-noise_model_json = noise_model.to_dict(serializable = True)
-
 backend_json = {
     "backend":{
         "name": "FakeQmio", 
