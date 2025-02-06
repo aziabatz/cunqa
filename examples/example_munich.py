@@ -11,7 +11,7 @@ from cunqa.qclient import QClient
 qasm = """OPENQASM 3.0;
 include "stdgates.inc";
 
-qubit[2] q;
+qubit[2] 
 bit[2] c;
 
 h q[0];
@@ -54,5 +54,9 @@ future2 = client.send_circuit(msg)
 
 print("Futures creados.")
 
-print("GET DEL FUTURE 1:" + future1.get())
+resultado = future1.get()
+
+hola = json.loads(resultado)
+print("GET DEL FUTURE 1:" + json.dumps(hola["ERROR"]))
+
 print("GET DEL FUTURE 2:" + future2.get())

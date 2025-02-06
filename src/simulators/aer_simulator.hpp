@@ -38,7 +38,7 @@ public:
         } catch (const std::exception& e) {
             // TODO: specify the circuit format in the docs.
             SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
-            return {{"ERROR", e.what()}};
+            return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
         }
         return {};
     }
