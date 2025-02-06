@@ -4,8 +4,8 @@ import sys
 import pickle, json
 import time
 from qiskit import QuantumCircuit
-from qiskit.qasm3 import dumps
-from circuit import qc_to_json, from_json_to_qc
+from qiskit.qasm2 import dumps
+from circuit import qc_to_json, from_json_to_qc, registers_dict
 from transpile import transpiler
 import qpu
 
@@ -87,7 +87,8 @@ class Result():
             raise QJobError
 
         else:
-            counts = None
+            counts_aer = None
+            counts_munich = None
             for k,v in result.items():
                 if k == "metadata":
                     for i, m in v.items():
@@ -95,18 +96,21 @@ class Result():
                 elif k == "results":
                     for i, m in v[0].items():
                         if i == "data":
-                            counts = m["counts"]
+                            counts_aer = m["counts"]
                         elif i == "metadata":
                             for j, w in m.items():
                                 setattr(self,j,w)
                         else:
                             setattr(self, i, m)
+                elif k == "counts":
+                    counts_munich = v
+
                 else:
                     setattr(self, k, v)
 
         self.counts = {}
-        if counts:
-            for j,w in counts.items():
+        if counts_aer:
+            for j,w in counts_aer.items():
                 if registers is None:
                     self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
                 elif isinstance(registers, dict):
@@ -114,9 +118,12 @@ class Result():
                     for v in registers.values():
                         lengths.append(len(v))
                     self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+        elif counts_munich:
+            self.counts = counts_munich
         else:
             logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
-            raise KeyError # I capture this error in QJob.result() when creating the object.
+            self.counts = result
+            #raise KeyError # I capture this error in QJob.result() when creating the object.
 
         logger.debug("Results correctly loaded.")
         
@@ -204,22 +211,66 @@ class QJob():
 
 
             if isinstance(circt, dict):
+
+                logger.debug("A circuit dict was provided.")
+
+                cl_bits = circt["num_clbits"]
+                self._cregisters = circt["classical_registers"]
+
                 if QPU.backend.simulator == "AerSimulator":
+
+                    logger.debug("Translating to dict for AerSimulator...")
+
                     circuit = circt['instructions']
+
                 elif QPU.backend.simulator == "MunichSimulator":
-                    circuit = dumps(from_json_to_qc(circt))
+
+                    logger.debug("Translating to QASM2 for MunichSimulator...")
+
+                    circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                    
 
             elif isinstance(circt, QuantumCircuit):
+
+                logger.debug("A QuantumCircuit was provided.")
+
+                cl_bits = sum([c.size for c in circt.cregs])
+                self._cregisters = registers_dict(circt)[1]
+
                 if QPU.backend.simulator == "AerSimulator":
+
+                    logger.debug("Translating to dict for AerSimulator...")
+
                     circuit = qc_to_json(circt)['instructions']
+
                 elif QPU.backend.simulator == "MunichSimulator":
-                    circuit = dumps(circt)
+
+                    logger.debug("Translating to QASM2 for MunichSimulator...")
+
+                    circuit = dumps(circt).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+
 
             elif isinstance(circt, str):
+
+                logger.debug("A QASM2 circuit was provided.")
+
+                cl_bits = 0
+                for line in circt.splitlines():
+                    if line.startswith("bit"):
+                        cl_bits += line.split()[4]
+                self._cregisters = registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+
                 if QPU.backend.simulator == "AerSimulator":
+
+                    logger.debug("Translating to dict for AerSimulator...")
+
                     circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
+
                 elif QPU.backend.simulator == "MunichSimulator":
-                    circuit = circt
+
+                    logger.debug("Translating to QASM2 for MunichSimulator...")
+
+                    circuit = circt.translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
             
             self._circuit = circuit
 
@@ -230,7 +281,7 @@ class QJob():
 
         try:
             # config dict
-            run_config = {"shots":1024, "method":"statevector", "memory_slots":circuit["num_clbits"], "seed": 188}
+            run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
 
             if run_parameters == None:
                 logger.debug("No run parameters provided, default were set.")
@@ -244,7 +295,7 @@ class QJob():
             # instructions dict/string
             instructions = circuit
 
-            self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+            self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
         
         except KeyError as error:
@@ -252,7 +303,7 @@ class QJob():
             raise QJobError # I capture the error in QPU.run() when creating the job
         
         except Exception as error:
-            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}]")
+            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
 
 
@@ -276,7 +327,7 @@ class QJob():
         if (self._future is not None) and (self._future.valid()):
             if self._result is None:
                 try:
-                    self._result = Result(json.loads(self._future.get()), registers=self._circuit['classical_registers'])
+                    self._result = Result(json.loads(self._future.get()), registers=self._cregisters)
                 except Exception as error:
                     logger.error(f"Error while creating Results object [{type(error).__name__}]")
                     raise SystemExit # User's level

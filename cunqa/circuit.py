@@ -81,40 +81,8 @@ def qc_to_json(qc):
         raise TypeError # this error should not be raised bacause in QPU we already check type of the circuit
 
     try:
-        quantum_registers = {}
-        for qr in qc.qregs:
-            quantum_registers[qr.name] = qr.size
-
-        countsq = []
-
-        valuesq = list(quantum_registers.values())
-
-        for i, v in enumerate(valuesq):
-            if i == 0:
-                countsq.append(list(range(0, v)))
-            else:
-                countsq.append(list(range(sum(valuesq[:i]), sum(valuesq[:i])+v)))
-
-        for i,k in enumerate(quantum_registers.keys()):
-            quantum_registers[k] = countsq[i]
-
-
-        classical_registers = {}
-        for cr in qc.cregs:
-            classical_registers[cr.name] = cr.size
-
-        counts = []
-
-        values = list(classical_registers.values())
-
-        for i, v in enumerate(values):
-            if i == 0:
-                counts.append(list(range(0, v)))
-            else:
-                counts.append(list(range(sum(values[:i]), sum(values[:i])+v)))
-
-        for i,k in enumerate(classical_registers.keys()):
-            classical_registers[k] = counts[i]
+        
+        quantum_registers, classical_registers = registers_dict(qc)
         
         json_data = {
             "instructions":[],
@@ -254,5 +222,45 @@ def from_json_to_qc(circuit_dict):
     except Exception as error:
         logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
         raise error
+
+
+
+
+def registers_dict(qc):
+
+    quantum_registers = {}
+    for qr in qc.qregs:
+        quantum_registers[qr.name] = qr.size
+
+    countsq = []
+
+    valuesq = list(quantum_registers.values())
+
+    for i, v in enumerate(valuesq):
+        if i == 0:
+            countsq.append(list(range(0, v)))
+        else:
+            countsq.append(list(range(sum(valuesq[:i]), sum(valuesq[:i])+v)))
+
+    for i,k in enumerate(quantum_registers.keys()):
+        quantum_registers[k] = countsq[i]
+
+    classical_registers = {}
+    for cr in qc.cregs:
+        classical_registers[cr.name] = cr.size
+
+    counts = []
+
+    values = list(classical_registers.values())
+
+    for i, v in enumerate(values):
+        if i == 0:
+            counts.append(list(range(0, v)))
+        else:
+            counts.append(list(range(sum(values[:i]), sum(values[:i])+v)))
+
+    for i,k in enumerate(classical_registers.keys()):
+        classical_registers[k] = counts[i]
+    return [quantum_registers, classical_registers]
 
 

@@ -16,7 +16,7 @@ public:
             noise_model_json = noise_model_json;
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
 
-            std::string circuit(circuit_json["circuit"]);
+            std::string circuit(circuit_json["instructions"]);
             SPDLOG_LOGGER_DEBUG(logger, "Circuit JSON: {}", circuit);
             auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
@@ -28,11 +28,11 @@ public:
                 StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, run_config.seed, "APD", noise_model_json["noise_prob"],
                                                 noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
                 auto result = sim.simulate(1024);
-                result_json = json(result);
+                !result.empty() ? result_json = json(result) : throw std::runtime_error("QASM format is not correct.");
             } else {
                 CircuitSimulator sim(std::move(mqt_circuit));
                 auto result = sim.simulate(1024);
-                result_json = json(result);
+                !result.empty() ? result_json = json(result) : throw std::runtime_error("QASM format is not correct.");
             }        
 
             SPDLOG_LOGGER_DEBUG(logger, "Results: {}", result_json.dump(4));

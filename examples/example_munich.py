@@ -27,8 +27,10 @@ msg = json.dumps(
             "memory_slots": 7,
             "seed": 12342
         },
-        "circuit": qasm
+        "instructions": qasm
     }, ensure_ascii=False)
+
+print(msg)
 
 STORE = os.getenv("STORE")
 conf_file = STORE + "/.api_simulator/qpu.json"

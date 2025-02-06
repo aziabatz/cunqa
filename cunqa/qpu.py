@@ -108,7 +108,7 @@ class QPU():
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:
             logger.error(f"Error when submitting QJob [{type(error).__name__}].")
-            raise SystemExit # User's level
+            raise error # User's level
 
         return qjob
 
