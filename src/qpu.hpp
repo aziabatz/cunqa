@@ -103,9 +103,12 @@ void QPU<sim_type>::_compute_result()
                         server->send_result(to_string(response));
                     }
                 } 
+            } catch(const boost::system::system_error& e) {
+                SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, probably the client has had an error.");
+                SPDLOG_LOGGER_ERROR(logger, "Boost message of the error: {}", e.what());
             } catch(const std::exception& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
-                SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
+                SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());
                 server->send_result("{\"ERROR\":"s + e.what() + "}"s);
                 
             }
