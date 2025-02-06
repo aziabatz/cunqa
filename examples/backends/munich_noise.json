@@ -11,11 +11,8 @@
         "max_shots": 1000000,
         "description": "FakeMunich backend",
         "basis_gates": [
-            "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
-            "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
-            "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
-            "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
-            "cswap"],
+            "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id", "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz", "cswap"
+        ],
         "custom_instructions": "",
         "gates": [], 
         "coupling_map": []
