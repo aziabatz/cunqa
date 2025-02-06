@@ -82,6 +82,7 @@ void QPU<sim_type>::_compute_result()
                 message_queue_.pop();
                 lock.unlock();
 
+                SPDLOG_LOGGER_ERROR(logger, "Circuit received: {}", message);
                 json message_json = json::parse(message);
 
                 // This does not refer to the field `params` for a specific gate, but
@@ -90,7 +91,6 @@ void QPU<sim_type>::_compute_result()
                     kernel = message_json;
                     json response = backend.run(kernel);
                     server->send_result(to_string(response));
-                    lock.lock();
                 } else {
                     std::vector<double> parameters = message_json.at("params");
                     if (kernel.empty()){
@@ -101,14 +101,15 @@ void QPU<sim_type>::_compute_result()
                         parameters.clear();
                         json response = backend.run(kernel);
                         server->send_result(to_string(response));
-                        lock.lock();
                     }
                 } 
             } catch(const std::exception& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Official message of the error: {}", e.what());
                 server->send_result("{\"ERROR\":"s + e.what() + "}"s);
+                
             }
+            lock.lock();
         }
         
     }

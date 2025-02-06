@@ -27,20 +27,20 @@ public:
                 const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
                 StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, run_config.seed, "APD", noise_model_json["noise_prob"],
                                                 noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
-                auto result = sim.simulate(1024);
+                auto result = sim.simulate(run_config.shots);
                 !result.empty() ? result_json = json(result) : throw std::runtime_error("QASM format is not correct.");
             } else {
                 CircuitSimulator sim(std::move(mqt_circuit));
-                auto result = sim.simulate(1024);
+                auto result = sim.simulate(run_config.shots);
                 !result.empty() ? result_json = json(result) : throw std::runtime_error("QASM format is not correct.");
             }        
 
             SPDLOG_LOGGER_DEBUG(logger, "Results: {}", result_json.dump(4));
-            return result_json;
+            return json({{"counts", result_json}});
         } catch (const std::exception& e) {
             // TODO: specify the circuit format in the docs.
             SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the Munich simulator.\nTry checking the format of the circuit sent and/or of the noise model.");
-            return {{"ERROR", e.what()}};
+            return {{"ERROR", "\"" + e.what() + "\""}};
         }
         return {};
     }

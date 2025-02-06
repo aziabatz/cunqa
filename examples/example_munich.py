@@ -54,5 +54,9 @@ future2 = client.send_circuit(msg)
 
 print("Futures creados.")
 
-print("GET DEL FUTURE 1:" + future1.get())
+resultado = future1.get()
+
+hola = json.loads(resultado)
+print("GET DEL FUTURE 1:" + json.dumps(hola["counts"]))
+
 print("GET DEL FUTURE 2:" + future2.get())
