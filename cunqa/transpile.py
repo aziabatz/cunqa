@@ -1,6 +1,8 @@
-from backend import Backend
+from cunqa.backend import Backend
+from cunqa.circuit import from_json_to_qc, qc_to_json
+from cunqa.logger import logger
+
 from qiskit import QuantumCircuit
-from circuit import from_json_to_qc, qc_to_json
 from qiskit.qasm3.exceptions import QASM3Error
 from qiskit.exceptions import QiskitError
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
@@ -8,7 +10,7 @@ from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.backend_compat import convert_to_target
 from qiskit.qasm2 import dumps
 
-from logger import logger
+
 
 
 class TranspilerError(Exception):

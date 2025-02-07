@@ -5,15 +5,15 @@ import pickle, json
 import time
 from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
-from circuit import qc_to_json, from_json_to_qc, registers_dict
-from transpile import transpiler
-import qpu
+from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict
+from cunqa.transpile import transpiler
+import cunqa.qpu as qpu
 from json import JSONDecodeError
 
 from cunqa.qclient import QClient
 
 # importing logger
-from logger import logger
+from cunqa.logger import logger
 
 
 class QJobError(Exception):
@@ -210,24 +210,41 @@ class QJob():
 
 
             if isinstance(circt, dict):
+                if "instructions" in  circt:
 
-                logger.debug("A circuit dict was provided.")
+                    logger.debug("A circuit dict was provided.")
 
-                cl_bits = circt["num_clbits"]
-                self._cregisters = circt["classical_registers"]
+                    cl_bits = circt["num_clbits"]
+                    self._cregisters = circt["classical_registers"]
 
-                if QPU.backend.simulator == "AerSimulator":
+                    if QPU.backend.simulator == "AerSimulator":
 
-                    logger.debug("Translating to dict for AerSimulator...")
+                        logger.debug("Translating to dict for AerSimulator...")
 
-                    circuit = circt['instructions']
+                        circuit = circt['instructions']
 
-                elif QPU.backend.simulator == "MunichSimulator":
+                    elif QPU.backend.simulator == "MunichSimulator":
 
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
+                        logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
-                    
+                        circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                
+                elif "params" in circt:
+                    logger.debug("New parameters were provided.")
+
+
+                    if QPU.backend.simulator == "AerSimulator":
+
+                        logger.debug("Preparing parameters to upgrade")
+
+                        circuit = circt
+
+                    #TODO
+                    elif QPU.backend.simulator == "MunichSimulator":
+
+                        logger.error("upgrade_params is still not implemented with MunichSimulator")
+                        raise QJobError 
+
 
             elif isinstance(circt, QuantumCircuit):
 
@@ -278,37 +295,43 @@ class QJob():
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
-        try:
-            # config dict
-            run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
+        if "params" in circuit:
+            logger.debug("Preparing _execution_config with parameters")
+            self._execution_config = """{}""".format(circuit).replace("'", '"')
 
-            if run_parameters == None:
-                logger.debug("No run parameters provided, default were set.")
-                pass
-            elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
-                for k,v in run_parameters.items():
-                    run_config[k] = v
-            else:
-                logger.warning("Error when reading `run_parameters`, default were set.")
+        else:
+
+            try:
+                # config dict
+                run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
+
+                if run_parameters == None:
+                    logger.debug("No run parameters provided, default were set.")
+                    pass
+                elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
+                    for k,v in run_parameters.items():
+                        run_config[k] = v
+                else:
+                    logger.warning("Error when reading `run_parameters`, default were set.")
+                
+                # instructions dict/string
+                instructions = circuit
+
+
+                if QPU.backend.simulator == "AerSimulator":
+                    self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+
+                elif QPU.backend.simulator == "MunichSimulator":
+                    self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+
             
-            # instructions dict/string
-            instructions = circuit
-
-
-            if QPU.backend.simulator == "AerSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
-
-            elif QPU.backend.simulator == "MunichSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
-
-        
-        except KeyError as error:
-            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
-            raise QJobError # I capture the error in QPU.run() when creating the job
-        
-        except Exception as error:
-            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
-            raise QJobError # I capture the error in QPU.run() when creating the job
+            except KeyError as error:
+                logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
+                raise QJobError # I capture the error in QPU.run() when creating the job
+            
+            except Exception as error:
+                logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
+                raise QJobError # I capture the error in QPU.run() when creating the job
 
 
     def submit(self):
@@ -330,12 +353,21 @@ class QJob():
         """
         if (self._future is not None) and (self._future.valid()):
             if self._result is None:
-                try:
-                    res = self._future.get()
-                    self._result = Result(json.loads(res), registers=self._cregisters)
-                except Exception as error:
-                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                    raise SystemExit # User's level
+                if "params" in self._circuit:
+                    try:
+                        res = self._future.get()
+                        self._result = Result(json.loads(res)) #TODO
+                    except Exception as error:
+                        logger.error(f"Error while creating Results object using upgrade_params [{type(error).__name__}]")
+                        raise SystemExit # Us
+
+                else:
+                    try:
+                        res = self._future.get()
+                        self._result = Result(json.loads(res), registers=self._cregisters)
+                    except Exception as error:
+                        logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                        raise SystemExit # User's level
 
         return self._result
 

@@ -11,12 +11,12 @@ if info_path is None:
 # importamos api en C++
 from cunqa.qclient import QClient
 # importamos la clase Backend
-from backend import Backend
-from qjob import QJob, gather
-from circuit import qc_to_json
+from cunqa.backend import Backend
+from cunqa.qjob import QJob, gather
+from cunqa.circuit import qc_to_json
 
 # importing logger
-from logger import logger
+from cunqa.logger import logger
 
 
 class QPU():
@@ -111,6 +111,19 @@ class QPU():
             raise error # User's level
 
         return qjob
+    
+    def upgrade_parameters(self, parameters):
+        try:
+            params = {"params" : parameters}
+            qjob = QJob(self, params, transpile = False)
+            qjob.submit()
+            logger.debug(f"ParametersJob submitted to QPU {self.id}.")
+        except Exception as error:
+            logger.error(f"Error when submitting ParametersJob [{type(error).__name__}].")
+            raise error # User's level
+
+        return qjob
+
 
 
 
