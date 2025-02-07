@@ -1,7 +1,7 @@
 import os, sys
 
 # adding pyhton folder path to detect modules
-sys.path.insert(0, "/mnt/netapp1/Store_CESGA/home/cesga/mlosada/api/api-simulator/cunqa")
+#sys.path.insert(0, "/mnt/netapp1/Store_CESGA/home/cesga/mlosada/api/api-simulator/cunqa")
 
 # path to access c++ files
 installation_path = os.getenv("INSTALL_PATH")
@@ -9,7 +9,7 @@ sys.path.append(installation_path)
 
 # Let's get the QPUs raised
 
-from qpu import getQPUs
+from cunqa.qpu import getQPUs
 
 qpus  = getQPUs()
 
@@ -22,7 +22,7 @@ for q in qpus:
 from qiskit import QuantumCircuit
 from qiskit.circuit.library import QFT
 
-n = 10 # number of qubits
+n = 5 # number of qubits
 
 qc = QuantumCircuit(n)
 
@@ -35,17 +35,16 @@ qc.append(QFT(n).inverse(), range(n))
 qc.measure_all()
 
 
-# Let's run the circuit in the first QPU
-
-qpu = qpus[0]
-
 counts = []
 
-for qpu in [qpus[0], qpus[2], qpus[4]]:
+for i, qpu in enumerate([qpus[0], qpus[2], qpus[4], qpus[5]]):
 
     print(f"For QPU {qpu.id}, with backend {qpu.backend.name}:")
 
-    qjob = qpu.run(qc, transpile = True, shots = 1000)
+    if i == 3:
+        qjob = qpu.run(qc, transpile = True, initial_layout = [31, 30, 29, 28, 27], shots = 1000)
+    else:
+        qjob = qpu.run(qc, transpile = True, shots = 1000)
 
     result = qjob.result() # bloking call
 
@@ -55,9 +54,10 @@ for qpu in [qpus[0], qpus[2], qpus[4]]:
 
     print(f"Result: \n{result.get_counts()}\n Time taken: {time} s.")
 
+
 from qiskit.visualization import plot_histogram
 import matplotlib.pyplot as plt
-plot_histogram(counts[:-1])
+plot_histogram(counts, figsize = (10, 5), bar_labels=False); plt.legend(["QPU 0", "QPU 2", "QPU 4", "QPU 5"])
 plt.savefig('counts.png')
 plt.show()
 
@@ -96,7 +96,7 @@ for qpu in [qpus[0], qpus[2], qpus[4]]:
 
 # Then, we can wait for all the jobs to finish with the gather function. Let's measure time to check that we are parallelizing:
 import time
-from qpu import gather
+from cunqa.qpu import gather
 
 tick = time.time()
 results = gather(qjobs) # this is a bloking call

@@ -12,7 +12,6 @@ from qiskit.qasm2 import dumps
 
 
 
-
 class TranspilerError(Exception):
     """Exception for error during the transpilation of a circuit to a given Backend. """
     pass
