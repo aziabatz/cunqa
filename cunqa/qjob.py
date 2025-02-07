@@ -1,19 +1,18 @@
-from concurrent.futures import ThreadPoolExecutor
 import os
 import sys
 import pickle, json
 import time
 from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
-from circuit import qc_to_json, from_json_to_qc, registers_dict
-from transpile import transpiler
-import qpu
+from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict
+from cunqa.transpile import transpiler
+import cunqa.qpu as qpu
 from json import JSONDecodeError
 
 from cunqa.qclient import QClient
 
 # importing logger
-from logger import logger
+from cunqa.logger import logger
 
 
 class QJobError(Exception):

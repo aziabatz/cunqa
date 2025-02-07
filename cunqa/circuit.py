@@ -1,4 +1,4 @@
-from logger import logger
+from cunqa.logger import logger
 
 def _qasm2_to_json(qasm_str, version = None):
     """

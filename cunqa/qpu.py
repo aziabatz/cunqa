@@ -11,12 +11,12 @@ if info_path is None:
 # importamos api en C++
 from cunqa.qclient import QClient
 # importamos la clase Backend
-from backend import Backend
-from qjob import QJob, gather
-from circuit import qc_to_json
+from cunqa.backend import Backend
+from cunqa.qjob import QJob, gather
+from cunqa.circuit import qc_to_json
 
 # importing logger
-from logger import logger
+from cunqa.logger import logger
 
 
 class QPU():
