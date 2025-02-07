@@ -112,7 +112,18 @@ class QPU():
 
         return qjob
     
-    def upgrade_parameters(self, parameters):
+    def upgrade_parameters(self, parameters : list[float]) -> QJob:
+        """
+        Class method to upgrade the parameters of a circuit previously sent.
+
+        Args:
+        --------
+        parameters (<class 'list'>): list of new parameters.
+
+        Return:
+        --------
+        <class 'qjob.Result'> object.
+        """
         try:
             params = {"params" : parameters}
             qjob = QJob(self, params, transpile = False)

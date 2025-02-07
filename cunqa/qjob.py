@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import sys
 import pickle, json
@@ -294,12 +295,7 @@ class QJob():
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
-        if "params" in circuit:
-            logger.debug("Preparing _execution_config with parameters")
-            self._execution_config = """{}""".format(circuit).replace("'", '"')
-
-        else:
-
+        if "params" not in circuit:
             try:
                 # config dict
                 run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
@@ -332,6 +328,16 @@ class QJob():
                 logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
 
+        else:
+            try: 
+                logger.debug("Preparing _execution_config with parameters")
+                self._execution_config = """{}""".format(circuit).replace("'", '"')
+            except Exception as error:
+                logger.error(f"Some error occured when preparing parameters to upgrade [{type(error).__name__}].")
+                raise QJobError
+
+            
+
 
     def submit(self):
         """
@@ -341,7 +347,10 @@ class QJob():
             logger.warning("QJob has already been submitted.")
         else:
             try:
-                self._future = self._QPU._qclient.send_circuit(self._execution_config)
+                if "params" not in self._circuit:
+                    self._future = self._QPU._qclient.send_circuit(self._execution_config)
+                else:
+                    self._future = self._QPU._qclient.send_parameters(self._execution_config)
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
@@ -352,21 +361,21 @@ class QJob():
         """
         if (self._future is not None) and (self._future.valid()):
             if self._result is None:
-                if "params" in self._circuit:
-                    try:
-                        res = self._future.get()
-                        self._result = Result(json.loads(res)) #TODO
-                    except Exception as error:
-                        logger.error(f"Error while creating Results object using upgrade_params [{type(error).__name__}]")
-                        raise SystemExit # Us
-
-                else:
+                if "params" not in self._circuit:
                     try:
                         res = self._future.get()
                         self._result = Result(json.loads(res), registers=self._cregisters)
                     except Exception as error:
                         logger.error(f"Error while creating Results object [{type(error).__name__}]")
                         raise SystemExit # User's level
+
+                else:
+                    try:
+                        res = self._future.get()
+                        self._result = Result(json.loads(res)) #TODO
+                    except Exception as error:
+                        logger.error(f"Error while creating Results object using upgrade_params [{type(error).__name__}]")
+                        raise SystemExit # Us
 
         return self._result
 
