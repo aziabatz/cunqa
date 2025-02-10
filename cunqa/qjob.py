@@ -210,40 +210,25 @@ class QJob():
 
 
             if isinstance(circt, dict):
-                if "instructions" in  circt:
 
-                    logger.debug("A circuit dict was provided.")
+                logger.debug("A circuit dict was provided.")
 
-                    cl_bits = circt["num_clbits"]
-                    self._cregisters = circt["classical_registers"]
+                cl_bits = circt["num_clbits"]
+                self._cregisters = circt["classical_registers"]
 
-                    if QPU.backend.simulator == "AerSimulator":
+                if QPU.backend.simulator == "AerSimulator":
 
-                        logger.debug("Translating to dict for AerSimulator...")
+                    logger.debug("Translating to dict for AerSimulator...")
 
-                        circuit = circt['instructions']
+                    circuit = circt['instructions']
 
-                    elif QPU.backend.simulator == "MunichSimulator":
+                elif QPU.backend.simulator == "MunichSimulator":
 
-                        logger.debug("Translating to QASM2 for MunichSimulator...")
+                    logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                        circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                    circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
                 
-                elif "params" in circt:
-                    logger.debug("New parameters were provided.")
-
-
-                    if QPU.backend.simulator == "AerSimulator":
-
-                        logger.debug("Preparing parameters to upgrade")
-
-                        circuit = circt
-
-                    #TODO
-                    elif QPU.backend.simulator == "MunichSimulator":
-
-                        logger.error("upgrade_params is still not implemented with MunichSimulator")
-                        raise QJobError 
+     
 
 
             elif isinstance(circt, QuantumCircuit):
@@ -295,48 +280,37 @@ class QJob():
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
-        if "params" not in circuit:
-            try:
-                # config dict
-                run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
+        try:
+            # config dict
+            run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
 
-                if run_parameters == None:
-                    logger.debug("No run parameters provided, default were set.")
-                    pass
-                elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
-                    for k,v in run_parameters.items():
-                        run_config[k] = v
-                else:
-                    logger.warning("Error when reading `run_parameters`, default were set.")
-                
-                # instructions dict/string
-                instructions = circuit
-
-
-                if QPU.backend.simulator == "AerSimulator":
-                    self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
-
-                elif QPU.backend.simulator == "MunichSimulator":
-                    self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
-
+            if run_parameters == None:
+                logger.debug("No run parameters provided, default were set.")
+                pass
+            elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
+                for k,v in run_parameters.items():
+                    run_config[k] = v
+            else:
+                logger.warning("Error when reading `run_parameters`, default were set.")
             
-            except KeyError as error:
-                logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
-                raise QJobError # I capture the error in QPU.run() when creating the job
-            
-            except Exception as error:
-                logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
-                raise QJobError # I capture the error in QPU.run() when creating the job
+            # instructions dict/string
+            instructions = circuit
 
-        else:
-            try: 
-                logger.debug("Preparing _execution_config with parameters")
-                self._execution_config = """{}""".format(circuit).replace("'", '"')
-            except Exception as error:
-                logger.error(f"Some error occured when preparing parameters to upgrade [{type(error).__name__}].")
-                raise QJobError
 
-            
+            if QPU.backend.simulator == "AerSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+
+            elif QPU.backend.simulator == "MunichSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+
+        
+        except KeyError as error:
+            logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
+        
+        except Exception as error:
+            logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
 
 
     def submit(self):
@@ -347,13 +321,11 @@ class QJob():
             logger.warning("QJob has already been submitted.")
         else:
             try:
-                if "params" not in self._circuit:
-                    self._future = self._QPU._qclient.send_circuit(self._execution_config)
-                else:
-                    self._future = self._QPU._qclient.send_parameters(self._execution_config)
+                self._future = self._QPU._qclient.send_circuit(self._execution_config)
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
+
 
     def result(self):
         """
@@ -361,23 +333,15 @@ class QJob():
         """
         if (self._future is not None) and (self._future.valid()):
             if self._result is None:
-                if "params" not in self._circuit:
-                    try:
-                        res = self._future.get()
-                        self._result = Result(json.loads(res), registers=self._cregisters)
-                    except Exception as error:
-                        logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                        raise SystemExit # User's level
-
-                else:
-                    try:
-                        res = self._future.get()
-                        self._result = Result(json.loads(res)) #TODO
-                    except Exception as error:
-                        logger.error(f"Error while creating Results object using upgrade_params [{type(error).__name__}]")
-                        raise SystemExit # Us
+                try:
+                    res = self._future.get()
+                    self._result = Result(json.loads(res), registers=self._cregisters)
+                except Exception as error:
+                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                    raise SystemExit # User's level
 
         return self._result
+
 
     def time_taken(self):
         """
@@ -397,7 +361,26 @@ class QJob():
         else:
             logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
+
+    
+    def upgrade_parameters(self, parameters):
+        #self.__class__.submit_parameters(parameters)
+        """
+        Asynchronous method to submit a parameter job to the corresponding QClient.
+        """
+        params = {"params":parameters}
+        self._parameters = """{}""".format(params).replace("'", '"')
+
+        try:
+            self._future = self._QPU._qclient.send_parameters(self._parameters)
+        except Exception as error:
+            logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
+            raise QJobError
         
+        return self
+
+            
+
 
 
 def gather(qjobs):
