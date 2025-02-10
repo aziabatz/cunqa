@@ -45,7 +45,7 @@ public:
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
                 SPDLOG_LOGGER_DEBUG(logger, "Client disconnected, closing conection.");
-                socket_.close();
+                socket_.close(); 
                 return std::string("CLOSE");
             } else {
                 SPDLOG_LOGGER_ERROR(logger, "Error receiving the circuit.");

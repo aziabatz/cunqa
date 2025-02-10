@@ -325,6 +325,21 @@ class QJob():
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
+            
+    def upgrade_parameters(self, parameters):
+        """
+        Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
+        """
+        params = {"params":parameters}
+        self._parameters = """{}""".format(params).replace("'", '"')
+
+        try:
+            self._future = self._QPU._qclient.send_parameters(self._parameters)
+        except Exception as error:
+            logger.error(f"Some error occured when sending the new parameters [{type(error).__name__}].")
+            raise QJobError
+        
+        return self
 
 
     def result(self):
@@ -332,13 +347,13 @@ class QJob():
         Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is bloking.
         """
         if (self._future is not None) and (self._future.valid()):
-            if self._result is None:
-                try:
-                    res = self._future.get()
-                    self._result = Result(json.loads(res), registers=self._cregisters)
-                except Exception as error:
-                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                    raise SystemExit # User's level
+            #if self._result is None: #Important to upgrade_parameters
+            try:
+                res = self._future.get()
+                self._result = Result(json.loads(res), registers=self._cregisters)
+            except Exception as error:
+                logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                raise SystemExit # User's level
 
         return self._result
 
@@ -362,22 +377,7 @@ class QJob():
             logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
 
-    
-    def upgrade_parameters(self, parameters):
-        #self.__class__.submit_parameters(parameters)
-        """
-        Asynchronous method to submit a parameter job to the corresponding QClient.
-        """
-        params = {"params":parameters}
-        self._parameters = """{}""".format(params).replace("'", '"')
 
-        try:
-            self._future = self._QPU._qclient.send_parameters(self._parameters)
-        except Exception as error:
-            logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
-            raise QJobError
-        
-        return self
 
             
 

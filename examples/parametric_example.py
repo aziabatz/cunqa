@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+import random
+
 from qiskit import QuantumCircuit
 
 # adding pyhton folder path to detect modules
@@ -22,24 +24,19 @@ for q in qpus:
 qpu0 = qpus[-1]
 
 
-theta=0.01
-
-qc = QuantumCircuit(2,2)
+theta=1.57079
+qc = QuantumCircuit(2)
 qc.rx(theta, 0)
-qc.h(0)
-qc.measure(0,0)
-qc.h(1)
 qc.measure_all()
 
 
-job = qpu0.run(qc, transpile = True, shots = 10)
-print(job)
+
+job = qpu0.run(qc, transpile = False, shots=1000)
 print(job.result().get_counts())
 
 
-
-new_params = [theta]
 for i in range(10):
-    new_params = [new_params[0]/(i+1)]
+    new_params = [random.uniform(0.0, 6.283185)]
+    print("Parameter: ", new_params[0])
     param_job = job.upgrade_parameters(new_params)
-    print(param_job.result().get_counts())
+    print("Counts: ", param_job.result().get_counts())
