@@ -72,7 +72,8 @@ json update_circuit_parameters(json& circuit, const std::vector<double>& params)
             }
         }
     } catch (const std::exception& e){
-        SPDLOG_LOGGER_ERROR(logger, "Incorrect set of parameters sent for the circuit (check correct size).");
+        SPDLOG_LOGGER_ERROR(logger, "Error updating parameters. (check correct size).");
+        throw std::runtime_error("Error updating parameters.");
     }
 
     return circuit;

@@ -87,5 +87,5 @@ backend_json = {
 }
 
 
-with open("{}/.api_simulator/fakeqmio_backend.json".format(STORE_PATH), 'w') as file:
+with open("{}/.api_simulator/tmp_fakeqmio_backend.json".format(STORE_PATH), 'w') as file:
     json.dump(backend_json, file)

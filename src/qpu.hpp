@@ -99,7 +99,7 @@ void QPU<sim_type>::_compute_result()
                         SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
                         throw std::runtime_error("Parameters were sent before a parametric circuit.");
                     } else {
-                        SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
+                        SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
                         kernel = update_circuit_parameters(kernel, parameters);
                         SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
                         parameters.clear();

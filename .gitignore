@@ -245,6 +245,7 @@ generar_circuito.py
 circuit
 
 modules_alvaro.sh
+config_alvaro.sh
 installations/
 local_tests/
 main_param.cpp
