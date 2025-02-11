@@ -337,7 +337,7 @@ class QJob():
             self._future = self._QPU._qclient.send_parameters(self._parameters)
         except Exception as error:
             logger.error(f"Some error occured when sending the new parameters [{type(error).__name__}].")
-            raise QJobError
+            raise QJobError # I capture the error in QPU.run() when creating the job
         
         return self
 
@@ -377,9 +377,6 @@ class QJob():
             logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
 
-
-
-            
 
 
 
