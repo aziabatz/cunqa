@@ -329,7 +329,7 @@ class QJob():
                 raise QJobError # I capture the error in QPU.run() when creating the job
 
         else:
-            try: 
+            try:
                 logger.debug("Preparing _execution_config with parameters")
                 self._execution_config = """{}""".format(circuit).replace("'", '"')
             except Exception as error:
@@ -397,7 +397,8 @@ class QJob():
         else:
             logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
-        
+
+
 
 
 def gather(qjobs):
