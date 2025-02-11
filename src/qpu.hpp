@@ -82,22 +82,26 @@ void QPU<sim_type>::_compute_result()
                 message_queue_.pop();
                 lock.unlock();
 
-                SPDLOG_LOGGER_ERROR(logger, "Circuit received: {}", message);
+                SPDLOG_LOGGER_DEBUG(logger, "Message received:");
                 json message_json = json::parse(message);
 
                 // This does not refer to the field `params` for a specific gate, but
                 // for a separated field specifying the new set of parameters
                 if (!message_json.contains("params")){ 
+                    SPDLOG_LOGGER_DEBUG(logger, "A circuit was received {}", message); 
                     kernel = message_json;
                     json response = backend.run(kernel);
                     server->send_result(to_string(response));
+                    
                 } else {
                     std::vector<double> parameters = message_json.at("params");
                     if (kernel.empty()){
                         SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                        throw std::runtime_error("You sent the parameters before the circuit.");
+                        throw std::runtime_error("Parameters were sent before a parametric circuit.");
                     } else {
+                        SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
                         kernel = update_circuit_parameters(kernel, parameters);
+                        SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
                         parameters.clear();
                         json response = backend.run(kernel);
                         server->send_result(to_string(response));

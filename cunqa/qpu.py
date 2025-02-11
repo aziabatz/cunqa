@@ -112,29 +112,8 @@ class QPU():
 
         return qjob
     
-    def upgrade_parameters(self, parameters : list[float]) -> QJob:
-        """
-        Class method to upgrade the parameters of a circuit previously sent.
 
-        Args:
-        --------
-        parameters (<class 'list'>): list of new parameters.
-
-        Return:
-        --------
-        <class 'qjob.Result'> object.
-        """
-        try:
-            params = {"params" : parameters}
-            qjob = QJob(self, params, transpile = False)
-            qjob.submit()
-            logger.debug(f"ParametersJob submitted to QPU {self.id}.")
-        except Exception as error:
-            logger.error(f"Error when submitting ParametersJob [{type(error).__name__}].")
-            raise error # User's level
-
-        return qjob
-
+    
 
 
 
