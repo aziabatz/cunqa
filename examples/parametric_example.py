@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-
+import scipy.optimize
 import random
 
 from qiskit import QuantumCircuit
@@ -22,7 +22,7 @@ for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}.")
 
 qpu0 = qpus[-1]
-
+kk
 
 theta=1.57079
 qc = QuantumCircuit(2)

@@ -87,42 +87,44 @@ class Result():
             raise QJobError
 
         else:
-            counts_aer = None
-            counts_munich = None
-            for k,v in result.items():
-                if k == "metadata":
-                    for i, m in v.items():
-                        setattr(self, i, m)
-                elif k == "results":
-                    for i, m in v[0].items():
-                        if i == "data":
-                            counts_aer = m["counts"]
-                        elif i == "metadata":
-                            for j, w in m.items():
-                                setattr(self,j,w)
-                        else:
+            try:
+                counts_aer = None
+                counts_munich = None
+                for k,v in result.items():
+                    if k == "metadata":
+                        for i, m in v.items():
                             setattr(self, i, m)
-                elif k == "counts":
-                    counts_munich = v
+                    elif k == "results":
+                        for i, m in v[0].items():
+                            if i == "data":
+                                counts_aer = m["counts"]
+                            elif i == "metadata":
+                                for j, w in m.items():
+                                    setattr(self,j,w)
+                            else:
+                                setattr(self, i, m)
+                    elif k == "counts":
+                        counts_munich = v
 
-                else:
-                    setattr(self, k, v)
+                    else:
+                        setattr(self, k, v)
 
-        self.counts = {}
-        if counts_aer:
-            for j,w in counts_aer.items():
-                if registers is None:
-                    self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                elif isinstance(registers, dict):
-                    lengths = []
-                    for v in registers.values():
-                        lengths.append(len(v))
-                    self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
-        elif counts_munich:
-            self.counts = counts_munich
-        else:
-            logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
-            raise KeyError # I capture this error in QJob.result() when creating the object.
+                self.counts = {}
+                if counts_aer:
+                    for j,w in counts_aer.items():
+                        if registers is None:
+                            self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                        elif isinstance(registers, dict):
+                            lengths = []
+                            for v in registers.values():
+                                lengths.append(len(v))
+                            self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+                elif counts_munich:
+                    self.counts = counts_munich
+
+            except KeyError:
+                logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
+                raise KeyError # I capture this error in QJob.result() when creating the object.
 
         logger.debug("Results correctly loaded.")
         
@@ -330,8 +332,7 @@ class QJob():
         """
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
         """
-        params = {"params":parameters}
-        self._parameters = """{}""".format(params).replace("'", '"')
+        self._parameters = """ {{"params":{}}}""".format(parameters).replace("'", '"')
 
         try:
             self._future = self._QPU._qclient.send_parameters(self._parameters)
@@ -350,10 +351,11 @@ class QJob():
             #if self._result is None: #Important to upgrade_parameters
             try:
                 res = self._future.get()
+                logger.debug(res)
                 self._result = Result(json.loads(res), registers=self._cregisters)
             except Exception as error:
                 logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                raise SystemExit # User's level
+                raise error # User's level
 
         return self._result
 
@@ -409,4 +411,27 @@ def gather(qjobs):
       
         
                
-        
+class QJobMapper:
+    def __init__(self, qjobs):
+        self.qjobs = qjobs
+        self.i = 0  # starting point
+
+    def __call__(self, func, population):
+        """
+        Callable method to map the function to the given QJobs.
+
+        Args:
+        ---------
+        func (func): function to be mapped to the QJobs.
+
+        params (list): list of vectors whose values correspond to the parameters for the gates of the parametrized circuit.
+        """
+
+        results = []
+
+        for params in population:
+            qjob = self.qjobs[self.i % len(self.qjobs)]
+            result = func((params, qjob))
+            results.append(result)
+            self.i += 1
+        return result

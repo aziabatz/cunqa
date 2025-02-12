@@ -12,7 +12,7 @@ if info_path is None:
 from cunqa.qclient import QClient
 # importamos la clase Backend
 from cunqa.backend import Backend
-from cunqa.qjob import QJob, gather
+from cunqa.qjob import QJob, gather, QJobMapper
 from cunqa.circuit import qc_to_json
 
 # importing logger
@@ -166,4 +166,29 @@ def getQPUs(path = info_path):
         raise SystemExit
 
 
-        
+
+
+class QPUMapper:
+    def __init__(self, qpus):
+        self.qpus = qpus
+        self.i = 0  # starting point
+
+    def __call__(self, func, population):
+        """
+        Callable method to map the function to the QPUs.
+
+        Args:
+        ---------
+        func (func): function to be mapped to the QPUs.
+
+        params (list): list of vectors whose values correspond to the parameters for the gates of the parametrized circuit.
+        """
+
+        results = []
+
+        for params in population:
+            qpu = self.qpus[self.i % len(self.qpus)]
+            result = func((params, qpu))
+            results.append(result)
+            self.i += 1
+        return result

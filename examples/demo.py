@@ -37,6 +37,12 @@ qc.measure_all()
 
 counts = []
 
+job = qpus[0].run(qc, transpile = True, shots = 1000)
+
+result = job.result() 
+
+counts = result.get_counts()
+
 for i, qpu in enumerate([qpus[0], qpus[2], qpus[4], qpus[5]]):
 
     print(f"For QPU {qpu.id}, with backend {qpu.backend.name}:")
