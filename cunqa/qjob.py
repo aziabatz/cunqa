@@ -299,11 +299,11 @@ class QJob():
 
 
             if QPU.backend.simulator == "AerSimulator":
-                self._type = "json"
+                #self._type = "json"
                 self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
 
             elif QPU.backend.simulator == "MunichSimulator":
-                self._type = "qasm"
+                #self._type = "qasm"
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
         
@@ -334,10 +334,7 @@ class QJob():
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
         """
         #self._parameters = parameters #Not used
-        message = """{{"type":"{}",
-                   "params":{} }}""".format(self._type, parameters).replace("'", '"')
-        
-        self._parameters = parameters
+        message = """{{"params":{} }}""".format(parameters).replace("'", '"')
 
         try:
             self._future = self._QPU._qclient.send_parameters(message)

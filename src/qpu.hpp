@@ -23,6 +23,7 @@ using namespace config;
 template <SimType sim_type = SimType::Aer> 
 class QPU {
 public:
+
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend;
 
@@ -94,7 +95,9 @@ void QPU<sim_type>::_compute_result()
                     server->send_result(to_string(response));
                     
                 } else {
-                    if (message_json.at("type") == "json"){
+                    SPDLOG_LOGGER_DEBUG(logger, "Simulator: {}", backend.backend_config.simulator);
+                    if (backend.backend_config.simulator == "AerSimulator"){
+                        SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator");
                         std::vector<double> parameters = message_json.at("params");
                         if (kernel.empty()){
                             SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
@@ -107,7 +110,8 @@ void QPU<sim_type>::_compute_result()
                             json response = backend.run(kernel);
                             server->send_result(to_string(response));
                         }
-                    } else if (message_json.at("type") == "qasm") {
+                    } else if (backend.backend_config.simulator == "MunichSimulator") {
+                        SPDLOG_LOGGER_DEBUG(logger, "Params of MunichSimulator");
                         std::vector<double> parameters = message_json.at("params");
                         if (kernel.empty()){
                             SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
