@@ -11,8 +11,10 @@ using namespace config;
 template <SimType sim_type>
 class Backend {
     std::unique_ptr<typename SimClass<sim_type>::type> simulator;
-    BackendConfig<sim_type> backend_config; 
+    
 public:
+
+    BackendConfig<sim_type> backend_config;
 
     Backend() :
         simulator{std::make_unique<typename SimClass<sim_type>::type>()},

@@ -23,6 +23,7 @@ using namespace config;
 template <SimType sim_type = SimType::Aer> 
 class QPU {
 public:
+
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend;
 
@@ -94,18 +95,37 @@ void QPU<sim_type>::_compute_result()
                     server->send_result(to_string(response));
                     
                 } else {
-                    std::vector<double> parameters = message_json.at("params");
-                    if (kernel.empty()){
-                        SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                        throw std::runtime_error("Parameters were sent before a parametric circuit.");
-                    } else {
-                        SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
-                        kernel = update_circuit_parameters(kernel, parameters);
-                        SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
-                        parameters.clear();
-                        json response = backend.run(kernel);
-                        server->send_result(to_string(response));
+                    SPDLOG_LOGGER_DEBUG(logger, "Simulator: {}", backend.backend_config.simulator);
+                    if (backend.backend_config.simulator == "AerSimulator"){
+                        SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator");
+                        std::vector<double> parameters = message_json.at("params");
+                        if (kernel.empty()){
+                            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+                        } else {
+                            SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
+                            kernel = update_circuit_parameters(kernel, parameters);
+                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            parameters.clear();
+                            json response = backend.run(kernel);
+                            server->send_result(to_string(response));
+                        }
+                    } else if (backend.backend_config.simulator == "MunichSimulator") {
+                        SPDLOG_LOGGER_DEBUG(logger, "Params of MunichSimulator");
+                        std::vector<double> parameters = message_json.at("params");
+                        if (kernel.empty()){
+                            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+                        } else {
+                            SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
+                            kernel = update_qasm_parameters(kernel, parameters);
+                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            parameters.clear();
+                            json response = backend.run(kernel);
+                            server->send_result(to_string(response));
+                        }
                     }
+                    
                 } 
             } catch(const boost::system::system_error& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, probably the client has had an error.");

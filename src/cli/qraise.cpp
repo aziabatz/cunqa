@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     if (args.fakeqmio.has_value()) {
         std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value());
         std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
-        args.backend = std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json"s;    
+        args.backend = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend.json"s;    
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";  
         SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
     }
@@ -109,6 +109,6 @@ int main(int argc, char* argv[])
     std::system("rm qraise_sbatch_tmp.sbatch");
 
     SPDLOG_LOGGER_DEBUG(logger, "Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
-    
+
     return 0;
 }
