@@ -94,18 +94,34 @@ void QPU<sim_type>::_compute_result()
                     server->send_result(to_string(response));
                     
                 } else {
-                    std::vector<double> parameters = message_json.at("params");
-                    if (kernel.empty()){
-                        SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                        throw std::runtime_error("Parameters were sent before a parametric circuit.");
-                    } else {
-                        SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
-                        kernel = update_circuit_parameters(kernel, parameters);
-                        SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
-                        parameters.clear();
-                        json response = backend.run(kernel);
-                        server->send_result(to_string(response));
+                    if (message_json.at("type") == "json"){
+                        std::vector<double> parameters = message_json.at("params");
+                        if (kernel.empty()){
+                            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+                        } else {
+                            SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
+                            kernel = update_circuit_parameters(kernel, parameters);
+                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            parameters.clear();
+                            json response = backend.run(kernel);
+                            server->send_result(to_string(response));
+                        }
+                    } else if (message_json.at("type") == "qasm") {
+                        std::vector<double> parameters = message_json.at("params");
+                        if (kernel.empty()){
+                            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+                            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+                        } else {
+                            SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
+                            kernel = update_qasm_parameters(kernel, parameters);
+                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            parameters.clear();
+                            json response = backend.run(kernel);
+                            server->send_result(to_string(response));
+                        }
                     }
+                    
                 } 
             } catch(const boost::system::system_error& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, probably the client has had an error.");

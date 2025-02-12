@@ -78,7 +78,7 @@ class Result():
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         if len(result) == 0:
-            logger.error(f"Results dictionary is empty, some error occured [{ValueError.__name__}].")
+            logger.error(f" [{ValueError.__name__}].")
             raise ValueError # I capture this error in QJob.result() when creating the object.
         
         elif "ERROR" in result:
@@ -188,6 +188,7 @@ class QJob():
         
         self._future = None
         self._result = None
+        self._type = None
             
 
 
@@ -298,9 +299,11 @@ class QJob():
 
 
             if QPU.backend.simulator == "AerSimulator":
+                self._type = "json"
                 self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
 
             elif QPU.backend.simulator == "MunichSimulator":
+                self._type = "qasm"
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
         
@@ -330,11 +333,14 @@ class QJob():
         """
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
         """
-        params = {"params":parameters}
-        self._parameters = """{}""".format(params).replace("'", '"')
+        #self._parameters = parameters #Not used
+        message = """{{"type":"{}",
+                   "params":{} }}""".format(self._type, parameters).replace("'", '"')
+        
+        self._parameters = parameters
 
         try:
-            self._future = self._QPU._qclient.send_parameters(self._parameters)
+            self._future = self._QPU._qclient.send_parameters(message)
         except Exception as error:
             logger.error(f"Some error occured when sending the new parameters [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
