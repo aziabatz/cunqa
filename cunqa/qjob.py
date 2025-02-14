@@ -190,7 +190,6 @@ class QJob():
         
         self._future = None
         self._result = None
-        self._type = None
             
 
 
@@ -301,11 +300,9 @@ class QJob():
 
 
             if QPU.backend.simulator == "AerSimulator":
-                #self._type = "json"
                 self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
 
             elif QPU.backend.simulator == "MunichSimulator":
-                #self._type = "qasm"
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
         
@@ -355,7 +352,7 @@ class QJob():
             #if self._result is None: #Important to upgrade_parameters
             try:
                 res = self._future.get()
-                logger.debug(res)
+                #logger.debug(res)
                 self._result = Result(json.loads(res), registers=self._cregisters)
             except Exception as error:
                 logger.error(f"Error while creating Results object [{type(error).__name__}]")
