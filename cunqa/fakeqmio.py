@@ -48,6 +48,7 @@ COUPLING_MAP = [
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
 parser.add_argument("backend_path", type = str, help = "Path to backend config json")
+parser.add_argument("SEED", type = int, help = "Random SEED")
 
 args = parser.parse_args()
 
@@ -86,6 +87,6 @@ backend_json = {
     "noise":noise_model_json
 }
 
-
-with open("{}/.api_simulator/tmp_fakeqmio_backend.json".format(STORE_PATH), 'w') as file:
+SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
+with open("{}/.api_simulator/tmp_fakeqmio_backend_{}.json".format(STORE_PATH, args.SEED), 'w') as file:
     json.dump(backend_json, file)
