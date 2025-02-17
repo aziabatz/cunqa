@@ -146,42 +146,46 @@ qraise -n 4 -t 01:20:30
 will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `dd-hh:mm:ss`.
 > **Note:** By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
 2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
->**Set simulator:** 
->```console
->qraise -n 4 -t 01:20:30 --sim=Munich
->```
-> The command above changes the default simulator by the [mqt-ddsim simulator](https://github.com/cda-tum/mqt-ddsim). Currently, **CUNQA** only allows two simulators: ``--sim=Aer`` and ``--sim=Munich``.
 
->**Set FakeQmio:**
->```console
->qraise -n 4 -t 01:20:30 --fakeqmio=<path/to/calibrations/file>
->```
->The `--fakeqmio` FLAG raises the QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used. With this FLAG, the background simulator is AerSimulator.
+**Set simulator:** 
+```console
+qraise -n 4 -t 01:20:30 --sim=Munich
+```
+The command above changes the default simulator by the [mqt-ddsim simulator](https://github.com/cda-tum/mqt-ddsim). Currently, **CUNQA** only allows two simulators: ``--sim=Aer`` and ``--sim=Munich``.
 
->**Set personalized backend:**
->```console
->qraise -n 4 -t 01:20:30 --backend=<path/to/backend/json>
->```
->The personalized backend has to be a *json* file with the following structure:
->```json
->{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
->```
->**Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
+**Set FakeQmio:**
+```console
+qraise -n 4 -t 01:20:30 --fakeqmio=<path/to/calibrations/file>
+```
+The `--fakeqmio` FLAG raises the QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used. With this FLAG, the background simulator is AerSimulator.
 
-> **Important:** Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
+**Set personalized backend:**
+```console
+qraise -n 4 -t 01:20:30 --backend=<path/to/backend/json>
+```
+The personalized backend has to be a *json* file with the following structure:
+```json
+{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
+```
+
+> **Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
+
+**Important:** Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
 
 ### 2. Python Program Example
 Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
 
->**Warning:** To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
+**Warning:** To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
+
 In QMIO:
->```console 
->module load qmio/hpc gcc/12.3.0 qiskit/1.2.4-python-3.9.9
->```
->In FT3:
->```console 
->module load cesga/2022 gcc/system qiskit/1.2.4
->```
+```console 
+module load qmio/hpc gcc/12.3.0 qiskit/1.2.4-python-3.9.9
+```
+
+In FT3:
+```console 
+module load cesga/2022 gcc/system qiskit/1.2.4
+```
 
 
 ```python 
