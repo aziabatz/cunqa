@@ -1,7 +1,7 @@
 # CUNQA
 Infraestructure for executing distributed quantum computations employing CESGA resources as emulated QPUs.
 
-## Clone repository
+## CLONE REPOSITORY
 In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
 
 ```console
@@ -10,20 +10,20 @@ git clone --recursive git@github.com:CESGA-Quantum-Spain/CUNQA.git
 To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
 
 ```console
-cd CUNQA/scripts/
+cd cunqa/scripts/
 bash setup_submodules.sh
 ```
 
-## Installation 
+## INSTALLATION 
 #### QMIO
 ###### Automatic configuration
-The `scripts/configure.sh` file is prepared to bring an authomatic installation of **CUNQA**. The user only has to execute this file followed by the path to the desire installation folder: 
+The `scripts/configure.sh` file is prepared to bring an automatic installation of **CUNQA**. The user only has to execute this file followed by the path to the desire installation folder: 
 
 ```console
 source configure.sh <your/installation/path>
 ``` 
 
-If the authomatic installation fails, try to the manual installation.
+If the automatic installation fails, try the manual installation.
 
 ###### Manual configuration
 1. First of all, deactivate miniconda to not interfere with the rest of the installation:
@@ -72,8 +72,10 @@ cmake --install build/
 
 In the FT3, the installation is almost the same as in QMIO but with few exceptions. 
 
-For the **authomatic configuration**, the process is exactly the same as presented in the corresponding section for QMIO.
+###### Automatic configuration
+For the **automatic configuration**, the process is exactly the same as presented in the corresponding section for QMIO.
 
+###### Manual configuration
 In the case of a **manual configuration**, follow the steps 1-4 shown above for QMIO but loading the following modules in step 2:
 
 ```console
@@ -91,9 +93,9 @@ And that's it! Everything is set—either on QMIO or in the FT3—to perform an 
 ## RUN YOUR FIRST DISTRIBUTED PROGRAM
 
 Once **CUNQA** is installed, the basic workflow to use it is:
-1. Raise the desired number of QPUs with the command `qraise`.
-2. Run circuits on the raised QPUs:
-2.1. Connect to the QPUs through the python script.
+1. Raise the desired QPUs with the command `qraise`.
+2. Run circuits on the QPUs:
+2.1. Connect to the QPUs through the python API.
 2.2. Define the circuits to execute.
 2.3. Execute the circuits on the QPUs.
 3. Drop the raised QPUs with the command `qdrop`.
@@ -105,14 +107,14 @@ The `qraise` command raises as many QPUs as desired. Each QPU can be configured 
 ```console
 qraise --help
 ```
-1. The only two mandatory FLAGS of `qraise` are the **Number of QPUs**, set up with `-n` or `--num_qpus` and the **Maximum time** the QPUs will be raised, set up with `-t` or `--time`. 
+1. The only two mandatory FLAGS of `qraise` are the **number of QPUs**, set up with `-n` or `--num_qpus` and the **maximum time** the QPUs will be raised, set up with `-t` or `--time`. 
 So, for instance, the command 
 ```console 
 qraise -n 4 -t 01:20:30
 ``` 
-will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds.  
-> **Note:** By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. **(To Improve)**
-2. The simulator and the backend configuration can be configured by the user through `qraise` FLAGs:
+will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `dd-hh:mm:ss`.
+> **Note:** By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
+2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
 >**Set simulator:** 
 >```console
 >qraise -n 4 -t 01:20:30 --sim=Munich
@@ -123,7 +125,7 @@ will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds.
 >```console
 >qraise -n 4 -t 01:20:30 --fakeqmio=<path/to/calibrations/file>
 >```
->The `--fakeqmio` FLAG raises the QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used. In this case, the background simulator is AerSimulator.
+>The `--fakeqmio` FLAG raises the QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used. With this FLAG, the background simulator is AerSimulator.
 
 >**Set personalized backend:**
 >```console
@@ -131,13 +133,13 @@ will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds.
 >```
 >The personalized backend has to be a *json* file with the following structure:
 >```json
->{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}
+>{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
 >```
 >**Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
 
 ### 2. Python Program Example
-Once the QPUs are raised, they are ready to execute any quantum circuit. The following script is a basic workflow to do that.
+Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
 
 >**Warning:** To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
 In QMIO:
@@ -186,7 +188,7 @@ result = job.result() # Get the result of the execution
 counts = result.get_counts() 
 ```
 
-**Note:** It is not mandatory to run a QuantumCircuit from Qiskit. You can also send the circuit in *OpenQASM 2.0* format or in *json* format. The last with the following structure: 
+**Note:** It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* and *json* format. The last with the following structure: 
 ```json
 {"instructions": [{"name": "h", "qubits": [0], "params": []},{"name": "cx", "qubits": [0, 1], "params": []}, {"name": "rx", "qubits": [0], "params": [0.39528385768119634]}, {"name": "measure", "qubits": [0], "memory": [0]}], "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
 
@@ -199,7 +201,7 @@ qdrop SLURM_JOB_ID
 ```
 Note that the ```SLURM_JOB_ID``` can be obtained, for instance, executing the `squeue` command.
 
-If the user wants to drop all the raised QPUs, just make:
+If the user wants to drop all the raised QPUs, just execute:
 ```console 
 qdrop --all
 ```
