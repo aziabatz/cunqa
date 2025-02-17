@@ -74,7 +74,7 @@ In the FT3, the installation is almost the same as in QMIO but with few exceptio
 
 For the **authomatic configuration**, the process is exactly the same as presented in the corresponding section for QMIO.
 
-In the case of a **manual configuration**, the 1-4 steps are equal as in QMIO but loading the following modules in step 2:
+In the case of a **manual configuration**, follow the steps 1-4 shown above for QMIO but loading the following modules in step 2:
 
 ```console
 ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
@@ -98,10 +98,10 @@ Once **CUNQA** is installed, the basic workflow to use it is:
 2.3. Execute the circuits on the QPUs.
 3. Drop the raised QPUs with the command `qdrop`.
 
-Please, note that steps 1-4 of the [Installation section](#installation) have to be donde every time **CUNQA** wants to be used.
+Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
 ### 1. `qraise`command
-This command allows to raise as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
+The `qraise` command raises as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
 ```console
 qraise --help
 ```
