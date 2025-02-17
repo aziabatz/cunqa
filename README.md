@@ -60,7 +60,7 @@ cmake --build build/
 cmake --install build/
 ```
 
-**Using ninja (faster)**
+**Using [Ninja](https://ninja-build.org/) (faster)**
 ```console
 cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
@@ -123,7 +123,7 @@ will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds.
 >```console
 >qraise -n 4 -t 01:20:30 --fakeqmio=<path/to/calibrations/file>
 >```
->The `--fakeqmio` FLAG raises QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used.
+>The `--fakeqmio` FLAG raises the QPUs as simulated [QMIO](https://www.cesga.es/infraestructuras/cuantica/)s. If no `<path/to/calibrations/file>` is provided, last calibrations of de QMIO are used. In this case, the background simulator is AerSimulator.
 
 >**Set personalized backend:**
 >```console
@@ -133,7 +133,7 @@ will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds.
 >```json
 >{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}
 >```
->**Note:** The "noise" key must be covered with a json with noise supported by the chosen simulator.
+>**Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
 
 ### 2. Python Program Example
