@@ -103,16 +103,40 @@ cmake --install build/
 In the FT3, the installation is almost the same as in QMIO but with few exceptions. 
 
 #### Automatic installation
-For the **automatic installation**, the process is exactly the same as the one presented for QMIO.
+For the **automatic installation**, the process is exactly the same as the one presented for QMIO:
+
+```console
+source configure.sh <your/installation/path>
+``` 
 
 #### Manual installation
-In the case of a **manual installation**, follow the steps 1-4 shown above for QMIO but loading the following modules in step 2:
+In the case of a **manual installation**, the steps 1-4 are analogous to the shown above for QMIO:
+
+1. Conda deactivation:
+
+```console
+conda deactivate
+```
+
+2. Loading modules:
 
 ```console
 ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
 ```
 
-For step 5, instead of a simple `cmake -B build/`, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
+3. INSTALL_PATH:
+
+```console
+export INSTALL_PATH=<your/installation/path>
+```
+
+4. Bin PATH:
+
+```console
+export PATH=$PATH:$INSTALL_PATH/bin
+```
+
+5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
 
 ```console
 cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/share/cmake/pybind11
