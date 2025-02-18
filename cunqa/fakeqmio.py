@@ -65,14 +65,11 @@ else:
 noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
 
-with open(INSTALL_PATH + "/include/utils/basis_gates.json", "r") as gates_file:
-    gates = json.load(gates_file)
 
 backend_json = {
     "backend":{
         "name": "FakeQmio", 
         "version": args.backend_path,
-        "simulator": "AerSimulator",
         "n_qubits": 32, 
         "url": "",
         "is_simulator": True,

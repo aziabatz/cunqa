@@ -246,6 +246,9 @@ circuit
 
 modules_alvaro.sh
 installations/
+config_alvaro.sh
+local_tests/
+memory_tests/
 local_tests/
 main_param.cpp
 mqt-ddsim/
