@@ -73,7 +73,6 @@ void QPU<sim_type>::_compute_result()
     json kernel = {}; 
     while (true) 
     {
-        SPDLOG_LOGGER_INFO(logger, "We set up the lock for .");
         std::unique_lock<std::mutex> lock(queue_mutex_);
         queue_condition_.wait(lock, [this] { return !message_queue_.empty(); });
 
