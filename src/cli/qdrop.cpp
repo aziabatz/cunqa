@@ -37,10 +37,13 @@ int isValidSlurmJobID(uint32_t jobID)
     slurm_fini();
     return found;
 }
+
 void removeAllJobs(std::string& id_str)
 {
     job_info_msg_t *jobInfoMsg = nullptr;
+
     slurm_init(NULL);
+
     int ret = slurm_load_job_user(&jobInfoMsg, static_cast<uint32_t>(getuid()), SHOW_LOCAL);
     if (ret != SLURM_SUCCESS) {
         SPDLOG_LOGGER_ERROR(logger, "Could not retrieve the SLURM jobs. {}", slurm_strerror(ret));
@@ -53,20 +56,23 @@ void removeAllJobs(std::string& id_str)
             }
         }
     }
+
     slurm_free_job_info_msg(jobInfoMsg);
     slurm_fini();
 }
-int main(int argc, char* argv[])
+
+int main(int argc, char* argv[]) 
 {
     auto args = argparse::parse<MyArgs>(argc, argv);
     std::string install_path = getenv("INSTALL_PATH");
     setenv("SLURM_CONF", (install_path + "/slurm.conf").c_str(), 1);
     std::string id_str;
     std::string cmd;
+
     if (args.all) {
         if (args.ids.has_value())
         std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You arr setting the --all flag and putting IDs (every qraise process will be eliminated).\n";
-        removeAllJobs(id_str);
+        removeAllJobs(id_str); 
         if (id_str.empty()) {
             std::cerr << "\033[1;31m" << "Error: " << "\033[0m" << "No qraise jobs are currently running.\n";
             return -1;
@@ -92,6 +98,7 @@ int main(int argc, char* argv[])
             }
         }
     }
+    
     std::system(("scancel "s + id_str).c_str());
     std::cout << "Removed job(s) with ID(s): \033[1;32m"
                     << id_str
