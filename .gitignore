@@ -252,5 +252,6 @@ memory_tests/
 local_tests/
 main_param.cpp
 mqt-ddsim/
+upgrade_params_benchmarking/
 
 

@@ -1,10 +1,15 @@
 #include <string>
 #include <fstream>
 #include <regex>
+#include <any>
+#include <nlohmann/json.hpp>
+#include <iostream>
 
 #include "argparse.hpp"
 #include "logger/logger.hpp"
 #include "constants.hpp"
+
+using json = nlohmann::json;
 
 using namespace std::literals;
 
@@ -79,14 +84,19 @@ int main(int argc, char* argv[])
         std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
     }
 
-    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
+    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpus.json\n";
 
+    std::string backend_path;
+    json backend_json = {};
+    std::string backend;
     if (args.fakeqmio.has_value()) {
-        std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value());
-        std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
-        args.backend = std::getenv("STORE") + "/.api_simulator/fakeqmio_backend.json"s;    
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";  
-        SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+        backend_path = std::any_cast<std::string>(args.fakeqmio.value());
+        backend_json = {
+            {"fakeqmio_path", backend_path}
+        };
+        backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
+        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";  
+        SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
     }
         
     if (args.backend.has_value()) {
@@ -95,8 +105,13 @@ int main(int argc, char* argv[])
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 0;
         } else {
-            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";
-            SPDLOG_LOGGER_DEBUG(logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
+            backend_path = std::any_cast<std::string>(args.backend.value());
+            backend_json = {
+                {"backend_path", backend_path}
+            };
+            backend = R"({"backend_path":")" + backend_path + R"("})" ;
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";
+            SPDLOG_LOGGER_DEBUG(logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
         }
     } else {
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";

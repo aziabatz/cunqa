@@ -42,7 +42,7 @@ public:
         if (filepath.has_value())
             final_filepath = filepath.value();
         else
-            final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
+            final_filepath = std::getenv("STORE") + "/.api_simulator/qpus.json"s;
         std::ifstream file(final_filepath);  
 
         if (!file.is_open()) {
