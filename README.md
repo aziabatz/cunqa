@@ -189,7 +189,7 @@ qraise -n 4 -t 01:20:30 --backend=<path/to/backend/json>
 ```
 The personalized backend has to be a *json* file with the following structure:
 ```json
-{"backend":{"name": "BackendExample", "version": "0.0","simulator": "AerSimulator", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
+{"backend":{"name": "BackendExample", "version": "0.0", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
 ```
 
 > **Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
