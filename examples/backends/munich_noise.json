@@ -2,7 +2,6 @@
     "backend":{
         "name": "FakeMunich", 
         "version": "",
-        "simulator": "MunichSimulator",
         "n_qubits": 32,
         "url": "",
         "is_simulator": true,

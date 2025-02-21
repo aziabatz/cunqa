@@ -20,6 +20,16 @@ using namespace config;
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
 #endif
 
+class ServerException : public std::exception {
+    std::string message;
+public:
+    explicit ServerException(const std::string& msg) : message(msg) { }
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
 class Server {
     std::unique_ptr<SelectedServer> comm_strat;
 public:
@@ -32,7 +42,13 @@ public:
     
     inline void accept() { comm_strat->accept(); }
 
-    inline void send_result(const std::string& result) { comm_strat->send_result(result); }
+    inline void send_result(const std::string& result) { 
+        try {
+            comm_strat->send_result(result);
+        } catch (const std::exception& e) {
+            throw ServerException(e.what());
+        }
+    }
 
     inline void close() {comm_strat->close(); }
 };

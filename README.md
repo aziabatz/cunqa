@@ -47,7 +47,7 @@ bash setup_submodules.sh
 ## INSTALLATION 
 ### QMIO
 #### Automatic installation
-The `scripts/configure.sh` file is prepared to bring an automatic installation of **CUNQA**. The user only has to execute this file followed by the path to the desire installation folder: 
+The `scripts/configure.sh` file is prepared to bring an automatic installation of the **CUNQA** platform. The user only has to execute this file followed by the path to the desire installation folder: 
 
 ```console
 source configure.sh <your/installation/path>

@@ -71,7 +71,6 @@ backend_json = {
     "backend":{
         "name": "FakeQmio", 
         "version": args.backend_path,
-        "simulator": "AerSimulator",
         "n_qubits": 32, 
         "url": "",
         "is_simulator": True,
