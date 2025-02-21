@@ -30,7 +30,8 @@ public:
             circuits.push_back(std::make_shared<Circuit>(circuit));
 
             json run_config_json(run_config);
-            Config aer_default(run_config_json);
+            Config aer_config(run_config_json);
+            aer_config.seed_simulator = rund_config.seed;
 
             Noise::NoiseModel noise_model(noise_model_json);
             Result result = controller_execute<Controller>(circuits, noise_model, aer_default);

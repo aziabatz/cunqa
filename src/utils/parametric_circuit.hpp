@@ -81,6 +81,9 @@ json update_circuit_parameters(json& circuit, const std::vector<double>& params)
 
 
 json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
+    std::string circuit_str = circuit.dump();
+
+    SPDLOG_LOGGER_ERROR(logger, "Circuit: ", circuit_str);
 
     if (!circuit.contains("instructions")) {
         throw std::runtime_error("Invalid circuit format, circuit must have an instruction field.");
@@ -89,6 +92,7 @@ json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
     try{
 
         std::string qasmCode = circuit.at("instructions");
+        SPDLOG_LOGGER_ERROR(logger, "Instructions read ok.");
         std::regex paramRegex(R"((rx|ry|rz|u1|u2|u3)\(\s*([0-9]*\.?[0-9]+)\s*\))");  // Match gate parameters
         std::smatch match;
 
@@ -96,13 +100,19 @@ json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
         size_t paramIndex = 0;
 
         auto words_begin = std::sregex_iterator(qasmCode.begin(), qasmCode.end(), paramRegex);
+        SPDLOG_LOGGER_ERROR(logger, "Words begin() ok.");
         auto words_end = std::sregex_iterator();
 
         // Check if the number of parameters match
         size_t numParamsFound = std::distance(words_begin, words_end);
         if (numParamsFound != params.size()) {
+            SPDLOG_LOGGER_ERROR(logger, "Dentro if ok.");
+            std::cout << "Num params found: " << (int)numParamsFound << "\nparams.size()" << (int)params.size() << "\n";
             throw std::runtime_error("Number of parameters in QASM does not match provided values.");
         }
+
+
+        SPDLOG_LOGGER_ERROR(logger, "Parameters ok.");
 
         for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
             std::string oldValue = (*i)[2].str();  // Extract old numeric value
@@ -112,12 +122,16 @@ json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
             updatedQasm = std::regex_replace(updatedQasm, std::regex(R"(\b)" + oldValue + R"(\b)"), newValue, std::regex_constants::format_first_only);
         }
 
+        SPDLOG_LOGGER_ERROR(logger, "For ok.");
+
         circuit.at("instructions") = updatedQasm;
+
+        SPDLOG_LOGGER_ERROR(logger, "Instructions ok.");
 
         return circuit;
 
     } catch (const std::exception& e) {
         SPDLOG_LOGGER_ERROR(logger, "Error updating qasm parameters. (check correct size).");
-        throw std::runtime_error("Error updating qasm parameters.");
+        throw std::runtime_error("Error updating qasm parameters: "+ std::string(e.what()));
     }
 }

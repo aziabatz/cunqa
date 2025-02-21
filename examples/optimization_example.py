@@ -25,15 +25,15 @@ def hardware_efficient_ansatz(num_qubits, num_layers):
     qc.measure_all()
     return qc
 
-num_qubits = 8
-num_layers = 2
+num_qubits = 6
+num_layers = 3
 ansatz = hardware_efficient_ansatz(num_qubits, num_layers)
 num_parameters = ansatz.num_parameters
 print(num_parameters)
 
 ################################################################################################
 
-from cunqa.qpu import getQPUs, QPUMapper, QJobMapper, gather
+from cunqa import getQPUs, QJobMapper, gather
 from qiskit.circuit import Parameter
 
 qpus = getQPUs()

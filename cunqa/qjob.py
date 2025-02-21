@@ -312,6 +312,7 @@ class QJob():
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
 
             logger.debug("QJob created.")
+            logger.debug(self._execution_config)
 
         
         except KeyError as error:
@@ -341,6 +342,10 @@ class QJob():
     def upgrade_parameters(self, parameters):
         """
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
+
+        Args:
+        -----------
+        parameters (list[float]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
