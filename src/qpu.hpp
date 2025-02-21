@@ -133,7 +133,7 @@ void QPU<sim_type>::_compute_result()
             } catch(const std::exception& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());
-                server->send_result("{\"ERROR\":"s + e.what() + "}"s);
+                server->send_result("{\"ERROR\":\""s + std::string(e.what()) + "\"}"s);
                 
             }
             lock.lock();

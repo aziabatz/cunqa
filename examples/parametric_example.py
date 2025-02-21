@@ -22,7 +22,6 @@ for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}.")
 
 qpu0 = qpus[-1]
-kk
 
 theta=1.57079
 qc = QuantumCircuit(2)
@@ -31,7 +30,7 @@ qc.measure_all()
 
 
 
-job = qpu0.run(qc, transpile = False, shots=1000)
+job = qpu0.run(qc, transpile = True, shots=1000)
 print(job.result().get_counts())
 
 

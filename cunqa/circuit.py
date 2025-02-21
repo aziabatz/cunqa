@@ -205,7 +205,9 @@ def from_json_to_qc(circuit_dict):
                     logger.error(f"Bit {bit} not found in {bits}, please check the format of the circuit json.")
                     raise IndexError
                 qc.append(inst)
+                
         return qc
+    
     except KeyError as error:
         logger.error(f"Some error with the keys of `instructions` occured, please check the format [{type(error).__name__}].")
         raise error
@@ -260,6 +262,7 @@ def registers_dict(qc):
 
     for i,k in enumerate(classical_registers.keys()):
         classical_registers[k] = counts[i]
+
     return [quantum_registers, classical_registers]
 
 

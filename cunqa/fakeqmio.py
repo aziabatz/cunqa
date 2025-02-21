@@ -2,7 +2,6 @@ import os
 import glob
 import argparse
 import json
-
 from qmiotools.integrations.qiskitqmio import FakeQmio 
 from qiskit_aer.noise import NoiseModel
 
