@@ -6,7 +6,7 @@
 #include <string>
 
 #include <cstdlib>   // For rand() and srand()
-#include <ctime> 
+#include <chrono> 
 
 #include "comm/server.hpp"
 #include "backend.hpp"
@@ -58,6 +58,7 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) :
 template <SimType sim_type>
 void QPU<sim_type>::turn_ON() 
 {
+    SPDLOG_LOGGER_INFO(logger, "We set up the server.");
     server = std::make_unique<Server>(qpu_config.net_config);
 
     std::thread listen([this](){this->_recv_data();});
@@ -89,10 +90,15 @@ void QPU<sim_type>::_compute_result()
                 // This does not refer to the field `params` for a specific gate, but
                 // for a separated field specifying the new set of parameters
                 if (!message_json.contains("params")){ 
-                    SPDLOG_LOGGER_DEBUG(logger, "A circuit was received {}", message); 
+                    SPDLOG_LOGGER_DEBUG(logger, "A circuit was received {}", message);
                     kernel = message_json;
+                    std::chrono::steady_clock::time_point begin_run_time = std::chrono::steady_clock::now();
                     json response = backend.run(kernel);
+                    std::chrono::steady_clock::time_point end_run_time = std::chrono::steady_clock::now();
+                    SPDLOG_LOGGER_DEBUG(logger, "Normal run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_run_time - begin_run_time).count());
                     server->send_result(to_string(response));
+                    
+
                     
                 } else {
                     SPDLOG_LOGGER_DEBUG(logger, "Simulator: {}", backend.backend_config.simulator);
@@ -103,11 +109,17 @@ void QPU<sim_type>::_compute_result()
                             SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
                             throw std::runtime_error("Parameters were sent before a parametric circuit.");
                         } else {
-                            SPDLOG_LOGGER_DEBUG(logger, "Parameters received {}", message);
+                            SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
+                            std::chrono::steady_clock::time_point begin_upgrade_time = std::chrono::steady_clock::now();
                             kernel = update_circuit_parameters(kernel, parameters);
+                            std::chrono::steady_clock::time_point end_upgrade_time = std::chrono::steady_clock::now();
                             SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            SPDLOG_LOGGER_DEBUG(logger, "Time upgrade_params: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_upgrade_time - begin_upgrade_time).count());
                             parameters.clear();
+                            std::chrono::steady_clock::time_point begin_up_run_time = std::chrono::steady_clock::now();
                             json response = backend.run(kernel);
+                            std::chrono::steady_clock::time_point end_up_run_time = std::chrono::steady_clock::now();
+                            SPDLOG_LOGGER_DEBUG(logger, "UP run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_up_run_time - begin_up_run_time).count());
                             server->send_result(to_string(response));
                         }
                     } else if (backend.backend_config.simulator == "MunichSimulator") {
@@ -127,9 +139,9 @@ void QPU<sim_type>::_compute_result()
                     }
                     
                 } 
-            } catch(const boost::system::system_error& e) {
+            } catch(const ServerException& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, probably the client has had an error.");
-                SPDLOG_LOGGER_ERROR(logger, "Boost message of the error: {}", e.what());
+                SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());
             } catch(const std::exception& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());

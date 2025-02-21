@@ -19,12 +19,14 @@ enum GATES {
     Y,
     Z,
     H,
+    SX,
     RX,
     RY,
     RZ,
     CX,
     CY,
-    CZ
+    CZ,
+    ECR
 };
 
 std::unordered_map<std::string, int> GATE_NAMES = {
@@ -37,6 +39,9 @@ std::unordered_map<std::string, int> GATE_NAMES = {
     {"y", Y},
     {"z", Z},
     {"h", H},
+    {"sx", SX},
+
+
 
     // ONE GATE PARAM
     {"rx", RX},
@@ -47,6 +52,7 @@ std::unordered_map<std::string, int> GATE_NAMES = {
     {"cx", CX},
     {"cy", CY},
     {"cz", CZ},
+    {"ecr", ECR},
 };
 
 std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
@@ -56,12 +62,14 @@ std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {Y, "y"},
     {Z, "z"},
     {H, "h"},
+    {SX, "sx"},
     {RX, "rx"},
     {RY, "ry"},
     {RZ, "rz"},
     {CX, "cx"},
     {CY, "cy"},
     {CZ, "cz"},
+    {ECR, "ecr"},
 };
 
 const std::vector<std::string> BASIS_GATES_JSON = {

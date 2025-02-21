@@ -113,7 +113,7 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 {
     j.at("name").get_to(backend_conf.name);
     j.at("version").get_to(backend_conf.version);
-    j.at("simulator").get_to(backend_conf.simulator);
+    //j.at("simulator").get_to(backend_conf.simulator);
     j.at("n_qubits").get_to(backend_conf.n_qubits);
     j.at("url").get_to(backend_conf.url);
     j.at("is_simulator").get_to(backend_conf.is_simulator);

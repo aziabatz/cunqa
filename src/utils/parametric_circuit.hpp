@@ -25,20 +25,12 @@ std::vector<double> get_circuit_parameters(const json& circuit = empty_json, std
 
         std::string name = instruction.at("name");
         switch(GATE_NAMES[name]){
-            case MEASURE:
-            case ID:
-            case X:
-            case Y:
-            case Z:
-            case H:
-            case CX:
-            case CY:
-            case CZ:
-                break;
             case RX:
             case RY:
             case RZ:
                 list_params.push_back(instruction.at("params")[0]);
+                break;
+            default:
                 break;
         }
     }

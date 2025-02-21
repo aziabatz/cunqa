@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-import scipy.optimize
+#import scipy.optimize
 import random
 
 from qiskit import QuantumCircuit

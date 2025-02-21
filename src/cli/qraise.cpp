@@ -2,19 +2,24 @@
 #include <fstream>
 #include <regex>
 
+#include <cstdlib> //Alvaro
+#include <string>
+
 #include "argparse.hpp"
 #include "logger/logger.hpp"
 #include "constants.hpp"
+
 
 using namespace std::literals;
 
 struct MyArgs : public argparse::Args 
 {
+    //int& node = kwarg("node", "Specific node to raise the qpus."); //Alvaro 
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                    = kwarg("t,time", "Time for the QPUs to be raised.");
-    std::optional<std::string>& backend  = kwarg("b,backend_path", "Path to the backend config file.");
+    std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
-    std::string& mem_per_qpu             = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
+    std::string& mem_per_qpu             = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("7G");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
 
     void welcome() {
@@ -36,6 +41,9 @@ bool check_mem_format(const std::string& mem)
 
 int main(int argc, char* argv[]) 
 {
+    srand((unsigned int)time(NULL));
+    int intSEED = rand() % 1000;
+    std::string SEED = std::to_string(intSEED);
     auto args = argparse::parse<MyArgs>(argc, argv);
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
@@ -46,6 +54,7 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH -c 2 \n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
     sbatchFile << "#SBATCH -N 1 \n";
+    // sbatchFile << "#SBATCH --nodelist=c7-" << args.node << "\n"; //Alvaro
 
     // TODO: Can the user decide the number of cores?
     if (check_mem_format(args.mem_per_qpu)){
@@ -80,11 +89,12 @@ int main(int argc, char* argv[])
     }
 
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpu.json\n";
+    sbatchFile << "export SEED=" << SEED << "\n";
 
     if (args.fakeqmio.has_value()) {
-        std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value());
+        std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + args.fakeqmio.value() + " " + SEED);
         std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
-        args.backend = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend.json"s;    
+        args.backend = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend_"s + SEED + ".json"s;    
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << args.backend.value().c_str() << "\n";  
         SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), args.backend.value().c_str());
     }
