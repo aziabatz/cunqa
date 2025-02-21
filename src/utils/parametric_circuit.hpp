@@ -92,7 +92,7 @@ json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
     }
 
     std::string qasmCode = circuit.at("instructions");
-    std::regex paramRegex(R"((rx|ry|rz|u1|u2|u3)\(\s*([0-9]*\.?[0-9]+)\s*\))");
+    std::regex paramRegex(R"((rx|ry|rz|u1|u2|u3)\(\s*(-?[0-9]*\.?[0-9]+)\s*\))");
     std::smatch match;
 
     std::string updatedQasm = qasmCode;
