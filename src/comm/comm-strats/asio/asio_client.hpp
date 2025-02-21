@@ -67,8 +67,8 @@ private:
         try {
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(data));
-            SPDLOG_LOGGER_DEBUG(logger, "Circuit sent.");
-            SPDLOG_LOGGER_DEBUG(logger, "Circuit sent: {}", data);
+            SPDLOG_LOGGER_DEBUG(logger, "Message sent.");
+            //SPDLOG_LOGGER_DEBUG(logger, "Message sent: ", data);
         } catch (const boost::system::system_error& e) {
             SPDLOG_LOGGER_ERROR(logger, "Error sending the circuit.");
         }
