@@ -121,7 +121,7 @@ conda deactivate
 2. Loading modules:
 
 ```console
-ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
+ml load cesga/2020 gcc/12.3.0 flexiblas/3.3.0 openmpi-runtime/3.1.4 boost python/3.9.9 pybind11/2.12.0-python-3.9.9 cmake/3.23.1 twl-ninja/0.97-cluster_only
 ```
 
 3. INSTALL_PATH:
@@ -139,7 +139,7 @@ export PATH=$PATH:$INSTALL_PATH/bin
 5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
 
 ```console
-cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/share/cmake/pybind11
+cmake -B build/ -DPYBIND_PATH=/opt/cesga/2020/software/Core/pybind11/2.12.0-python-3.9.9/lib/python3.9/site-packages/pybind11/share/cmake/pybind11/
 ```
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 

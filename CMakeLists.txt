@@ -11,7 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
 
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
-cmake_policy(SET CMP0144 OLD)
+message(STATUS "${CMAKE_VERSION}")
+if(${CMAKE_VERSION} VERSION_EQUAL "3.27.6")
+    cmake_policy(SET CMP0144 OLD)
+endif()
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 if(NOT DEFINED ENV{INSTALL_PATH})

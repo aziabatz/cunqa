@@ -16,15 +16,12 @@ using namespace config;
 #if COMM_LIB == ASIO
     #include "comm-strats/asio/asio_client.hpp"
     using SelectedClient = AsioClient;
-    using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq_comm.hpp"
-    using SelectedClient = ZMQClient;
-    using Future = std::future<std::string>;
+    #include "comm-strats/zmq/zmq_client.hpp"
+    using SelectedClient = ZmqClient;
 #elif COMM_LIB == CROW
     #include "comm-strats/crow_comm.hpp"
     using SelectedClient = CrowClient;
-    using Future = std::future<std::string>;
 #else
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
 #endif
@@ -38,18 +35,17 @@ public:
     Client(const std::optional<std::string> &filepath) :
         comm_strat{std::make_unique<SelectedClient>()} 
     { 
-        std::string final_filepath;
-        if (filepath.has_value())
-            final_filepath = filepath.value();
-        else
-            final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
-        std::ifstream file(final_filepath);  
-
-        if (!file.is_open()) {
-            std::cerr << "Cannot open the JSON file\n";
-        }
-
         try {
+            std::string final_filepath;
+            if (filepath.has_value())
+                final_filepath = filepath.value();
+            else
+                final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
+            
+            std::ifstream file(final_filepath);  
+            if (!file.is_open())
+                std::cerr << "Cannot open the JSON file\n";
+            
             file >> qpus_json;
         } catch (const json::parse_error& e) {
             std::cerr << "Error parsing the QClient info into JSON: " << e.what() << "\n";
