@@ -80,44 +80,43 @@ json update_circuit_parameters(json& circuit, const std::vector<double>& params)
 }
 
 
-json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
+// Function to escape special characters in a regex pattern
+std::string regex_escape(const std::string& str) {
+    static const std::regex special_chars(R"([-[\]{}()*+?.,\^$|#\s])");
+    return std::regex_replace(str, special_chars, R"(\$&)");
+}
 
+json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
     if (!circuit.contains("instructions")) {
         throw std::runtime_error("Invalid circuit format, circuit must have an instruction field.");
     }
 
-    try{
+    std::string qasmCode = circuit.at("instructions");
+    std::regex paramRegex(R"((rx|ry|rz|u1|u2|u3)\(\s*(-?[0-9]*\.?[0-9]+)\s*\))");
+    std::smatch match;
 
-        std::string qasmCode = circuit.at("instructions");
-        std::regex paramRegex(R"((rx|ry|rz|u1|u2|u3)\(\s*([0-9]*\.?[0-9]+)\s*\))");  // Match gate parameters
-        std::smatch match;
+    std::string updatedQasm = qasmCode;
+    size_t paramIndex = 0;
 
-        std::string updatedQasm = qasmCode;
-        size_t paramIndex = 0;
+    auto words_begin = std::sregex_iterator(qasmCode.begin(), qasmCode.end(), paramRegex);
+    auto words_end = std::sregex_iterator();
 
-        auto words_begin = std::sregex_iterator(qasmCode.begin(), qasmCode.end(), paramRegex);
-        auto words_end = std::sregex_iterator();
-
-        // Check if the number of parameters match
-        size_t numParamsFound = std::distance(words_begin, words_end);
-        if (numParamsFound != params.size()) {
-            throw std::runtime_error("Number of parameters in QASM does not match provided values.");
-        }
-
-        for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
-            std::string oldValue = (*i)[2].str();  // Extract old numeric value
-            std::string newValue = std::to_string(params[paramIndex++]);
-
-            // Replace the found value in the QASM string
-            updatedQasm = std::regex_replace(updatedQasm, std::regex(R"(\b)" + oldValue + R"(\b)"), newValue, std::regex_constants::format_first_only);
-        }
-
-        circuit.at("instructions") = updatedQasm;
-
-        return circuit;
-
-    } catch (const std::exception& e) {
-        SPDLOG_LOGGER_ERROR(logger, "Error updating qasm parameters. (check correct size).");
-        throw std::runtime_error("Error updating qasm parameters.");
+    size_t numParamsFound = std::distance(words_begin, words_end);
+    if (numParamsFound != params.size()) {
+        throw std::runtime_error("Number of parameters in QASM does not match provided values.");
     }
+
+    for (std::sregex_iterator i = words_begin; i != words_end; ++i) {
+        std::string oldValue = (*i)[2].str();  // Extract old numeric value
+        std::string newValue = std::to_string(params[paramIndex++]);
+
+        // Replace the found value in the QASM string
+        std::string oldInstruction = (*i).str();
+        std::string newInstruction = std::regex_replace(oldInstruction, std::regex(regex_escape(oldValue)), newValue);
+        updatedQasm.replace(updatedQasm.find(oldInstruction), oldInstruction.length(), newInstruction);
+    }
+
+    circuit["instructions"] = updatedQasm;
+
+    return circuit;
 }
