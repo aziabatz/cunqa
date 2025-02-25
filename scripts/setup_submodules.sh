@@ -21,23 +21,15 @@ cd src/third-party/argparse && git read-tree -mu HEAD
 
 cd ../../../
 
-git submodule add --name libzmq git@github.com:zeromq/libzmq.git src/third-party/libzmq
-git submodule init
-git submodule update
-
-cd src/third-party/libzmq
-git rev-parse v4.3.4
-git reset --hard v4.3.4
-
-git submodule add --name zmq git@github.com:zeromq/cppzmq.git src/third-party/zmq
-git submodule init
-git submodule update
-
-cd src/third-party/zmq
-git rev-parse v4.10.0
-git reset --hard v4.10.0
-
-git config core.sparsecheckout true && cd ../../../
+cd src/third-party/zmq && git config core.sparsecheckout true && cd ../../../
 echo zmq.hpp >> .git/modules/zmq/info/sparse-checkout 
 echo zmq_addon.hpp >> .git/modules/zmq/info/sparse-checkout 
 cd src/third-party/zmq && git read-tree -mu HEAD 
+
+#git submodule add --name libzmq git@github.com:zeromq/libzmq.git src/third-party/libzmq
+#git submodule init
+#git submodule update
+
+#cd src/third-party/libzmq
+#git rev-parse v4.3.4
+#git reset --hard v4.3.4
