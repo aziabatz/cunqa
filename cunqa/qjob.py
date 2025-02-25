@@ -61,6 +61,7 @@ class Result():
 
         registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
         """
+        logger.debug(f"Result recived: {result}\n")
 
         if type(result) == dict:
             self.result = result

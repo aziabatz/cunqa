@@ -4,6 +4,10 @@ from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error
 from cunqa.circuit import from_json_to_qc
+from cunqa.qpu import QPU
+import numpy as np
+
+
 
 class QJobMapper:
     """
@@ -19,7 +23,6 @@ class QJobMapper:
 
         """
         self.qjobs = qjobs
-        self.i = 0  # starting point
         logger.debug(f"QJobMapper initialized with {len(qjobs)} QJobs.")
 
     def __call__(self, func, population):
@@ -36,20 +39,16 @@ class QJobMapper:
         ---------
         List of results of the function applied to the QJobs for the given population.
         """
-
-        qjobs = []
-
-        for params in population:
-            qjob = self.qjobs[self.i % len(self.qjobs)]
-
+        qjobs_ = []
+        for i, params in enumerate(population):
+            qjob = self.qjobs[i]
             logger.debug(f"Uptading params for QJob {qjob} in QPU {qjob._QPU.id}...")
-            qjobs.append(qjob.upgrade_parameters(params.tolist()))
-
-            self.i += 1
+            qjob.upgrade_parameters(params.tolist())
+            qjobs_.append(qjob)
 
         logger.debug("About to gather results ...")
-        results = gather(qjobs)
-        self.i = 0
+        results = gather(qjobs_) # we only gather the qjobs we upgraded.
+
         return [func(result) for result in results]
 
 
@@ -57,7 +56,7 @@ class QPUCircuitMapper:
     """
     Class to map the function `qpu.QPU.run()` to a list of QPUs.
     """
-    def __init__(self, qpus, circuit, transpile = False, initial_layout = None, **run_parameters):
+    def __init__(self, qpus, ansatz, transpile = False, initial_layout = None, **run_parameters):
         """
         Initializes the QPUCircuitMapper class.
 
@@ -76,36 +75,13 @@ class QPUCircuitMapper:
         """
         self.qpus = qpus
 
-        try:
-            if isinstance(circuit, dict):
-                self.circuit = from_json_to_qc(circuit)
+        if isinstance(ansatz, QuantumCircuit):
+            self.ansatz = ansatz
 
-            elif isinstance(circuit, QuantumCircuit):
-                self.circuit = circuit
-                
-            elif isinstance(circuit, str):
-            
-                circuit = QuantumCircuit.from_qasm_str(circuit)
-            
-                self.circuit = circuit
+        else:
+            logger.error(f"Parametric circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(ansatz)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
 
-            else:
-                logger.error(f"Circuit must be dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
-                raise SystemExit # User's level
-            
-        except QASM2Error as error:
-            logger.error(f"Error with QASM2 string, please check that the sintex is correct [{type(error).__name__}]: {error}.")
-            raise SystemExit # User's level
-        
-        except  QiskitError as error:
-            logger.error(f"Error with QuantumCircuit [{type(error).__name__}]: {error}.")
-            raise SystemExit # User's level
-        
-        except Exception as error:
-            logger.error(f"Some error occurred with the circuit format [{type(error).__name__}]: {error}")
-            raise SystemExit # User's level
-            
-        self.i = 0  # starting point
         self.transpile = transpile
         self.initial_layout = initial_layout
         self.run_parameters = run_parameters
@@ -129,18 +105,25 @@ class QPUCircuitMapper:
 
         qjobs = []
 
-        for params in population:
-            qpu = self.qpus[self.i % len(self.qpus)]
-            circuit_assembled = self.circuit.assign_parameters(params)
+        try:
+            for i, params in enumerate(population):
+                qpu = self.qpus[i % len(self.qpus)]
+                circuit_assembled = self.ansatz.assign_parameters(params)
 
-            logger.debug(f"Sending QJob to QPU {qpu.id}...")
-            qjobs.append(qpu.run(circuit_assembled, transpile = self.transpile, initial_layout = self.initial_layout, **self.run_parameters))
+                logger.debug(f"Sending QJob to QPU {qpu.id}...")
+                qjobs.append(qpu.run(circuit_assembled, transpile = self.transpile, initial_layout = self.initial_layout, **self.run_parameters))
+
             
-            self.i += 1
+            logger.debug(f"About to gather {len(qjobs)} results ...")
+            results = gather(qjobs)
+
+            return [func(result) for result in results]
+
         
-        logger.debug("About to gather results ...")
-        results = gather(qjobs)
-
-        self.i = 0
-
-        return [func(result) for result in results]
+        except  QiskitError as error:
+            logger.error(f"Error while assigning parameters to QuantumCircuit, please check they have the correct size [{type(error).__name__}]: {error}.")
+            raise SystemExit # User's level
+        
+        except Exception as error:
+            logger.error(f"Some error occurred with the circuit [{type(error).__name__}]: {error}")
+            raise SystemExit # User's level
