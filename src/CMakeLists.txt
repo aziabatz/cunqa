@@ -1,6 +1,20 @@
 add_library(CUNQA INTERFACE)
 
-set(COMM_LIB "ASIO")
+option(USE_ASIO "Using the ASIO library for communication" OFF)
+option(USE_ZMQ "Using the ZMQ library for communication" OFF)
+option(USE_CROW "Using the CROW library for communication" OFF)
+
+if(USE_ASIO)
+    set(COMM_LIB 0)
+elseif(USE_ZMQ)
+    set(COMM_LIB 1)
+elseif(USE_CROW)
+    message(FATAL_ERROR "CROW is not implemented yet.")
+    set(COMM_LIB 2)
+else()
+    # We set the default communication library to ZMQ
+    set(COMM_LIB 1)
+endif()
 
 find_package(nlohmann_json 3.7.3 REQUIRED)
 find_package(Threads REQUIRED)

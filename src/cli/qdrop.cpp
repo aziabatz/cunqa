@@ -1,6 +1,5 @@
 #include <string>
 #include <fstream>
-#include <regex>
 #include <slurm/slurm.h>
 #include <iostream>
 #include <cstdlib>

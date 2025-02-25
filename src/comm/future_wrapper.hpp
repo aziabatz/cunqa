@@ -6,7 +6,8 @@
     #include "comm-strats/asio/asio_client.hpp"
     using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
-    using Future = std::future;
+    #include "comm-strats/zmq/zmq_client.hpp"
+    using Future = ZmqFuture;
 #elif COMM_LIB == CROW
     using Future = std::future;
 #else
