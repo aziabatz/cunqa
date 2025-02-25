@@ -25,9 +25,10 @@ class QPU {
 public:
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend;
+    int mpi_rank;
 
-    QPU(config::QPUConfig<sim_type> qpu_config);
-    QPU(config::QPUConfig<sim_type> qpu_config, const std::string& backend_path);
+    QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config);
+    QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config, const std::string& backend_path);
 
     void turn_ON();
     inline void turn_OFF();
@@ -44,8 +45,8 @@ private:
 
 
 template <SimType sim_type>
-QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) : 
-    qpu_config{qpu_config}, backend{qpu_config.backend_config}
+QPU<sim_type>::QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config) : 
+    mpi_rank(mpi_rank), qpu_config{qpu_config}, backend{qpu_config.backend_config}
 {
     CustomJson c_json{};
     json config_json(qpu_config);
@@ -79,11 +80,12 @@ void QPU<sim_type>::_compute_result()
         while (!message_queue_.empty()) 
         {
             try {
+                SPDLOG_LOGGER_DEBUG(logger, "MPI rank: {}", this->mpi_rank);
                 std::string message = message_queue_.front();
                 message_queue_.pop();
                 lock.unlock();
 
-                SPDLOG_LOGGER_ERROR(logger, "Circuit received: {}", message);
+                SPDLOG_LOGGER_DEBUG(logger, "Circuit received: {}", message);
                 json message_json = json::parse(message);
 
                 // This does not refer to the field `params` for a specific gate, but
@@ -122,6 +124,8 @@ void QPU<sim_type>::_compute_result()
 template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
 {
+    SPDLOG_LOGGER_DEBUG(logger, "Listening on mpi task number {}", this->mpi_rank);
+    
     while (true) 
     {
         try {

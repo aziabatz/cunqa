@@ -8,6 +8,7 @@
 #include "controllers/controller_execute.hpp"
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
+#include "logger/logger.hpp"
 #include <string>
 #include "config/run_config.hpp"
 #include <nlohmann/json.hpp>
@@ -19,7 +20,14 @@ using namespace config;
 
 
 class AerSimulator {
+
 public:
+    int aer_mpi_rank;
+    AerSimulator()
+    {
+        MPI_Comm_rank(MPI_COMM_WORLD, &aer_mpi_rank);
+        SPDLOG_LOGGER_DEBUG(logger, "aer_mpi_rank: {}", aer_mpi_rank);
+    }
     
     static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) {
         

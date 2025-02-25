@@ -11,6 +11,13 @@ using json = nlohmann::json;
 
 class MunichSimulator {
 public:
+    int munich_mpi_rank;
+    MunichSimulator()
+    {
+        MPI_Comm_rank(MPI_COMM_WORLD, &munich_mpi_rank);
+        SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
+    }
+
     static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) 
     {
         try {

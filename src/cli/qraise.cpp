@@ -21,6 +21,7 @@ struct MyArgs : public argparse::Args
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::string& mem_per_qpu             = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
+    std::optional<std::string>& comm = kwarg("comm", "Raise QPUs with MPI communications").set_default("no_comm");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -86,6 +87,7 @@ int main(int argc, char* argv[])
 
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpus.json\n";
 
+    std::string subcommand;
     std::string backend_path;
     json backend_json = {};
     std::string backend;
@@ -95,10 +97,12 @@ int main(int argc, char* argv[])
             {"fakeqmio_path", backend_path}
         };
         backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";  
-        SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
-    }
+
+        subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
         
+        SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
+    }
+
     if (args.backend.has_value()) {
         if(args.backend.value() == "etiopia_computer.json") {
             SPDLOG_LOGGER_ERROR(logger, "Terrible mistake. Possible solution: {}", cafe);
@@ -110,13 +114,34 @@ int main(int argc, char* argv[])
                 {"backend_path", backend_path}
             };
             backend = R"({"backend_path":")" + backend_path + R"("})" ;
-            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";
-            SPDLOG_LOGGER_DEBUG(logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
+            subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
+            SPDLOG_LOGGER_DEBUG(logger, "Qraise with personalized backend. \n");
         }
     } else {
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
-        SPDLOG_LOGGER_DEBUG(logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
+        //sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << args.simulator.c_str() << "\n";
+        subcommand = std::any_cast<std::string>(args.simulator) + "\n";
+        SPDLOG_LOGGER_DEBUG(logger, "Qraise default. \n");
     }
+
+
+    if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
+        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"class_comm\" or \"quantum_comm\" as valid arguments");
+        return 0;
+
+    } else if (args.comm.value() == "no_comm") {
+        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
+        SPDLOG_LOGGER_DEBUG(logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
+
+    } else if (args.comm.value() == "class_comm") { //Classical Communications
+        sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
+        SPDLOG_LOGGER_DEBUG(logger, "Command: mpirun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
+
+    } else { //Quantum Communication
+        SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
+        return 0;
+    }
+
+    
 
     sbatchFile.close();
 

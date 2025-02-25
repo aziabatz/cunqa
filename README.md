@@ -25,7 +25,7 @@ This automatically creates all the environment variables and installs the API an
 First of all, some modules have to be loaded and, also, if miniconda is activate, deactivate it to not interfere.
 
 ```console
-ml load qmio/hpc gcc/system gcccore/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0
+ml load qmio/hpc gcc/system gcccore/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 impi/2021.13.0
 ```
 
 Now, using the environment path `INSTALL_PATH`, define the directory that you want to install to. 

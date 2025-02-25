@@ -13,22 +13,31 @@ class Backend {
     std::unique_ptr<typename SimClass<sim_type>::type> simulator;
     BackendConfig<sim_type> backend_config; 
 public:
+    int backend_mpi_rank;
 
     Backend() :
         simulator{std::make_unique<typename SimClass<sim_type>::type>()},
         backend_config{}
-    { }
+    {
+        
+        MPI_Comm_rank(MPI_COMM_WORLD, &backend_mpi_rank);
+        SPDLOG_LOGGER_DEBUG(logger, "backend_mpi_rank: {}", backend_mpi_rank);
+
+    }
 
     Backend(BackendConfig<sim_type> backend_config) :
         backend_config{backend_config}
-    { } 
+    { 
+        MPI_Comm_rank(MPI_COMM_WORLD, &backend_mpi_rank);
+        SPDLOG_LOGGER_DEBUG(logger, "backend_mpi_rank: {}", backend_mpi_rank);
+    } 
 
     json run(json circuit_json) 
     {
         try {
             return SimClass<sim_type>::type::execute(circuit_json, backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error parsin the run configuration - {}", e.what());
+            SPDLOG_LOGGER_ERROR(logger, "Error parsing the run configuration - {}", e.what());
         }
         return {};
     }
