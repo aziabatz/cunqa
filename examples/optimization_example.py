@@ -113,7 +113,7 @@ energies = mapper(cost_function, best_individual)
 tack = time.time()
 print("Time:", tack-tick)
 
-
+kk
 
 ########################### DENTRO OPTIMIZACIÓN PARALELA ########################################
 
