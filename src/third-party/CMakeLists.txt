@@ -15,6 +15,8 @@ set(cmake_libzmq_args
     -DCMAKE_BUILD_TYPE=Release
     -DZMQ_BUILD_TESTS=OFF
     -DENABLE_DRAFTS=ON
+    -DBUILD_SHARED=ON
+    -DBUILD_STATIC=OFF
 )
 
 include(ExternalProject)
@@ -27,4 +29,4 @@ ExternalProject_Add(libzmq
 )
 
 set(libzmq_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build ${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include CACHE INTERNAL "")
-set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.a CACHE INTERNAL "")
+set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.so CACHE INTERNAL "")
