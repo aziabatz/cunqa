@@ -25,8 +25,15 @@ install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "${CMAKE_IN
 install(FILES "slurm.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}")
 
 
+get_directory_property(LINK_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} LINK_DIRECTORIES)
+message(STATUS "Link directories globales: ${LINK_DIRS}")
+
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
+target_link_directories(setup_qpus PRIVATE "/mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64")
+
+#find_library(GNUTLS_LIB gnutls REQUIRED PATHS /mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64/)
+#find_library(SODIUM_LIB sodium REQUIRED PATHS /mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64/)
 
 message(STATUS "libzmq_INCLUDE_DIRS: ${libzmq_INCLUDE_DIRS}")
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src" 
@@ -39,7 +46,7 @@ target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              Threads::Threads MQT::DDSim
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK
-                             ${libzmq_LIBRARIES})
+                             ${libzmq_LIBRARIES}) #${GNUTLS_LIB} ${SODIUM_LIB} bsd)
 
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
