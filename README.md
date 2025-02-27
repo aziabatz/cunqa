@@ -40,8 +40,8 @@ git clone --recursive git@github.com:CESGA-Quantum-Spain/CUNQA.git
 To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
 
 ```console
-cd cunqa/scripts/
-bash setup_submodules.sh
+cd CUNQA
+bash scripts/setup_submodules.sh
 ```
 
 ## INSTALLATION 
