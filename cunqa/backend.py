@@ -12,7 +12,3 @@ class Backend():
         print(f"""--- Backend configuration ---""")
         for k, v in self.__dict__.items():
             print(f"{k}: {v}")
-
-    def set(self, key, value):
-        setattr(self, key, value)
-
