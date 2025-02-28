@@ -40,8 +40,8 @@ git clone --recursive git@github.com:CESGA-Quantum-Spain/CUNQA.git
 To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
 
 ```console
-cd cunqa/scripts/
-bash setup_submodules.sh
+cd CUNQA
+bash scripts/setup_submodules.sh
 ```
 
 ## INSTALLATION 
@@ -121,7 +121,7 @@ conda deactivate
 2. Loading modules:
 
 ```console
-ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
+ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake
 ```
 
 3. INSTALL_PATH:
@@ -139,7 +139,7 @@ export PATH=$PATH:$INSTALL_PATH/bin
 5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
 
 ```console
-cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/share/cmake/pybind11
+cmake -B build/ DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
 ```
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 

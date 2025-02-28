@@ -30,7 +30,7 @@ qc.measure_all()
 
 
 
-job = qpu0.run(qc, transpile = False, shots=1000)
+job = qpu0.run(qc, transpile = True, shots=1000)
 print(job.result().get_counts())
 
 

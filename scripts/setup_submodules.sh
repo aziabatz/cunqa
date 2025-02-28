@@ -1,4 +1,6 @@
 #!/bin/bash
+ls
+
 cd ../
 
 if [ ! -f ".gitmodules" ] || ! grep -q 'aer' ".gitmodules"; then
@@ -18,3 +20,18 @@ cd ../../../
 cd src/third-party/argparse && git config core.sparsecheckout true && cd ../../../
 echo include/argparse/argparse.hpp >> .git/modules/argparse/info/sparse-checkout 
 cd src/third-party/argparse && git read-tree -mu HEAD 
+
+cd ../../../
+
+cd src/third-party/zmq && git config core.sparsecheckout true && cd ../../../
+echo zmq.hpp >> .git/modules/zmq/info/sparse-checkout 
+echo zmq_addon.hpp >> .git/modules/zmq/info/sparse-checkout 
+cd src/third-party/zmq && git read-tree -mu HEAD 
+
+#git submodule add --name libzmq git@github.com:zeromq/libzmq.git src/third-party/libzmq
+#git submodule init
+#git submodule update
+
+#cd src/third-party/libzmq
+#git rev-parse v4.3.4
+#git reset --hard v4.3.4

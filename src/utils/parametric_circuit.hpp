@@ -102,6 +102,8 @@ json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
     auto words_end = std::sregex_iterator();
 
     size_t numParamsFound = std::distance(words_begin, words_end);
+    std::cout << "numParamsFound: " << numParamsFound << "\n";
+    std::cout << "params.size(): " << params.size() << "\n";
     if (numParamsFound != params.size()) {
         throw std::runtime_error("Number of parameters in QASM does not match provided values.");
     }

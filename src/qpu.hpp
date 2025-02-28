@@ -90,8 +90,8 @@ void QPU<sim_type>::_compute_result()
                 // This does not refer to the field `params` for a specific gate, but
                 // for a separated field specifying the new set of parameters
                 if (!message_json.contains("params")){ 
-                    //SPDLOG_LOGGER_DEBUG(logger, "A circuit was received {}", message);
-                    SPDLOG_LOGGER_DEBUG(logger, "A circuit was received");
+                    SPDLOG_LOGGER_DEBUG(logger, "A circuit was received {}\n", message);
+                    // SPDLOG_LOGGER_DEBUG(logger, "A circuit was received");
                     kernel = message_json;
                     std::chrono::steady_clock::time_point begin_run_time = std::chrono::steady_clock::now();
                     json response = backend.run(kernel);
@@ -110,12 +110,13 @@ void QPU<sim_type>::_compute_result()
                             SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
                             throw std::runtime_error("Parameters were sent before a parametric circuit.");
                         } else {
-                            //SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
+                            // SPDLOG_LOGGER_DEBUG(logger, "Parameters were received {}", message);
                             SPDLOG_LOGGER_DEBUG(logger, "Parameters were received");
                             std::chrono::steady_clock::time_point begin_upgrade_time = std::chrono::steady_clock::now();
                             kernel = update_circuit_parameters(kernel, parameters);
+                            std::string kernel_str=kernel.dump();
                             std::chrono::steady_clock::time_point end_upgrade_time = std::chrono::steady_clock::now();
-                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
+                            SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded {}.", kernel_str);
                             SPDLOG_LOGGER_DEBUG(logger, "Time upgrade_params: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_upgrade_time - begin_upgrade_time).count());
                             parameters.clear();
                             std::chrono::steady_clock::time_point begin_up_run_time = std::chrono::steady_clock::now();
@@ -147,7 +148,7 @@ void QPU<sim_type>::_compute_result()
             } catch(const std::exception& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());
-                server->send_result("{\"ERROR\":"s + e.what() + "}"s);
+                server->send_result("{\"ERROR\":\""s + std::string(e.what()) + "\"}"s);
                 
             }
             lock.lock();

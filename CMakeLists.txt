@@ -11,7 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE "Release")
 
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
-cmake_policy(SET CMP0144 OLD)
+message(STATUS "${CMAKE_VERSION}")
+if(${CMAKE_VERSION} VERSION_EQUAL "3.27.6")
+    cmake_policy(SET CMP0144 OLD)
+endif()
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 if(NOT DEFINED ENV{INSTALL_PATH})
@@ -25,10 +28,13 @@ set(CMAKE_INSTALL_LIBDIR "lib")
 set(CMAKE_INSTALL_INCLDIR "include")
 set(CMAKE_INSTALL_BINDIR "bin")
 
-find_package(Python 3.9 COMPONENTS Interpreter Development)
+find_package(Python 3.9.9 EXACT COMPONENTS Interpreter Development)
+
+#TODO: Load pybind11 depending on the environment
 
 if(DEFINED PYBIND_PATH)
-    list(APPEND CMAKE_PREFIX_PATH "${PYBIND_PATH}")
+    list(APPEND CMAKE_PREFIX_PATH "${PYBIND_PATH}/share/cmake/pybind11")
+    set(PYBIND_DIR "${PYBIND_PATH}")
 else(NOT DEFINED PYBIND_PATH)
     string(FIND "$ENV{LOADEDMODULES}" "pybind11" module_pos)
     if(module_pos GREATER -1)
@@ -49,9 +55,10 @@ endif()
 set(PYBIND11_PYTHON_VERSION 3.9 CACHE STRING "")
 find_package(pybind11 2.12 REQUIRED)
 
+#message(STATUS "LIBRARY PATH VALUE: $ENV{LIBRARY_PATH}")
+#message(STATUS "CMAKE_LIBRARY_PATH: ${CMAKE_LIBRARY_PATH}")
+#set(CMAKE_LIBRARY_PATH $ENV{LIBRARY_PATH})
 include_directories("${PYBIND_DIR}/include")
 
 add_subdirectory(src)
 add_subdirectory(cunqa)
-
-

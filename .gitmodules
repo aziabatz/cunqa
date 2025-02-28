@@ -10,3 +10,9 @@
 [submodule "mqt-ddsim"]
 	path = src/third-party/mqt-ddsim
 	url = git@github.com:cda-tum/mqt-ddsim.git
+[submodule "zmq"]
+	path = src/third-party/zmq
+	url = git@github.com:CESGA-Quantum-Spain/cppzmq.git
+[submodule "libzmq"]
+	path = src/third-party/libzmq
+	url = git@github.com:CESGA-Quantum-Spain/libzmq.git
