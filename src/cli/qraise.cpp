@@ -101,9 +101,8 @@ int main(int argc, char* argv[])
         subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
         
         SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
-    }
 
-    if (args.backend.has_value()) {
+    } else if (args.backend.has_value()) {
         if(args.backend.value() == "etiopia_computer.json") {
             SPDLOG_LOGGER_ERROR(logger, "Terrible mistake. Possible solution: {}", cafe);
             std::system("rm qraise_sbatch_tmp.sbatch");
@@ -125,7 +124,7 @@ int main(int argc, char* argv[])
 
 
     if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
-        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"class_comm\" or \"quantum_comm\" as valid arguments");
+        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"no_comm\", \"class_comm\" or \"quantum_comm\" as valid arguments");
         return 0;
 
     } else if (args.comm.value() == "no_comm") {
