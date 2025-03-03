@@ -4,7 +4,7 @@ from json import JSONDecodeError, load
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
-    info_path = STORE+"/.api_simulator/qpu.json"
+    info_path = STORE+"/.api_simulator/qpus.json"
 # importamos api en C++
 from cunqa.qclient import QClient
 # importamos la clase Backend
