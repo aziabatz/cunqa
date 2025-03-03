@@ -7,6 +7,7 @@
   <li> <a href="https://github.com/martalosada">Marta Losada Estévez </a> </li>
   <li> <a href="https://github.com/jorgevazquezperez">Jorge Vázquez Pérez </a></li>
   <li> <a href="https://github.com/alvarocarballido">Álvaro Carballido Costas </a></li>
+  <li> <a href="https://github.com/D-Exposito">Daniel Expósito Patiño </a></li>
   <br> 
 </ul>
 
@@ -121,7 +122,7 @@ conda deactivate
 2. Loading modules:
 
 ```console
-ml load cesga/2020 gcc/12.3.0 flexiblas/3.3.0 openmpi-runtime/3.1.4 boost python/3.9.9 pybind11/2.12.0-python-3.9.9 cmake/3.23.1 twl-ninja/0.97-cluster_only
+ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake
 ```
 
 3. INSTALL_PATH:
@@ -139,7 +140,7 @@ export PATH=$PATH:$INSTALL_PATH/bin
 5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
 
 ```console
-cmake -B build/ -DPYBIND_PATH=/opt/cesga/2020/software/Core/pybind11/2.12.0-python-3.9.9/lib/python3.9/site-packages/pybind11/share/cmake/pybind11/
+cmake -B build/ DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
 ```
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
@@ -154,8 +155,8 @@ Once **CUNQA** is installed, the basic workflow to use it is:
     - Execute the circuits on the QPUs.
     - Obtain the results.
 3. Drop the raised QPUs with the command `qdrop`.
-
-Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
+> [!IMPORTANT] 
+> Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
 ### 1. `qraise`command
 The `qraise` command raises as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
@@ -168,7 +169,8 @@ So, for instance, the command
 qraise -n 4 -t 01:20:30
 ``` 
 will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `hh:mm:ss`.
-> **Note:** By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
+> [!NOTE]  
+> By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
 2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
 
 **Set simulator:** 
@@ -191,15 +193,17 @@ The personalized backend has to be a *json* file with the following structure:
 ```json
 {"backend":{"name": "BackendExample", "version": "0.0", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
 ```
+> [!NOTE]
+> The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
-> **Note:** The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
-
-**Important:** Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
+> [!IMPORTANT]  
+> Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
 
 ### 2. Python Program Example
 Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
 
-**Warning:** To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
+> [!WARNING]
+> To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
 
 In QMIO:
 ```console 
@@ -248,7 +252,8 @@ result = job.result() # Get the result of the execution
 counts = result.get_counts() 
 ```
 
-**Note:** It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure 
+> [!NOTE] 
+> It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure: 
 ```json
 {"instructions":"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];" , "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
 

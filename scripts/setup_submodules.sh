@@ -1,4 +1,6 @@
 #!/bin/bash
+ls
+
 cd ../
 
 if [ ! -f ".gitmodules" ] || ! grep -q 'aer' ".gitmodules"; then
