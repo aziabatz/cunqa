@@ -16,7 +16,7 @@ set(cmake_libzmq_args
     -DZMQ_BUILD_TESTS=OFF
     -DENABLE_DRAFTS=ON
     -DBUILD_SHARED=ON
-    -DBUILD_STATIC=OFF
+    -DBUILD_STATIC=ON
 )
 
     include(ExternalProject)
@@ -29,4 +29,9 @@ set(cmake_libzmq_args
     )
 
 set(libzmq_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build ${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include CACHE INTERNAL "")
-set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.so CACHE INTERNAL "")
+
+if("$ENV{LMOD_SYSTEM_NAME}" STREQUAL "QMIO")
+    set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.a CACHE INTERNAL "")
+else()
+    set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.so CACHE INTERNAL "")
+endif()
