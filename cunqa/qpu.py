@@ -74,7 +74,7 @@ class QPU():
         logger.debug(f"Object for QPU {id} created correctly.")
 
 
-    def run(self, circuit, transpile = False, initial_layout = None, **run_parameters):
+    def run(self, circuit, transpile = False, initial_layout = None, opt_level = 1, **run_parameters):
         """
         Class method to run a circuit in the QPU.
 
@@ -93,6 +93,8 @@ class QPU():
 
         initial_layout (list[int]): Initial position of virtual qubits on physical qubits for transpilation.
 
+        opt_level (int): optimization level for transpilation, default set to 1.
+
         **run_parameters : any other simulation instructions.
 
         Return:
@@ -100,7 +102,7 @@ class QPU():
         <class 'qjob.Result'> object.
         """
         try:
-            qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, **run_parameters)
+            qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level **run_parameters)
             qjob.submit()
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:
