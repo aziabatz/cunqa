@@ -41,8 +41,6 @@ job = qpus[0].run(qc, transpile = True, shots = 1000)
 
 result = job.result() 
 
-kk
-
 counts = result.get_counts()
 
 for i, qpu in enumerate([qpus[0], qpus[2], qpus[4], qpus[5]]):
