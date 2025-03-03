@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
     
         return 0;
     }
-        
+    
     if (args.backend.has_value()) {
         if(args.backend.value() == "etiopia_computer.json") {
             SPDLOG_LOGGER_ERROR(logger, "Terrible mistake. Possible solution: {}", cafe);

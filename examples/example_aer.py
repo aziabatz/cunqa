@@ -88,10 +88,9 @@ print(type(client))
 
 print(claves_primer_nivel)
 
-client.connect(claves_primer_nivel[-1])
+client.connect(claves_primer_nivel[0])
 
-
-print("Cliente: " + claves_primer_nivel[-1])
+print("Cliente: " + claves_primer_nivel[0])
 future1 = client.send_circuit(qc)
 future2 = client.send_circuit(qc)
 
