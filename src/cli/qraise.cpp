@@ -92,13 +92,9 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpus.json\n";
 
     std::string backend_path;
-    json backend_json = {};
     std::string backend;
     if (args.fakeqmio.has_value()) {
         backend_path = std::any_cast<std::string>(args.fakeqmio.value());
-        backend_json = {
-            {"fakeqmio_path", backend_path}
-        };
         backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";  
         SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
@@ -111,9 +107,6 @@ int main(int argc, char* argv[])
             return 0;
         } else {
             backend_path = std::any_cast<std::string>(args.backend.value());
-            backend_json = {
-                {"backend_path", backend_path}
-            };
             backend = R"({"backend_path":")" + backend_path + R"("})" ;
             sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";
             SPDLOG_LOGGER_DEBUG(logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);

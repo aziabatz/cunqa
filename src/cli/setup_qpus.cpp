@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
                 std::ifstream f(fq_path);
                 qpu_config_json = json::parse(f);
             } else if (backend_json.contains("backend_path")) {
-                std::ifstream f(backend_json.at("backend_path"));
+                std::ifstream f(backend_json.at("backend_path").get<std::string>());
                 qpu_config_json = json::parse(f);
             } else {
                 throw std::runtime_error(std::string("Format not correct. Must be {\"backend_path\" : \"path/to/backend/json\"} or {\"fakeqmio_path\" : \"path/to/qmio/calibration/json\"}"));
