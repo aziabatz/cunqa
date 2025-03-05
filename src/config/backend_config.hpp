@@ -73,7 +73,7 @@ public:
              typename std::enable_if_t<is_same<T, SimType::Cunqa>::value, bool> = true>
     BackendConfig() : 
         name{"Cunqa"},
-        version{"0.0.1"},
+        version{"0.0.0"},
         simulator{"CunqaSimulator"},
         n_qubits{15},
         url{"https://github.com/CESGA-Quantum-Spain/cunqasimulator"},

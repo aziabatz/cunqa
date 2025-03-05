@@ -91,6 +91,13 @@ int main(int argc, char* argv[])
     std::string backend_path;
     json backend_json = {};
     std::string backend;
+
+    if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
+        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"no_comm\", \"class_comm\" or \"quantum_comm\" as valid arguments");
+        std::system("rm qraise_sbatch_tmp.sbatch");
+        return 0;
+    }
+
     if (args.fakeqmio.has_value()) {
         backend_path = std::any_cast<std::string>(args.fakeqmio.value());
         backend_json = {
@@ -98,51 +105,60 @@ int main(int argc, char* argv[])
         };
         backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
 
-        subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
+        subcommand = "no_comm Aer \'" + backend + "\'" + "\n";
+
+        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << subcommand;
         
         SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
 
-    } else if (args.backend.has_value()) {
-        if(args.backend.value() == "etiopia_computer.json") {
-            SPDLOG_LOGGER_ERROR(logger, "Terrible mistake. Possible solution: {}", cafe);
+    } else {
+        if (args.comm.value() == "no_comm") {
+            if (args.backend.has_value()) {
+                if(args.backend.value() == "etiopia_computer.json") {
+                    SPDLOG_LOGGER_ERROR(logger, "Terrible mistake. Possible solution: {}", cafe);
+                    std::system("rm qraise_sbatch_tmp.sbatch");
+                    return 0;
+                } else {
+                    backend_path = std::any_cast<std::string>(args.backend.value());
+                    backend_json = {
+                        {"backend_path", backend_path}
+                    };
+                    backend = R"({"backend_path":")" + backend_path + R"("})" ;
+                    subcommand = "no_comm " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
+                    sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << subcommand;
+                    SPDLOG_LOGGER_DEBUG(logger, "Qraise with no communications and personalized backend. \n");
+                }
+            } else {
+                subcommand = "no_comm " + std::any_cast<std::string>(args.simulator) + "\n";
+                sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << subcommand;
+                SPDLOG_LOGGER_DEBUG(logger, "Qraise default with no communications. \n");
+            }
+    
+        } else if (args.comm.value() == "class_comm") {
+            if (std::any_cast<std::string>(args.simulator) != "Cunqa") {
+                SPDLOG_LOGGER_ERROR(logger, "Classical communications only are available under CunqaSimulator but the following simulator was provided: ", std::any_cast<std::string>(args.simulator));
+                std::system("rm qraise_sbatch_tmp.sbatch");
+                return 0;
+            } 
+
+            if (args.backend.has_value()) {
+                subcommand = "class_comm " + std::any_cast<std::string>(args.simulator) + " " + args.backend.value() + "\n";
+                SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and personalized CunqaSimulator backend. \n");
+            } else {
+                subcommand = "class_comm " + std::any_cast<std::string>(args.simulator) + "\n";
+                SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and default CunqaSimulator backend. \n");
+            }
+
+            sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  subcommand;
+            SPDLOG_LOGGER_DEBUG(logger, "Command: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {}", subcommand );
+    
+        } else { //Quantum Communication
+            SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 0;
-        } else {
-            backend_path = std::any_cast<std::string>(args.backend.value());
-            backend_json = {
-                {"backend_path", backend_path}
-            };
-            backend = R"({"backend_path":")" + backend_path + R"("})" ;
-            subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
-            SPDLOG_LOGGER_DEBUG(logger, "Qraise with personalized backend. \n");
         }
-    } else {
-        subcommand = std::any_cast<std::string>(args.simulator) + "\n";
-        SPDLOG_LOGGER_DEBUG(logger, "Qraise default. \n");
+
     }
-
-
-    if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
-        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"no_comm\", \"class_comm\" or \"quantum_comm\" as valid arguments");
-        return 0;
-
-    } else if (args.comm.value() == "no_comm") {
-        //subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
-        SPDLOG_LOGGER_DEBUG(logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
-
-    } else if (args.comm.value() == "class_comm") { //Classical Communications
-        args.simulator = "Cunqa";
-        subcommand = std::any_cast<std::string>(args.simulator) + "\n";
-        sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
-        SPDLOG_LOGGER_DEBUG(logger, "Command: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
-
-    } else { //Quantum Communication
-        SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
-        return 0;
-    }
-
-    
 
     sbatchFile.close();
 
