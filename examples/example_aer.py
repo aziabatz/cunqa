@@ -72,7 +72,7 @@ params = """ {
 
 
 STORE = os.getenv("STORE")
-conf_file = STORE + "/.api_simulator/qpu.json"
+conf_file = STORE + "/.api_simulator/qpus.json"
 
 with open(conf_file, 'r', encoding='utf-8') as archivo:
     datos = json.load(archivo)
@@ -88,10 +88,9 @@ print(type(client))
 
 print(claves_primer_nivel)
 
-client.connect(claves_primer_nivel[-1])
+client.connect(claves_primer_nivel[0])
 
-
-print("Cliente: " + claves_primer_nivel[-1])
+print("Cliente: " + claves_primer_nivel[0])
 future1 = client.send_circuit(qc)
 future2 = client.send_circuit(qc)
 

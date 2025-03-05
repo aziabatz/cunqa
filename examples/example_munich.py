@@ -27,13 +27,13 @@ msg = json.dumps(
             "memory_slots": 7,
             "seed": 12342
         },
-        "instructions": qasm
-    }, ensure_ascii=False)
+        "instructions": f"{qasm}"
+    }, ensure_ascii=False).replace("'", '"')
 
 print(msg)
 
 STORE = os.getenv("STORE")
-conf_file = STORE + "/.api_simulator/qpu.json"
+conf_file = STORE + "/.api_simulator/qpus.json"
 
 with open(conf_file, 'r', encoding='utf-8') as archivo:
     datos = json.load(archivo)
@@ -57,6 +57,8 @@ print("Futures creados.")
 resultado = future1.get()
 
 hola = json.loads(resultado)
+#print(hola)
+
 print("GET DEL FUTURE 1:" + json.dumps(hola["time_taken"]))
 
 print("GET DEL FUTURE 2:" + future2.get())

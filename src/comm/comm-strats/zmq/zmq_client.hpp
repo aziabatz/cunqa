@@ -76,8 +76,8 @@ private:
     {
         try {
             zmq::message_t reply;
-            socket_.recv(reply, zmq::recv_flags::none);
-            std::string result(static_cast<char*>(reply.data()), reply.size());
+            auto size = socket_.recv(reply, zmq::recv_flags::none);
+            std::string result(static_cast<char*>(reply.data()), size.value());
             SPDLOG_LOGGER_DEBUG(logger, "Result correctly received: {}", result);
             return result;
         } catch (const zmq::error_t& e) {

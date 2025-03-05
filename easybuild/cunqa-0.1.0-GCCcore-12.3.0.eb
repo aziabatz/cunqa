@@ -24,7 +24,7 @@ toolchain = {'name': 'GCCcore', 'version': '12.3.0'}
 #source_urls = ['...']
 sources = ['v%(version)s.tar.gz']
 
-patches = ['...']
+#patches = ['...']
 
 
 builddependencies = [

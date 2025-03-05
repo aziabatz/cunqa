@@ -35,17 +35,18 @@ public:
     Client(const std::optional<std::string> &filepath) :
         comm_strat{std::make_unique<SelectedClient>()} 
     { 
+        std::string final_filepath;
+        if (filepath.has_value())
+            final_filepath = filepath.value();
+        else
+            final_filepath = std::getenv("STORE") + "/.api_simulator/qpus.json"s;
+        std::ifstream file(final_filepath);  
+
+        if (!file.is_open()) {
+            std::cerr << "Cannot open the JSON file\n";
+        }
+
         try {
-            std::string final_filepath;
-            if (filepath.has_value())
-                final_filepath = filepath.value();
-            else
-                final_filepath = std::getenv("STORE") + "/.api_simulator/qpu.json"s;
-            
-            std::ifstream file(final_filepath);  
-            if (!file.is_open())
-                std::cerr << "Cannot open the JSON file\n";
-            
             file >> qpus_json;
         } catch (const json::parse_error& e) {
             std::cerr << "Error parsing the QClient info into JSON: " << e.what() << "\n";

@@ -13,7 +13,7 @@ sys.path.insert(0, INSTALL_PATH)
 
 # loading necesary modules
 
-from cunqa.qpu import getQPUs, gather
+from cunqa.qpu import getQPUs
 qpus = getQPUs()
 
 
@@ -34,7 +34,7 @@ job = qpu0.run(qc, transpile = True, shots=1000)
 print(job.result().get_counts())
 
 
-for i in range(10):
+for _ in range(10):
     new_params = [random.uniform(0.0, 6.283185)]
     print("Parameter: ", new_params[0])
     param_job = job.upgrade_parameters(new_params)

@@ -22,7 +22,7 @@ def _divide(string, lengths):
 
     Args:
     --------
-    string (str): srting that we want to divide.
+    string (str): string that we want to divide.
 
     lengths (list[int]): lenghts of the resulting strings in which the original one is divided.
 
@@ -61,7 +61,7 @@ class Result():
 
         registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
         """
-        logger.debug(f"Result recived: {result}\n")
+        logger.debug(f"Result received: {result}\n")
 
         if type(result) == dict:
             self.result = result
