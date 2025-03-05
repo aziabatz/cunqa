@@ -30,12 +30,16 @@ message(STATUS "Link directories globales: ${LINK_DIRS}")
 
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
-target_link_directories(setup_qpus PRIVATE "/mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64")
 
+if($ENV{LMOD_SYSTEM_NAME} STREQUAL "FT3")
+    message(STATUS "Load the link directory for FT3")
+    target_link_directories(setup_qpus PRIVATE "/mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64")
+endif()
 #find_library(GNUTLS_LIB gnutls REQUIRED PATHS /mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64/)
 #find_library(SODIUM_LIB sodium REQUIRED PATHS /mnt/netapp1/Optcesga_FT2_RHEL7/2022/gentoo/31032022/usr/lib64/)
 
 message(STATUS "libzmq_INCLUDE_DIRS: ${libzmq_INCLUDE_DIRS}")
+message(STATUS "libzmq_LIBRARIES: ${libzmq_LIBRARIES}")
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                               "${libzmq_INCLUDE_DIRS}"
@@ -47,6 +51,8 @@ target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK
                              ${libzmq_LIBRARIES}) #${GNUTLS_LIB} ${SODIUM_LIB} bsd)
+target_compile_options(setup_qpus PRIVATE -fvisibility=hidden)
+target_link_options(setup_qpus PRIVATE -Wl,-Bsymbolic)
 
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

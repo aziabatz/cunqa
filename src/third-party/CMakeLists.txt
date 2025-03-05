@@ -19,14 +19,14 @@ set(cmake_libzmq_args
     -DBUILD_STATIC=OFF
 )
 
-    include(ExternalProject)
+include(ExternalProject)
 
-    ExternalProject_Add(libzmq
-        PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libzmq
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libzmq
-        DOWNLOAD_COMMAND ""
-        CMAKE_ARGS ${cmake_libzmq_args}
-    )
+ExternalProject_Add(libzmq
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libzmq
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libzmq
+    DOWNLOAD_COMMAND ""
+    CMAKE_ARGS ${cmake_libzmq_args}
+)
 
 set(libzmq_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build ${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include CACHE INTERNAL "")
 set(libzmq_LIBRARIES ${CMAKE_CURRENT_BINARY_DIR}/libzmq/src/libzmq-build/lib/libzmq.so CACHE INTERNAL "")

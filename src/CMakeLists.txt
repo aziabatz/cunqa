@@ -13,7 +13,7 @@ elseif(USE_CROW)
     set(COMM_LIB 2)
 else()
     # We set the default communication library to ZMQ
-    set(COMM_LIB 0)
+    set(COMM_LIB 1)
 endif()
 
 find_package(nlohmann_json 3.7.3 REQUIRED)
