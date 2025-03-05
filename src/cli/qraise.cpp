@@ -117,7 +117,6 @@ int main(int argc, char* argv[])
             SPDLOG_LOGGER_DEBUG(logger, "Qraise with personalized backend. \n");
         }
     } else {
-        //sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << args.simulator.c_str() << "\n";
         subcommand = std::any_cast<std::string>(args.simulator) + "\n";
         SPDLOG_LOGGER_DEBUG(logger, "Qraise default. \n");
     }
@@ -128,12 +127,15 @@ int main(int argc, char* argv[])
         return 0;
 
     } else if (args.comm.value() == "no_comm") {
+        //subcommand = std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
         SPDLOG_LOGGER_DEBUG(logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
 
     } else if (args.comm.value() == "class_comm") { //Classical Communications
+        args.simulator = "Cunqa";
+        subcommand = std::any_cast<std::string>(args.simulator) + "\n";
         sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  args.comm.value() << " " << subcommand;
-        SPDLOG_LOGGER_DEBUG(logger, "Command: mpirun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
+        SPDLOG_LOGGER_DEBUG(logger, "Command: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}", args.comm.value(), subcommand);
 
     } else { //Quantum Communication
         SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");

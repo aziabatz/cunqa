@@ -87,12 +87,14 @@ void QPU<sim_type>::_compute_result()
 
                 SPDLOG_LOGGER_DEBUG(logger, "Circuit received: {}", message);
                 json message_json = json::parse(message);
+                SPDLOG_LOGGER_DEBUG(logger, "Circuit parsed");
 
                 // This does not refer to the field `params` for a specific gate, but
                 // for a separated field specifying the new set of parameters
                 if (!message_json.contains("params")){ 
                     kernel = message_json;
                     json response = backend.run(kernel);
+                    SPDLOG_LOGGER_DEBUG(logger, "backend.run completed");
                     server->send_result(to_string(response));
                 } else {
                     std::vector<double> parameters = message_json.at("params");

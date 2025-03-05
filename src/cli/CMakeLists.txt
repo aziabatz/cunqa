@@ -24,6 +24,7 @@ install(FILES "slurm.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}")
 add_executable(setup_qpus setup_qpus.cpp)
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
+                                              "${CMAKE_SOURCE_DIR}/src/third-party/cunqasimulator/src"
                                               "${PROJECT_BINARY_DIR}/src/comm")
 target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              nlohmann_json::nlohmann_json 

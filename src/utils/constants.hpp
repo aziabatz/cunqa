@@ -89,6 +89,11 @@ const std::vector<std::string> BASIS_GATES_JSON = {
             "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
             "cswap"};
 
+const std::vector<std::string> CUNQA_GATES = {
+  "measure", "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz"
+};
+
+
 const std::string cafe = R"(                                                                                                
                                                             ##*%                                                                                                
                                                           ###%###                                                                                               

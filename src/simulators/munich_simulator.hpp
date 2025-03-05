@@ -7,6 +7,8 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 
+#include "config/backend_config.hpp"
+
 using json = nlohmann::json;
 
 class MunichSimulator {
@@ -18,10 +20,9 @@ public:
         SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
     }
 
-    static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) 
+    static json execute(json circuit_json, int& n_qubits, json& noise_model_json,  const config::RunConfig& run_config) 
     {
         try {
-            noise_model_json = noise_model_json;
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
 
             std::string circuit(circuit_json["instructions"]);

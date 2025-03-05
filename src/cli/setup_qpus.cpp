@@ -89,6 +89,9 @@ int main(int argc, char *argv[])
                 } else if (search->second == SimType::Munich) {
                     turn_on_qpu<SimType::Munich>(no_rank, qpu_config_json, info_path);
                     SPDLOG_LOGGER_DEBUG(logger, "QPU with Munich turned on.");
+                } else if (search->second == SimType::Munich) {
+                    turn_on_qpu<SimType::Munich>(no_rank, qpu_config_json, info_path);
+                    SPDLOG_LOGGER_DEBUG(logger, "QPU with CunqaSimulator turned on.");
                 }
             }
             break;
@@ -98,21 +101,25 @@ int main(int argc, char *argv[])
             // MPI INIT BLOCK //
             MPI_Init(&argc, &argv);
 
-            int world_size;
-            MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+            int mpi_size;
+            MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-            int world_rank;
-            MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+            int mpi_rank;
+            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
             // MPI INIT BLOCK //
             
             if(auto search = SIM_NAMES.find(simulator); search != SIM_NAMES.end()) {
                 if (search->second == SimType::Aer) {
-                    turn_on_qpu<SimType::Aer>(world_rank, qpu_config_json, info_path);
-                    SPDLOG_LOGGER_DEBUG(logger, "QPU with Aer turned on.");
-
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with Aer and MPI.");
+                    turn_on_qpu<SimType::Aer>(mpi_rank, qpu_config_json, info_path);
+                    
                 } else if (search->second == SimType::Munich) {
-                    turn_on_qpu<SimType::Munich>(world_rank, qpu_config_json, info_path);
-                    SPDLOG_LOGGER_DEBUG(logger, "QPU with Munich turned on.");
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with Munich and MPI.");
+                    turn_on_qpu<SimType::Munich>(mpi_rank, qpu_config_json, info_path);
+
+                } else if (search->second == SimType::Cunqa) {
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with CunqaSimulator and MPI.");
+                    turn_on_qpu<SimType::Cunqa>(mpi_rank, qpu_config_json, info_path);
                 }
             }            
 

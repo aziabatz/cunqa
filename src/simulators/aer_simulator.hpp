@@ -11,6 +11,7 @@
 #include "logger/logger.hpp"
 #include <string>
 #include "config/run_config.hpp"
+#include "config/backend_config.hpp"
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -22,14 +23,7 @@ using namespace config;
 class AerSimulator {
 
 public:
-    int aer_mpi_rank;
-    AerSimulator()
-    {
-        MPI_Comm_rank(MPI_COMM_WORLD, &aer_mpi_rank);
-        SPDLOG_LOGGER_DEBUG(logger, "aer_mpi_rank: {}", aer_mpi_rank);
-    }
-    
-    static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) {
+    static json execute(json circuit_json, int& n_qubits, json& noise_model_json, const config::RunConfig& run_config) {
         
         try {
             //TODO: Maybe improve them to send several circuits at once
