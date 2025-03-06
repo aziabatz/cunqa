@@ -16,15 +16,12 @@ using namespace config;
 #if COMM_LIB == ASIO
     #include "comm-strats/asio/asio_client.hpp"
     using SelectedClient = AsioClient;
-    using Future = AsioFuture;
 #elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq_comm.hpp"
-    using SelectedClient = ZMQClient;
-    using Future = std::future<std::string>;
+    #include "comm-strats/zmq/zmq_client.hpp"
+    using SelectedClient = ZmqClient;
 #elif COMM_LIB == CROW
     #include "comm-strats/crow_comm.hpp"
     using SelectedClient = CrowClient;
-    using Future = std::future<std::string>;
 #else
     #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
 #endif

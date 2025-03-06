@@ -1,8 +1,5 @@
 import os
-import sys
 from json import JSONDecodeError, load
-
-
 # path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
@@ -11,13 +8,12 @@ if info_path is None:
 # importamos api en C++
 from cunqa.qclient import QClient
 # importamos la clase Backend
-from backend import Backend
-from qjob import QJob, gather
-from circuit import qc_to_json
+from cunqa.backend import Backend
+from cunqa.qjob import QJob
+
 
 # importing logger
-from logger import logger
-
+from cunqa.logger import logger
 
 class QPU():
     """
@@ -31,7 +27,7 @@ class QPU():
 
         Args:
         -----------
-        id_ (int): Id assigned to the qpu, simply a int from 0 to n_qpus-1.
+        id (int): Id assigned to the qpu, simply a int from 0 to n_qpus-1.
 
         qclient (<class 'python.qclient.QClient'>): object that holds the information to communicate with the server
             endpoint for a given QPU.
@@ -77,7 +73,7 @@ class QPU():
         logger.debug(f"Object for QPU {id} created correctly.")
 
 
-    def run(self, circ, transpile = False, initial_layout = None, **run_parameters):
+    def run(self, circuit, transpile = False, initial_layout = None, **run_parameters):
         """
         Class method to run a circuit in the QPU.
 
@@ -90,7 +86,7 @@ class QPU():
 
         Args:
         --------
-        circ (json dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to be run in the QPU.
+        circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPU.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -103,14 +99,17 @@ class QPU():
         <class 'qjob.Result'> object.
         """
         try:
-            qjob = QJob(self, circ, transpile = transpile, initial_layout = initial_layout, **run_parameters)
+            qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, **run_parameters)
             qjob.submit()
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:
             logger.error(f"Error when submitting QJob [{type(error).__name__}].")
-            raise error # User's level
+            raise SystemExit # User's level
 
         return qjob
+    
+
+    
 
 
 
@@ -123,7 +122,6 @@ def getQPUs(path = info_path):
     List of QPU objects.
     
     """
-
     try:
         with open(path, "r") as qpus_json:
             dumps = load(qpus_json)
@@ -162,5 +160,3 @@ def getQPUs(path = info_path):
         logger.error(f"No QPUs were found, {path} is empty.")
         raise SystemExit
 
-
-        

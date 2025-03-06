@@ -32,10 +32,11 @@ public:
             circuits.push_back(std::make_shared<Circuit>(circuit));
 
             json run_config_json(run_config);
-            Config aer_default(run_config_json);
-
+            run_config_json["seed_simulator"] = run_config.seed;
+            Config aer_config(run_config_json);
+            
             Noise::NoiseModel noise_model(noise_model_json);
-            Result result = controller_execute<Controller>(circuits, noise_model, aer_default);
+            Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
             return result.to_json();
         } catch (const std::exception& e) {
             // TODO: specify the circuit format in the docs.

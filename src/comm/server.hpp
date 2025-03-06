@@ -11,8 +11,8 @@ using namespace config;
     #include "comm-strats/asio/asio_server.hpp"
     using SelectedServer = AsioServer;
 #elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq_comm.hpp"
-    using SelectedServer = ZMQServer;
+    #include "comm-strats/zmq/zmq_server.hpp"
+    using SelectedServer = ZmqServer;
 #elif COMM_LIB == CROW
     #include "comm-strats/crow_comm.hpp"
     using SelectedServer = CrowServer;

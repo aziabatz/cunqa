@@ -15,11 +15,12 @@ using namespace std::literals;
 
 struct MyArgs : public argparse::Args 
 {
+    //int& node = kwarg("node", "Specific node to raise the qpus."); //Alvaro 
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                    = kwarg("t,time", "Time for the QPUs to be raised.");
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
-    std::string& mem_per_qpu             = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("1G");
+    std::string& mem_per_qpu             = kwarg("mem-per-qpu", "Memory given to each QPU.").set_default("7G");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
     std::optional<std::string>& comm = kwarg("comm", "Raise QPUs with MPI communications").set_default("no_comm");
 
@@ -42,6 +43,9 @@ bool check_mem_format(const std::string& mem)
 
 int main(int argc, char* argv[]) 
 {
+    srand((unsigned int)time(NULL));
+    int intSEED = rand() % 1000;
+    std::string SEED = std::to_string(intSEED);
     auto args = argparse::parse<MyArgs>(argc, argv);
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
@@ -52,6 +56,7 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH -c 2 \n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
     sbatchFile << "#SBATCH -N 1 \n";
+    // sbatchFile << "#SBATCH --nodelist=c7-" << args.node << "\n"; //Alvaro
 
     // TODO: Can the user decide the number of cores?
     if (check_mem_format(args.mem_per_qpu)){
@@ -89,7 +94,6 @@ int main(int argc, char* argv[])
 
     std::string subcommand;
     std::string backend_path;
-    json backend_json = {};
     std::string backend;
 
     if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
@@ -159,6 +163,6 @@ int main(int argc, char* argv[])
     std::system("rm qraise_sbatch_tmp.sbatch");
 
     SPDLOG_LOGGER_DEBUG(logger, "Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
-    
+
     return 0;
 }

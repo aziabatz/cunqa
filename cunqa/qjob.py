@@ -1,18 +1,13 @@
-from concurrent.futures import ThreadPoolExecutor
-import os
-import sys
-import pickle, json
-import time
+import json
 from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
-from circuit import qc_to_json, from_json_to_qc, registers_dict
-from transpile import transpiler
-import qpu
-
-from cunqa.qclient import QClient
+from qiskit.qasm2.exceptions import QASM2Error
+from qiskit.exceptions import QiskitError
+from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict
+from cunqa.transpile import transpiler, TranspilerError
 
 # importing logger
-from logger import logger
+from cunqa.logger import logger
 
 
 class QJobError(Exception):
@@ -27,7 +22,7 @@ def _divide(string, lengths):
 
     Args:
     --------
-    string (str): srting that we want to divide.
+    string (str): string that we want to divide.
 
     lengths (list[int]): lenghts of the resulting strings in which the original one is divided.
 
@@ -66,6 +61,7 @@ class Result():
 
         registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
         """
+        logger.debug(f"Result received: {result}\n")
 
         if type(result) == dict:
             self.result = result
@@ -74,11 +70,11 @@ class Result():
             raise ValueError
         else:
             logger.error(f"result must be dict, but {type(result)} was provided [{TypeError.__name__}].")
-            logger.debug(result)
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
+        # processing result
         if len(result) == 0:
-            logger.error(f"Results dictionary is empty, some error occured [{ValueError.__name__}].")
+            logger.error(f" [{ValueError.__name__}].")
             raise ValueError # I capture this error in QJob.result() when creating the object.
         
         elif "ERROR" in result:
@@ -87,43 +83,42 @@ class Result():
             raise QJobError
 
         else:
-            counts_aer = None
-            counts_munich = None
-            for k,v in result.items():
-                if k == "metadata":
-                    for i, m in v.items():
-                        setattr(self, i, m)
-                elif k == "results":
-                    for i, m in v[0].items():
-                        if i == "data":
-                            counts_aer = m["counts"]
-                        elif i == "metadata":
-                            for j, w in m.items():
-                                setattr(self,j,w)
-                        else:
+            try:
+                counts_aer = None
+                counts_munich = None
+                for k,v in result.items():
+                    if k == "metadata":
+                        for i, m in v.items():
                             setattr(self, i, m)
-                elif k == "counts":
-                    counts_munich = v
+                    elif k == "results":
+                        for i, m in v[0].items():
+                            if i == "data":
+                                counts = m["counts"]
+                            elif i == "metadata":
+                                for j, w in m.items():
+                                    setattr(self,j,w)
+                            else:
+                                setattr(self, i, m)
+                    elif k == "counts":
+                        counts = v
+                        self.num_clbits = sum([len(i) for i in registers.values()])
 
-                else:
-                    setattr(self, k, v)
+                    else:
+                        setattr(self, k, v)
 
-        self.counts = {}
-        if counts_aer:
-            for j,w in counts_aer.items():
-                if registers is None:
-                    self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                elif isinstance(registers, dict):
-                    lengths = []
-                    for v in registers.values():
-                        lengths.append(len(v))
-                    self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
-        elif counts_munich:
-            self.counts = counts_munich
-        else:
-            logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
-            self.counts = result
-            #raise KeyError # I capture this error in QJob.result() when creating the object.
+                self.counts = {}
+                for j,w in counts.items():
+                    if registers is None:
+                        self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                    elif isinstance(registers, dict):
+                        lengths = []
+                        for v in registers.values():
+                            lengths.append(len(v))
+                        self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+
+            except KeyError:
+                logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
+                raise KeyError # I capture this error in QJob.result() when creating the object.
 
         logger.debug("Results correctly loaded.")
         
@@ -156,14 +151,14 @@ class QJob():
     Class to handle jobs sent to the simulator.
     """
 
-    def __init__(self, QPU, circ, transpile, initial_layout = None, **run_parameters):
+    def __init__(self, qpu, circ, transpile, initial_layout = None, opt_level = 1, **run_parameters):
         """
         Initializes the QJob class.
 
         It is important to note that  if `transpilation` is set False, we asume user has already done the transpilation, otherwise some errors during the simulation
         can occur, for example if the QPU has a noise model with error associated to specific gates, if the circuit is not transpiled errors might not appear.
 
-        If `transpile` is False and `initial_layout` is provided, it will be ignored.
+        If `transpile` is False and `initial_layout` is provided, it will be ignored, as well as `opt_level`.
 
         Possible instructions to add as `**run_parameters` can be: shots, method, parameter_binds, meas_level, ...
 
@@ -172,44 +167,41 @@ class QJob():
         -----------
         QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-        circ (json dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to be run.
+        circ (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
         initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
 
+        opt_level (int): optimization level for transpilation, default set to 1.
+
         **run_parameters : any other simulation instructions.
 
         """
-        if isinstance(QPU, qpu.QPU):
-            self._QPU = QPU
-        else:
-            logger.error(f"QPU must be <class 'qpu.QPU'>, but {type(QPU)} was provided [{TypeError.__name__}].")
-            raise QJobError # I capture this error in QPU.run() when creating the job
-        
+
+        self._QPU = qpu
         self._future = None
         self._result = None
+        self._updated = False
+
+
+        # transpilation
+        if transpile:
+            try:
+                circt = transpiler( circ, self._QPU.backend, initial_layout = initial_layout, opt_level = opt_level )
+                logger.debug("Transpilation done.")
+            except Exception as error:
+                logger.error(f"Transpilation failed [{type(error).__name__}].")
+                raise TranspilerError # I capture the error in QPU.run() when creating the job
             
+        else:
+            if initial_layout is not None:
+                logger.warning("Transpilation was not done, initial_layout provided was ignored. If you want to map the circuit to the given qubits of the backend you must set transpile=True and provide the list of qubits which lenght has to be equal to the number of qubits of the circuit.")
+            circt = circ
+            logger.warning("No transpilation was done, errors might occur if any gate or instruction is not supported by the simulator.")
 
-
-        if isinstance(circ, QuantumCircuit) or isinstance(circ, dict) or isinstance(circ, str):
-
-
-            if transpile:
-                try:
-                    circt = transpiler( circ, QPU.backend, initial_layout = initial_layout )
-                    logger.debug("Transpilation done.")
-                except Exception as error:
-                    logger.error(f"Transpilation failed [{type(error).__name__}].")
-                    raise error # I capture the error in QPU.run() when creating the job
-                
-            else:
-                if initial_layout is not None:
-                    logger.warning("Transpilation was not done, initial_layout provided was ignored. If you want to map the circuit to the given qubits of the backend you must set transpile=True and provide the list of qubits which lenght has to be equal to the number of qubits of the circuit.")
-                circt = circ
-                logger.warning("No transpilation was done, errors might occur if any gate or instruction is not supported by the simulator.")
-
-
+        # conversion to the needed format
+        try:
             if isinstance(circt, dict):
 
                 logger.debug("A circuit dict was provided.")
@@ -217,18 +209,18 @@ class QJob():
                 cl_bits = circt["num_clbits"]
                 self._cregisters = circt["classical_registers"]
 
-                if QPU.backend.simulator == "AerSimulator":
+                if self._QPU.backend.simulator == "AerSimulator":
 
                     logger.debug("Translating to dict for AerSimulator...")
 
                     circuit = circt['instructions']
 
-                elif QPU.backend.simulator == "MunichSimulator":
+                elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
                     circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
-                    
+            
 
             elif isinstance(circt, QuantumCircuit):
 
@@ -237,13 +229,13 @@ class QJob():
                 cl_bits = sum([c.size for c in circt.cregs])
                 self._cregisters = registers_dict(circt)[1]
 
-                if QPU.backend.simulator == "AerSimulator":
+                if self._QPU.backend.simulator == "AerSimulator":
 
                     logger.debug("Translating to dict for AerSimulator...")
 
                     circuit = qc_to_json(circt)['instructions']
 
-                elif QPU.backend.simulator == "MunichSimulator":
+                elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
@@ -260,25 +252,43 @@ class QJob():
                         cl_bits += line.split()[4]
                 self._cregisters = registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
 
-                if QPU.backend.simulator == "AerSimulator":
+                if self._QPU.backend.simulator == "AerSimulator":
 
                     logger.debug("Translating to dict for AerSimulator...")
 
                     circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
 
-                elif QPU.backend.simulator == "MunichSimulator":
+                elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
                     circuit = circt.translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+
+            else:
+                logger.error(f"Circuit must be dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
+                raise QJobError # I capture the error in QPU.run() when creating the job
             
             self._circuit = circuit
+            
+        
+        except KeyError as error:
+            logger.error(f"Format of the cirucit dict not correct, couldn't find 'num_clbits', 'classical_registers' or 'instructions' [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
 
-        else:
-            logger.error(f"Circuit must be dict or <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circ)} was provided [{TypeError.__name__}].")
+        except QASM2Error as error:
+            logger.error(f"Error while translating to QASM2 [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
+    
+        except QiskitError as error:
+            logger.error(f"Format of the circuit not correct  [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
+    
+        except Exception as error:
+            logger.error(f"Some error occured with the circuit dict provided [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
     
 
+        # configuration
         try:
             # config dict
             run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
@@ -295,7 +305,15 @@ class QJob():
             # instructions dict/string
             instructions = circuit
 
-            self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+
+            if self._QPU.backend.simulator == "AerSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+
+            elif self._QPU.backend.simulator == "MunichSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+
+            logger.debug("QJob created.")
+            logger.debug(self._execution_config)
 
         
         except KeyError as error:
@@ -305,6 +323,7 @@ class QJob():
         except Exception as error:
             logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
+        
 
 
     def submit(self):
@@ -316,23 +335,60 @@ class QJob():
         else:
             try:
                 self._future = self._QPU._qclient.send_circuit(self._execution_config)
+                logger.debug("Circuit was sent.")
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
+            
+    def upgrade_parameters(self, parameters):
+        """
+        Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
+
+        Args:
+        -----------
+        parameters (list[float]): list of parameters to assign to the parametrized circuit.
+        """
+
+        if self._result is None:
+            res = self._future.get()
+        
+        message = """{{"params":{} }}""".format(parameters).replace("'", '"')
+
+        try:
+            logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
+            self._future = self._QPU._qclient.send_parameters(message)
+        except Exception as error:
+            logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
+            raise QJobError # I capture the error in QPU.run() when creating the job
+        
+        self._updated = False # We indicate that new results will come, in order to call server
+
+        return self
+
 
     def result(self):
         """
         Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is bloking.
         """
         if (self._future is not None) and (self._future.valid()):
-            if self._result is None:
-                try:
-                    self._result = Result(json.loads(self._future.get()), registers=self._cregisters)
-                except Exception as error:
-                    logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                    raise SystemExit # User's level
+            try:
+                if self._result is not None:
+                    if not self._updated: # if the result was already obtained, we only call the server if an update was done
+                        res = self._future.get()
+                        self._result = Result(json.loads(res), registers=self._cregisters)
+                        self._updated = True
+                    else:
+                        pass
+                else:
+                    res = self._future.get()
+                    self._result = Result(json.loads(res), registers=self._cregisters)
+                    self._updated = True
+            except Exception as error:
+                logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                raise error # User's level
 
         return self._result
+
 
     def time_taken(self):
         """
@@ -341,14 +397,19 @@ class QJob():
 
         if self._future is not None and self._future.valid():
             if self._result is not None:
-                return self._result.get_dict()["results"][0]["time_taken"]
+                try:
+                    return self._result.time_taken
+                except AttributeError:
+                    logger.warning("Time taken not available.")
+                    return None
             else:
                 logger.error(f"QJob not finished [{QJobError.__name__}].")
                 raise SystemExit # User's level
         else:
             logger.error(f"No QJob submited [{QJobError.__name__}].")
             raise SystemExit # User's level
-        
+
+
 
 
 def gather(qjobs):
@@ -376,8 +437,3 @@ def gather(qjobs):
     else:
         logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")
         raise SystemError # User's level
-
-      
-        
-               
-        
