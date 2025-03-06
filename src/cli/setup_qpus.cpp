@@ -21,15 +21,22 @@ json get_qpu_config(json& backend_json)
 {
     json qpu_config_json;
     if (backend_json.contains("fakeqmio_path")) {
+        SPDLOG_LOGGER_DEBUG(logger, "PATH to Qmio calibrations was provided.");
         std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + backend_json.at("fakeqmio_path").get<std::string>() + " "s +  std::getenv("SLURM_JOB_ID"));
         std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
         std::string fq_path = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
+        SPDLOG_LOGGER_DEBUG(logger, "FakeQmio temporal configuration file created.");
         std::ifstream f(fq_path);
+        SPDLOG_LOGGER_DEBUG(logger, "FakeQmio temporal configuration file read.");
         qpu_config_json = json::parse(f);
+        SPDLOG_LOGGER_DEBUG(logger, "Json with FakeQmio configuration parsed.");
     
     } else if (backend_json.contains("backend_path")) {
+        SPDLOG_LOGGER_DEBUG(logger, "PATH to a specific backend was provided.");
         std::ifstream f(backend_json.at("backend_path"));
+        SPDLOG_LOGGER_DEBUG(logger, "Backend was read.");
         qpu_config_json = json::parse(f);
+        SPDLOG_LOGGER_DEBUG(logger, "Backend was parsed.");
     } else {
         throw std::runtime_error(std::string("Format not correct. Must be {\"backend_path\" : \"path/to/backend/json\"} or {\"fakeqmio_path\" : \"path/to/qmio/calibration/json\"}"));
     }
@@ -62,17 +69,18 @@ int main(int argc, char *argv[])
     std::string info_path(argv[1]);
     std::string communications(argv[2]);
     std::string simulator(argv[3]);
-    std::string backend;
+    std::string backend_str;
     json backend_json;
     int no_rank = -1;
     
     json qpu_config_json = {};
     try {
         if (argc == 5) {
-            backend = std::string(argv[4]);
-            std::cout << backend << "\n";
-            backend_json = json::parse(backend);
+            backend_str = std::string(argv[4]);
+            SPDLOG_LOGGER_DEBUG(logger, "A PATH to a backend was provided: {}", backend_str);
+            backend_json = json::parse(backend_str);
             qpu_config_json = get_qpu_config(backend_json);
+            SPDLOG_LOGGER_DEBUG(logger, "Json with QPU configuration created");
             
         } else  if (argc < 4) {
             SPDLOG_LOGGER_ERROR(logger, "Not a QPU configuration was given.");
@@ -81,17 +89,19 @@ int main(int argc, char *argv[])
         switch (comm_map[communications])
         {
         case no_comm:
+        SPDLOG_LOGGER_DEBUG(logger, "Ready to raise QPUs without communications.");
             if(auto search = SIM_NAMES.find(simulator); search != SIM_NAMES.end()) {
                 if (search->second == SimType::Aer) {
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with AerSimulator.");
                     turn_on_qpu<SimType::Aer>(no_rank, qpu_config_json, info_path);
-                    SPDLOG_LOGGER_DEBUG(logger, "QPU with Aer turned on.");
 
                 } else if (search->second == SimType::Munich) {
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with MunichSimulator.");
                     turn_on_qpu<SimType::Munich>(no_rank, qpu_config_json, info_path);
-                    SPDLOG_LOGGER_DEBUG(logger, "QPU with Munich turned on.");
+
                 } else if (search->second == SimType::Munich) {
+                    SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with CunqaSimulator.");
                     turn_on_qpu<SimType::Munich>(no_rank, qpu_config_json, info_path);
-                    SPDLOG_LOGGER_DEBUG(logger, "QPU with CunqaSimulator turned on.");
                 }
             }
             break;

@@ -100,15 +100,9 @@ int main(int argc, char* argv[])
 
     if (args.fakeqmio.has_value()) {
         backend_path = std::any_cast<std::string>(args.fakeqmio.value());
-        backend_json = {
-            {"fakeqmio_path", backend_path}
-        };
-        backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
-
+        backend = R"({\"fakeqmio_path\":\")" + backend_path + R"(\"})" ;
         subcommand = "no_comm Aer \'" + backend + "\'" + "\n";
-
         sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << subcommand;
-        
         SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
 
     } else {
@@ -120,10 +114,7 @@ int main(int argc, char* argv[])
                     return 0;
                 } else {
                     backend_path = std::any_cast<std::string>(args.backend.value());
-                    backend_json = {
-                        {"backend_path", backend_path}
-                    };
-                    backend = R"({"backend_path":")" + backend_path + R"("})" ;
+                    backend = R"({\"backend_path\":\")" + backend_path + R"(\"})" ;
                     subcommand = "no_comm " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" + "\n";
                     sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << subcommand;
                     SPDLOG_LOGGER_DEBUG(logger, "Qraise with no communications and personalized backend. \n");
@@ -136,13 +127,15 @@ int main(int argc, char* argv[])
     
         } else if (args.comm.value() == "class_comm") {
             if (std::any_cast<std::string>(args.simulator) != "Cunqa") {
-                SPDLOG_LOGGER_ERROR(logger, "Classical communications only are available under CunqaSimulator but the following simulator was provided: ", std::any_cast<std::string>(args.simulator));
+                SPDLOG_LOGGER_ERROR(logger, "Classical communications only are available under CunqaSimulator but the following simulator was provided: {}", std::any_cast<std::string>(args.simulator));
                 std::system("rm qraise_sbatch_tmp.sbatch");
                 return 0;
             } 
 
             if (args.backend.has_value()) {
-                subcommand = "class_comm " + std::any_cast<std::string>(args.simulator) + " " + args.backend.value() + "\n";
+                backend_path = std::any_cast<std::string>(args.backend.value());
+                backend = R"({\"backend_path\":\")" + backend_path + R"(\"})" ;
+                subcommand = "class_comm " + std::any_cast<std::string>(args.simulator) + " " + backend + "\n";
                 SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and personalized CunqaSimulator backend. \n");
             } else {
                 subcommand = "class_comm " + std::any_cast<std::string>(args.simulator) + "\n";
