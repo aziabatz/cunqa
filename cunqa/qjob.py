@@ -373,7 +373,7 @@ class QJob():
 
     def result(self):
         """
-        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is bloking.
+        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
         """
         if (self._future is not None) and (self._future.valid()):
             try:
@@ -389,10 +389,10 @@ class QJob():
                     self._result = Result(json.loads(res), registers=self._cregisters)
                     self._updated = True
             except Exception as error:
-                logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                logger.error(f"Error while creating Results object [{type(error).__name__}].")
                 raise error # User's level
         else:
-            logger.debug(f"self._future is None or non-valid, None is returned")
+            logger.debug(f"self._future is None or non-valid, None is returned.")
 
         return self._result
 

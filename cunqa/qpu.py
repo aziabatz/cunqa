@@ -19,7 +19,7 @@ from cunqa.logger import logger
 class QPU():
     """
     Class to define a QPU.
-    -----------
+    ----------------------
     """
     
     def __init__(self, id=None, qclient=None, backend=None):
