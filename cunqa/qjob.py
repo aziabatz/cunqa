@@ -53,7 +53,6 @@ class Result():
     """
     Class to describe the result of an experiment.
     """
-
     def __init__(self, result, registers = None):
         """
         Initializes the Result class.
@@ -138,7 +137,7 @@ class Result():
                 raise error
 
         logger.debug("Results correctly loaded.")
-        
+
     def get_dict(self):
         """
         Class method to obtain a dictionary with the class variables.
@@ -201,7 +200,13 @@ class QJob():
         self._result = None
         self._updated = False
 
+        if isinstance(transpile, bool):
+            pass
 
+        else:
+            logger.error(f"transpile must be boolean, but a {type(transpile)} was provided [{TypeError.__name__}].")
+            raise TypeError # I capture the error in QPU.run() when creating the job
+    
         # transpilation
         if transpile:
             try:
@@ -310,10 +315,10 @@ class QJob():
             # config dict
             run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
 
-            if run_parameters == None:
+            if (run_parameters == None) or (len(run_parameters) == 0):
                 logger.debug("No run parameters provided, default were set.")
                 pass
-            elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
+            elif (type(run_parameters) == dict): 
                 for k,v in run_parameters.items():
                     run_config[k] = v
             else:
@@ -367,7 +372,7 @@ class QJob():
         """
 
         if self._result is None:
-            res = self._future.get()
+            res = self._future.get() # Unused and blocking :(. Here we nullify a possible pending job on the queue so that the result with new parameters can be collected 
         
         message = """{{"params":{} }}""".format(parameters).replace("'", '"')
 
@@ -385,7 +390,7 @@ class QJob():
 
     def result(self):
         """
-        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is bloking.
+        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
         """
         if (self._future is not None) and (self._future.valid()):
             try:
@@ -401,8 +406,10 @@ class QJob():
                     self._result = Result(json.loads(res), registers=self._cregisters)
                     self._updated = True
             except Exception as error:
-                logger.error(f"Error while creating Results object [{type(error).__name__}]")
+                logger.error(f"Error while creating Results object [{type(error).__name__}].")
                 raise error # User's level
+        else:
+            logger.debug(f"self._future is None or non-valid, None is returned.")
 
         return self._result
 
