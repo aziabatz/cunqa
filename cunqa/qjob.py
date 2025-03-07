@@ -35,10 +35,13 @@ def _divide(string, lengths):
     parts = []
     init = 0
     try:
-        for length in lengths:
-            parts.append(string[init:init + length])
-            init += length
-        return ' '.join(parts)
+        if len(lengths) == 0:
+            return string
+        else:
+            for length in lengths:
+                parts.append(string[init:init + length])
+                init += length
+            return ' '.join(parts)
     
     except Exception as error:
         logger.error(f"Something failed with division of string [{error.__name__}].")
@@ -92,32 +95,46 @@ class Result():
                     elif k == "results":
                         for i, m in v[0].items():
                             if i == "data":
-                                counts = m["counts"]
+                                counts_aer = m["counts"]
                             elif i == "metadata":
                                 for j, w in m.items():
                                     setattr(self,j,w)
                             else:
                                 setattr(self, i, m)
                     elif k == "counts":
-                        counts = v
+                        counts_munich = v
                         self.num_clbits = sum([len(i) for i in registers.values()])
 
                     else:
                         setattr(self, k, v)
 
+                counts = {}
+
+                # if aer counts are provided, we must transform to binary
+                if counts_aer is not None:
+                    for j,w in counts_aer.items():
+                        counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                elif counts_munich is not None:
+                    counts = counts_munich
+
+                # check if we have several classical registers
+                lengths = []
+                if registers is not None and isinstance(registers, dict):
+                    for v in registers.values():
+                        lengths.append(len(v))
+
+                # apply division of bits into as many classical registers as provided
                 self.counts = {}
                 for j,w in counts.items():
-                    if registers is None:
-                        self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                    elif isinstance(registers, dict):
-                        lengths = []
-                        for v in registers.values():
-                            lengths.append(len(v))
-                        self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+                    self.counts[_divide(j, lengths)]= w
 
             except KeyError:
                 logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
                 raise KeyError # I capture this error in QJob.result() when creating the object.
+            
+            except Exception as error:
+                logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
+                raise error
 
         logger.debug("Results correctly loaded.")
 

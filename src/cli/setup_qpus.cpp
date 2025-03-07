@@ -19,13 +19,27 @@ int main(int argc, char *argv[])
     std::string info_path(argv[1]);
     std::string simulator(argv[2]);
     std::string backend;
+    json backend_json;
 
     json qpu_config_json = {};
     try {
         if (argc == 4) {
             backend = std::string(argv[3]);
-            std::ifstream f(backend);
-            qpu_config_json = json::parse(f);
+            std::cout << backend << "\n";
+            backend_json = json::parse(backend);
+            if (backend_json.contains("fakeqmio_path")) {
+                std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + backend_json.at("fakeqmio_path").get<std::string>() + " "s +  std::getenv("SLURM_JOB_ID"));
+                std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
+                std::string fq_path = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
+                std::ifstream f(fq_path);
+                qpu_config_json = json::parse(f);
+            } else if (backend_json.contains("backend_path")) {
+                std::ifstream f(backend_json.at("backend_path").get<std::string>());
+                qpu_config_json = json::parse(f);
+            } else {
+                throw std::runtime_error(std::string("Format not correct. Must be {\"backend_path\" : \"path/to/backend/json\"} or {\"fakeqmio_path\" : \"path/to/qmio/calibration/json\"}"));
+            }
+            
         } else  if (argc < 2)
             SPDLOG_LOGGER_ERROR(logger, "Not a QPU configuration was given.");
 

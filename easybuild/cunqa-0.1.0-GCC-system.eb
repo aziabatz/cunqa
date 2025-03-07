@@ -16,10 +16,10 @@ resources as emulated QPUs. It defines an API for communicating with the QPUs an
 the necessary tools to manage them.
 """
 
-toolchain = {'name': 'GCCcore', 'version': '12.3.0'}
+toolchain = {'name': 'GCC', 'version': 'system'}
 
 #number of threads to use on build
-#parallel = ...
+parallel = 1
 
 #source_urls = ['...']
 sources = ['v%(version)s.tar.gz']
@@ -28,43 +28,26 @@ sources = ['v%(version)s.tar.gz']
 
 
 builddependencies = [
-   ('...', '...'),
+   ('FlexiBLAS', '3.3.0'),
+   ('OpenMPI', '5.0.5'),
+   ('Boost', '1.83.0'),
+   ('pybind11', '2.12.0'),
+   ('CMake', '3.27.6')
 ]
 
-dependencies = [
-   ('...','...'),
+postinstallcmds = [
+    "module load qiskit/1.2.4"
 ]
+
 
 #sanity_check_paths: files/directories that must get installed
 #sanity_check_commands: (simple) commands that must work when the installed module is loaded
-sanity_check_paths = {
-    'files': [""],
-    'dirs': [],
-}
+#sanity_check_paths = {
+#    'files': [""],
+#    'dirs': [],
+#}
 
-#Easybuild module classes
-#       base:      Default module class
-#       bio:       Bioinformatics, biology and biomedical
-#       cae:       Computer Aided Engineering (incl. CFD)
-#       chem:      Chemistry, Computational Chemistry and Quantum Chemistry
-#       compiler:  Compilers
-#       data:      Data management & processing tools
-#       debugger:  Debuggers
-#       devel:     Development tools
-#       geo:       Earth Sciences
-#       ide:       Integrated Development Environments (e.g. editors)
-#       lang:      Languages and programming aids
-#       lib:       General purpose libraries
-#       math:      High-level mathematical software
-#       mpi:       MPI stacks
-#       numlib:    Numerical Libraries
-#       perf:      Performance tools
-#       phys:      Physics and physical systems simulations
-#       system:    System utilities (e.g. highly depending on system OS and hardware)
-#       toolchain: EasyBuild toolchains
-#       tools:     General purpose tools
-#       vis:       Visualization, plotting, documentation and typesetting
-moduleclass = '...'
+moduleclass = 'tools'
 
 #CESGA areas
 #area_bioinformatics
@@ -82,7 +65,7 @@ moduleclass = '...'
 #area_tools
 #area_visualizationanddataformats
 #area_quantumcomputing
-modluafooter = 'add_property("type0","area_....")'
+modluafooter = 'add_property("type0","area_quantumcomputing")'
 
 usage = """
 \033[94mINTERACTIVE USE:\033[0m
@@ -96,4 +79,4 @@ usage = """
 examples = """
 """
 
-docurls = [ '%(installdir)s/...' ]
+#docurls = [ '%(installdir)s/...' ]

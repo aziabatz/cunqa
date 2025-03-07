@@ -39,8 +39,8 @@ public:
     { 
         try {
             zmq::message_t message;
-            socket_.recv(message, zmq::recv_flags::none);
-            std::string data(static_cast<char*>(message.data()), message.size());
+            auto size = socket_.recv(message, zmq::recv_flags::none);
+            std::string data(static_cast<char*>(message.data()), size.value());
             SPDLOG_LOGGER_DEBUG(logger, "Received data: {}", data);
             
             rid_queue_.push(message.routing_id());

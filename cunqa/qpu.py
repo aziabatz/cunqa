@@ -4,7 +4,7 @@ from json import JSONDecodeError, load
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
-    info_path = STORE+"/.api_simulator/qpu.json"
+    info_path = STORE+"/.api_simulator/qpus.json"
 # importamos api en C++
 from cunqa.qclient import QClient
 # importamos la clase Backend
@@ -14,7 +14,6 @@ from cunqa.qjob import QJob
 
 # importing logger
 from cunqa.logger import logger
-
 
 class QPU():
     """
@@ -125,7 +124,6 @@ def getQPUs(path = info_path):
     List of QPU objects.
     
     """
-
     try:
         with open(path, "r") as qpus_json:
             dumps = load(qpus_json)

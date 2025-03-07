@@ -46,6 +46,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+build*
 develop-eggs/
 dist/
 downloads/
@@ -257,7 +258,7 @@ mqt-ddsim/
 upgrade_params_benchmarking
 node_test.sh
 raise.sh
-
+.nfs*
 
 condaJupyter_ft3.sh
 condaJupyter_qmio.sh

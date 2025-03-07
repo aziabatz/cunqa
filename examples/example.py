@@ -64,7 +64,7 @@ params = """ {
 } """
 
 STORE = os.getenv("STORE")
-conf_file = STORE + "/.api_simulator/qpu.json"
+conf_file = STORE + "/.api_simulator/qpus.json"
 
 with open(conf_file, 'r', encoding='utf-8') as archivo:
     datos = json.load(archivo)
