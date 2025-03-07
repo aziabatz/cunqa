@@ -114,8 +114,7 @@ std::unordered_map<std::string, std::string> get_IP_addresses()
     freeifaddrs(interfaces);
     return ips;
 }
-
-// TODO: Hacer que el get_port no esté tan ligado a SLURM 
+ 
 std::string get_port() 
 {
     auto id = std::getenv("SLURM_LOCALID");

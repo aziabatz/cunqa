@@ -17,27 +17,31 @@ using namespace std::literals;
 using namespace AER;
 using namespace config;
 
+
 class AerSimulator {
 public:
+    
+    static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) {
+        
+        try {
+            //TODO: Maybe improve them to send several circuits at once
+            Circuit circuit(circuit_json);
+            std::vector<std::shared_ptr<Circuit>> circuits;
+            circuits.push_back(std::make_shared<Circuit>(circuit));
 
-    // TODO: Añadir el modelo de ruido
-    json execute(json circuit_json, const config::RunConfig& run_config) {
-
-        Circuit circuit(circuit_json);
-        Noise::NoiseModel noise_default;
-
-        json run_config_json(run_config);
-        std::cout << run_config_json.dump(4) << "\n";
-
-        Config aer_default(run_config_json);
-
-
-        std::vector<std::shared_ptr<Circuit>> circuits;
-        circuits.push_back(std::make_shared<Circuit>(circuit));
-
-        Result result = controller_execute<Controller>(circuits, noise_default, aer_default);
-
-        return result.to_json();
+            json run_config_json(run_config);
+            run_config_json["seed_simulator"] = run_config.seed;
+            Config aer_config(run_config_json);
+            
+            Noise::NoiseModel noise_model(noise_model_json);
+            Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
+            return result.to_json();
+        } catch (const std::exception& e) {
+            // TODO: specify the circuit format in the docs.
+            SPDLOG_LOGGER_ERROR(logger, "Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
+            return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
+        }
+        return {};
     }
 
 };

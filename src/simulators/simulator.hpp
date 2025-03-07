@@ -10,7 +10,7 @@ enum class SimType {
     Munich
 };
 
-const std::unordered_map<std::string, SimType> sim_names = {
+const std::unordered_map<std::string, SimType> SIM_NAMES = {
     {"Aer", SimType::Aer},
     {"Munich", SimType::Munich}
 };
@@ -25,7 +25,7 @@ struct is_same<T, T> : std::true_type {};
 template <SimType = SimType::Aer>
 struct SimClass {
     using type = AerSimulator;
-};
+};  
 
 template <>
 struct SimClass<SimType::Aer> {
@@ -36,18 +36,3 @@ template <>
 struct SimClass<SimType::Munich> {
     using type = MunichSimulator;
 };
-
-/* 
-template <SimType sim_type>
-class Simulator {
-    std::unique_ptr<typename SimClass<sim_type>::type> simulator;
-
-public:
-
-    Simulator() : simulator{std::make_unique<typename SimClass<sim_type>::type>()} { }
-
-    inline json execute(json circuit_json, const config::RunConfig& run_config) {
-        return simulator->execute(circuit_json, run_config);
-    }
-
-}; */

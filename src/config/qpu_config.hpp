@@ -20,11 +20,12 @@ public:
         filepath{filepath}
     {
         if (config.contains("backend"))
-            this->backend_config = BackendConfig<sim_type>(config.at("backend"));
+            this->backend_config = config.contains("noise") ? 
+                           BackendConfig<sim_type>(config.at("backend"), config.at("noise")) : 
+                           BackendConfig<sim_type>(config.at("backend"), json());
         else
             this->backend_config = BackendConfig<sim_type>();
         
-        // If no net is specified in the config file, then the process net is defined
         if (config.contains("net"))
             this->net_config = NetConfig(config.at("net"));
         else {

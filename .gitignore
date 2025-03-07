@@ -46,6 +46,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+build*
 develop-eggs/
 dist/
 downloads/
@@ -212,6 +213,9 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# Logging
+logs/
+
 # vscode
 .vscode
 
@@ -223,6 +227,7 @@ installation
 qraise_*
 client.cpp
 server.cpp
+compile.sh
 
 cargar_modulos.sh
 
@@ -238,8 +243,23 @@ myjob.sh
 hola.sh
 test*
 generar_circuito.py
+circuit
 
 modules_alvaro.sh
+config_alvaro.sh
 installations/
+config_alvaro.sh
+local_tests/
+memory_tests/
+local_tests/
+memory_tests/
+main_param.cpp
+mqt-ddsim/
+upgrade_params_benchmarking
+node_test.sh
+raise.sh
+.nfs*
 
-
+condaJupyter_ft3.sh
+condaJupyter_qmio.sh
+modules.sh

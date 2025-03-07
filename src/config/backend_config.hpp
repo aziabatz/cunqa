@@ -2,12 +2,15 @@
 
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <fstream>
+#include <string>
 
-#include "../utils/constants.hpp"
-#include "../simulators/simulator.hpp"
+#include "utils/constants.hpp"
+#include "simulators/simulator.hpp"
 
 using namespace std::literals;
 using json = nlohmann::json;
+
 
 namespace config {
 
@@ -24,10 +27,12 @@ public:
     bool memory;
     int max_shots;
     std::string description;
-    std::optional<std::string> coupling_map;
-    std::string basis_gates;
+    std::vector<std::vector<int>> coupling_map;
+    std::vector<std::string> basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
+    
+    json noise_model;
     
 
     template<SimType T = sim_type,
@@ -42,8 +47,11 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
+        coupling_map{{}},
+        basis_gates{BASIS_GATES_JSON},
         description{"Usual AER simulator."}
     { }
+
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
@@ -57,21 +65,22 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
+        basis_gates{BASIS_GATES_JSON},
         description{"Usual Munich simulator."}
     { }
 
     template<SimType T = sim_type,
-             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true>
-    BackendConfig(const json& config)
-        : simulator{"AerSimulator"}
+             typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"AerSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
     }
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
-    BackendConfig(const json& config) 
-        : simulator{"MunichSimulator"}
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"MunichSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
     }
@@ -80,6 +89,7 @@ public:
 template <SimType sim_type>
 void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 {
+    
     j = {   
             {"name", backend_conf.name}, 
             {"version", backend_conf.version},
@@ -91,10 +101,10 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
             {"memory", backend_conf.memory},
             {"max_shots", backend_conf.max_shots},
             {"description", backend_conf.description},
-            //{"coupling_map", backend_conf.coupling_map},
+            {"coupling_map", backend_conf.coupling_map},
             {"basis_gates", backend_conf.basis_gates}, 
             {"custom_instructions", backend_conf.custom_instructions},
-            //{"gates", backend_conf.gates}
+            {"gates", backend_conf.gates}
         };
 }
 
@@ -103,7 +113,7 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
 {
     j.at("name").get_to(backend_conf.name);
     j.at("version").get_to(backend_conf.version);
-    j.at("simulator").get_to(backend_conf.simulator);
+    //j.at("simulator").get_to(backend_conf.simulator);
     j.at("n_qubits").get_to(backend_conf.n_qubits);
     j.at("url").get_to(backend_conf.url);
     j.at("is_simulator").get_to(backend_conf.is_simulator);
@@ -111,20 +121,11 @@ void from_json(const json& j, BackendConfig<sim_type>& backend_conf)
     j.at("memory").get_to(backend_conf.memory);
     j.at("max_shots").get_to(backend_conf.max_shots);
     j.at("description").get_to(backend_conf.description);
-    //j.at("coupling_map").get_to(backend_conf.coupling_map);
+    j.at("coupling_map").get_to(backend_conf.coupling_map);
     j.at("basis_gates").get_to(backend_conf.basis_gates);
     j.at("custom_instructions").get_to(backend_conf.custom_instructions);
-    //j.at("gates").get_to(backend_conf.gates);
+    j.at("gates").get_to(backend_conf.gates);
+    
 }; 
 
 };
-
-std::ostream& operator<<(std::ostream& os, const config::BackendConfig<SimType::Aer>& config) {
-    /* os << "\nIPs: \n";
-    for (const auto& net_bind : config.IPs) {
-            os << net_bind.first << " ---> " << net_bind.second << "\n";
-    }
-    os << "\nPuerto: " << config.port
-       << "\nHostname: " << config.hostname << "\n\n"; */
-    return os;
-}
