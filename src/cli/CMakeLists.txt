@@ -40,15 +40,17 @@ add_executable(setup_qpus setup_qpus.cpp)
 message(STATUS "libzmq_LIBRARIES: ${libzmq_LIBRARIES}")
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
-                                              "${libzmq_INCLUDE_DIRS}"
+                                              #"${libzmq_INCLUDE_DIRS}"
+                                              "${libzmq_BINARY_DIR}"
                                               "${CMAKE_SOURCE_DIR}/src/third-party/zmq"
-                                              "${PROJECT_BINARY_DIR}/src/comm")
+                                              "${PROJECT_BINARY_DIR}/src/comm"
+                                              "${PYBIND_PATH}/include")
 target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              nlohmann_json::nlohmann_json 
                              Threads::Threads MQT::DDSim
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK
-                             ${libzmq_LIBRARIES})
+                             libzmq)
 target_compile_options(setup_qpus PRIVATE -fvisibility=hidden)
 target_link_options(setup_qpus PRIVATE -Wl,-Bsymbolic)
 

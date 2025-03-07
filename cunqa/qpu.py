@@ -15,7 +15,6 @@ from cunqa.qjob import QJob
 # importing logger
 from cunqa.logger import logger
 
-
 class QPU():
     """
     Class to define a QPU.
@@ -123,7 +122,6 @@ def getQPUs(path = info_path):
     List of QPU objects.
     
     """
-
     try:
         with open(path, "r") as qpus_json:
             dumps = load(qpus_json)

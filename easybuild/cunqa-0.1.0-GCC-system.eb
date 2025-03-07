@@ -1,12 +1,15 @@
+# FT3 EasyBuild file for CUNQA
 # Author:
 #   - Álvaro Carballido Costas
 #   - Marta Losada Estévez
 #   - Jorge Vázquez Pérez 
 # Fundacion Publica Galega Centro Tecnoloxico de Supercomputacion de Galicia (CESGA)
 
-easyblock = 'CMakeMake'
+easyblock = 'CMakePythonPackage'
+
 name = 'cunqa'
 version = '0.1.0'
+versionsuffix = '-Python-3.9.9s'
 
 homepage = "https://github.com/CESGA-Quantum-Spain/cunqa"
 #cambiar *** por descripcion: modhierinfo() se incluye automaticamente
@@ -19,12 +22,10 @@ the necessary tools to manage them.
 toolchain = {'name': 'GCC', 'version': 'system'}
 
 #number of threads to use on build
-parallel = 1
+parallel = 4
 
 #source_urls = ['...']
 sources = ['v%(version)s.tar.gz']
-
-#patches = ['...']
 
 
 builddependencies = [
@@ -35,17 +36,17 @@ builddependencies = [
    ('CMake', '3.27.6')
 ]
 
-postinstallcmds = [
-    "module load qiskit/1.2.4"
+dependencies = [
+    ('Qiskit', '1.2.4')
 ]
 
+installopts = " "
+configopts = '-DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11 '
 
-#sanity_check_paths: files/directories that must get installed
-#sanity_check_commands: (simple) commands that must work when the installed module is loaded
-#sanity_check_paths = {
-#    'files': [""],
-#    'dirs': [],
-#}
+sanity_check_paths = {
+    'files': ['bin/qraise', 'bin/qdrop', 'bin/setup_qpus', 'bin/epilog.sh'],
+    'dirs': ['bin', 'lib'],
+}
 
 moduleclass = 'tools'
 

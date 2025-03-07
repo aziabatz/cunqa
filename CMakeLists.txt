@@ -24,8 +24,7 @@ else()
     set(CMAKE_INSTALL_PREFIX "$ENV{INSTALL_PATH}")
 endif()
 
-set(CMAKE_INSTALL_LIBDIR "lib")
-set(CMAKE_INSTALL_INCLDIR "include")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib64")
 set(CMAKE_INSTALL_BINDIR "bin")
 
 find_package(Python 3.9.9 EXACT COMPONENTS Interpreter Development)
@@ -33,14 +32,13 @@ find_package(Python 3.9.9 EXACT COMPONENTS Interpreter Development)
 #TODO: Load pybind11 depending on the environment
 
 if(DEFINED PYBIND_PATH)
-    list(APPEND CMAKE_PREFIX_PATH "${PYBIND_PATH}/share/cmake/pybind11")
-    set(PYBIND_DIR "${PYBIND_PATH}")
+    set(pybind11_DIR "${PYBIND_PATH}/share/cmake/pybind11")
 else(NOT DEFINED PYBIND_PATH)
     string(FIND "$ENV{LOADEDMODULES}" "pybind11" module_pos)
     if(module_pos GREATER -1)
         #list(APPEND CMAKE_PREFIX_PATH "/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib/python3.9/site-packages/pybind11/share/cmake/pybind11")
-        set(PYBIND_DIR "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11")
-        list(APPEND CMAKE_PREFIX_PATH "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11/share/cmake/pybind11")
+        set(PYBIND_PATH "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11")
+        set(pybind11_DIR "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11/share/cmake/pybind11")
         message(STATUS "Loading the default path for pybind11...")
     else()
         message(WARNING
@@ -54,11 +52,6 @@ endif()
 
 set(PYBIND11_PYTHON_VERSION 3.9 CACHE STRING "")
 find_package(pybind11 2.12 REQUIRED)
-
-#message(STATUS "LIBRARY PATH VALUE: $ENV{LIBRARY_PATH}")
-#message(STATUS "CMAKE_LIBRARY_PATH: ${CMAKE_LIBRARY_PATH}")
-#set(CMAKE_LIBRARY_PATH $ENV{LIBRARY_PATH})
-include_directories("${PYBIND_DIR}/include")
 
 add_subdirectory(src)
 add_subdirectory(cunqa)
