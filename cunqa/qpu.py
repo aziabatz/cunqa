@@ -100,6 +100,7 @@ class QPU():
         """
         try:
             qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, **run_parameters)
+            logger.debug("Qjob instantiated.")
             qjob.submit()
             logger.debug(f"Qjob submitted to QPU {self.id}.")
         except Exception as error:

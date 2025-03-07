@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     
         } else if (args.comm.value() == "class_comm") {
             if (std::any_cast<std::string>(args.simulator) != "Cunqa") {
-                SPDLOG_LOGGER_ERROR(logger, "Classical communications only are available under CunqaSimulator but the following simulator was provided: {}", std::any_cast<std::string>(args.simulator));
+                SPDLOG_LOGGER_ERROR(logger, "Classical communications only are available under \"Cunqa\" simulator, but the following simulator was provided: {}", std::any_cast<std::string>(args.simulator));
                 std::system("rm qraise_sbatch_tmp.sbatch");
                 return 0;
             } 

@@ -86,9 +86,9 @@ void QPU<sim_type>::_compute_result()
                 message_queue_.pop();
                 lock.unlock();
 
-                SPDLOG_LOGGER_DEBUG(logger, "Message received:");
+                SPDLOG_LOGGER_DEBUG(logger, "Message received.");
                 json message_json = json::parse(message);
-                SPDLOG_LOGGER_DEBUG(logger, "Circuit parsed");
+                SPDLOG_LOGGER_DEBUG(logger, "Message parsed.");
 
                 // This does not refer to the field `params` for a specific gate, but
                 // for a separated field specifying the new set of parameters
@@ -105,9 +105,8 @@ void QPU<sim_type>::_compute_result()
 
                     
                 } else {
-                    SPDLOG_LOGGER_DEBUG(logger, "Simulator: {}", backend.backend_config.simulator);
-                    if (backend.backend_config.simulator == "AerSimulator"){
-                        SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator");
+                    if (backend.backend_config.simulator == "AerSimulator" | backend.backend_config.simulator == "CunqaSimulator"){
+                        SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator or CunqaSimulator");
                         std::vector<double> parameters = message_json.at("params");
                         if (kernel.empty()){
                             SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
