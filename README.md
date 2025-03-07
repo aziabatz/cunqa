@@ -141,7 +141,7 @@ export PATH=$PATH:$INSTALL_PATH/bin
 6. 
 * **Using [Ninja](https://ninja-build.org/) (faster)**
 ```console
-cmake -G Ninja -B build/ cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+cmake -G Ninja -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
 ninja -C build -j $(nproc)
 cmake --install build/
 ```
