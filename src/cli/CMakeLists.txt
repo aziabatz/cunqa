@@ -2,6 +2,7 @@
 add_executable(qraise qraise.cpp)
 target_include_directories(qraise PRIVATE "${CMAKE_SOURCE_DIR}/src" 
                                           "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
+                                          "${CMAKE_SOURCE_DIR}/src/third-party/cunqasimulator/src"
                                           "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 target_link_libraries(qraise PRIVATE custom-json logger_client
                                      nlohmann_json::nlohmann_json 

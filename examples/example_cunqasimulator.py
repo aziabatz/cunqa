@@ -33,13 +33,7 @@ client.connect(claves_primer_nivel[0])
 
 # Ejemplo comunicaciones clasicas
 
-d_qc_0 = {
-    "config": {
-        "shots": 19,
-        "method": "automatic",
-        "memory_slots": 7,
-        "seed": 1331
-    },
+qc = {
     "instructions": [
     
 
@@ -51,17 +45,50 @@ d_qc_0 = {
         "name": "measure",
         "qubits": [0,-1,-1]
     }
-    ]
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    }
 }
 
+d_qc_0 = {
+    "instructions": [
+    
+
+    {
+        "name":"h",
+        "qubits":[0,0,-1],
+    },
+    {
+        "name":"d_c_if_x",
+        "qubits":[0,0,-1],
+        "qpus":[0,1]
+    },
+    {
+        "name": "measure",
+        "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
+    }
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    }
+}
 
 d_qc_1 = {
-    "config": {
-        "shots": 19,
-        "method": "automatic",
-        "memory_slots": 7,
-        "seed": 1331
-    },
     "instructions": [
     
     {
@@ -72,8 +99,20 @@ d_qc_1 = {
     {
         "name": "measure",
         "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
     }
-    ]
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    }
 }
 
 
@@ -108,8 +147,10 @@ for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}.")
 
 
-job = qpu0.run(d_qc_0, shots=19)
-print(job.result())
+job0 = qpu0.run(d_qc_0, shots=19)
+job1 = qpu1.run(d_qc_1, shots=19)
+print(job0.result().get_counts())
+print(job1.result().get_counts())
 
 
 

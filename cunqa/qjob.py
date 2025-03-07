@@ -221,6 +221,12 @@ class QJob():
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
                     circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+
+                elif self._QPU.backend.simulator == "CunqaSimulator":
+
+                    logger.debug("Translating to dict for CunqaSimulator...")
+
+                    circuit = circt['instructions']
             
 
             elif isinstance(circt, QuantumCircuit):
@@ -312,6 +318,9 @@ class QJob():
 
             elif self._QPU.backend.simulator == "MunichSimulator":
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+            
+            elif self._QPU.backend.simulator == "CunqaSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
