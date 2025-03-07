@@ -6,3 +6,4 @@
     :members:
     .. autoclass:: cunqa.qjob.gather 
     :members:
+    
