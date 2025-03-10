@@ -15,10 +15,11 @@ using json = nlohmann::json;
 class CunqaSimulator {
 
 public:
-    static json execute(json circuit_json, int& n_qubits, json& noise_model_json, const config::RunConfig& run_config) {
+    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
         
         try {
             QuantumCircuit circuit = circuit_json.at("instructions");
+            int n_qubits = circuit_json.at("num_qubits");
             json run_config_json(run_config);
             Executor executor(n_qubits); //TODO: This class is instanciated every time backend.execute is called. Better if only instanciated one time? Where?
             SPDLOG_LOGGER_DEBUG(logger, "Cunqa executor ready to run.");
