@@ -48,7 +48,7 @@ Now, everything is set to get the source code.
 git clone --recursive git@github.com:CESGA-Quantum-Spain/cunqa.git
 ```
 
-To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
+As a additional step, we encourage to run the *setup_submodules.sh* file, which removes some of the files unused in the submodules and makes the repository lighter:
 
 ```console
 cd cunqa/scripts
