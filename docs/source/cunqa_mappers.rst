@@ -1,6 +1,6 @@
 .. autosummary:: cunqa.mappers
     :members:
-    
+
     .. autoclass:: cunqa.mappers.QJobMapper
         :members:
 
