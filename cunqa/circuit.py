@@ -132,7 +132,7 @@ def from_json_to_qc(circuit_dict):
     Function to transform a circuit in json dict format to <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
 
     Args:
-    -----------
+    ----------
     circuit_dict (dict): circuit to be transformed to QuantumCircuit.
 
     Return:
@@ -228,6 +228,17 @@ def from_json_to_qc(circuit_dict):
 
 
 def registers_dict(qc):
+    """
+    Extracts the number of classical and quantum registers from a QuantumCircuit.
+
+    Args
+    -------
+     qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
+
+    Return:
+    --------
+    Two element list with quantum and classical registers, in that order.
+    """
 
     quantum_registers = {}
     for qr in qc.qregs:
