@@ -246,13 +246,14 @@ qc.cx(0,1)
 qc.measure_all()
 
 # Time to run
-qpu0 = qpu[0] # Select one of the raise QPUs
+qpu0 = qpus[0] # Select one of the raise QPUs
 
 job = qpu0.run(qc, transpile = True, shots = 1000)
 
 result = job.result() # Get the result of the execution
 
 counts = result.get_counts() 
+print(f"Counts: {counts}" )
 ```
 
 > [!NOTE] 
