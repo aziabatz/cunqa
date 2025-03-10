@@ -21,7 +21,7 @@ release = '0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', 'nbsphinx', 'sphinx_gallery.load_style',]
+extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx-mdinclude', 'nbsphinx', 'sphinx_gallery.load_style',]
 
 autodoc_mock_imports = ['os','json', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'qmiotools', 'qiskit_aer']
 
