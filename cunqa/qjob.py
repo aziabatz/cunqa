@@ -268,11 +268,8 @@ class QJob():
 
                 logger.debug("A QASM2 circuit was provided.")
 
-                cl_bits = 0
-                for line in circt.splitlines():
-                    if line.startswith("bit"):
-                        cl_bits += line.split()[4]
                 self._cregisters = registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+                cl_bits = sum(len(k) for k in self._cregisters.values())
 
                 if self._QPU.backend.simulator == "AerSimulator":
 
