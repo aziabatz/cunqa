@@ -23,7 +23,7 @@ using namespace config;
 class AerSimulator {
 
 public:
-    static json execute(json circuit_json, int& n_qubits, json& noise_model_json, const config::RunConfig& run_config) {
+    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
         
         try {
             //TODO: Maybe improve them to send several circuits at once

@@ -20,7 +20,7 @@ public:
         SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
     }
 
-    static json execute(json circuit_json, int& n_qubits, json& noise_model_json,  const config::RunConfig& run_config) 
+    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
     {
         try {
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));

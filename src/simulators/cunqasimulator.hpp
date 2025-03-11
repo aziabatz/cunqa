@@ -27,7 +27,6 @@ public:
             ResultCunqa result = executor.run(circuit, run_config_json.at("shots"));
 
             SPDLOG_LOGGER_DEBUG(logger, "executor.run finished.");
-            SPDLOG_LOGGER_DEBUG(logger, "Counts: {}", std::string(result.counts.dump()));
 
             return result.to_json();
         } catch (const std::exception& e) {

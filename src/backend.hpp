@@ -29,7 +29,7 @@ public:
     json run(json& circuit_json) 
     {
         try {
-            return SimClass<sim_type>::type::execute(circuit_json, backend_config.n_qubits, backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
+            return SimClass<sim_type>::type::execute(circuit_json, backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
         } catch (const std::exception& e) {
             SPDLOG_LOGGER_ERROR(logger, "Error parsing the run configuration - {}", e.what());
         }
