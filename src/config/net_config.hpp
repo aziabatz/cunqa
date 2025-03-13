@@ -117,7 +117,8 @@ std::unordered_map<std::string, std::string> get_IP_addresses()
  
 std::string get_port() 
 {
-    auto id = std::getenv("SLURM_LOCALID");
+    //auto id = std::getenv("SLURM_LOCALID");
+    auto id = std::getenv("SLURM_TASK_PID"); //Alvaro: antes el de arriba
     std::string ports = std::getenv("SLURM_STEP_RESV_PORTS");
 
     if(ports != "" && id != "")
