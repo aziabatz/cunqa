@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 
         case class_comm:
             SPDLOG_LOGGER_DEBUG(logger, "Ready to raise QPUs with classical communications.");
+            #ifdef QPU_MPI
             // MPI INIT BLOCK //
             MPI_Init(&argc, &argv);
 
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
 
             MPI_Finalize();
             break;
+            #endif
 
         case quantum_comm:
             SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");

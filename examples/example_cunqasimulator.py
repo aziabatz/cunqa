@@ -58,7 +58,6 @@ qc = {
 
 d_qc_0 = {
     "instructions": [
-    
 
     {
         "name":"h",

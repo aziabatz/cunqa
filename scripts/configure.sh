@@ -18,8 +18,6 @@ if [ ! -z "$1" ]; then
         # Execution for FT3 
         ml load cesga/2022 gcc/system gcccore/system openmpi/4.1.4 flexiblas/3.3.0 boost python/3.10.8 pybind11/2.12.0 cmake/3.27.6
 
-        echo Hola
-
         conda deactivate
         
         export INSTALL_PATH=$1

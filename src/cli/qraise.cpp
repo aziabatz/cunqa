@@ -146,8 +146,10 @@ int main(int argc, char* argv[])
                 SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and default CunqaSimulator backend. \n");
             }
 
+            #ifdef QPU_MPI
             sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  subcommand;
             SPDLOG_LOGGER_DEBUG(logger, "Command: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {}", subcommand );
+            #endif
     
         } else { //Quantum Communication
             SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");

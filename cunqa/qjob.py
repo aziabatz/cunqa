@@ -51,7 +51,7 @@ class Result():
     Class to describe the result of an experiment.
     """
 
-    def __init__(self, result, registers = None):
+    def __init__(self, result, simulator, registers = None):
         """
         Initializes the Result class.
 
@@ -107,15 +107,18 @@ class Result():
                         setattr(self, k, v)
 
                 self.counts = {}
-                for j,w in counts.items():
-                    if registers is None:
-                        self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                    elif isinstance(registers, dict):
-                        lengths = []
-                        for v in registers.values():
-                            lengths.append(len(v))
-                        self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
-
+                if (simulator != "CunqaSimulator"):
+                    
+                    for j,w in counts.items():
+                        if registers is None:
+                            self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
+                        elif isinstance(registers, dict):
+                            lengths = []
+                            for v in registers.values():
+                                lengths.append(len(v))
+                            self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
+                else:
+                    self.counts = json.dumps(counts)
             except KeyError:
                 logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
                 raise KeyError # I capture this error in QJob.result() when creating the object.
@@ -207,6 +210,7 @@ class QJob():
 
                 logger.debug("A circuit dict was provided.")
 
+                self.num_qubits = circt["num_qubits"]
                 cl_bits = circt["num_clbits"]
                 self._cregisters = circt["classical_registers"]
 
@@ -314,13 +318,13 @@ class QJob():
 
 
             if self._QPU.backend.simulator == "AerSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":{}}}""".format(run_config, instructions).replace("'", '"')
 
             elif self._QPU.backend.simulator == "MunichSimulator":
                 self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
             
             elif self._QPU.backend.simulator == "CunqaSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":{}, "num_qubits":{} }}""".format(run_config, instructions, self.num_qubits).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
@@ -385,13 +389,13 @@ class QJob():
                 if self._result is not None:
                     if not self._updated: # if the result was already obtained, we only call the server if an update was done
                         res = self._future.get()
-                        self._result = Result(json.loads(res), registers=self._cregisters)
+                        self._result = Result(json.loads(res), self._QPU.backend.simulator, registers=self._cregisters)
                         self._updated = True
                     else:
                         pass
                 else:
                     res = self._future.get()
-                    self._result = Result(json.loads(res), registers=self._cregisters)
+                    self._result = Result(json.loads(res), self._QPU.backend.simulator, registers=self._cregisters)
                     self._updated = True
             except Exception as error:
                 logger.error(f"Error while creating Results object [{type(error).__name__}]")

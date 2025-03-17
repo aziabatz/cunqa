@@ -27,7 +27,7 @@ public:
         
         try {
             //TODO: Maybe improve them to send several circuits at once
-            Circuit circuit(circuit_json);
+            Circuit circuit(circuit_json.at("instructions"));
             std::vector<std::shared_ptr<Circuit>> circuits;
             circuits.push_back(std::make_shared<Circuit>(circuit));
 

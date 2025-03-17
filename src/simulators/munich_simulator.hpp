@@ -25,7 +25,7 @@ public:
         try {
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
 
-            std::string circuit(circuit_json["instructions"]);
+            std::string circuit(circuit_json.at("instructions"));
             SPDLOG_LOGGER_DEBUG(logger, "Circuit JSON: {}", circuit);
             auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
