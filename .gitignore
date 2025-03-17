@@ -265,3 +265,4 @@ condaJupyter_qmio.sh
 modules.sh
 
 build_improvements/
+bash/

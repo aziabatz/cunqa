@@ -1,7 +1,6 @@
 #!/bin/bash
 
-if (($SLURM_LOCALID == "0")); then
-    echo "Hola desde la task $SLURM_LOCALID"
-fi
+
+echo "SLURM_LOCALID: ${SLURM_LOCALID} - SLURM_PROCID: ${SLURM_PROCID} - SLURM_TASK_PID: ${SLURM_TASK_PID} - SLURM_STEP_RESV_PORTS: ${SLURM_STEP_RESV_PORTS}"
 
 sleep 2
