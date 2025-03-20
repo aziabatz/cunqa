@@ -148,8 +148,15 @@ int main(int argc, char* argv[])
 
             #ifdef QPU_MPI
             sbatchFile << "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  subcommand;
-            SPDLOG_LOGGER_DEBUG(logger, "Command: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {}", subcommand );
+            SPDLOG_LOGGER_DEBUG(logger, "Command with MPI comm: srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {}", subcommand );
             #endif
+
+            #ifdef QPU_ZMQ
+            int num_ports = args.n_qpus * 2;
+            sbatchFile << "srun --resv-ports=" + std::to_string(num_ports) + " --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " <<  subcommand;
+            SPDLOG_LOGGER_DEBUG(logger, "Command with ZMQ comm: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {}", subcommand );
+            #endif
+
     
         } else { //Quantum Communication
             SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");

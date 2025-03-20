@@ -66,6 +66,64 @@ d_qc_1 = {
     }
 }
 
+d_qc_0_zmq = {
+    "instructions": [
+
+    {
+        "name":"h",
+        "qubits":[0,-1,-1],
+    },
+    {
+        "name":"d_c_if_x",
+        "qubits":[0,0,-1],
+        "qpus":["tcp://10.5.7.8:17330", "tcp://10.5.7.8:17329"]
+    },
+    {
+        "name": "measure",
+        "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
+    }
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    }
+}
+
+d_qc_1_zmq = {
+    "instructions": [
+    
+    {
+        "name":"d_c_if_x",
+        "qubits":[0,0,-1],
+        "qpus":["tcp://10.5.7.8:17330", "tcp://10.5.7.8:17329"]
+    },
+    {
+        "name": "measure",
+        "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
+    }
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    }
+}
+
 
 qpus = getQPUs()
 qpu0 = qpus[0]
@@ -76,8 +134,8 @@ for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}.")
 
 
-job0 = qpu0.run(d_qc_0, shots=19)
-job1 = qpu1.run(d_qc_1, shots=19)
+job0 = qpu0.run(d_qc_0_zmq, shots=10)
+job1 = qpu1.run(d_qc_1_zmq, shots=10)
 print(job0.result().get_counts())
 print(job1.result().get_counts())
 

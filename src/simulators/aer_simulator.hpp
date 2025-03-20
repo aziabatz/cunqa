@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+#include <optional>
+#include <nlohmann/json.hpp>
+
 #include "simulators/circuit_executor.hpp"
 #include "framework/json.hpp"
 #include "framework/config.hpp"
@@ -8,11 +12,11 @@
 #include "controllers/controller_execute.hpp"
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
+#include "comm/qpu_comm.hpp"
 #include "logger/logger.hpp"
-#include <string>
 #include "config/run_config.hpp"
 #include "config/backend_config.hpp"
-#include <nlohmann/json.hpp>
+
 
 using json = nlohmann::json;
 using namespace std::literals;
@@ -23,7 +27,7 @@ using namespace config;
 class AerSimulator {
 
 public:
-    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
+    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config, std::optional<ZMQSockets> zmq_sockets) {
         
         try {
             //TODO: Maybe improve them to send several circuits at once

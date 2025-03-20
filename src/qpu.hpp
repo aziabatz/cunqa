@@ -4,11 +4,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <optional>
 
 #include <cstdlib>   // For rand() and srand()
 #include <chrono> 
 
 #include "comm/server.hpp"
+#include "comm/qpu_comm.hpp"
 #include "backend.hpp"
 #include "simulators/simulator.hpp"
 #include "config/qpu_config.hpp"
@@ -26,10 +28,13 @@ public:
 
     config::QPUConfig<sim_type> qpu_config;
     Backend<sim_type> backend;
-    int mpi_rank;
+    std::optional<ZMQSockets> zmq_sockets = std::nullopt;
 
-    QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config);
-    QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config, const std::string& backend_path);
+    QPU(config::QPUConfig<sim_type> qpu_config);
+
+    #if defined(QPU_ZMQ)
+    QPU(config::QPUConfig<sim_type> qpu_config, ZMQSockets zmq_sockets);
+    #endif
 
     void turn_ON();
     inline void turn_OFF();
@@ -44,10 +49,9 @@ private:
     void _recv_data();
 };
 
-
 template <SimType sim_type>
-QPU<sim_type>::QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config) : 
-    mpi_rank(mpi_rank), qpu_config{qpu_config}, backend{qpu_config.backend_config}
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config) : 
+qpu_config{qpu_config}, backend{qpu_config.backend_config}
 {
     CustomJson c_json{};
     json config_json(qpu_config);
@@ -55,6 +59,17 @@ QPU<sim_type>::QPU(int& mpi_rank, config::QPUConfig<sim_type> qpu_config) :
     c_json.write(config_json, qpu_config.filepath);
 }
 
+#if defined(QPU_ZMQ)
+template <SimType sim_type>
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, ZMQSockets zmq_sockets) : 
+qpu_config{qpu_config}, backend{qpu_config.backend_config}, zmq_sockets(std::move(zmq_sockets))
+{
+    CustomJson c_json{};
+    json config_json(qpu_config);
+
+    c_json.write(config_json, qpu_config.filepath);
+}
+#endif
 
 template <SimType sim_type>
 void QPU<sim_type>::turn_ON() 
@@ -81,7 +96,6 @@ void QPU<sim_type>::_compute_result()
         while (!message_queue_.empty()) 
         {
             try {
-                SPDLOG_LOGGER_DEBUG(logger, "MPI rank: {}", this->mpi_rank);
                 std::string message = message_queue_.front();
                 message_queue_.pop();
                 lock.unlock();
@@ -97,7 +111,7 @@ void QPU<sim_type>::_compute_result()
                     // SPDLOG_LOGGER_DEBUG(logger, "A circuit was received");
                     kernel = message_json;
                     std::chrono::steady_clock::time_point begin_run_time = std::chrono::steady_clock::now();
-                    json response = backend.run(kernel);
+                    json response = backend.run(kernel, std::move(this->zmq_sockets));
                     std::chrono::steady_clock::time_point end_run_time = std::chrono::steady_clock::now();
                     SPDLOG_LOGGER_DEBUG(logger, "Normal run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_run_time - begin_run_time).count());
                     server->send_result(to_string(response));
@@ -122,7 +136,7 @@ void QPU<sim_type>::_compute_result()
                             SPDLOG_LOGGER_DEBUG(logger, "Time upgrade_params: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_upgrade_time - begin_upgrade_time).count());
                             parameters.clear();
                             std::chrono::steady_clock::time_point begin_up_run_time = std::chrono::steady_clock::now();
-                            json response = backend.run(kernel);
+                            json response = backend.run(kernel, std::move(this->zmq_sockets));
                             std::chrono::steady_clock::time_point end_up_run_time = std::chrono::steady_clock::now();
                             SPDLOG_LOGGER_DEBUG(logger, "UP run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_up_run_time - begin_up_run_time).count());
                             server->send_result(to_string(response));
@@ -138,7 +152,7 @@ void QPU<sim_type>::_compute_result()
                             kernel = update_qasm_parameters(kernel, parameters);
                             SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit upgraded.");
                             parameters.clear();
-                            json response = backend.run(kernel);
+                            json response = backend.run(kernel, std::move(this->zmq_sockets));
                             server->send_result(to_string(response));
                         }
                     }
@@ -161,9 +175,7 @@ void QPU<sim_type>::_compute_result()
 
 template <SimType sim_type>
 void QPU<sim_type>::_recv_data() 
-{
-    SPDLOG_LOGGER_DEBUG(logger, "Listening on mpi task number {}", this->mpi_rank);
-    
+{   
     while (true) 
     {
         try {

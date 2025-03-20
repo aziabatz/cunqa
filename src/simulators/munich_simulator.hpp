@@ -1,12 +1,14 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
+#include <chrono>
+#include <optional>
+
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "logger/logger.hpp"
-#include <nlohmann/json.hpp>
-#include <chrono>
-
+#include "comm/qpu_comm.hpp"
 #include "config/backend_config.hpp"
 
 using json = nlohmann::json;
@@ -20,7 +22,7 @@ public:
         SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
     }
 
-    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
+    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config, std::optional<ZMQSockets> zmq_sockets) 
     {
         try {
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
