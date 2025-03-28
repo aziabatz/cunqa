@@ -36,7 +36,8 @@ d_qc_0 = {
             0,
             1
         ]
-    }
+    },
+    "exec_type":"dynamic"
 }
 
 d_qc_1 = {
@@ -63,7 +64,8 @@ d_qc_1 = {
             0,
             1
         ]
-    }
+    },
+    "exec_type":"dynamic"
 }
 
 d_qc_0_zmq = {
@@ -76,7 +78,7 @@ d_qc_0_zmq = {
     {
         "name":"d_c_if_x",
         "qubits":[0,0,-1],
-        "qpus":["tcp://10.5.7.8:17330", "tcp://10.5.7.8:17329"]
+        "qpus":["tcp://10.5.7.13:17715", "tcp://10.5.7.13:17714"]
     },
     {
         "name": "measure",
@@ -94,7 +96,8 @@ d_qc_0_zmq = {
             0,
             1
         ]
-    }
+    },
+    "exec_type":"dynamic"
 }
 
 d_qc_1_zmq = {
@@ -103,7 +106,7 @@ d_qc_1_zmq = {
     {
         "name":"d_c_if_x",
         "qubits":[0,0,-1],
-        "qpus":["tcp://10.5.7.8:17330", "tcp://10.5.7.8:17329"]
+        "qpus":["tcp://10.5.7.13:17715", "tcp://10.5.7.13:17714"]
     },
     {
         "name": "measure",
@@ -121,7 +124,8 @@ d_qc_1_zmq = {
             0,
             1
         ]
-    }
+    },
+    "exec_type":"dynamic"
 }
 
 

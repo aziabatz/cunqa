@@ -16,6 +16,7 @@
 #include "logger/logger.hpp"
 #include "config/run_config.hpp"
 #include "config/backend_config.hpp"
+#include "utils/constants.hpp"
 
 
 using json = nlohmann::json;
@@ -24,14 +25,15 @@ using namespace AER;
 using namespace config;
 
 
+
 class AerSimulator {
 
 public:
-    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config, std::optional<ZMQSockets> zmq_sockets) {
+    static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
         
         try {
             //TODO: Maybe improve them to send several circuits at once
-            Circuit circuit(circuit_json.at("instructions"));
+            Circuit circuit(circuit_json);
             std::vector<std::shared_ptr<Circuit>> circuits;
             circuits.push_back(std::make_shared<Circuit>(circuit));
 
@@ -50,4 +52,18 @@ public:
         return {};
     }
 
+    static CunqaStateVector _apply_gate(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits, std::vector<double>& param)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+        return {};
+    }
+
+    static MeasurementOutput _apply_measure(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits)
+    {
+        MeasurementOutput m;
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+        return m;
+    }
+
 };
+

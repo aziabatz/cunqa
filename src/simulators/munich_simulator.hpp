@@ -10,8 +10,10 @@
 #include "logger/logger.hpp"
 #include "comm/qpu_comm.hpp"
 #include "config/backend_config.hpp"
+#include "utils/constants.hpp"
 
 using json = nlohmann::json;
+
 
 class MunichSimulator {
 public:
@@ -22,7 +24,7 @@ public:
         SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
     }
 
-    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config, std::optional<ZMQSockets> zmq_sockets) 
+    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
     {
         try {
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
@@ -63,5 +65,18 @@ public:
             return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
         }
         return {};
+    }
+
+    static CunqaStateVector _apply_gate(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits, std::vector<double>& param)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
+        return {};
+    }
+
+    static MeasurementOutput _apply_measure(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits)
+    {
+        MeasurementOutput m;
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
+        return m;
     }
 };

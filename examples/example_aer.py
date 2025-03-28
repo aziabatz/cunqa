@@ -62,7 +62,8 @@ qc = """ {
     {"name": "sx", "qubits": [23], "params": []}, 
     {"name": "measure", "qubits": [23], "memory": [0]}, 
     {"name": "measure", "qubits": [30], "memory": [1]}
-    ] 
+    ],
+    "exec_type":"offline" 
 
 } """
 
@@ -93,10 +94,10 @@ client.connect(claves_primer_nivel[1])
 
 print("Cliente: " + claves_primer_nivel[1])
 future1 = client.send_circuit(qc)
-future2 = client.send_circuit(qc)
+#future2 = client.send_circuit(qc)
 
 print("Futures creados.")
 
 print("GET DEL FUTURE 1:" + future1.get())
-print("GET DEL FUTURE 2:" + future2.get())
+#print("GET DEL FUTURE 2:" + future2.get())
 #print("RESULT DEL PARAMETERS:" + future_param.get())

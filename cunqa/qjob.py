@@ -220,17 +220,23 @@ class QJob():
 
                     circuit = circt['instructions']
 
+                    exec_type = circt['exec_type']
+
                 elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
                     circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
 
+                    exec_type = circt['exec_type']
+
                 elif self._QPU.backend.simulator == "CunqaSimulator":
 
                     logger.debug("Translating to dict for CunqaSimulator...")
 
                     circuit = circt['instructions']
+
+                    exec_type = circt['exec_type']
             
 
             elif isinstance(circt, QuantumCircuit):
@@ -318,13 +324,13 @@ class QJob():
 
 
             if self._QPU.backend.simulator == "AerSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{}}}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
 
             elif self._QPU.backend.simulator == "MunichSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":"{}", "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
             
             elif self._QPU.backend.simulator == "CunqaSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{}, "num_qubits":{} }}""".format(run_config, instructions, self.num_qubits).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, exec_type, self.num_qubits).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
@@ -382,7 +388,7 @@ class QJob():
 
     def result(self):
         """
-        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is bloking.
+        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
         """
         if (self._future is not None) and (self._future.valid()):
             try:

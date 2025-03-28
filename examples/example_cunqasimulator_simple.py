@@ -9,11 +9,39 @@ install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
 from cunqa.qpu import getQPUs
 
-
 qc = {
     "instructions": [
-    
+    {
+        "name":"h",
+        "qubits":[0,-1,-1]
+    },
+    {
+        "name":"cx",
+        "qubits":[0,1,-1],
+    },
+    {
+        "name": "measure",
+        "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
+    }
+    ],
+    "num_qubits": 2,
+    "num_clbits": 2,
+    "classical_registers": {
+        "meas": [
+            0,
+            1
+        ]
+    },
+    "exec_type":"dynamic"
+}
 
+
+qc_param = {
+    "instructions": [
     {
         "name":"h",
         "qubits":[0,-1,-1]
@@ -26,6 +54,10 @@ qc = {
     {
         "name": "measure",
         "qubits": [0,-1,-1]
+    },
+    {
+        "name": "measure",
+        "qubits": [1,-1,-1]
     }
     ],
     "num_qubits": 2,
@@ -35,7 +67,8 @@ qc = {
             0,
             1
         ]
-    }
+    },
+    "exec_type":"dynamic"
 }
 
 
@@ -53,10 +86,10 @@ print(job.result().get_counts())
 
 
 # Upgrade parameters
-for _ in range(10):
+""" for _ in range(10):
     new_params = [random.uniform(0.0, 6.283185)]
     print("Parameter: ", new_params[0])
     param_job = job.upgrade_parameters(new_params)
-    print("Counts: ", param_job.result().get_counts())
+    print("Counts: ", param_job.result().get_counts()) """
 
 

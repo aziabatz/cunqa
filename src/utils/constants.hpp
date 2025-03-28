@@ -3,6 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
+#include<complex>
 
 using json = nlohmann::json;
 
@@ -26,6 +27,12 @@ std::unordered_map<std::string, int> comm_map = {
 
 };
 
+using CunqaInstructions = std::vector<json>; 
+using CunqaStateVector = std::vector<std::complex<double>>;
+struct MeasurementOutput {
+  CunqaStateVector statevector;
+  int measure;
+};
 
 
 
@@ -99,6 +106,99 @@ const std::vector<std::string> BASIS_GATES_JSON = {
 
 const std::vector<std::string> CUNQA_GATES = {
   "measure", "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz"
+};
+
+const std::vector<std::string> COMM_INSTRUCTIONS = {"measure", "id", "h", "x", "y", "z", "rx", "ry", "rz", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"};
+
+enum COMM_INSTRUCTIONS_ENUM {
+  cunqa_measure,
+  cunqa_id,
+  cunqa_h,    
+  cunqa_x,  
+  cunqa_y,
+  cunqa_z,
+  cunqa_rx,
+  cunqa_ry,
+  cunqa_rz,
+  cunqa_cx,
+  cunqa_cy,
+  cunqa_cz,
+  cunqa_ecr,
+  cunqa_c_if_h,
+  cunqa_c_if_x,
+  cunqa_c_if_y,
+  cunqa_c_if_z,
+  cunqa_c_if_rx,
+  cunqa_c_if_ry,
+  cunqa_c_if_rz,
+  cunqa_c_if_cx,
+  cunqa_c_if_cy,
+  cunqa_c_if_cz,
+  cunqa_c_if_ecr,
+  cunqa_d_c_if_h,
+  cunqa_d_c_if_x,
+  cunqa_d_c_if_y,
+  cunqa_d_c_if_z,
+  cunqa_d_c_if_rx,
+  cunqa_d_c_if_ry,
+  cunqa_d_c_if_rz,
+  cunqa_d_c_if_cx,
+  cunqa_d_c_if_cy,
+  cunqa_d_c_if_cz,
+  cunqa_d_c_if_ecr,
+
+};
+
+std::unordered_map<std::string, int> CUNQA_INSTRUCTIONS_MAP = {
+  {"measure", cunqa_measure},
+  {"id", cunqa_id},
+  {"h", cunqa_h},
+  {"x", cunqa_x},
+  {"y", cunqa_y},
+  {"z", cunqa_z},
+  {"rx", cunqa_rx},
+  {"ry", cunqa_ry},
+  {"rz", cunqa_rz},
+  {"cx", cunqa_cx},
+  {"cy", cunqa_cy},
+  {"cz", cunqa_cz},
+  {"ecr", cunqa_ecr},
+  {"c_if_h", cunqa_c_if_h},
+  {"c_if_x", cunqa_c_if_x},
+  {"c_if_y", cunqa_c_if_y},
+  {"c_if_z", cunqa_c_if_z},
+  {"c_if_rx", cunqa_c_if_rx},
+  {"c_if_ry", cunqa_c_if_ry},
+  {"c_if_rz", cunqa_c_if_rz},
+  {"c_if_cx", cunqa_c_if_cx},
+  {"c_if_cy", cunqa_c_if_cy},
+  {"c_if_cz", cunqa_c_if_cz},
+  {"c_if_ecr", cunqa_c_if_ecr},
+  {"d_c_if_h", cunqa_d_c_if_h},
+  {"d_c_if_x", cunqa_d_c_if_x},
+  {"d_c_if_y", cunqa_d_c_if_y},
+  {"d_c_if_z", cunqa_d_c_if_z},
+  {"d_c_if_rx", cunqa_d_c_if_rx},
+  {"d_c_if_ry", cunqa_d_c_if_ry},
+  {"d_c_if_rz", cunqa_d_c_if_rz},
+  {"d_c_if_cx", cunqa_d_c_if_cx},
+  {"d_c_if_cy", cunqa_d_c_if_cy},
+  {"d_c_if_cz", cunqa_d_c_if_cz},
+  {"d_c_if_ecr", cunqa_d_c_if_ecr},
+};
+
+std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
+  {"d_c_if_h", "h"},
+  {"d_c_if_x", "x"},
+  {"d_c_if_y", "y"},
+  {"d_c_if_z", "z"},
+  {"d_c_if_rx", "rx"},
+  {"d_c_if_ry", "ry"},
+  {"d_c_if_rz", "rz"},
+  {"d_c_if_cx", "cx"},
+  {"d_c_if_cy", "cy"},
+  {"d_c_if_cz", "cz"},
+  {"d_c_if_ecr", "ecr"},
 };
 
 
