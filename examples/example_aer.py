@@ -63,7 +63,7 @@ qc = """ {
     {"name": "measure", "qubits": [23], "memory": [0]}, 
     {"name": "measure", "qubits": [30], "memory": [1]}
     ],
-    "exec_type":"offline" 
+    "exec_type":"offloading" 
 
 } """
 

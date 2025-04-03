@@ -117,9 +117,9 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                         std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
                         if (comm_endp[0] == this->comm_component.mpi_rank) {
                             measurement = this->backend.apply_measure(instruction_name, qubits);
-                            MPI_Send(&measurement, 1, MPI_INT, comm_endp[1], 1, MPI_COMM_WORLD);
+                            this->comm_component._send(measurement, comm_endp[1]);
                         } else if (comm_endp[1] == this->comm_component.mpi_rank) {
-                            MPI_Recv(&measurement, 1, MPI_INT, comm_endp[0], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                            measurement = this->comm_component._recv(comm_endp[0]);
                             if (measurement == 1) {
                                 this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
                             }
@@ -132,15 +132,10 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                         std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
                         if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
                             measurement = this->backend.apply_measure(instruction_name, qubits);
-                            this->comm_component.zmq_comm_client.value().connect(comm_endp[1]);
-                            zmq::message_t message(sizeof(int));
-                            std::memcpy(message.data(), &measurement, sizeof(int));
-                            this->comm_component.zmq_comm_client.value().send(message);
+                            this->comm_component._send(measurement, comm_endp[1]);
 
                         } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
-                            zmq::message_t message;
-                            this->comm_component.zmq_comm_server.value().recv(message);
-                            std::memcpy(&measurement, message.data(), sizeof(int));
+                            measurement = this->comm_component._recv(comm_endp[0]);
 
                             if (measurement == 1) {
                                 this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
@@ -159,9 +154,9 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                         std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
                         if (comm_endp[0] == this->comm_component.mpi_rank) {
                             measurement = this->backend.apply_measure(instruction_name, qubits);
-                            MPI_Send(&measurement, 1, MPI_INT, comm_endp[1], 1, MPI_COMM_WORLD);
+                            this->comm_component._send(measurement, comm_endp[1]);
                         } else if (comm_endp[1] == this->comm_component.mpi_rank) {
-                            MPI_Recv(&measurement, 1, MPI_INT, comm_endp[0], 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                            measurement = this->comm_component._recv(comm_endp[0]);
                             if (measurement == 1) {
                                 this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);
                             }
@@ -174,15 +169,11 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                         std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
                         if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
                             measurement = this->backend.apply_measure(instruction_name, qubits);
-                            this->comm_component.zmq_comm_client.value().connect(comm_endp[1]);
-                            zmq::message_t message(sizeof(int));
-                            std::memcpy(message.data(), &measurement, sizeof(int));
-                            this->comm_component.zmq_comm_client.value().send(message);
+                            this->comm_component._send(measurement, comm_endp[1]);
 
                         } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
-                            zmq::message_t message;
-                            this->comm_component.zmq_comm_server.value().recv(message);
-                            std::memcpy(&measurement, message.data(), sizeof(int));
+                            std::string client_id = this->comm_component._client_id_recv();
+                            measurement = this->comm_component._recv(comm_endp[0]);
 
                             if (measurement == 1) {
                                 this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);

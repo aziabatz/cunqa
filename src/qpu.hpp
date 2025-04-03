@@ -176,12 +176,12 @@ void QPU<sim_type>::_compute_(json& message_json)
 template <SimType sim_type>
 void QPU<sim_type>::_run_circuit(json& kernel, std::string& exec_type)
 {
-    if(exec_type == "offline") {
+    if(exec_type == "offloading") {
         std::chrono::steady_clock::time_point begin_run_time = std::chrono::steady_clock::now();
-        SPDLOG_LOGGER_DEBUG(logger, "Circuit to be run offline: {}", kernel.dump());
+        SPDLOG_LOGGER_DEBUG(logger, "Circuit to be run offloading: {}", kernel.dump());
         this->classical_node->send_circ_to_execute(kernel);
         std::chrono::steady_clock::time_point end_run_time = std::chrono::steady_clock::now();
-        SPDLOG_LOGGER_DEBUG(logger, "Offline run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_run_time - begin_run_time).count());
+        SPDLOG_LOGGER_DEBUG(logger, "Offloading run time: {} [µs]", std::chrono::duration_cast<std::chrono::microseconds>(end_run_time - begin_run_time).count());
 
     } else if (exec_type == "dynamic") {
         std::chrono::steady_clock::time_point begin_run_time = std::chrono::steady_clock::now();

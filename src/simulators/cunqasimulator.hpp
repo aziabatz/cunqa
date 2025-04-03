@@ -21,7 +21,7 @@ class CunqaSimulator {
 
 public:
     static json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
-        SPDLOG_LOGGER_ERROR(logger, "Error. Offline execution is not available with Cunqa simulator. ");
+        SPDLOG_LOGGER_ERROR(logger, "Error. Offloading execution is not available with Cunqa simulator. ");
         return {};
     }
         
