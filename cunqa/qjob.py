@@ -3,7 +3,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
-from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict
+from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict, is_parametric
 from cunqa.transpile import transpiler, TranspilerError
 
 # importing logger
@@ -374,20 +374,28 @@ class QJob():
 
         Args:
         -----------
-        parameters (list[float]): list of parameters to assign to the parametrized circuit.
+        parameters (list[float or int]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
-            res = self._future.get() # Unused and blocking :(. Here we nullify a possible pending job on the queue so that the result with new parameters can be collected 
+            self._future.get()
         
-        message = """{{"params":{} }}""".format(parameters).replace("'", '"')
 
+        if isinstance(parameters, list):
+            if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
+                message = """{{"params":{} }}""".format(parameters).replace("'", '"')
+            else:
+                logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
+                raise SystemExit # User's level
+        if not is_parametric(self._circuit):
+            logger.error(f"Cannot upgrade parameters bacuse the circuit of the `QJob` does not accept parameters. Please check that your circuit has gates that accept parameters [{QJobError.__name__}].")
+            raise SystemExit # User's level
         try:
             logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
             self._future = self._QPU._qclient.send_parameters(message)
         except Exception as error:
             logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
-            raise QJobError # I capture the error in QPU.run() when creating the job
+            raise SystemExit # User's level
         
         self._updated = False # We indicate that new results will come, in order to call server
 
