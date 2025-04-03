@@ -21,7 +21,7 @@ class QPU():
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None):
+    def __init__(self, id=None, qclient=None, backend=None, port = None):
         """
         Initializes the QPU class.
 
@@ -33,6 +33,8 @@ class QPU():
             endpoint for a given QPU.
             
         backend (<class 'backend.Backend'>): object that provides information about the QPU backend.
+
+        port (str): String refering to the port of the server to which the QPU corresponds.
         """
         
         if id == None:
@@ -70,6 +72,20 @@ class QPU():
             logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
+        if port == None:
+            logger.error(f"QPU client not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
+            raise SystemExit # User's level
+        
+        elif isinstance(port, str):
+            self._port = port
+
+        else:
+            logger.error(f"QClient port must be str, but {type(port)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+        
+        # argument to track weather the QPU is connected. It will be connected at `run` method.
+        self.connected = False
+        
         logger.debug(f"Object for QPU {id} created correctly.")
 
 
@@ -100,6 +116,13 @@ class QPU():
         --------
         <class 'qjob.Result'> object.
         """
+
+        if not self.connected:
+            self._qclient.connect(self._port)
+            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
+        else:
+            logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
+
         try:
             qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level, **run_parameters)
             qjob.submit()
@@ -153,8 +176,8 @@ def getQPUs(path = info_path):
         i = 0
         for k, v in dumps.items():
             client = QClient(path)
-            client.connect(k)
-            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend'])  )  ) # errors captured above
+            # client.connect(k)
+            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
             i+=1
         logger.debug(f"{len(qpus)} QPU objects were created.")
         return qpus
