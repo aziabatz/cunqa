@@ -16,36 +16,40 @@ using namespace config;
 template <SimType sim_type>
 class Backend {
     std::unique_ptr<typename SimClass<sim_type>::type> simulator;
+
     
 public:
     BackendConfig<sim_type> backend_config;
-    std::optional<CunqaStateVector> backend_statevector;
 
     Backend();
-    Backend(BackendConfig<sim_type> backend_config);
+    Backend(BackendConfig<sim_type>& backend_config);
 
     inline json run(json& circuit_json);
-    inline void initialize_statevector(int& n_qubits);
+    inline int apply_measure(std::array<int, 3>& qubits);
     inline void apply_gate(std::string& instruction_name, std::array<int, 3>& qubits, std::vector<double> param = {0.0});
-    inline int apply_measure(std::string& instruction_name, std::array<int, 3>& qubits);
-    inline int get_statevector_status();
-    inline void _restart_statevector();
+    inline int get_shot_result();
+    inline void restart_statevector();
+
 };
 
 template <SimType sim_type>
-Backend<sim_type>::Backend() : simulator{std::make_unique<typename SimClass<sim_type>::type>()},
-backend_config{}
+Backend<sim_type>::Backend() : backend_config{}, simulator{std::make_unique<typename SimClass<sim_type>::type>()}
 {}
 
 template <SimType sim_type>
-Backend<sim_type>::Backend(BackendConfig<sim_type> backend_config) : backend_config{backend_config}
-{}
+Backend<sim_type>::Backend(BackendConfig<sim_type>& backend_config) : backend_config{backend_config}, simulator{std::make_unique<typename SimClass<sim_type>::type>()}
+{
+    json backend_config_json = this->backend_config;
+    this->simulator->configure_simulator(backend_config_json);
+}
 
+//Offloading wrappers
 template <SimType sim_type>
 inline json Backend<sim_type>::run(json& circuit_json)
 {
     try {
-        return SimClass<sim_type>::type::execute(circuit_json, this->backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
+        return this->simulator->execute(circuit_json, this->backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
+        //return SimClass<sim_type>::type::execute(circuit_json, this->backend_config.noise_model, config::RunConfig(circuit_json.at("config")));
         
     } catch (const std::exception& e) {
         SPDLOG_LOGGER_ERROR(logger, "Error parsing the run configuration - {}", e.what());
@@ -53,56 +57,32 @@ inline json Backend<sim_type>::run(json& circuit_json)
     }
 } 
 
+//Dynamic wrapper
 template <SimType sim_type>
-inline void Backend<sim_type>::initialize_statevector(int& n_qubits)
+inline int Backend<sim_type>::apply_measure(std::array<int, 3>& qubits)
 {
-    this->backend_statevector = CunqaStateVector(1 << n_qubits);
-    this->backend_statevector.value()[0] = 1.0;
+    return this->simulator->_apply_measure(qubits);
+    //return SimClass<sim_type>::type::_apply_measure(qubits);
 }
 
 template <SimType sim_type>
-inline void Backend<sim_type>::apply_gate(std::string& instruction_name, std::array<int, 3>& qubits, std::vector<double> param)
+inline void Backend<sim_type>::apply_gate(std::string& gate_name, std::array<int, 3>& qubits, std::vector<double> param)
 {
-    try {
-        this->backend_statevector.value() = SimClass<sim_type>::type::_apply_gate(instruction_name, this->backend_statevector.value(), qubits, param);
-        
-    } catch (const std::exception& e) {
-        SPDLOG_LOGGER_ERROR(logger, "Error applying gate");
-    }
+    this->simulator->_apply_gate(gate_name, qubits, param);
+    //SimClass<sim_type>::type::_apply_gate(gate_name, qubits, param);
 }
 
 template <SimType sim_type>
-inline int Backend<sim_type>::apply_measure(std::string& instruction_name, std::array<int, 3>& qubits)
+inline int Backend<sim_type>::get_shot_result()
 {
-    MeasurementOutput measurement;
-    try {
-        measurement = SimClass<sim_type>::type::_apply_measure(instruction_name, this->backend_statevector.value(), qubits);
-        this->backend_statevector.value() = measurement.statevector;
-        return measurement.measure;
-        
-    } catch (const std::exception& e) {
-        SPDLOG_LOGGER_ERROR(logger, "Error applying instruction");
-        return -1;
-    }
+    return this->simulator->_get_statevector_nonzero_position();
+    //return SimClass<sim_type>::type::_get_statevector_nonzero_position();
 }
 
 template <SimType sim_type>
-inline void Backend<sim_type>::_restart_statevector()
+inline void Backend<sim_type>::restart_statevector()
 {
-    this->backend_statevector.value().assign(this->backend_statevector.value().size(), {0.0, 0.0});
-    this->backend_statevector.value()[0] = 1.0;
-}
-
-template <SimType sim_type>
-inline int Backend<sim_type>::get_statevector_status()
-{
-    int position;
-    auto it = std::find_if(this->backend_statevector.value().begin(), this->backend_statevector.value().end(), [](const complex& c) {
-        return c != std::complex<double>(0, 0); // Check for nonzero
-    });
-
-    position = std::distance(this->backend_statevector.value().begin(), it);
-
-    return position;
+    this->simulator->_reinitialize_statevector();
+    //SimClass<sim_type>::type::_reinitialize_statevector();
 }
 

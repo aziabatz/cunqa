@@ -116,8 +116,8 @@ void QPU<sim_type>::_compute_result()
                 SPDLOG_LOGGER_DEBUG(logger, " \"type\" key deleted.");
 
                 this->_compute_(message_json);
-                server->send_result(to_string(this->classical_node->result_circuit));
-                this->classical_node->clean_circuit_result();
+                server->send_result(to_string(this->classical_node->result));
+                this->classical_node->clean_result();
 
 
             } catch(const ServerException& e) {

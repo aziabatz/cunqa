@@ -15,8 +15,7 @@
 
 
 using json = nlohmann::json;
-using CunqaInstructions = std::vector<json>; 
-using CunqaStateVector = std::vector<std::complex<double>>;
+using CunqaInstructions = std::vector<json>;
 
 
 template <SimType sim_type>
@@ -26,14 +25,13 @@ public:
 
     Backend<sim_type> backend;
     CommunicationComponent<sim_type> comm_component;
-    
-    json result_circuit = {};
+    json result = {};
     
     QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[]);
 
     inline void send_circ_to_execute(json& kernel);
     inline void send_instructions_to_execute(json& kernel);
-    inline void clean_circuit_result();
+    inline void clean_result();
 
 };
 
@@ -46,7 +44,7 @@ QPUClassicalNode<sim_type>::QPUClassicalNode(std::string& comm_type, config::QPU
 template <SimType sim_type>
 inline void QPUClassicalNode<sim_type>::send_circ_to_execute(json& kernel)
 {
-    this->result_circuit = this->backend.run(kernel);
+    this->result = this->backend.run(kernel);
     SPDLOG_LOGGER_DEBUG(logger, "Result is in the classical node.");
 }
 
@@ -54,7 +52,6 @@ template <SimType sim_type>
 inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kernel)
 {
     CunqaInstructions instructions = kernel.at("instructions");
-    int n_qubits = kernel.at("num_qubits");
     config::RunConfig run_config(kernel.at("config"));
     json run_config_json(run_config);
     int shots = run_config_json.at("shots");
@@ -64,9 +61,6 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     std::vector<double> param;
     std::unordered_map<int, int> counts;
 
-    this->backend.initialize_statevector(n_qubits);
-
-
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
         for (auto& instruction : instructions) {
@@ -75,7 +69,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
             switch (CUNQA_INSTRUCTIONS_MAP[instruction_name])
             {
                 case measure:
-                    measurement = this->backend.apply_measure(instruction_name, qubits);
+                    measurement = this->backend.apply_measure(qubits);
                     break;
                 case cunqa_id:
                 case cunqa_x:
@@ -116,7 +110,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     if (this->comm_component.comm_type == "mpi") {
                         std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
                         if (comm_endp[0] == this->comm_component.mpi_rank) {
-                            measurement = this->backend.apply_measure(instruction_name, qubits);
+                            measurement = this->backend.apply_measure(qubits);
                             this->comm_component._send(measurement, comm_endp[1]);
                         } else if (comm_endp[1] == this->comm_component.mpi_rank) {
                             measurement = this->comm_component._recv(comm_endp[0]);
@@ -131,7 +125,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     } else if (this->comm_component.comm_type == "zmq") {
                         std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
                         if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
-                            measurement = this->backend.apply_measure(instruction_name, qubits);
+                            measurement = this->backend.apply_measure(qubits);
                             this->comm_component._send(measurement, comm_endp[1]);
 
                         } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
@@ -153,7 +147,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     if (this->comm_component.comm_type == "mpi") {
                         std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
                         if (comm_endp[0] == this->comm_component.mpi_rank) {
-                            measurement = this->backend.apply_measure(instruction_name, qubits);
+                            measurement = this->backend.apply_measure(qubits);
                             this->comm_component._send(measurement, comm_endp[1]);
                         } else if (comm_endp[1] == this->comm_component.mpi_rank) {
                             measurement = this->comm_component._recv(comm_endp[0]);
@@ -168,7 +162,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     } else if (this->comm_component.comm_type == "zmq") {
                         std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
                         if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
-                            measurement = this->backend.apply_measure(instruction_name, qubits);
+                            measurement = this->backend.apply_measure(qubits);
                             this->comm_component._send(measurement, comm_endp[1]);
 
                         } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
@@ -192,23 +186,23 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     break;
             }
         }
-        int position = this->backend.get_statevector_status();
+        int position = this->backend.get_shot_result();
         SPDLOG_LOGGER_DEBUG(logger, "Position: {}", position);
         counts[position]++;
-        this->backend._restart_statevector();
+        this->backend.restart_statevector();
     }
 
     auto stop_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
     double total_time = duration.count();
 
-    this->result_circuit = counts;
+    this->result = counts;
 
 }
 
 template <SimType sim_type>
-inline void QPUClassicalNode<sim_type>::clean_circuit_result()
+inline void QPUClassicalNode<sim_type>::clean_result()
 {
-    this->result_circuit.clear();
+    this->result.clear();
 }
 

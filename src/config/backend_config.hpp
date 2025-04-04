@@ -75,7 +75,7 @@ public:
         name{"Cunqa"},
         version{"0.0.0"},
         simulator{"CunqaSimulator"},
-        n_qubits{15},
+        n_qubits{5},
         url{"https://github.com/CESGA-Quantum-Spain/cunqasimulator"},
         is_simulator{true},
         conditional{true},

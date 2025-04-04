@@ -4,6 +4,7 @@
 #include <chrono>
 #include <optional>
 
+#include "config/backend_config.hpp"
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
@@ -11,6 +12,7 @@
 #include "comm/qpu_comm.hpp"
 #include "config/backend_config.hpp"
 #include "utils/constants.hpp"
+#include "simulator.hpp"
 
 using json = nlohmann::json;
 
@@ -23,8 +25,14 @@ public:
         MPI_Comm_rank(MPI_COMM_WORLD, &munich_mpi_rank);
         SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
     }
+    
+    void configure_simulator(json& backend_config)
+    {
+        SPDLOG_LOGGER_DEBUG(logger, "No configuration needed for MunichSimulator");
+    }
 
-    static json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
+    //Offloading execution
+    json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
     {
         try {
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
@@ -67,16 +75,27 @@ public:
         return {};
     }
 
-    static CunqaStateVector _apply_gate(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits, std::vector<double>& param)
+    
+    //Dynamic execution
+    inline int _apply_measure(std::array<int, 3>& qubits)
     {
         SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
-        return {};
+        return -1;
+    }
+    
+    inline void _apply_gate(std::string& gate_name, std::array<int, 3>& qubits, std::vector<double>& param)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
     }
 
-    static MeasurementOutput _apply_measure(std::string& instruction_name, CunqaStateVector& statevector, std::array<int, 3>& qubits)
+    inline int _get_statevector_nonzero_position()
     {
-        MeasurementOutput m;
         SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
-        return m;
+        return -1;
+    }
+
+    inline void _reinitialize_statevector()
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
     }
 };
