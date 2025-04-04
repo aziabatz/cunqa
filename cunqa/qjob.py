@@ -3,7 +3,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
-from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict, is_parametric
+from cunqa.circuit import qc_to_json, from_json_to_qc, _registers_dict, _is_parametric
 from cunqa.transpile import transpiler, TranspilerError
 
 # importing logger
@@ -256,7 +256,7 @@ class QJob():
                 logger.debug("A QuantumCircuit was provided.")
 
                 cl_bits = sum([c.size for c in circt.cregs])
-                self._cregisters = registers_dict(circt)[1]
+                self._cregisters = _registers_dict(circt)[1]
 
                 if self._QPU.backend.simulator == "AerSimulator":
 
@@ -275,7 +275,7 @@ class QJob():
 
                 logger.debug("A QASM2 circuit was provided.")
 
-                self._cregisters = registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+                self._cregisters = _registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
                 cl_bits = sum(len(k) for k in self._cregisters.values())
 
                 if self._QPU.backend.simulator == "AerSimulator":
@@ -378,6 +378,9 @@ class QJob():
         if self._result is None:
             self._future.get()
 
+        if not _is_parametric(self._circuit):
+            logger.error(f"Cannot upgrade parameters. Please check that the circuit provided has gates that accept parameters [{QJobError.__name__}].")
+            raise SystemExit # User's level
 
         if isinstance(parameters, list):
 
