@@ -109,11 +109,14 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::D_C_IF_CZ:
                 case CUNQA::D_C_IF_ECR:
                     comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
+                    SPDLOG_LOGGER_DEBUG(logger, "Communication endpoints: {}, {}", comm_endp[0], comm_endp[1]);
                     if (this->comm_component.is_sender_qpu(comm_endp[0])) {
                         measurement = this->backend.apply_measure(qubits);
                         this->comm_component._send(measurement, comm_endp[1]);
+                        SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", comm_endp[1]);
                     } else if (this->comm_component.is_receiver_qpu(comm_endp[1])) {
                         measurement = this->comm_component._recv(comm_endp[0]);
+                        SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", comm_endp[0]);
                         if (measurement == 1) {
                             this->backend.apply_gate(CUNQA::CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
                         }
@@ -126,6 +129,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::D_C_IF_RY:
                 case CUNQA::D_C_IF_RZ:
                     comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
+                    SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
                     param = instruction.at("params").get<std::vector<double>>();
                     if (this->comm_component.is_sender_qpu(comm_endp[0])) {
                         measurement = this->backend.apply_measure(qubits);
@@ -146,7 +150,6 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
             }
         }
         int position = this->backend.get_shot_result();
-        SPDLOG_LOGGER_DEBUG(logger, "Position: {}", position);
         counts[position]++;
         this->backend.restart_statevector();
     }
@@ -155,7 +158,12 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
     double total_time = duration.count();
 
-    this->result = counts;
+    this->result = {
+        {"counts:", counts},
+        {"time_taken:", total_time}
+    }; 
+
+    counts.clear();
 
 }
 

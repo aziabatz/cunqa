@@ -143,8 +143,8 @@ const std::vector<std::string> BASIS_GATES = {
             "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
             "cswap"};
 
-  const std::vector<std::string> DISTRIBUTED_GATES = {
-    "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
+  const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
+    "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
   };
 
   std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {

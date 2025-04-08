@@ -43,6 +43,7 @@ public:
     
             //Endpoint part
             std::string aux_endpoint = get_zmq_endpoint();
+            this->zmq_comm_client->setsockopt(ZMQ_IDENTITY, aux_endpoint.c_str(), aux_endpoint.size());
             zmq_endpoint = std::move(aux_endpoint); 
             SPDLOG_LOGGER_DEBUG(logger, "Endpoint created.");
     
@@ -61,105 +62,71 @@ public:
         }
     }
 
-
-    inline void _send(int& measurement, int& destination);
-    inline int _recv(int& origin);
-
     inline void _send(int& measurement, std::string& destination);
     inline int _recv(std::string& origin);
-    inline std::string _client_id_recv();
-
-    inline bool _check_endpoint(std::string& endpoint);
     inline bool is_sender_qpu(std::string& endpoint);
     inline bool is_receiver_qpu(std::string& endpoint);
 
-
+private:
+    inline bool _check_endpoint(std::string& endpoint);
 };
 
-template <SimType sim_type>
-inline void CommunicationComponent<sim_type>::_send(int& measurement, int& destination) 
-{
-    if (this->comm_type == "mpi") {
-        MPI_Send(&measurement, 1, MPI_INT, destination, 1, MPI_COMM_WORLD);
-    } else {
-        throw std::runtime_error("Invalid communication type for int destination");
-    }
-}
-
-template <SimType sim_type>
-inline int CommunicationComponent<sim_type>::_recv(int& origin) 
-{
-    int measurement;
-    
-    if (this->comm_type == "mpi") {
-        MPI_Recv(&measurement, 1, MPI_INT, origin, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    } else {
-        throw std::runtime_error("Invalid communication type for int origin");
-    }
-    
-    return measurement;
-}
 
 template <SimType sim_type>
 inline void CommunicationComponent<sim_type>::_send(int& measurement, std::string& destination) 
 {
-    if (this->comm_type == "zmq") {
+    if (this->comm_type == "mpi") {
+        int destination_int = std::atoi(destination.c_str());
+        MPI_Send(&measurement, 1, MPI_INT, destination_int, 1, MPI_COMM_WORLD);
+    } else if (this->comm_type == "zmq") {
         this->zmq_comm_client.value().connect(destination);
-        SPDLOG_LOGGER_DEBUG(logger, "Client connected in _send method of communication component.");
+        //this->_send_client_id();
         zmq::message_t message(sizeof(int));
         std::memcpy(message.data(), &measurement, sizeof(int));
-        SPDLOG_LOGGER_DEBUG(logger, "Message prepared to be send in the communication component.");
         this->zmq_comm_client.value().send(message);
     } else {
         throw std::runtime_error("Invalid communication type for string destination");
     }
 }
 
-template <SimType sim_type>
-inline std::string CommunicationComponent<sim_type>::_client_id_recv() 
-{
-    if (this->comm_type == "zmq") {
-        zmq::message_t client_id;
-        this->zmq_comm_server.value().recv(client_id, zmq::recv_flags::none);
-        std::string client_id_str = *reinterpret_cast<std::string*>(client_id.data());
-        SPDLOG_LOGGER_DEBUG(logger, "Client ID received in the communication component: {}", client_id_str);
-        return client_id_str;
-
-    } else {
-        throw std::runtime_error("Invalid communication type for string destination");
-    }
-    
-}
 
 template <SimType sim_type>
 inline int CommunicationComponent<sim_type>::_recv(std::string& origin) 
 {
     int measurement;
-    if (!message_queue[origin].empty()) {
-        SPDLOG_LOGGER_DEBUG(logger, "The message_queue already had a message from client {}.", origin);
-        measurement = message_queue[origin].front();
-        SPDLOG_LOGGER_DEBUG(logger, "Measurement extracted from the message_queue.");
-        message_queue[origin].pop();
-        SPDLOG_LOGGER_DEBUG(logger, "Measurement deleted from the message_queue.");
+    if (this->comm_type == "mpi") {
+        int origin_int = std::atoi(origin.c_str());
+        MPI_Recv(&measurement, 1, MPI_INT, origin_int, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         return measurement;
-    } else {
-        while (true) {
-            zmq::message_t message;
-            std::string client_id = this->_client_id_recv();
-            this->zmq_comm_server.value().recv(message, zmq::recv_flags::none);
-            int measurement = *reinterpret_cast<int*>(message.data());
-            SPDLOG_LOGGER_DEBUG(logger, "Measurement received: {}", measurement);
-            
-            if (client_id == origin) {
-                SPDLOG_LOGGER_DEBUG(logger, "The measurement came from the desired client.");
-                return measurement;
-            } else {
-                SPDLOG_LOGGER_DEBUG(logger, "The measurement came from other client.");
-                this->message_queue[client_id].push(measurement);
-                SPDLOG_LOGGER_DEBUG(logger, "Message_queue updated.");
+    } else if (this->comm_type == "zmq") {
+        if (!message_queue[origin].empty()) {
+            SPDLOG_LOGGER_DEBUG(logger, "The message_queue already had a message from client {}.", origin);
+            measurement = message_queue[origin].front();
+            SPDLOG_LOGGER_DEBUG(logger, "Measurement extracted from the message_queue.");
+            message_queue[origin].pop();
+            SPDLOG_LOGGER_DEBUG(logger, "Measurement deleted from the message_queue.");
+            return measurement;
+        } else {
+            while (true) {
+                zmq::message_t client_id;
+                zmq::message_t message;
+                this->zmq_comm_server.value().recv(client_id, zmq::recv_flags::none);
+                this->zmq_comm_server.value().recv(message, zmq::recv_flags::none);
+                std::string client_id_str(static_cast<char*>(client_id.data()), client_id.size());
+                std::memcpy(&measurement, message.data(), sizeof(int));
+                
+                if (client_id_str == origin) {
+                    SPDLOG_LOGGER_DEBUG(logger, "The measurement came from the desired client.");
+                    return measurement;
+                } else {
+                    SPDLOG_LOGGER_DEBUG(logger, "The measurement came from other client with id: {}", client_id_str);
+                    this->message_queue[client_id_str].push(measurement);
+                    SPDLOG_LOGGER_DEBUG(logger, "Message_queue updated.");
+                }
             }
         }
     }
+    
 }
 
 template <SimType sim_type>

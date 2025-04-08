@@ -82,7 +82,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{CUNQA::GATES},
+        basis_gates{CUNQA::BASIS_AND_DISTRIBUTED_GATES},
         description{"CunqaSimulator"}
     { }
 
