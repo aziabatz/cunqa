@@ -48,7 +48,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{BASIS_GATES_JSON},
+        basis_gates{CUNQA::BASIS_GATES},
         description{"Usual AER simulator."}
     { }
 
@@ -65,7 +65,7 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{BASIS_GATES_JSON},
+        basis_gates{CUNQA::BASIS_GATES},
         description{"Usual Munich simulator."}
     { }
 
@@ -82,7 +82,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{CUNQA_GATES},
+        basis_gates{CUNQA::GATES},
         description{"CunqaSimulator"}
     { }
 

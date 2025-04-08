@@ -69,6 +69,10 @@ public:
     inline int _recv(std::string& origin);
     inline std::string _client_id_recv();
 
+    inline bool _check_endpoint(std::string& endpoint);
+    inline bool is_sender_qpu(std::string& endpoint);
+    inline bool is_receiver_qpu(std::string& endpoint);
+
 
 };
 
@@ -157,3 +161,29 @@ inline int CommunicationComponent<sim_type>::_recv(std::string& origin)
         }
     }
 }
+
+template <SimType sim_type>
+inline bool CommunicationComponent<sim_type>::_check_endpoint(std::string& endpoint)
+{
+    if (this->comm_type == "mpi") {
+        int endpoint_int = std::atoi(endpoint.c_str());
+        return endpoint_int == this->mpi_rank; 
+    } else if (this->comm_type == "zmq") {
+        return endpoint == this->zmq_endpoint;
+    } else {
+        return false;
+    }
+}
+
+template <SimType sim_type>
+inline bool CommunicationComponent<sim_type>::is_sender_qpu(std::string& endpoint)
+{
+    return this->_check_endpoint(endpoint);
+}
+
+template <SimType sim_type>
+inline bool CommunicationComponent<sim_type>::is_receiver_qpu(std::string& endpoint)
+{
+    return this->_check_endpoint(endpoint);
+}
+

@@ -58,6 +58,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     std::string instruction_name;
     std::array<int, 3> qubits;
     int measurement;
+    std::array<std::string, 2> comm_endp;
     std::vector<double> param;
     std::unordered_map<int, int> counts;
 
@@ -66,121 +67,79 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name");
             qubits = instruction.at("qubits");
-            switch (CUNQA_INSTRUCTIONS_MAP[instruction_name])
+            switch (CUNQA::INSTRUCTIONS_MAP[instruction_name])
             {
                 case measure:
                     measurement = this->backend.apply_measure(qubits);
                     break;
-                case cunqa_id:
-                case cunqa_x:
-                case cunqa_y:
-                case cunqa_z:
-                case cunqa_h:
-                case cunqa_cx:
-                case cunqa_cy:
-                case cunqa_cz:
-                case cunqa_ecr:
-                case cunqa_c_if_h:
-                case cunqa_c_if_x:
-                case cunqa_c_if_y:
-                case cunqa_c_if_z:
-                case cunqa_c_if_cx:
-                case cunqa_c_if_cy:
-                case cunqa_c_if_cz:
-                case cunqa_c_if_ecr:
+                case CUNQA::ID:
+                case CUNQA::X:
+                case CUNQA::Y:
+                case CUNQA::Z:
+                case CUNQA::H:
+                case CUNQA::CX:
+                case CUNQA::CY:
+                case CUNQA::CZ:
+                case CUNQA::ECR:
+                case CUNQA::C_IF_H:
+                case CUNQA::C_IF_X:
+                case CUNQA::C_IF_Y:
+                case CUNQA::C_IF_Z:
+                case CUNQA::C_IF_CX:
+                case CUNQA::C_IF_CY:
+                case CUNQA::C_IF_CZ:
+                case CUNQA::C_IF_ECR:
                     this->backend.apply_gate(instruction_name, qubits);
                     break;
-                case cunqa_rx:
-                case cunqa_ry:
-                case cunqa_rz:
-                case cunqa_c_if_rx:
-                case cunqa_c_if_ry:
-                case cunqa_c_if_rz:
+                case CUNQA::RX:
+                case CUNQA::RY:
+                case CUNQA::RZ:
+                case CUNQA::C_IF_RX:
+                case CUNQA::C_IF_RY:
+                case CUNQA::C_IF_RZ:
                     param =  instruction.at("params").get<std::vector<double>>();
                     this->backend.apply_gate(instruction_name, qubits, param);
                     break;
-                case cunqa_d_c_if_h:
-                case cunqa_d_c_if_x:
-                case cunqa_d_c_if_y:
-                case cunqa_d_c_if_z:
-                case cunqa_d_c_if_cx:
-                case cunqa_d_c_if_cy:
-                case cunqa_d_c_if_cz:
-                case cunqa_d_c_if_ecr:
-                    if (this->comm_component.comm_type == "mpi") {
-                        std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
-                        if (comm_endp[0] == this->comm_component.mpi_rank) {
-                            measurement = this->backend.apply_measure(qubits);
-                            this->comm_component._send(measurement, comm_endp[1]);
-                        } else if (comm_endp[1] == this->comm_component.mpi_rank) {
-                            measurement = this->comm_component._recv(comm_endp[0]);
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
-                            }
-    
-                        } else {
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}, but {}", comm_endp[0], comm_endp[1], this->comm_component.mpi_rank); 
-                            throw std::runtime_error("Error with the QPU IDs.");
+                case CUNQA::D_C_IF_H:
+                case CUNQA::D_C_IF_X:
+                case CUNQA::D_C_IF_Y:
+                case CUNQA::D_C_IF_Z:
+                case CUNQA::D_C_IF_CX:
+                case CUNQA::D_C_IF_CY:
+                case CUNQA::D_C_IF_CZ:
+                case CUNQA::D_C_IF_ECR:
+                    comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
+                    if (this->comm_component.is_sender_qpu(comm_endp[0])) {
+                        measurement = this->backend.apply_measure(qubits);
+                        this->comm_component._send(measurement, comm_endp[1]);
+                    } else if (this->comm_component.is_receiver_qpu(comm_endp[1])) {
+                        measurement = this->comm_component._recv(comm_endp[0]);
+                        if (measurement == 1) {
+                            this->backend.apply_gate(CUNQA::CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
                         }
-                    } else if (this->comm_component.comm_type == "zmq") {
-                        std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                        if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
-                            measurement = this->backend.apply_measure(qubits);
-                            this->comm_component._send(measurement, comm_endp[1]);
-
-                        } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
-                            measurement = this->comm_component._recv(comm_endp[0]);
-
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
-                            }
-                        } else {
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}, but {}", comm_endp[0], comm_endp[1], this->comm_component.zmq_endpoint.value()); 
-                            throw std::runtime_error("Error with the QPU IDs.");
-                        }
+                    } else {
+                        SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}", comm_endp[0], comm_endp[1]); 
+                        throw std::runtime_error("Error with the QPU IDs.");
                     }
                     break;
-                case cunqa_d_c_if_rx:
-                case cunqa_d_c_if_ry:
-                case cunqa_d_c_if_rz:
+                case CUNQA::D_C_IF_RX:
+                case CUNQA::D_C_IF_RY:
+                case CUNQA::D_C_IF_RZ:
+                    comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
                     param = instruction.at("params").get<std::vector<double>>();
-                    if (this->comm_component.comm_type == "mpi") {
-                        std::array<int, 2> comm_endp = instruction.at("qpus").get<std::array<int, 2>>();
-                        if (comm_endp[0] == this->comm_component.mpi_rank) {
-                            measurement = this->backend.apply_measure(qubits);
-                            this->comm_component._send(measurement, comm_endp[1]);
-                        } else if (comm_endp[1] == this->comm_component.mpi_rank) {
-                            measurement = this->comm_component._recv(comm_endp[0]);
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);
-                            }
-    
-                        } else {
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}, but {}", comm_endp[0], comm_endp[1], this->comm_component.mpi_rank); 
-                            throw std::runtime_error("Error with the QPU IDs.");
+                    if (this->comm_component.is_sender_qpu(comm_endp[0])) {
+                        measurement = this->backend.apply_measure(qubits);
+                        this->comm_component._send(measurement, comm_endp[1]);
+                    } else if (this->comm_component.is_receiver_qpu(comm_endp[1])) {
+                        measurement = this->comm_component._recv(comm_endp[0]);
+                        if (measurement == 1) {
+                            this->backend.apply_gate(CUNQA::CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);
                         }
-                    } else if (this->comm_component.comm_type == "zmq") {
-                        std::array<std::string, 2> comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                        if (comm_endp[0] == this->comm_component.zmq_endpoint.value()) {
-                            measurement = this->backend.apply_measure(qubits);
-                            this->comm_component._send(measurement, comm_endp[1]);
-
-                        } else if (comm_endp[1] == this->comm_component.zmq_endpoint.value()) {
-                            std::string client_id = this->comm_component._client_id_recv();
-                            measurement = this->comm_component._recv(comm_endp[0]);
-
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);
-                            }
-    
-                        } else {
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}, but {}", comm_endp[0], comm_endp[1], this->comm_component.zmq_endpoint.value()); 
-                            throw std::runtime_error("Error with the QPU IDs.");
-                        }
+                    } else {
+                        SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}", comm_endp[0], comm_endp[1]); 
+                        throw std::runtime_error("Error with the QPU IDs.");
                     }
-                    
                     break;  
-                
                 default:
                     std::cout << "Error. Invalid gate name" << "\n";
                     break;
