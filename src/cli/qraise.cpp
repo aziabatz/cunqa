@@ -25,6 +25,7 @@ struct MyArgs : public argparse::Args
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
+    std::string& family_name            = kwarg("family_name", "Name that identifies which QPUs were raised together").set_default("default");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -99,7 +100,7 @@ int main(int argc, char* argv[])
     if (memory_specs == 1) {
         SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in QMIO. Please, decrease the mem-per-QPU or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
         return -1;
-    } else if (memory_specs == 1) {
+    } else if (memory_specs == 2) {
         SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in FT3. Please, decrease the mem-per-QPU or increase the cores-per-qpu. Max mem-per-cpu = 4");
         return -1;
     }
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
     if (args.fakeqmio.has_value()) {
         backend_path = std::any_cast<std::string>(args.fakeqmio.value());
         backend = R"({"fakeqmio_path":")" + backend_path + R"("})" ;
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";  
+        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus " << args.family_name.c_str() << " $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";  
         SPDLOG_LOGGER_DEBUG(logger, "FakeQmio. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
     }
     
@@ -139,11 +140,11 @@ int main(int argc, char* argv[])
         } else {
             backend_path = std::any_cast<std::string>(args.backend.value());
             backend = R"({"backend_path":")" + backend_path + R"("})" ;
-            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";
+            sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus " << args.family_name.c_str() << " $INFO_PATH " << args.simulator.c_str() << " " << "\'"<< backend << "\'" << "\n";
             SPDLOG_LOGGER_DEBUG(logger, "Qraise with backend. Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} {}\n", args.simulator.c_str(), backend);
         }
     } else {
-        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " << args.simulator.c_str() << "\n";
+        sbatchFile << "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus " << args.family_name.c_str() << " $INFO_PATH " << args.simulator.c_str() << "\n";
         SPDLOG_LOGGER_DEBUG(logger, "Command: srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH {} \n", args.simulator.c_str());
     }
 
