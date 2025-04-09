@@ -45,13 +45,49 @@ def _divide(string, lengths):
         raise SystemExit # User's level
 
 
+def _convert_counts(counts, registers):
+
+    """
+    Funtion to convert counts wirtten in hexadecimal format to binary strings and that applies the division of the bit strings.
+
+    Args:
+    --------
+    counts (dict): dictionary of counts to apply the conversion.
+
+    registers (dict): dictionary of classical registers.
+
+    Return:
+    --------
+    Counts dictionary with keys as binary string correctly separated with spaces accordingly to the classical registers.
+    """
+
+    if isinstance(registers, dict):
+        
+        # counting number of classical bits
+        num_clbits = sum([len(i) for i in registers.values()])
+        # getting lenghts of bits for the different registers
+        lengths = []
+        for v in registers.values():
+            lengths.append(len(v))
+    else:
+        logger.error(f"Error when converting `counts` strings.")
+        raise QJobError # I capture this error in QJob.result()
+
+    new_counts = {}
+    for k,v in counts.items():
+        if k.startswith('0x'): # converting to binary string and dividing in bit strings
+            new_counts[_divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
+        else: # just dividing the bit stings
+            new_counts[_divide(k, lengths)] = v
+    return new_counts
+
 
 class Result():
     """
     Class to describe the result of an experiment.
     """
 
-    def __init__(self, result, simulator, registers = None):
+    def __init__(self, result, registers = None):
         """
         Initializes the Result class.
 
@@ -73,55 +109,37 @@ class Result():
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         # processing result
-        if len(result) == 0:
+        if len(self.result) == 0:
             logger.error(f" [{ValueError.__name__}].")
             raise ValueError # I capture this error in QJob.result() when creating the object.
         
-        elif "ERROR" in result:
-            message = result["ERROR"]
+        elif "ERROR" in self.result:
+            message = self.result["ERROR"]
             logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}")
             raise QJobError
 
         else:
             try:
-                counts_aer = None
-                counts_munich = None
-                for k,v in result.items():
-                    if k == "metadata":
-                        for i, m in v.items():
-                            setattr(self, i, m)
-                    elif k == "results":
-                        for i, m in v[0].items():
-                            if i == "data":
-                                counts = m["counts"]
-                            elif i == "metadata":
-                                for j, w in m.items():
-                                    setattr(self,j,w)
-                            else:
-                                setattr(self, i, m)
-                    elif k == "counts":
-                        counts = v
-                        self.num_clbits = sum([len(i) for i in registers.values()])
 
-                    else:
-                        setattr(self, k, v)
+                if "results" in list(self.result.keys()): # aer
+                    self.counts = result["results"][0]["data"]["counts"]
+                    self.time = self.result["results"][0]["time_taken"]
 
-                self.counts = {}
-                if (simulator != "CunqaSimulator"):
-                    
-                    for j,w in counts.items():
-                        if registers is None:
-                            self.counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                        elif isinstance(registers, dict):
-                            lengths = []
-                            for v in registers.values():
-                                lengths.append(len(v))
-                            self.counts[_divide(format( int(j, 16), '0'+str(self.num_clbits)+'b' ), lengths)]= w
-                else:
-                    self.counts = json.dumps(counts)
+                elif "counts" in list(self.result.keys()): # munich and cunqa
+                    self.counts = self.result["counts"]
+                    self.time = self.result["time_taken"]
+
+                if (isinstance(self.counts, dict)): # Aer and Munich
+                    self.counts = _convert_counts(self.counts, registers)
+
+
             except KeyError:
                 logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
                 raise KeyError # I capture this error in QJob.result() when creating the object.
+            
+            except Exception as error:
+                logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
+                raise error
 
         logger.debug("Results correctly loaded.")
         
@@ -146,6 +164,17 @@ class Result():
 
         """
         return self.counts
+    
+    def time_taken(self):
+        """
+        Class method to obtain the information for the time_taken for the given experiment.
+
+        Return:
+        -----------
+        Real number representing the execution time
+
+        """
+        return self.time
 
 
 
@@ -395,17 +424,19 @@ class QJob():
                 if self._result is not None:
                     if not self._updated: # if the result was already obtained, we only call the server if an update was done
                         res = self._future.get()
-                        self._result = Result(json.loads(res), self._QPU.backend.simulator, registers=self._cregisters)
+                        self._result = Result(json.loads(res), registers=self._cregisters)
                         self._updated = True
                     else:
                         pass
                 else:
                     res = self._future.get()
-                    self._result = Result(json.loads(res), self._QPU.backend.simulator, registers=self._cregisters)
+                    self._result = Result(json.loads(res), registers=self._cregisters)
                     self._updated = True
             except Exception as error:
-                logger.error(f"Error while creating Results object [{type(error).__name__}]")
-                raise error # User's level
+                logger.error(f"Error while creating Results object [{type(error).__name__}].")
+                raise SystemExit # User's level
+        else:
+            logger.debug(f"self._future is None or non-valid, None is returned.")
 
         return self._result
 

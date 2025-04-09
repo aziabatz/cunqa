@@ -159,8 +159,8 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     double total_time = duration.count();
 
     this->result = {
-        {"counts:", counts},
-        {"time_taken:", total_time}
+        {"counts", counts},
+        {"time_taken", total_time}
     }; 
 
     counts.clear();

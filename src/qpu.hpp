@@ -55,7 +55,7 @@ private:
 
     void _compute_result();
     void _recv_data();
-    inline void _compute_(json& message_json);
+    inline void _update_params(std::vector<double>& parameters);
     inline void _run_circuit(json& kernel, std::string& circ_type);
     inline void _update_circuit_params(std::vector<double>& parameters);
     inline void _update_qasm_params(std::vector<double>& parameters);
@@ -110,15 +110,22 @@ void QPU<sim_type>::_compute_result()
                 SPDLOG_LOGGER_DEBUG(logger, "Message received.");
                 json message_json = json::parse(message);
                 SPDLOG_LOGGER_DEBUG(logger, "Message parsed.");
-                this->exec_type = message_json.at("exec_type");
-                SPDLOG_LOGGER_DEBUG(logger, "Circuit type: {}.", exec_type);
-                message_json.erase("exec_type");
-                SPDLOG_LOGGER_DEBUG(logger, " \"type\" key deleted.");
 
-                this->_compute_(message_json);
+                if (message_json.contains("params")){ 
+                    std::vector<double> parameters = message_json.at("params");
+                    SPDLOG_LOGGER_DEBUG(logger, "Parameters received");
+                    this->_update_params(parameters);
+                } else {
+                    SPDLOG_LOGGER_DEBUG(logger, "Circuit received");
+                    this->exec_type = message_json.at("exec_type");
+                    SPDLOG_LOGGER_DEBUG(logger, "Circuit type: {}.", exec_type);
+                    message_json.erase("exec_type");
+                    SPDLOG_LOGGER_DEBUG(logger, " \"type\" key deleted.");
+                    this->kernel = message_json;
+                }
+                this->_run_circuit(this->kernel, this->exec_type);
                 server->send_result(to_string(this->classical_node->result));
                 this->classical_node->clean_result();
-
 
             } catch(const ServerException& e) {
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, probably the client has had an error.");
@@ -127,50 +134,12 @@ void QPU<sim_type>::_compute_result()
                 SPDLOG_LOGGER_ERROR(logger, "There has happened an error sending the result, the server keeps on iterating.");
                 SPDLOG_LOGGER_ERROR(logger, "Message of the error: {}", e.what());
                 server->send_result("{\"ERROR\":\""s + std::string(e.what()) + "\"}"s);
-                
             }
             lock.lock();
         }
-        
     }
 }
 
-
-template<SimType sim_type>
-void QPU<sim_type>::_compute_(json& message_json)
-{
-
-    if (!message_json.contains("params")){ 
-        this->kernel = message_json;
-        this->_run_circuit(this->kernel, this->exec_type);
-    } else {
-        std::vector<double> parameters = message_json.at("params");
-        SPDLOG_LOGGER_DEBUG(logger, "Parameters received");
-        if (this->classical_node->backend.backend_config.simulator == "AerSimulator" || this->classical_node->backend.backend_config.simulator == "CunqaSimulator"){
-            SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator or CunqaSimulator");
-            if (!this->kernel.empty()){
-                SPDLOG_LOGGER_DEBUG(logger, "Ready to update circuit parameters");
-                this->_update_circuit_params(parameters);   
-                this->_run_circuit(this->kernel, this->exec_type);
-            } else {
-                SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                throw std::runtime_error("Parameters were sent before a parametric circuit.");
-            }
-        } else if (this->classical_node->backend.backend_config.simulator == "MunichSimulator") {
-            SPDLOG_LOGGER_DEBUG(logger, "Params of MunichSimulator");
-            if (!this->kernel.empty()){
-                SPDLOG_LOGGER_DEBUG(logger, "Ready to update qasm parameters");;
-                this->_update_qasm_params(parameters);
-                this->_run_circuit(this->kernel, this->exec_type);
-            } else {
-                SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
-                throw std::runtime_error("Parameters were sent before a parametric circuit.");
-            }
-        }
-        
-    }
-
-}
 
 
 template <SimType sim_type>
@@ -197,6 +166,30 @@ void QPU<sim_type>::_run_circuit(json& kernel, std::string& exec_type)
 }
 
 
+template<SimType sim_type>
+void QPU<sim_type>::_update_params(std::vector<double>& parameters)
+{
+    if (this->classical_node->backend.backend_config.simulator == "AerSimulator" || this->classical_node->backend.backend_config.simulator == "CunqaSimulator"){
+        SPDLOG_LOGGER_DEBUG(logger, "Params of AerSimulator or CunqaSimulator");
+        if (!this->kernel.empty()){
+            SPDLOG_LOGGER_DEBUG(logger, "Ready to update circuit parameters");
+            this->_update_circuit_params(parameters);   
+        } else {
+            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+        }
+    } else if (this->classical_node->backend.backend_config.simulator == "MunichSimulator") {
+        SPDLOG_LOGGER_DEBUG(logger, "Params of MunichSimulator");
+        if (!this->kernel.empty()){
+            SPDLOG_LOGGER_DEBUG(logger, "Ready to update qasm parameters");;
+            this->_update_qasm_params(parameters);
+        } else {
+            SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
+            throw std::runtime_error("Parameters were sent before a parametric circuit.");
+        }
+    }
+}
+
 template <SimType sim_type>
 inline void QPU<sim_type>::_update_circuit_params(std::vector<double>& parameters)
 {
@@ -204,7 +197,6 @@ inline void QPU<sim_type>::_update_circuit_params(std::vector<double>& parameter
         SPDLOG_LOGGER_DEBUG(logger, "Parameters were received");
         this->kernel = update_circuit_parameters(this->kernel, parameters);
         SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit updated.");
-        parameters.clear();
     } else {
         SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
         throw std::runtime_error("Parameters were sent before a parametric circuit.");
@@ -217,13 +209,11 @@ inline void QPU<sim_type>::_update_qasm_params(std::vector<double>& parameters)
     if (!kernel.empty()){
         this->kernel = update_qasm_parameters(this->kernel, parameters);
         SPDLOG_LOGGER_DEBUG(logger, "Parametric circuit updated.");
-        parameters.clear();
     } else {
         SPDLOG_LOGGER_ERROR(logger, "No parametric circuit was sent.");
         throw std::runtime_error("Parameters were sent before a parametric circuit.");
     }
 }
-
 
 
 template <SimType sim_type>

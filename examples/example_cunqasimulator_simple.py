@@ -86,10 +86,10 @@ print(job.result().get_counts())
 
 
 # Upgrade parameters
-""" for _ in range(10):
+for _ in range(10):
     new_params = [random.uniform(0.0, 6.283185)]
     print("Parameter: ", new_params[0])
     param_job = job.upgrade_parameters(new_params)
-    print("Counts: ", param_job.result().get_counts()) """
+    print("Counts: ", param_job.result().get_counts())
 
 
