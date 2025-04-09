@@ -33,12 +33,22 @@
 
 
 ## CLONE REPOSITORY
-In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
+It is important to say that, for ensuring a correct cloning of the repository, the SSH is the one preferred. In order to get this to work one has to do:
+
+```console
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/SSH_KEY
+```
+ 
+Now, everything is set to get the source code. 
+> [!WARNING]
+> In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
 
 ```console
 git clone --recursive git@github.com:CESGA-Quantum-Spain/cunqa.git
 ```
-To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
+
+As a additional step, we encourage to run the *setup_submodules.sh* file, which removes some of the files unused in the submodules and makes the repository lighter:
 
 ```console
 cd cunqa/scripts
@@ -246,13 +256,14 @@ qc.cx(0,1)
 qc.measure_all()
 
 # Time to run
-qpu0 = qpu[0] # Select one of the raise QPUs
+qpu0 = qpus[0] # Select one of the raise QPUs
 
 job = qpu0.run(qc, transpile = True, shots = 1000)
 
 result = job.result() # Get the result of the execution
 
 counts = result.get_counts() 
+print(f"Counts: {counts}" )
 ```
 
 > [!NOTE] 

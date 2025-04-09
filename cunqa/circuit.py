@@ -227,7 +227,7 @@ def from_json_to_qc(circuit_dict):
 
 
 
-def registers_dict(qc):
+def _registers_dict(qc):
     """
     Extracts the number of classical and quantum registers from a QuantumCircuit.
 
@@ -276,7 +276,7 @@ def registers_dict(qc):
 
     return [quantum_registers, classical_registers]
 
-def is_parametric(circuit):
+def _is_parametric(circuit):
     """
     Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
     For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we

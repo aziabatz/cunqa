@@ -13,11 +13,12 @@ Check out the :doc:`first_steps` for instructions on how to get started.
 
 
 .. toctree::
+   README <first_steps>
+   api
+
    :maxdepth: 3
    :caption: Contents:
-    README <first_steps>
-    api
-    notebooks_gallery
+    
 
     
 
