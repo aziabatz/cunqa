@@ -25,6 +25,7 @@ public:
 
     Backend<sim_type> backend;
     CommunicationComponent<sim_type> comm_component;
+    json endpoint_info = {};
     json result = {};
     
     QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[]);
@@ -39,6 +40,23 @@ template <SimType sim_type>
 QPUClassicalNode<sim_type>::QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[]) : backend(qpu_config.backend_config), comm_component(comm_type, argc, argv)
 {
     SPDLOG_LOGGER_DEBUG(logger, "Classical Node correctly instanciated.");
+
+    std::string endpoint_type;
+    std::string endpoint_value;
+    if (this->comm_component.comm_type == "mpi") {
+        endpoint_type = "mpi";
+        endpoint_value = std::to_string(this->comm_component.mpi_rank);
+    } else if (this->comm_component.comm_type == "zmq") {
+        endpoint_type = "zmq";
+        endpoint_value = this->comm_component.zmq_endpoint.value();
+    } else {
+        endpoint_type = "none";
+        endpoint_value = "";
+    }
+
+    this->endpoint_info = {
+        {endpoint_type, endpoint_value}
+    };
 }
 
 template <SimType sim_type>

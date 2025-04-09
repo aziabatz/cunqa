@@ -70,10 +70,11 @@ QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, int& argc, char *argv
     CustomJson c_json{};
     json config_json(qpu_config);
 
-    c_json.write(config_json, qpu_config.filepath);
-
     classical_node = std::make_unique<QPUClassicalNode<sim_type>>(comm_type, qpu_config, argc, argv);
     SPDLOG_LOGGER_DEBUG(logger, "QPU classical node configured.");
+
+    config_json["comm_info"] = this->classical_node->endpoint_info;
+    c_json.write(config_json, qpu_config.filepath);
      
 }
 
