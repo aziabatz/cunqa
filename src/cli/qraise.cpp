@@ -25,7 +25,7 @@ struct MyArgs : public argparse::Args
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
-    std::string& family_name            = kwarg("family_name", "Name that identifies which QPUs were raised together").set_default("default");
+    std::string& family_name            = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -58,7 +58,6 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
     SPDLOG_LOGGER_DEBUG(logger, "Correct memory per core.");
 
     return 0;
-
 }
 
 int main(int argc, char* argv[]) 
@@ -66,7 +65,9 @@ int main(int argc, char* argv[])
     srand((unsigned int)time(NULL));
     int intSEED = rand() % 1000;
     std::string SEED = std::to_string(intSEED);
-    auto args = argparse::parse<MyArgs>(argc, argv);
+
+    auto args = argparse::parse<MyArgs>(argc, argv, true);
+    
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
 
