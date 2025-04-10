@@ -24,11 +24,12 @@ namespace config {
 class NetConfig {
 public:
     std::string hostname;
+    std::string nodename;
     std::unordered_map<std::string, std::string> IPs;
     std::string port;
 
     NetConfig();
-    NetConfig(const std::string& hostname, std::unordered_map<std::string, std::string> IPs, std::string port);
+    NetConfig(const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port);
     NetConfig(const json& server_info);
 
     static NetConfig myNetConfig();
@@ -38,6 +39,7 @@ public:
 };
 
 std::string get_hostname();
+std::string get_nodename();
 std::unordered_map<std::string, std::string> get_IP_addresses();
 std::string get_port();
 
@@ -46,8 +48,9 @@ void from_json(const json& j, NetConfig& NetConfig);
 
 NetConfig::NetConfig() = default;
 
-NetConfig::NetConfig(const std::string& hostname, std::unordered_map<std::string, std::string> IPs, std::string port)
+NetConfig::NetConfig(const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port)
     : hostname{hostname},
+        nodename{nodename},
         IPs{IPs},
         port{port} 
 { }
@@ -59,7 +62,7 @@ NetConfig::NetConfig(const json& server_info)
 
 NetConfig NetConfig::myNetConfig() 
 {
-    return NetConfig(get_hostname(), get_IP_addresses(), get_port());
+    return NetConfig(get_hostname(), get_nodename(), get_IP_addresses(), get_port());
 }
 
 std::string NetConfig::get_endpoint(const std::string_view& net) const 
@@ -71,6 +74,7 @@ NetConfig& NetConfig::operator=(const NetConfig& other)
 {
     if (this != &other) {
         hostname = other.hostname;
+        nodename = other.nodename;
         IPs = other.IPs;
         port = other.port;
     }
@@ -85,6 +89,11 @@ std::string get_hostname(){
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
     return hostname;
+}
+
+std::string get_nodename(){
+    auto nodename = std::getenv("SLURMD_NODENAME");
+    return (std::string)(nodename);
 }
 
 std::unordered_map<std::string, std::string> get_IP_addresses() 
@@ -156,8 +165,10 @@ void to_json(json& j, const NetConfig& net_config)
 
     j = {   
             {"hostname", net_config.hostname}, 
+            {"node name", net_config.nodename},
             {"IPs", ips},
             {"port", net_config.port},
+
         };
 }
 
@@ -165,6 +176,7 @@ void from_json(const json& j, NetConfig& NetConfig)
 {
         
     j.at("hostname").get_to(NetConfig.hostname);
+    j.at("node name").get_to(NetConfig.nodename);
     for (auto& netbind : j.at("IPs").items()) {
         NetConfig.IPs[netbind.key()] = netbind.value();
     }
@@ -179,6 +191,7 @@ std::ostream& operator<<(std::ostream& os, const config::NetConfig& config) {
             os << net_bind.first << " ---> " << net_bind.second << "\n";
     }
     os << "\nPuerto: " << config.port
+        << "\nNodename: " << config.nodename 
        << "\nHostname: " << config.hostname << "\n\n";
     return os;
 }

@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
         }
 
         qpu_config_json["family_name"] = family_name;
+        qpu_config_json["slurm_job_id"] = (std::string)std::getenv("SLURM_JOB_ID");
 
         if(auto search = SIM_NAMES.find(simulator); search != SIM_NAMES.end()) {
             if (search->second == SimType::Aer) {

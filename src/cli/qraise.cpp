@@ -20,13 +20,14 @@ struct MyArgs : public argparse::Args
     //int& node = kwarg("node", "Specific node to raise the qpus."); //Alvaro 
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                    = kwarg("t,time", "Time for the QPUs to be raised.");
-    int& cores_per_qpu                  = kwarg("c,cores", "Number of cores per QPU.").set_default(2);
-    int& mem_per_qpu                    = kwarg("mem,mem-per-qpu", "Memory given to each QPU in GB.").set_default(24);
-    int& number_of_nodes                = kwarg("N,n_nodes", "Number of nodes.").set_default(1);
+    int& cores_per_qpu                   = kwarg("c,cores", "Number of cores per QPU.").set_default(2);
+    int& mem_per_qpu                     = kwarg("mem,mem-per-qpu", "Memory given to each QPU in GB.").set_default(24);
+    std::optional<int>& number_of_nodes  = kwarg("N,n_nodes", "Number of nodes.").set_default(1);
+    std::optional<int>& qpus_per_node    = kwarg("qpuN,qpus_per_node", "Number of qpus in each node.");
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
-    std::string& family_name            = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
+    std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -37,6 +38,14 @@ bool check_time_format(const std::string& time)
 {
     std::regex format("^(\\d{2}):(\\d{2}):(\\d{2})$");
     return std::regex_match(time, format);   
+}
+
+void check_qpus_cores_logic(int& n_qpus, int& qpus_per_node)
+{
+    if (n_qpus < qpus_per_node) {
+        std::cerr << "\033[1;33m" << "Warning: " << "Less qpus than selected qpus_per_node.\n";
+        std::cerr << "\033[1;33m" << "Number of QPUs: " << n_qpus << " QPUs per node: " << qpus_per_node << "\033[0m" << "\n";
+    }
 }
 
 bool check_mem_format(const int& mem) 
@@ -67,8 +76,8 @@ int main(int argc, char* argv[])
     int intSEED = rand() % 1000;
     std::string SEED = std::to_string(intSEED);
 
-    auto args = argparse::parse<MyArgs>(argc, argv, true);
-    
+    auto args = argparse::parse<MyArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
+
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
 
@@ -77,7 +86,12 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
-    sbatchFile << "#SBATCH -N " << args.number_of_nodes << "\n";
+    sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
+
+    if (args.qpus_per_node.has_value()) {
+        check_qpus_cores_logic(args.n_qpus, args.qpus_per_node.value());
+        sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
+    }
     // sbatchFile << "#SBATCH --nodelist=c7-" << args.node << "\n"; 
 
     // TODO: Can the user decide the number of cores?
