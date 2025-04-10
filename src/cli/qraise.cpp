@@ -8,12 +8,12 @@
 #include "argparse.hpp"
 #include "logger/logger.hpp"
 #include "constants.hpp"
-#include "utils/qraise_utils.hpp"
-#include "utils/qraise_args.hpp"
-#include "config/qraise_fakeqmio_conf.hpp"
-#include "config/qraise_no_comm_conf.hpp"
-#include "config/qraise_class_comm_conf.hpp"
-#include "config/qraise_quantum_comm_conf.hpp"
+#include "utils/qraise/utils_qraise.hpp"
+#include "utils/qraise/args_qraise.hpp"
+#include "utils/qraise/fakeqmio_conf_qraise.hpp"
+#include "utils/qraise/no_comm_conf_qraise.hpp"
+#include "utils/qraise/class_comm_conf_qraise.hpp"
+#include "utils/qraise/quantum_comm_conf_qraise.hpp"
 
 using json = nlohmann::json;
 
