@@ -21,10 +21,10 @@ public:
     std::optional<std::string> zmq_endpoint;
     std::unordered_map<std::string, std::queue<int>> message_queue;
 
-    CommunicationComponent(std::string& comm_type, int& argc, char *argv[]) : comm_type(comm_type)
+    CommunicationComponent(std::string& comm_type) : comm_type(comm_type)
     {
         if (comm_type == "mpi") {
-            MPI_Init(&argc, &argv);
+            MPI_Init(NULL, NULL);
             MPI_Comm_size(MPI_COMM_WORLD, &(this->mpi_size));
             MPI_Comm_rank(MPI_COMM_WORLD, &(this->mpi_rank));
     

@@ -38,7 +38,7 @@ public:
     std::unique_ptr<QPUClassicalNode<sim_type>> classical_node;
     
 
-    QPU(config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[], std::string& comm_type = "None");
+    QPU(config::QPUConfig<sim_type> qpu_config, std::string& comm_type = "None");
 
     void turn_ON();
     inline void turn_OFF();
@@ -65,12 +65,12 @@ private:
 
 
 template <SimType sim_type>
-QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[], std::string& comm_type) : qpu_config{qpu_config}, comm_type(comm_type)
+QPU<sim_type>::QPU(config::QPUConfig<sim_type> qpu_config, std::string& comm_type) : qpu_config{qpu_config}, comm_type(comm_type)
 {
     CustomJson c_json{};
     json config_json(qpu_config);
 
-    classical_node = std::make_unique<QPUClassicalNode<sim_type>>(comm_type, qpu_config, argc, argv);
+    classical_node = std::make_unique<QPUClassicalNode<sim_type>>(comm_type, qpu_config);
     SPDLOG_LOGGER_DEBUG(logger, "QPU classical node configured.");
 
     config_json["comm_info"] = this->classical_node->endpoint_info;

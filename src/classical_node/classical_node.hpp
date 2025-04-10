@@ -28,7 +28,7 @@ public:
     json endpoint_info = {};
     json result = {};
     
-    QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[]);
+    QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config);
 
     inline void send_circ_to_execute(json& kernel);
     inline void send_instructions_to_execute(json& kernel);
@@ -37,7 +37,7 @@ public:
 };
 
 template <SimType sim_type>
-QPUClassicalNode<sim_type>::QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config, int& argc, char *argv[]) : backend(qpu_config.backend_config), comm_component(comm_type, argc, argv)
+QPUClassicalNode<sim_type>::QPUClassicalNode(std::string& comm_type, config::QPUConfig<sim_type> qpu_config) : backend(qpu_config.backend_config), comm_component(comm_type)
 {
     SPDLOG_LOGGER_DEBUG(logger, "Classical Node correctly instanciated.");
 

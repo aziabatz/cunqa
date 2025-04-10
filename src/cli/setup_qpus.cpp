@@ -41,15 +41,15 @@ int main(int argc, char *argv[])
         if(auto search = SIM_NAMES.find(simulator); search != SIM_NAMES.end()) {
             if (search->second == SimType::Aer) {
                 SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with AerSimulator.");
-                turn_on_qpu<SimType::Aer>(qpu_config_json, info_path, communications, argc, argv);
+                turn_on_qpu<SimType::Aer>(qpu_config_json, info_path, communications);
 
             } else if (search->second == SimType::Munich) {
                 SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with MunichSimulator.");
-                turn_on_qpu<SimType::Munich>(qpu_config_json, info_path, communications, argc, argv);
+                turn_on_qpu<SimType::Munich>(qpu_config_json, info_path, communications);
 
             } else if (search->second == SimType::Cunqa) {
                 SPDLOG_LOGGER_DEBUG(logger, "Turning on QPU with CunqaSimulator.");
-                turn_on_qpu<SimType::Cunqa>(qpu_config_json, info_path, communications, argc, argv);
+                turn_on_qpu<SimType::Cunqa>(qpu_config_json, info_path, communications);
             }
         }
 

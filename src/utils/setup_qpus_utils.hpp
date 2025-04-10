@@ -51,7 +51,7 @@ json get_qpu_config(json& backend_json)
 }
 
 template<SimType sim_type>
-void turn_on_qpu(json& qpu_config_json, std::string& info_path, std::string& communications, int& argc, char *argv[])
+void turn_on_qpu(json& qpu_config_json, std::string& info_path, std::string& communications)
 {
     try{
         SPDLOG_LOGGER_DEBUG(logger, "Turning on QPUs.");
@@ -59,17 +59,17 @@ void turn_on_qpu(json& qpu_config_json, std::string& info_path, std::string& com
         if (communications != "no_comm") {
             #if defined(QPU_MPI)
                 std::string comm_type = "mpi";
-                QPU<sim_type> qpu(qpu_config, argc, argv, comm_type);
+                QPU<sim_type> qpu(qpu_config, comm_type);
                 SPDLOG_LOGGER_DEBUG(logger, "QPUs with MPI succesfully configured.");
                 qpu.turn_ON();
             #elif defined(QPU_ZMQ)
                 std::string comm_type = "zmq";
-                QPU<sim_type> qpu(qpu_config, argc, argv, comm_type);
+                QPU<sim_type> qpu(qpu_config, comm_type);
                 SPDLOG_LOGGER_DEBUG(logger, "QPUs with ZMQ succesfully configured.");
                 qpu.turn_ON();
             #endif
         } else {
-            QPU<sim_type> qpu(qpu_config, argc, argv, communications);
+            QPU<sim_type> qpu(qpu_config, communications);
             SPDLOG_LOGGER_DEBUG(logger, "QPUs with no communications configured.");
             qpu.turn_ON();
         }
