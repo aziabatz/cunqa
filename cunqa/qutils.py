@@ -86,7 +86,7 @@ def qdrop(*families):
     return
 
 
-def getQPUs(path = info_path):
+def getQPUs(local = True, family_name = None):
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
@@ -95,17 +95,14 @@ def getQPUs(path = info_path):
     List of QPU objects.
     
     """
+    path = info_path
+
     try:
         with open(path, "r") as qpus_json:
             dumps = load(qpus_json)
-
-    except FileNotFoundError as error:
-        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{type(error).__name__}].")
-        raise SystemExit # User's level
-
-    except TypeError as error:
-        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{type(error).__name__}].")
-        raise SystemExit # User's level
+            if len(dumps) == 0:
+                logger.error(f"No QPUs were found.")
+                raise Exception
 
     except JSONDecodeError as error:
         logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
@@ -118,17 +115,29 @@ def getQPUs(path = info_path):
     logger.debug(f"File accessed correctly.")
 
 
-    
-    if len(dumps) != 0:
-        qpus = []
-        i = 0
-        for k, v in dumps.items():
-            client = QClient(path)
-            # client.connect(k)
-            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
-            i+=1
-        logger.debug(f"{len(qpus)} QPU objects were created.")
-        return qpus
+
+    if local:
+        local_node = os.getenv("SLURMD_NODENAME")
+        logger.debug(f"User at node {local_node}.")
+
+        if family_name is not None:
+            targets = [q for q in dumps if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) ]
+        
+        else:
+            targets = [q for q in dumps if (q.get("node_name")==local_node)]
+
     else:
-        logger.error(f"No QPUs were found, {path} is empty.")
-        raise SystemExit
+        if family_name is not None:
+            targets = [q for q in dumps if (q.get("family_name") == family_name) ]
+        
+        else:
+            targets = dumps
+    
+    qpus = []
+    i = 0
+    for k, v in targets.items():
+        client = QClient(path)
+        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
+        i+=1
+    logger.debug(f"{len(qpus)} QPU objects were created.")
+    return qpus
