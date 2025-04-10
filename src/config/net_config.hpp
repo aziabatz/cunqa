@@ -165,7 +165,7 @@ void to_json(json& j, const NetConfig& net_config)
 
     j = {   
             {"hostname", net_config.hostname}, 
-            {"node name", net_config.nodename},
+            {"node_name", net_config.nodename},
             {"IPs", ips},
             {"port", net_config.port},
 
@@ -176,7 +176,7 @@ void from_json(const json& j, NetConfig& NetConfig)
 {
         
     j.at("hostname").get_to(NetConfig.hostname);
-    j.at("node name").get_to(NetConfig.nodename);
+    j.at("node_name").get_to(NetConfig.nodename);
     for (auto& netbind : j.at("IPs").items()) {
         NetConfig.IPs[netbind.key()] = netbind.value();
     }
