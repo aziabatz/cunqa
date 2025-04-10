@@ -1,14 +1,20 @@
 import os
 import sys
-import json
-import subprocess
-from cunqa.logger import logger
 from subprocess import run
-from cunqa.qpu import getQPUs
+from json import JSONDecodeError, load
+from cunqa.qclient import QClient  # importamos api en C++
+from cunqa.backend import Backend
+from cunqa.logger import logger
+from cunqa.qpu import QPU
 
 # Adding pyhton folder path to detect modules
 INSTALL_PATH = os.getenv("INSTALL_PATH")
 sys.path.insert(0, INSTALL_PATH)
+
+info_path = os.getenv("INFO_PATH")
+if info_path is None:
+    STORE = os.getenv("STORE")
+    info_path = STORE+"/.cunqa/qpus.json"
 
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
@@ -16,7 +22,7 @@ class QRaiseError(Exception):
 
 def qraise(n, time, flags = ''):
     """
-    Raises a QPU and returns its job_id
+    Raises a QPU and returns its job_id.
 
     Args
     -----------
@@ -34,27 +40,20 @@ def qraise(n, time, flags = ''):
         # return job_id
     
     except Exception as error:
-        raise QRaiseError(f"Unable to raise requested QPUs [{error}]")
+        raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
 
 def qdrop(*families):
     """
-    Drops the QPU families corresponding to the the entered QPU objects. By default, all raised QPUs will be dropped
+    Drops the QPU families corresponding to the the entered QPU objects. By default, all raised QPUs will be dropped.
 
     Args
     --------
-    qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop
+    qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
     """
     
     #if no QPU is provided we drop all QPU slurm jobs
     if len( families ) == 0:
         qpus = ['--all'] 
-
-
-    # path to access to json file holding information about the raised QPUs
-    info_path = os.getenv("INFO_PATH")
-    if info_path is None:
-        STORE = os.getenv("STORE")
-        info_path = STORE+"/.api_simulator/qpus.json"
 
 
     #access the large dictionary containing all QPU dictionaries
@@ -83,4 +82,53 @@ def qdrop(*families):
         
     
     run(cmd) #run 'qdrop slurm_job_id_1 slurm_job_id_2 etc' on terminal
+
     return
+
+
+def getQPUs(path = info_path):
+    """
+    Global function to get the QPU objects corresponding to the virtual QPUs raised.
+
+    Return:
+    ---------
+    List of QPU objects.
+    
+    """
+    try:
+        with open(path, "r") as qpus_json:
+            dumps = load(qpus_json)
+
+    except FileNotFoundError as error:
+        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{type(error).__name__}].")
+        raise SystemExit # User's level
+
+    except TypeError as error:
+        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{type(error).__name__}].")
+        raise SystemExit # User's level
+
+    except JSONDecodeError as error:
+        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
+        raise SystemExit # User's level
+
+    except Exception as error:
+        logger.error(f"Some exception occurred [{type(error).__name__}].")
+        raise SystemExit # User's level
+    
+    logger.debug(f"File accessed correctly.")
+
+
+    
+    if len(dumps) != 0:
+        qpus = []
+        i = 0
+        for k, v in dumps.items():
+            client = QClient(path)
+            # client.connect(k)
+            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
+            i+=1
+        logger.debug(f"{len(qpus)} QPU objects were created.")
+        return qpus
+    else:
+        logger.error(f"No QPUs were found, {path} is empty.")
+        raise SystemExit
