@@ -1,6 +1,7 @@
 import os
 import sys
 from subprocess import run
+import json
 from json import JSONDecodeError, load
 from cunqa.qclient import QClient  # importamos api en C++
 from cunqa.backend import Backend
