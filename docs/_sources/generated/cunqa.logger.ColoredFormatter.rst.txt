@@ -1,0 +1,37 @@
+﻿cunqa.logger.ColoredFormatter
+=============================
+
+.. currentmodule:: cunqa.logger
+
+.. autoclass:: ColoredFormatter
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ColoredFormatter.__init__
+      ~ColoredFormatter.converter
+      ~ColoredFormatter.format
+      ~ColoredFormatter.formatException
+      ~ColoredFormatter.formatMessage
+      ~ColoredFormatter.formatStack
+      ~ColoredFormatter.formatTime
+      ~ColoredFormatter.usesTime
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ColoredFormatter.LEVEL_COLOR
+      ~ColoredFormatter.default_msec_format
+      ~ColoredFormatter.default_time_format
+   
+   
