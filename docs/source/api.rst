@@ -5,13 +5,12 @@ Subprogramas
    :recursive:
    :toctree: generated
 
-   cunqa.qpu
-   cunqa.qjob
-   cunqa.transpile
-   cunqa.circuit
-   cunqa.mappers
-   cunqa.backend
-   cunqa.logger
+   cunqa_qpu
+   cunqa_qjob
+   cunqa_transpile
+   cunqa_circuit
+   cunqa_mappers
+   cunqa_backend
    
    
    
