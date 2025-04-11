@@ -1,6 +1,5 @@
 Subprogramas
 ===================
-EStos son los programillas
 .. autosummary::
    :recursive:
    :toctree: generated
