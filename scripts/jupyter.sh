@@ -8,7 +8,7 @@ export INSTALL_PATH=/mnt/netapp1/Store_CESGA/home/cesga/jvazquez/works/cunqa/ins
  
 export PATH=$PATH:$INSTALL_PATH/bin
  
-export INFO_PATH=$STORE/.api_simulator/qpus.json
+export INFO_PATH=$STORE/.cunqa/qpus.json
  
 IP=$(ip route get 1.2.3.4 | head -1 | awk '{print $7}')
 nohup jupyter-notebook --ip $IP &> jup.out &

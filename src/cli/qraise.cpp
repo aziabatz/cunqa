@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH --output=qraise_%j\n";
 
     sbatchFile << "\n";
-    sbatchFile << "if [ ! -d \"$STORE/.api_simulator\" ]; then\n";
-    sbatchFile << "mkdir $STORE/.api_simulator\n";
+    sbatchFile << "if [ ! -d \"$STORE/.cunqa\" ]; then\n";
+    sbatchFile << "mkdir $STORE/.cunqa\n";
     sbatchFile << "fi\n";
 
     const char* var_name = "INSTALL_PATH"; // Replace with your variable name
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
         std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
     }
 
-    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.api_simulator/qpus.json\n";
+    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.cunqa/qpus.json\n";
 
 
     if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
