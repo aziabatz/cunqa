@@ -9,8 +9,7 @@ from cunqa.logger import logger
 from cunqa.qpu import QPU
 
 # Adding pyhton folder path to detect modules
-INSTALL_PATH = os.getenv("INSTALL_PATH")
-sys.path.insert(0, INSTALL_PATH)
+sys.path.insert(0,os.getenv("INSTALL_PATH"))
 
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
@@ -20,6 +19,10 @@ if info_path is None:
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
+
+
+
+
 
 def qraise(n, time, flags = ''):
     """
@@ -54,7 +57,7 @@ def qdrop(*families):
     
     #if no QPU is provided we drop all QPU slurm jobs
     if len( families ) == 0:
-        qpus = ['--all'] 
+        job_id = ['--all'] 
 
 
     #access the large dictionary containing all QPU dictionaries
@@ -87,6 +90,85 @@ def qdrop(*families):
     return
 
 
+def nodeswithQPUs():
+    """
+    Global function to know what nodes of the computer host virtual QPUs.
+
+    Return:
+    ---------
+    List of the corresponding node names.
+    """
+    try:
+        with open(info_path, "r") as qpus_json:
+            dumps = json.load(qpus_json)
+
+        node_names = set()
+
+        for v in dumps.values():
+            node_names.add(v["net"]["node_name"])
+
+        return list(node_names)
+
+    except Exception as error:
+        logger.error(f"Some exception occurred [{type(error).__name__}].")
+        raise SystemExit # User's level
+
+
+
+def infoQPUs(local = True, node_name = None):
+    """
+    Global function that returns information about the QPUs available either in the local node or globaly.
+
+    It is possible also to filter by `node_names`. If `local = True` and `node_names` provided are different from the local node, only local node will be chosen.
+    """
+
+    try:
+        with open(info_path, "r") as qpus_json:
+            dumps = load(qpus_json)
+            if len(dumps) == 0:
+                logger.warning(f"No QPUs were found.")
+                return
+        
+        if node_name is not None:
+            targets = [{k:q} for k,q in dumps.items() if (q["net"].get("node_name") == node_name ) ]
+        
+        else:
+            if local:
+                local_node = os.getenv("SLURMD_NODENAME")
+                logger.debug(f"User at node {local_node}.")
+                # filtering by node_name to select local node
+                targets = [{k:q} for k,q in dumps.items() if (q["net"].get("node_name")==local_node) ]
+            else:
+                targets =[{k:q} for k,q in dumps.items()]
+        
+        info = []
+        for t in targets:
+            key = list(t.keys())[0]
+            info.append({
+                "QPU":key,
+                "node":t[key]["net"]["node_name"],
+                "family_name":t[key]["family_name"],
+                "backend":{
+                    "name":t[key]["backend"]["name"],
+                    "simulator":t[key]["backend"]["simulator"],
+                    "version":t[key]["backend"]["version"],
+                    "description":t[key]["backend"]["description"],
+                    "n_qubits":t[key]["backend"]["n_qubits"],
+                    "basis_gates":t[key]["backend"]["basis_gates"],
+                    "coupling_map":t[key]["backend"]["coupling_map"],
+                    "custom_instructiona":t[key]["backend"]["custom_instructions"]
+                }
+            })
+        return info
+            
+            
+
+    except Exception as error:
+        logger.error(f"Some exception occurred [{type(error).__name__}].")
+        raise error # User's level
+
+
+
 def getQPUs(local = True, family_name = None):
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
@@ -96,18 +178,13 @@ def getQPUs(local = True, family_name = None):
     List of QPU objects.
     
     """
-    path = info_path
 
     try:
-        with open(path, "r") as qpus_json:
+        with open(info_path, "r") as qpus_json:
             dumps = load(qpus_json)
             if len(dumps) == 0:
                 logger.error(f"No QPUs were found.")
                 raise Exception
-
-    except JSONDecodeError as error:
-        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
-        raise SystemExit # User's level
 
     except Exception as error:
         logger.error(f"Some exception occurred [{type(error).__name__}].")
@@ -122,14 +199,14 @@ def getQPUs(local = True, family_name = None):
         logger.debug(f"User at node {local_node}.")
 
         if family_name is not None:
-            targets = [q for q in dumps if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) ]
+            targets = { k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) }
         
         else:
-            targets = [q for q in dumps if (q.get("node_name")==local_node)]
+            targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node)}
 
     else:
         if family_name is not None:
-            targets = [q for q in dumps if (q.get("family_name") == family_name) ]
+            targets = {k:q for k,q in dumps.items() if (q.get("family_name") == family_name) }
         
         else:
             targets = dumps
@@ -137,8 +214,8 @@ def getQPUs(local = True, family_name = None):
     qpus = []
     i = 0
     for k, v in targets.items():
-        client = QClient(path)
-        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
+        client = QClient(info_path)
+        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k  )  ) # errors captured above
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
     return qpus

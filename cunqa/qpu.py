@@ -12,13 +12,13 @@ if info_path is None:
     info_path = STORE+"/.cunqa/qpus.json"
 
 
-class QPU():
+class QPU:
     """
     Class to define a QPU.
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None, qfamily_name = None, port = None):
+    def __init__(self, id=None, qclient=None, backend=None, family_name = None, port = None):
         """
         Initializes the QPU class.
 
@@ -80,15 +80,15 @@ class QPU():
             logger.error(f"QClient port must be str, but {type(port)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
-        if qfamily_name == None:
+        if family_name == None:
             logger.error(f"Please provide QPU family name [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
             raise SystemExit # User's level
         
         elif isinstance(port, str):
-            self._family_name = qfamily_name
+            self._family_name = family_name
 
         else:
-            logger.error(f"Family name must be str, but {type(qfamily_name)} was provided [{TypeError.__name__}].")
+            logger.error(f"Family name must be str, but {type(family_name)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
 
 
