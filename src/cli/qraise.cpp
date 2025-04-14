@@ -17,7 +17,6 @@ using namespace std::literals;
 
 struct MyArgs : public argparse::Args 
 {
-    //int& node = kwarg("node", "Specific node to raise the qpus."); //Alvaro 
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                    = kwarg("t,time", "Time for the QPUs to be raised.");
     int& cores_per_qpu                   = kwarg("c,cores", "Number of cores per QPU.").set_default(2);
@@ -28,6 +27,7 @@ struct MyArgs : public argparse::Args
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
     std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
+    std::optional<std::vector<std::string>>& node_list = kwarg("node_list", "List of nodes where the QPUs will be deployed.").multi_argument(); 
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
@@ -38,14 +38,6 @@ bool check_time_format(const std::string& time)
 {
     std::regex format("^(\\d{2}):(\\d{2}):(\\d{2})$");
     return std::regex_match(time, format);   
-}
-
-void check_qpus_cores_logic(int& n_qpus, int& qpus_per_node)
-{
-    if (n_qpus < qpus_per_node) {
-        std::cerr << "\033[1;33m" << "Warning: " << "Less qpus than selected qpus_per_node.\n";
-        std::cerr << "\033[1;33m" << "Number of QPUs: " << n_qpus << " QPUs per node: " << qpus_per_node << "\033[0m" << "\n";
-    }
 }
 
 bool check_mem_format(const int& mem) 
@@ -70,6 +62,7 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
     return 0;
 }
 
+
 int main(int argc, char* argv[]) 
 {
     srand((unsigned int)time(NULL));
@@ -89,10 +82,38 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
 
     if (args.qpus_per_node.has_value()) {
-        check_qpus_cores_logic(args.n_qpus, args.qpus_per_node.value());
-        sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
+        if (args.n_qpus < args.qpus_per_node) {
+            std::cerr << "\033[1;31m" << "Error: " << "Less qpus than selected qpus_per_node.\n";
+            std::cerr << "Number of QPUs: " << args.n_qpus << " QPUs per node: " << args.qpus_per_node.value() << "\n";
+            std::cerr << "Aborted." << "\033[0m \n";
+            //std::system("rm qraise_sbatch_tmp.sbatch");
+            return -1;
+        } else {
+            sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
+        }
     }
-    // sbatchFile << "#SBATCH --nodelist=c7-" << args.node << "\n"; 
+
+    if (args.node_list.has_value()) {
+        if (args.number_of_nodes.value() != args.node_list.value().size()) {
+            std::cerr << "\033[1;31m" << "Warning: " << "Different number of node names than total nodes.\n";
+            std::cerr << "Number of nodes: " << args.number_of_nodes.value() << " Number of node names: " << args.node_list.value().size() << "\n";
+            std::cerr << "Aborted." << "\033[0m \n";
+            //std::system("rm qraise_sbatch_tmp.sbatch");
+            return -1;
+        } else {
+            sbatchFile << "#SBATCH --nodelist=";
+            int comma = 0;
+            for (auto& node_name : args.node_list.value()) {
+                if (comma > 0 ) {
+                    sbatchFile << ",";
+                }
+                sbatchFile << node_name;
+                comma++;
+            }
+            sbatchFile << "\n";
+        }
+    }
+    //  
 
     // TODO: Can the user decide the number of cores?
     if (check_mem_format(args.mem_per_qpu)){
