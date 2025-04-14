@@ -6,9 +6,13 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
 import sys
+import os
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+
+os.environ['INFO_PATH'] = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/'
+os.environ['STORE'] = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/'
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
