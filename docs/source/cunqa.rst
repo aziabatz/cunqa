@@ -1,9 +1,10 @@
-Subprogramas
+cunqa
 ===================
 .. autosummary::
    :recursive:
    :toctree: generated
 
+   cunqa.qpu
    cunqa.qjob
    cunqa.transpile
    cunqa.circuit

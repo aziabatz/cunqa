@@ -4,3 +4,15 @@
 .. automodule:: cunqa.qpu
 
    
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      getQPUs
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      QPU
+   
