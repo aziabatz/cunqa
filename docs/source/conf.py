@@ -7,9 +7,8 @@
 # add these directories to sys.path here.
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-import cunqa
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -21,9 +20,10 @@ release = '0.1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary',] # 'nbsphinx', 'sphinx_gallery.load_style', 'sphinx_mdinclude', this ones were troublesome
+extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'nbsphinx',
+    'sphinx_gallery.load_style',] # 'sphinx_mdinclude', this ones were troublesome
 
-autodoc_mock_imports = ['os','json', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'qmiotools', 'qiskit_aer']
+autodoc_mock_imports = ['os','json', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'qmiotools', 'qiskit_aer',]
 
 templates_path = ['_templates']
 exclude_patterns = []

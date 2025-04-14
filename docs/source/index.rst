@@ -17,7 +17,7 @@ Check out the :doc:`first_steps` for instructions on how to get started. On :doc
    :caption: Contents:
     first_steps
     api
-    .. notebooks_gallery
+    notebooks_gallery
 
     
 
