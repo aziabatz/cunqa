@@ -1,4 +1,4 @@
-.. autosummary:: /CUNQA/cunqa/circuit
+.. autosummary:: cunqa.circuit
     :members:
 
     .. autofunction:: cunqa.circuit.qc_to_json
