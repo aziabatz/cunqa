@@ -1,6 +1,8 @@
 Subprogramas
 ===================
 .. autosummary::
+   :maxdepth: 2
+   :caption: Contents:
    :recursive:
    :toctree: generated
 

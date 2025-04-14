@@ -13,7 +13,7 @@ Check out the :doc:`first_steps` for instructions on how to get started. On :doc
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
     first_steps
     api
