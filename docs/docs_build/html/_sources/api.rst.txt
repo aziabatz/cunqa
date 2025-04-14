@@ -8,7 +8,6 @@ Subprogramas
    cunqa.qjob
    cunqa.transpile
    cunqa.circuit
-   cunqa.mappers
    cunqa.backend
    
    
