@@ -7,7 +7,7 @@ Welcome to Cunqa's documentation!
 =================================
 
 **Cunqa** is a Python/C++ library for quantum computing researchers looking to emulate distributed quantum computing using *CESGA's* resources.
-All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa/tree/tmp-cpp-python>`_. 
+All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa>`_. 
 
 Check out the :doc:`first_steps` for instructions on how to get started. On :doc:`api` you'll find all cunqa classes.
 
@@ -17,7 +17,6 @@ Check out the :doc:`first_steps` for instructions on how to get started. On :doc
    :caption: Contents:
     first_steps
     api
-    notebooks_gallery
 
     
 
