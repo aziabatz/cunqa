@@ -22,7 +22,7 @@ release = '0.1'
 
 extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', "myst_nb",] # 'sphinx_mdinclude', this ones were troublesome
 
-autodoc_mock_imports = ['os','json', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer',]
+autodoc_mock_imports = ['os','json', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.qpu', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer',]
 
 templates_path = ['_templates']
 exclude_patterns = []
