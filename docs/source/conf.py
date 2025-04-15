@@ -16,10 +16,10 @@ os.environ['STORE'] = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/'
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Cunqa'
+project = 'CUNQA'
 copyright = '2025, CESGA'
 author = 'Marta Losada Estévez, Jorge Vázquez Pérez, Álvaro Carballido Costas, Daniel Expósito Patiño'
-release = '0.1'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
