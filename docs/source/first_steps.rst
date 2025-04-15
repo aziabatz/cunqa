@@ -2,6 +2,6 @@
 First Distributed Execution
 ****************************
 
-.. mdinclude:: CUNQA/README.md
+.. mdinclude:: README.md
     :start-line: 156
 

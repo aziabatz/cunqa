@@ -32,6 +32,8 @@ templates_path = ['_templates']
 exclude_patterns = []
 pygments_style = 'sphinx'
 
+
+mdinclude_dir = '/CUNQA/'
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',
