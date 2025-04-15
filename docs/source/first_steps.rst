@@ -2,5 +2,5 @@
 First Distributed Execution
 ****************************
 
-.. mdinclude:: README.md
+.. mdinclude:: CUNQA/README.md
 
