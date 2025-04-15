@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <sys/types.h>
+#include <string_view>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -23,16 +24,17 @@ namespace config {
 
 class NetConfig {
 public:
+    std::string mode;
     std::string hostname;
     std::string nodename;
     std::unordered_map<std::string, std::string> IPs;
     std::string port;
 
     NetConfig();
-    NetConfig(const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port);
+    NetConfig(const std::string& mode, const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port);
     NetConfig(const json& server_info);
 
-    static NetConfig myNetConfig();
+    static NetConfig myNetConfig(const std::string& mode);
     std::string get_endpoint(const std::string_view& net = INFINIBAND) const;
 
     NetConfig& operator=(const NetConfig& other);
@@ -48,8 +50,9 @@ void from_json(const json& j, NetConfig& NetConfig);
 
 NetConfig::NetConfig() = default;
 
-NetConfig::NetConfig(const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port)
-    : hostname{hostname},
+NetConfig::NetConfig(const std::string& mode, const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port)
+    :   mode{mode},
+        hostname{hostname},
         nodename{nodename},
         IPs{IPs},
         port{port} 
@@ -60,9 +63,9 @@ NetConfig::NetConfig(const json& server_info)
     from_json(server_info, *this);
 }
 
-NetConfig NetConfig::myNetConfig() 
+NetConfig NetConfig::myNetConfig(const std::string& mode) 
 {
-    return NetConfig(get_hostname(), get_nodename(), get_IP_addresses(), get_port());
+    return NetConfig(mode, get_hostname(), get_nodename(), get_IP_addresses(), get_port());
 }
 
 std::string NetConfig::get_endpoint(const std::string_view& net) const 
@@ -73,6 +76,7 @@ std::string NetConfig::get_endpoint(const std::string_view& net) const
 NetConfig& NetConfig::operator=(const NetConfig& other) 
 {
     if (this != &other) {
+        mode = other.mode;
         hostname = other.hostname;
         nodename = other.nodename;
         IPs = other.IPs;
@@ -164,6 +168,7 @@ void to_json(json& j, const NetConfig& net_config)
     }
 
     j = {   
+            {"mode", net_config.mode},
             {"hostname", net_config.hostname}, 
             {"node_name", net_config.nodename},
             {"IPs", ips},
@@ -174,7 +179,7 @@ void to_json(json& j, const NetConfig& net_config)
 
 void from_json(const json& j, NetConfig& NetConfig) 
 {
-        
+    j.at("mode").get_to(NetConfig.mode);
     j.at("hostname").get_to(NetConfig.hostname);
     j.at("node_name").get_to(NetConfig.nodename);
     for (auto& netbind : j.at("IPs").items()) {
@@ -192,6 +197,7 @@ std::ostream& operator<<(std::ostream& os, const config::NetConfig& config) {
     }
     os << "\nPuerto: " << config.port
         << "\nNodename: " << config.nodename 
-       << "\nHostname: " << config.hostname << "\n\n";
+       << "\nHostname: " << config.hostname 
+       << "\nMode: " << config.mode << "\n\n";
     return os;
 }

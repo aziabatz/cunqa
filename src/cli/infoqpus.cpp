@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
         }
         
         if (family_counts_per_node.find(slurm_nodename) != family_counts_per_node.end()) {
-            std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are the following QPUs: " << "\n";
+            std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are: " << "\n";
             for (auto& [family_name, number] : family_counts_per_node[slurm_nodename]) {
                 std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
             }
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         }
     } else {
         for (auto& [node_name, node_info] : family_counts_per_node) {
-            std::cout << "In \033[34mNode " << node_name << "\033[0m there are the following QPUs: " << "\n";
+            std::cout << "In \033[34mNode " << node_name << "\033[0m there are: " << "\n";
             for (auto& [family_name, number] : node_info) {
                 std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
             }
