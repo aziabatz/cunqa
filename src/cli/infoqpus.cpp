@@ -69,21 +69,21 @@ int main(int argc, char* argv[]) {
             std::cout << indent << "Description: " << qpus_json[id]["backend"]["description"] << "\n";
         }
     } else if (args.my_node) {
-        try {
-            const char* slurm_nodename = std::getenv("SLURMD_NODENAME");
-            if (family_counts_per_node.find(slurm_nodename) != family_counts_per_node.end()) {
-                std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are the following QPUs: " << "\n";
-                for (auto& [family_name, number] : family_counts_per_node[slurm_nodename]) {
-                    std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
-                }
-            } else {
-                std::cout << "\033[33mNode No QPUs deployed on the current node " << slurm_nodename << "\033[0m \n";
+        const char* slurm_nodename = std::getenv("SLURMD_NODENAME");
+        if (slurm_nodename == nullptr) 
+        {
+            std::cerr << "\033[31mProblem accessing to the QPUs on the current node. Probably the command was run on a login node.\033[0m" << "\n";
+            return 1;
+        }
+        
+        if (family_counts_per_node.find(slurm_nodename) != family_counts_per_node.end()) {
+            std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are the following QPUs: " << "\n";
+            for (auto& [family_name, number] : family_counts_per_node[slurm_nodename]) {
+                std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
             }
-
-        } catch (const std::exception& e) {
-        std::cerr << "\033[31mProblem accessing to the QPUs on the current node. Probably the command was run on a login node.\033[0m" << "\n";
-    }
-
+        } else {
+            std::cout << "\033[33mNode No QPUs deployed on the current node " << slurm_nodename << "\033[0m \n";
+        }
     } else {
         for (auto& [node_name, node_info] : family_counts_per_node) {
             std::cout << "In \033[34mNode " << node_name << "\033[0m there are the following QPUs: " << "\n";
