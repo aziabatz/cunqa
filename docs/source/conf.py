@@ -30,6 +30,7 @@ autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qisk
 
 templates_path = ['_templates']
 exclude_patterns = []
+pygments_style = 'sphinx'
 
 
 # -- Options for HTML output -------------------------------------------------
