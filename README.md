@@ -33,16 +33,26 @@
 
 
 ## CLONE REPOSITORY
-In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
+It is important to say that, for ensuring a correct cloning of the repository, the SSH is the one preferred. In order to get this to work one has to do:
 
 ```console
-git clone --recursive git@github.com:CESGA-Quantum-Spain/CUNQA.git
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/SSH_KEY
 ```
-To ensure all submodules are correctly installed, we encourage to run the *setup_submodules.sh* file:
+ 
+Now, everything is set to get the source code. 
+> [!WARNING]
+> In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
 
 ```console
-cd CUNQA
-bash scripts/setup_submodules.sh
+git clone --recursive git@github.com:CESGA-Quantum-Spain/cunqa.git
+```
+
+As a additional step, we encourage to run the *setup_submodules.sh* file, which removes some of the files unused in the submodules and makes the repository lighter:
+
+```console
+cd cunqa/scripts
+bash setup_submodules.sh
 ```
 
 ## INSTALLATION 
@@ -67,7 +77,7 @@ conda deactivate
 2. Then, load the following modules:
 
 ```console
-ml load qmio/hpc gcc/system gcccore/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0
+ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9
 ```
 
 3. Define the enviroment variable `INSTALL_PATH` as the **ABSOLUTE PATH** to the directory where **CUNQA** wants to be installed. 
@@ -122,7 +132,7 @@ conda deactivate
 2. Loading modules:
 
 ```console
-ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake
+ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake qiskit/1.2.4
 ```
 
 3. INSTALL_PATH:
@@ -138,9 +148,12 @@ export PATH=$PATH:$INSTALL_PATH/bin
 ```
 
 5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
-
+6. 
+* **Using [Ninja](https://ninja-build.org/) (faster)**
 ```console
-cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+cmake -G Ninja -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+ninja -C build -j $(nproc)
+cmake --install build/
 ```
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
@@ -243,13 +256,14 @@ qc.cx(0,1)
 qc.measure_all()
 
 # Time to run
-qpu0 = qpu[0] # Select one of the raise QPUs
+qpu0 = qpus[0] # Select one of the raise QPUs
 
 job = qpu0.run(qc, transpile = True, shots = 1000)
 
 result = job.result() # Get the result of the execution
 
 counts = result.get_counts() 
+print(f"Counts: {counts}" )
 ```
 
 > [!NOTE] 

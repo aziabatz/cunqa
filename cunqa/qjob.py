@@ -3,17 +3,14 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
-from cunqa.circuit import qc_to_json, from_json_to_qc, registers_dict
+from cunqa.circuit import qc_to_json, from_json_to_qc, _registers_dict, _is_parametric
 from cunqa.transpile import transpiler, TranspilerError
-
-# importing logger
 from cunqa.logger import logger
 
 
 class QJobError(Exception):
     """Exception for error during job submission to QPUs."""
     pass
-
 
 def _divide(string, lengths):
 
@@ -35,10 +32,13 @@ def _divide(string, lengths):
     parts = []
     init = 0
     try:
-        for length in lengths:
-            parts.append(string[init:init + length])
-            init += length
-        return ' '.join(parts)
+        if len(lengths) == 0:
+            return string
+        else:
+            for length in lengths:
+                parts.append(string[init:init + length])
+                init += length
+            return ' '.join(parts)
     
     except Exception as error:
         logger.error(f"Something failed with division of string [{error.__name__}].")
@@ -82,11 +82,10 @@ def _convert_counts(counts, registers):
     return new_counts
 
 
-class Result():
+class Result:
     """
     Class to describe the result of an experiment.
     """
-
     def __init__(self, result, registers = None):
         """
         Initializes the Result class.
@@ -142,7 +141,7 @@ class Result():
                 raise error
 
         logger.debug("Results correctly loaded.")
-        
+
     def get_dict(self):
         """
         Class method to obtain a dictionary with the class variables.
@@ -178,7 +177,7 @@ class Result():
 
 
 
-class QJob():
+class QJob:
     """
     Class to handle jobs sent to the simulator.
     """
@@ -216,7 +215,13 @@ class QJob():
         self._result = None
         self._updated = False
 
+        if isinstance(transpile, bool):
+            pass
 
+        else:
+            logger.error(f"transpile must be boolean, but a {type(transpile)} was provided [{TypeError.__name__}].")
+            raise TypeError # I capture the error in QPU.run() when creating the job
+    
         # transpilation
         if transpile:
             try:
@@ -273,7 +278,7 @@ class QJob():
                 logger.debug("A QuantumCircuit was provided.")
 
                 cl_bits = sum([c.size for c in circt.cregs])
-                self._cregisters = registers_dict(circt)[1]
+                self._cregisters = _registers_dict(circt)[1]
 
                 if self._QPU.backend.simulator == "AerSimulator":
 
@@ -285,18 +290,15 @@ class QJob():
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = dumps(circt).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                    circuit = dumps(circt)
 
 
             elif isinstance(circt, str):
 
                 logger.debug("A QASM2 circuit was provided.")
 
-                cl_bits = 0
-                for line in circt.splitlines():
-                    if line.startswith("bit"):
-                        cl_bits += line.split()[4]
-                self._cregisters = registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+                self._cregisters = _registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+                cl_bits = sum(len(k) for k in self._cregisters.values())
 
                 if self._QPU.backend.simulator == "AerSimulator":
 
@@ -308,7 +310,7 @@ class QJob():
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = circt.translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                    circuit = circt
 
             else:
                 logger.error(f"Circuit must be dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
@@ -339,10 +341,10 @@ class QJob():
             # config dict
             run_config = {"shots":1024, "method":"statevector", "memory_slots":cl_bits, "seed": 188}
 
-            if run_parameters == None:
+            if (run_parameters == None) or (len(run_parameters) == 0):
                 logger.debug("No run parameters provided, default were set.")
                 pass
-            elif (type(run_parameters) == dict) or (len(run_parameters) == 0):
+            elif (type(run_parameters) == dict): 
                 for k,v in run_parameters.items():
                     run_config[k] = v
             else:
@@ -393,27 +395,38 @@ class QJob():
         """
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
 
-        Args:
+         Args:
         -----------
-        parameters (list[float]): list of parameters to assign to the parametrized circuit.
+        parameters (list[float or int]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
-            res = self._future.get()
-        
-        message = """{{"params":{} }}""".format(parameters).replace("'", '"')
+            self._future.get()
 
+        if not _is_parametric(self._circuit):
+            logger.error(f"Cannot upgrade parameters. Please check that the circuit provided has gates that accept parameters [{QJobError.__name__}].")
+            raise SystemExit # User's level
+
+        if isinstance(parameters, list):
+
+            if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
+                message = """{{"params":{} }}""".format(parameters).replace("'", '"')
+
+            else:
+                logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
+                raise SystemExit # User's level
+        
         try:
             logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
             self._future = self._QPU._qclient.send_parameters(message)
+
         except Exception as error:
             logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
-            raise QJobError # I capture the error in QPU.run() when creating the job
+            raise SystemExit # User's level
         
         self._updated = False # We indicate that new results will come, in order to call server
 
         return self
-
 
     def result(self):
         """

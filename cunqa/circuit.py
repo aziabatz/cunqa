@@ -132,7 +132,7 @@ def from_json_to_qc(circuit_dict):
     Function to transform a circuit in json dict format to <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
 
     Args:
-    -----------
+    ----------
     circuit_dict (dict): circuit to be transformed to QuantumCircuit.
 
     Return:
@@ -227,7 +227,18 @@ def from_json_to_qc(circuit_dict):
 
 
 
-def registers_dict(qc):
+def _registers_dict(qc):
+    """
+    Extracts the number of classical and quantum registers from a QuantumCircuit.
+
+    Args
+    -------
+     qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
+
+    Return:
+    --------
+    Two element list with quantum and classical registers, in that order.
+    """
 
     quantum_registers = {}
     for qr in qc.qregs:
@@ -265,4 +276,36 @@ def registers_dict(qc):
 
     return [quantum_registers, classical_registers]
 
+def _is_parametric(circuit):
+    """
+    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
+    For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we
+    consider it a parametric circuit for our purposes.
 
+    Args:
+    -------
+    circuit (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, dict or str): the circuit from which we want to find out if it's parametric.
+
+    Return:
+    -------
+    True if the circuit is considered parametric, False if it's not.
+    """
+    parametric_gates = ["u", "u1", "u2", "u3", "rx", "ry", "rz", "crx", "cry", "crz", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "cp", "cswap", "ccx", "crz", "cu"]
+    if isinstance(circuit, QuantumCircuit):
+        for instruction in circuit.data:
+            if instruction.operation.name in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, dict):
+        for instruction in circuit['instructions']:
+            if instruction['name'] in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, str):
+        lines = circuit.splitlines()
+        for line in lines:
+            line = line.strip()
+            if any(line.startswith(gate) for gate in parametric_gates):
+                return True
+        return False
+           

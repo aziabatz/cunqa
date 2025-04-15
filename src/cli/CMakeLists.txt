@@ -43,17 +43,24 @@ target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src"
                                               "${CMAKE_SOURCE_DIR}/src/third-party/aer-cpp/src"
                                               "${CMAKE_SOURCE_DIR}/src/third-party/cunqasimulator/src"
                                               "${libzmq_INCLUDE_DIRS}"
+                                              "${libzmq_BINARY_DIR}"
                                               "${CMAKE_SOURCE_DIR}/src/third-party/zmq"
-                                              "${PROJECT_BINARY_DIR}/src/comm")
+                                              "${PROJECT_BINARY_DIR}/src/comm"
+                                              "${PYBIND_PATH}/include")
 target_link_libraries(setup_qpus PRIVATE custom-json logger_qpu
                              nlohmann_json::nlohmann_json 
                              Threads::Threads MQT::DDSim
                              m ${Python_LIBRARIES} MPI::MPI_CXX
                              OpenMP::OpenMP_CXX LAPACK::LAPACK
-                             ${libzmq_LIBRARIES})
+                             libzmq)
 target_compile_options(setup_qpus PRIVATE -fvisibility=hidden)
 target_link_options(setup_qpus PRIVATE -Wl,-Bsymbolic)
 
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+# INFOQPUS executable
+add_executable(infoqpus infoqpus.cpp)
+target_include_directories(infoqpus PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
+install(TARGETS infoqpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 
