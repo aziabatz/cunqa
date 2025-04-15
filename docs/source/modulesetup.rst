@@ -53,6 +53,7 @@ Manual installation
     export PATH=$PATH:$INSTALL_PATH/bin
 
 5. Once the previous steps are done, everything is set for the build/installation. There are two options:
+
     * **Standard way (slower)** ::
         
         cmake -B build/ 
@@ -95,7 +96,8 @@ In the case of a **manual installation**, the steps 1-4 are analogous to the sho
 
     export PATH=$PATH:$INSTALL_PATH/bin
 
-5. Instead of a simple ``cmake -B build/`` as in QMIO, the user has to add the ``-DPYBIND_DIR`` option with the path to the pybind11 cmake modules: 
+5. Instead of a simple ``cmake -B build/`` as in QMIO, the user has to add the ``-DPYBIND_DIR`` option with the path to the pybind11 cmake modules:
+ 
     * **Standard way (slower)** ::
         
         cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
