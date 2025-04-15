@@ -97,18 +97,19 @@ In the case of a **manual installation**, the steps 1-4 are analogous to the sho
     export PATH=$PATH:$INSTALL_PATH/bin
 
 5. Instead of a simple ``cmake -B build/`` as in QMIO, the user has to add the ``-DPYBIND_DIR`` option with the path to the pybind11 cmake modules:
- 
-    * **Standard way (slower)** ::
+
+
+    *  **Standard way (slower)** ::
         
         cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
         cmake --build build/
         cmake --install build/
 
-    * **Using `Ninja <https://ninja-build.org/>`_ (faster)** ::
+    *  **Using** `Ninja <https://ninja-build.org/>`_ **(faster)** ::
 
         cmake -G Ninja -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
         ninja -C build -j $(nproc)
         cmake --install build/
 
-And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. Next we'll learn with a minimal example how **CUNQA** works.
+And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. Next we'll learn how to run a distributed program by means of a minimal example.
 
