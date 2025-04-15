@@ -33,7 +33,7 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 
-mdinclude_dir = '/CUNQA/'
+mdinclude_dir = sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',

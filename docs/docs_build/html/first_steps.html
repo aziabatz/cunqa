@@ -85,12 +85,17 @@
              
   <section id="first-distributed-execution">
 <h1>First Distributed Execution<a class="headerlink" href="#first-distributed-execution" title="Link to this heading"></a></h1>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">Define</span> <span class="n">the</span> <span class="n">circuits</span> <span class="n">to</span> <span class="n">execute</span><span class="o">.</span>
-<span class="o">-</span> <span class="n">Execute</span> <span class="n">the</span> <span class="n">circuits</span> <span class="n">on</span> <span class="n">the</span> <span class="n">QPUs</span><span class="o">.</span>
-<span class="o">-</span> <span class="n">Obtain</span> <span class="n">the</span> <span class="n">results</span><span class="o">.</span>
-</pre></div>
-</div>
+<p>Once <strong>CUNQA</strong> is installed, the basic workflow to use it is:</p>
 <ol class="arabic simple">
+<li><p>Raise the desired QPUs with the command <code class="docutils literal notranslate"><span class="pre">qraise</span></code>.</p></li>
+<li><p>Run circuits on the QPUs:</p>
+<ul class="simple">
+<li><p>Connect to the QPUs through the python API.</p></li>
+<li><p>Define the circuits to execute.</p></li>
+<li><p>Execute the circuits on the QPUs.</p></li>
+<li><p>Obtain the results.</p></li>
+</ul>
+</li>
 <li><p>Drop the raised QPUs with the command <code class="docutils literal notranslate"><span class="pre">qdrop</span></code>.</p></li>
 </ol>
 <blockquote>

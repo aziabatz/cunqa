@@ -2,6 +2,6 @@
 First Distributed Execution
 ****************************
 
-.. mdinclude:: README.md
-    :start-line: 156
+.. mdinclude:: copied_README.md
+    :start-line: 152
 
