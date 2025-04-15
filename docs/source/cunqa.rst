@@ -1,4 +1,4 @@
-cunqa
+CUNQA Submodules
 ===================
 .. autosummary::
    :recursive:
