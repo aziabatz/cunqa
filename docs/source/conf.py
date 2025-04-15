@@ -45,7 +45,6 @@ html_theme_options = {
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
     'vcs_pageview_mode': '',
-    'style_nav_header_background': 'white',
     'flyout_display': 'hidden',
     'version_selector': True,
     'language_selector': True,
