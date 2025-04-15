@@ -9,10 +9,11 @@ bool check_time_format(const std::string& time)
     return std::regex_match(time, format);   
 }
 
-bool check_mem_format(const std::string& mem) 
+bool check_mem_format(const int& mem) 
 {
+    std::string mem_str = std::to_string(mem) + "G";
     std::regex format("^(\\d{1,2})G$");
-    return std::regex_match(mem, format);
+    return std::regex_match(mem_str, format);
 }
 
 int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)

@@ -69,7 +69,7 @@ void turn_on_qpu(std::string& mode, json& qpu_config_json, std::string& info_pat
                 qpu.turn_ON();
             #endif
         } else {
-            QPU<sim_type> qpu(mode, qpu_config, communications);
+            QPU<sim_type> qpu(qpu_config, communications);
             SPDLOG_LOGGER_DEBUG(logger, "QPUs with no communications configured.");
             qpu.turn_ON();
         }

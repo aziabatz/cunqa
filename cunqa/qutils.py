@@ -215,7 +215,7 @@ def getQPUs(local = True, family_name = None):
     i = 0
     for k, v in targets.items():
         client = QClient(info_path)
-        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k  )  ) # errors captured above
+        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k, comm_info = v["comm_info"]  )  ) # errors captured above
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
     return qpus

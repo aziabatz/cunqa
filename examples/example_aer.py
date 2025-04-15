@@ -88,21 +88,21 @@ print(infoQPUs(node_name=nodeswithQPUs()[0]))
 print(getQPUs(local=False, family_name="Exposito")) """
 
 #for clave in claves_primer_nivel:
-""" client = QClient(conf_file)
+client = QClient(conf_file)
 print("Cliente instanciado")
 
 print(type(client))
 
 print(claves_primer_nivel)
 
-client.connect(claves_primer_nivel[0]) """
+client.connect(claves_primer_nivel[0])
 
-""" print("Cliente: " + claves_primer_nivel[0])
+print("Cliente: " + claves_primer_nivel[0])
 future1 = client.send_circuit(qc)
-#future2 = client.send_circuit(qc)
+future2 = client.send_circuit(qc)
 
 print("Futures creados.")
 
 print("GET DEL FUTURE 1:" + future1.get())
-print("GET DEL FUTURE 2:" + future2.get()) """
+print("GET DEL FUTURE 2:" + future2.get())
 #print("RESULT DEL PARAMETERS:" + future_param.get())

@@ -5,9 +5,9 @@ import time
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 
-qpus = getQPUs()
+qpus = getQPUs(local=False)
 print("QPUs disponibles:")
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}.")

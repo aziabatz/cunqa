@@ -80,6 +80,22 @@ int main(int argc, char* argv[])
         }
     }
 
+    if (check_mem_format(args.mem_per_qpu)){
+        int mem_per_qpu = args.mem_per_qpu;
+        int cores_per_qpu = args.cores_per_qpu;
+        sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+    } else {
+        SPDLOG_LOGGER_DEBUG(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
+        return -1;
+    }
+
+    if (check_time_format(args.time))
+        sbatchFile << "#SBATCH --time=" << args.time << "\n";
+    else {
+        SPDLOG_LOGGER_DEBUG(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        return -1;
+    }
+
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
 
     if (memory_specs == 1) {

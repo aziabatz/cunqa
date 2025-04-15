@@ -63,6 +63,7 @@ public:
             SPDLOG_LOGGER_ERROR(logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
         } catch (const std::exception& e) {
             SPDLOG_LOGGER_ERROR(logger, "Error on when connecting the client");
+            throw;
         }
     }
 
