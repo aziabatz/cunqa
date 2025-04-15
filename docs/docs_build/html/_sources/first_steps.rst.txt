@@ -2,7 +2,7 @@
 First Distributed Execution
 ****************************
 
-.. include:: ../README.md
-   :parser: myst
-   :start-line: 152
+.. mdinclude:: copied_and_processed_README.md
+    :start-line: 152
+   
 
