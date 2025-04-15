@@ -3,5 +3,5 @@ First Distributed Execution
 ****************************
 
 .. mdinclude:: README.md
-    :start-line: 156
+    :start-line: 152
 
