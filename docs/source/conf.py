@@ -37,7 +37,7 @@ exclude_patterns = []
 
 html_theme = 'sphinx_rtd_theme' 
 html_static_path = ['_static']
-html_css_files = ['_static/custom.css',]
+# html_css_files = ['_static/custom.css',]
 html_logo = "_static/logo_cesga_blanco.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
