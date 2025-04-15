@@ -24,16 +24,16 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude',] # "myst_nb" 'sphinx_mdinclude', this ones were troublesome
+extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'myst_parser',] # 'myst_nb', 'sphinx_mdinclude', this ones were troublesome
 
-autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer', 'error_string',]
+autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer', ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 pygments_style = 'sphinx'
 
 
-mdinclude_dir = sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+# mdinclude_dir = '/path/to/dir/'
 source_suffix = {
     '.rst': 'restructuredtext',
     '.md': 'markdown',

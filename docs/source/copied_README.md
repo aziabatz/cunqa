@@ -158,8 +158,8 @@ Once **CUNQA** is installed, the basic workflow to use it is:
     - Execute the circuits on the QPUs.
     - Obtain the results.
 3. Drop the raised QPUs with the command `qdrop`.
-> [!IMPORTANT] 
-> Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
+!!! important
+    Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
 ### 1. `qraise`command
 The `qraise` command raises as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
@@ -172,8 +172,8 @@ So, for instance, the command
 qraise -n 4 -t 01:20:30
 ``` 
 will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `hh:mm:ss`.
-> [!NOTE]  
-> By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
+!!! note
+    By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
 2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
 
 **Set simulator:** 
@@ -196,17 +196,17 @@ The personalized backend has to be a *json* file with the following structure:
 ```json
 {"backend":{"name": "BackendExample", "version": "0.0", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
 ```
-> [!NOTE]
-> The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
+!!! note
+    The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
-> [!IMPORTANT]  
-> Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
+!!! important
+    Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
 
 ### 2. Python Program Example
 Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
 
-> [!WARNING]
-> To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
+!!! warning
+    To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
 
 In QMIO:
 ```console 
@@ -255,20 +255,18 @@ result = job.result() # Get the result of the execution
 counts = result.get_counts() 
 ```
 
-> [!NOTE] 
-It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure: 
+!!! note
+    It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure:
+    ```json
+    {"instructions":"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];" , "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
 
-```
-{"instructions":"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];" , "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
+    ```
 
-```
+    and *json* format with the following structure: 
+    ```json
+    {"instructions": [{"name": "h", "qubits": [0], "params": []},{"name": "cx", "qubits": [0, 1], "params": []}, {"name": "rx", "qubits": [0], "params": [0.39528385768119634]}, {"name": "measure", "qubits": [0], "memory": [0]}], "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
 
-and *json* format with the following structure: 
-
-```
-{"instructions": [{"name": "h", "qubits": [0], "params": []},{"name": "cx", "qubits": [0, 1], "params": []}, {"name": "rx", "qubits": [0], "params": [0.39528385768119634]}, {"name": "measure", "qubits": [0], "memory": [0]}], "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
-
-```
+    ```
 ### 3. `qdrop` command
 Once the work is finished, the raised QPUs should be dropped in order to not monopolize computational resources. 
 
@@ -282,6 +280,3 @@ To drop all the raised QPUs, just execute:
 ```console 
 qdrop --all
 ```
-
-## ACKNOWLEDGEMENTS
-
