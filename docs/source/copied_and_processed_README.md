@@ -168,10 +168,11 @@ The `qraise` command raises as many QPUs as desired. Each QPU can be configured 
   ```
 1. The only two mandatory FLAGS of `qraise` are the **number of QPUs**, set up with `-n` or `--num_qpus` and the **maximum time** the QPUs will be raised, set up with `-t` or `--time`. 
 So, for instance, the command 
-  ```console 
+  ``` 
   qraise -n 4 -t 01:20:30
   ``` 
 will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `hh:mm:ss`.
+
 > 📘 **Note:**
 > By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
 2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
