@@ -20,6 +20,7 @@ Illustrative examples of use can be found in ....
    :maxdepth: 3
    :caption: Contents:
 
+   installation
    first_steps
    cunqa
 
