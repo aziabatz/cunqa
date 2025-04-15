@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <sys/types.h>
+#include <string_view>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -49,7 +50,7 @@ void from_json(const json& j, NetConfig& NetConfig);
 
 NetConfig::NetConfig() = default;
 
-NetConfig::NetConfig(const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port)
+NetConfig::NetConfig(const std::string& mode, const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port)
     :   mode{mode},
         hostname{hostname},
         nodename{nodename},

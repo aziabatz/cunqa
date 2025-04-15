@@ -29,6 +29,13 @@ int main(int argc, char* argv[])
 
     auto args = argparse::parse<MyArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
 
+    //Checking mode:
+    if ((args.mode != "hpc") && (args.mode != "cloud")) {
+        std::cerr << "\033[1;31m" << "Error: " << "mode argument different than hpc or cloud. Given: " << args.mode << "\n";
+        std::cerr << "Aborted." << "\033[0m \n";
+        return 1;
+    }
+
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
     std::string run_command;
@@ -45,8 +52,8 @@ int main(int argc, char* argv[])
             std::cerr << "\033[1;31m" << "Error: " << "Less qpus than selected qpus_per_node.\n";
             std::cerr << "Number of QPUs: " << args.n_qpus << " QPUs per node: " << args.qpus_per_node.value() << "\n";
             std::cerr << "Aborted." << "\033[0m \n";
-            //std::system("rm qraise_sbatch_tmp.sbatch");
-            return -1;
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return 1;
         } else {
             sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
         }
@@ -54,11 +61,11 @@ int main(int argc, char* argv[])
 
     if (args.node_list.has_value()) {
         if (args.number_of_nodes.value() != args.node_list.value().size()) {
-            std::cerr << "\033[1;31m" << "Warning: " << "Different number of node names than total nodes.\n";
+            std::cerr << "\033[1;31m" << "Error: " << "Different number of node names than total nodes.\n";
             std::cerr << "Number of nodes: " << args.number_of_nodes.value() << " Number of node names: " << args.node_list.value().size() << "\n";
             std::cerr << "Aborted." << "\033[0m \n";
-            //std::system("rm qraise_sbatch_tmp.sbatch");
-            return -1;
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return 1;
         } else {
             sbatchFile << "#SBATCH --nodelist=";
             int comma = 0;
