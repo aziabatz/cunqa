@@ -1,10 +1,7 @@
-First Steps
-===========
+****************************
+First Distributed Execution
+****************************
 
-
--------------
-First Steps 
---------------
 Ola, esta é a documentación de cunqa. Mirade que pedras!
  
 

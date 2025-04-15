@@ -17,7 +17,7 @@ Illustrative examples of use can be found in ....
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
    modulesetup
