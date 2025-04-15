@@ -1,4 +1,4 @@
-
+Does this appear on cunqa submodules?
 .. autosummary:: cunqa.qpu
     :members:
 
