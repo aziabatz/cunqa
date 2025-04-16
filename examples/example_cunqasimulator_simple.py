@@ -7,7 +7,7 @@ from qiskit import QuantumCircuit
 
 install_path = os.getenv("INSTALL_PATH")
 sys.path.insert(0, install_path)
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 
 qc = {
     "instructions": [
@@ -72,7 +72,7 @@ qc_param = {
 }
 
 
-qpus = getQPUs()
+qpus = getQPUs(local=False)
 
 print("QPUs disponibles:")
 for q in qpus:

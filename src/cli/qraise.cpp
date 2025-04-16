@@ -4,6 +4,7 @@
 #include <any>
 #include <nlohmann/json.hpp>
 #include <iostream>
+#include <cstdlib>
 
 #include "argparse.hpp"
 #include "logger/logger.hpp"
@@ -17,6 +18,7 @@
 
 using json = nlohmann::json;
 
+
 using namespace std::literals;
 
 int main(int argc, char* argv[]) 
@@ -24,7 +26,16 @@ int main(int argc, char* argv[])
     srand((unsigned int)time(NULL));
     int intSEED = rand() % 1000;
     std::string SEED = std::to_string(intSEED);
-    auto args = argparse::parse<MyArgs>(argc, argv);
+
+    auto args = argparse::parse<MyArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
+
+    //Checking mode:
+    if ((args.mode != "hpc") && (args.mode != "cloud")) {
+        std::cerr << "\033[1;31m" << "Error: " << "mode argument different than hpc or cloud. Given: " << args.mode << "\n";
+        std::cerr << "Aborted." << "\033[0m \n";
+        return 1;
+    }
+
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
     std::string run_command;
@@ -32,15 +43,47 @@ int main(int argc, char* argv[])
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
-    sbatchFile << "#SBATCH -c 2 \n";
+    sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
-    sbatchFile << "#SBATCH -N 1 \n";
-    // sbatchFile << "#SBATCH --nodelist=c7-" << args.node << "\n"; //Alvaro
+    sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
 
-    // TODO: Can the user decide the number of cores?
+    if (args.qpus_per_node.has_value()) {
+        if (args.n_qpus < args.qpus_per_node) {
+            std::cerr << "\033[1;31m" << "Error: " << "Less qpus than selected qpus_per_node.\n";
+            std::cerr << "Number of QPUs: " << args.n_qpus << " QPUs per node: " << args.qpus_per_node.value() << "\n";
+            std::cerr << "Aborted." << "\033[0m \n";
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return 1;
+        } else {
+            sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
+        }
+    }
+
+    if (args.node_list.has_value()) {
+        if (args.number_of_nodes.value() != args.node_list.value().size()) {
+            std::cerr << "\033[1;31m" << "Error: " << "Different number of node names than total nodes.\n";
+            std::cerr << "Number of nodes: " << args.number_of_nodes.value() << " Number of node names: " << args.node_list.value().size() << "\n";
+            std::cerr << "Aborted." << "\033[0m \n";
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return 1;
+        } else {
+            sbatchFile << "#SBATCH --nodelist=";
+            int comma = 0;
+            for (auto& node_name : args.node_list.value()) {
+                if (comma > 0 ) {
+                    sbatchFile << ",";
+                }
+                sbatchFile << node_name;
+                comma++;
+            }
+            sbatchFile << "\n";
+        }
+    }
+
     if (check_mem_format(args.mem_per_qpu)){
-        int mem_per_qpu = args.mem_per_qpu[0] - '0';
-        sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu*2 << "G\n";
+        int mem_per_qpu = args.mem_per_qpu;
+        int cores_per_qpu = args.cores_per_qpu;
+        sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
     } else {
         SPDLOG_LOGGER_DEBUG(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
         return -1;
@@ -50,6 +93,16 @@ int main(int argc, char* argv[])
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
     else {
         SPDLOG_LOGGER_DEBUG(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        return -1;
+    }
+
+    int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
+
+    if (memory_specs == 1) {
+        SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in QMIO. Please, decrease the mem-per-QPU or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
+        return -1;
+    } else if (memory_specs == 2) {
+        SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in FT3. Please, decrease the mem-per-QPU or increase the cores-per-qpu. Max mem-per-cpu = 4");
         return -1;
     }
 
@@ -77,7 +130,7 @@ int main(int argc, char* argv[])
         std::system("rm qraise_sbatch_tmp.sbatch");
         return 0;
     }
-
+    
     if (args.fakeqmio.has_value()) {
         SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
         run_command = get_fakeqmio_run_command(args);

@@ -51,11 +51,11 @@ json get_qpu_config(json& backend_json)
 }
 
 template<SimType sim_type>
-void turn_on_qpu(json& qpu_config_json, std::string& info_path, std::string& communications)
+void turn_on_qpu(std::string& mode, json& qpu_config_json, std::string& info_path, std::string& communications)
 {
     try{
         SPDLOG_LOGGER_DEBUG(logger, "Turning on QPUs.");
-        config::QPUConfig<sim_type> qpu_config{qpu_config_json, info_path};
+        config::QPUConfig<sim_type> qpu_config{mode, qpu_config_json, info_path};
         if (communications != "no_comm") {
             #if defined(QPU_MPI)
                 std::string comm_type = "mpi";
