@@ -26,9 +26,11 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
+
 extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', "nbsphinx", 'sphinx.ext.mathjax',] # 'myst_parser', 'sphinx_mdinclude', this ones were troublesome
 
 autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer', 'Pandoc']
+
 
 templates_path = ['_templates']
 exclude_patterns = []
@@ -48,12 +50,14 @@ source_suffix = {
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
+
 html_theme = 'sphinx_rtd_theme' 
 html_static_path = ['_static']
 # html_css_files = ['_static/custom.css',]
 html_logo = "_static/logo_cesga_blanco.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
+
     'logo_only': False,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
