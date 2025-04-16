@@ -1,3 +1,7 @@
+"""
+This is a description for QPU hehe
+"""
+
 import os
 from json import JSONDecodeError, load
 from cunqa.qclient import QClient
@@ -9,9 +13,7 @@ info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
     info_path = STORE+"/.api_simulator/qpus.json"
-"""
-Encapsulates the virtual QPU objects and the method to retrieve them once raised.
-"""
+
 
 class QPU():
     """

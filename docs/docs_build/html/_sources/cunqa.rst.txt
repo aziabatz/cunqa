@@ -4,10 +4,10 @@ CUNQA Submodules
    :recursive:
    :toctree: generated
 
-   cunqa.qpu
+   cunqa.qpu 
    cunqa.qjob
    cunqa.transpile
-   cunqa.circuit
+   cunqa.circuit 
    cunqa.backend
    
    

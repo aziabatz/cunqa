@@ -112,15 +112,17 @@ Please, note that steps 1-4 of the <span class="xref std std-ref">Installation s
 <li><p>The only two mandatory FLAGS of <code class="docutils literal notranslate"><span class="pre">qraise</span></code> are the <strong>number of QPUs</strong>, set up with <code class="docutils literal notranslate"><span class="pre">-n</span></code> or <code class="docutils literal notranslate"><span class="pre">--num_qpus</span></code> and the <strong>maximum time</strong> the QPUs will be raised, set up with <code class="docutils literal notranslate"><span class="pre">-t</span></code> or <code class="docutils literal notranslate"><span class="pre">--time</span></code>.
 So, for instance, the command</p></li>
 </ol>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">qraise -n 4 -t 01:20:30</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">qraise</span> <span class="o">-</span><span class="n">n</span> <span class="mi">4</span> <span class="o">-</span><span class="n">t</span> <span class="mi">01</span><span class="p">:</span><span class="mi">20</span><span class="p">:</span><span class="mi">30</span>
 </pre></div>
 </div>
+<p>will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is <code class="docutils literal notranslate"><span class="pre">hh:mm:ss</span></code>.</p>
 <blockquote>
 <div><p>📘 <strong>Note:</strong>
 By default, all the QPUs will be raised with <a class="reference external" href="https://github.com/Qiskit/qiskit-aer">AerSimulator</a> as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.</p>
 </div></blockquote>
-<p>will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is <code class="docutils literal notranslate"><span class="pre">hh:mm:ss</span></code>.
-2. The simulator and the backend configuration can be set by the user through <code class="docutils literal notranslate"><span class="pre">qraise</span></code> FLAGs:</p>
+<ol class="arabic simple">
+<li><p>The simulator and the backend configuration can be set by the user through <code class="docutils literal notranslate"><span class="pre">qraise</span></code> FLAGs:</p></li>
+</ol>
 <p><strong>Set simulator:</strong></p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">qraise -n 4 -t 01:20:30 --sim=Munich</span>
 </pre></div>
@@ -198,10 +200,7 @@ To execute the following python example it is needed  to load the <a class="refe
 <span class="n">counts</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get_counts</span><span class="p">()</span>
 </pre></div>
 </div>
-<blockquote>
-<div><p>📘 <strong>Note:</strong>
-It is not mandatory to run a <em>QuantumCircuit</em> from Qiskit. The <code class="docutils literal notranslate"><span class="pre">.run</span></code> method also supports <em>OpenQASM 2.0</em> with the following structure:</p>
-</div></blockquote>
+<p>It is not mandatory to run a <em>QuantumCircuit</em> from Qiskit. The <code class="docutils literal notranslate"><span class="pre">.run</span></code> method also supports <em>OpenQASM 2.0</em> with the following structure:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;instructions&quot;</span><span class="p">:</span><span class="s2">&quot;OPENQASM 2.0;\ninclude \&quot;qelib1.inc\&quot;;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q[0] -&gt; c[0];\nmeasure q[1] -&gt; c[1];&quot;</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;num_qubits&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;num_clbits&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;quantum_registers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;q&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">]},</span><span class="w"> </span><span class="nt">&quot;classical_registers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;c&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;other_measure_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;meas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="mi">3</span><span class="p">]}}</span>
 </pre></div>
 </div>

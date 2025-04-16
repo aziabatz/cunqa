@@ -32,6 +32,8 @@ templates_path = ['_templates']
 exclude_patterns = []
 pygments_style = 'sphinx'
 
+autodoc_default_flags = ['members']
+autosummary_generate = True
 
 # mdinclude_dir = '/path/to/dir/'
 source_suffix = {
