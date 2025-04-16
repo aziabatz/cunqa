@@ -6,6 +6,7 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here.
 import sys
+import re
 import os
 import shutil
 from pathlib import Path
@@ -68,10 +69,53 @@ html_theme_options = {
     'titles_only': False
 }
 
-#Copy jupyter notebooks to folder docs/examples so nbsphinx can read them for our gallery (these will be ignored to avoid duplication)
+
+# Auxiliary functions to convert extended markdown notes to basic markdown structures that mdinclude can read (in First Distributed Execution)
+ADMONITION_MAP = {
+    "NOTE": ("📘", "Note"),
+    "WARNING": ("⚠️", "Warning"),
+    "IMPORTANT": ("❗", "Important"),
+    "TIP": ("💡", "Tip"),
+    "CAUTION": ("🚧", "Caution"),
+    "INFO": ("ℹ️", "Info"),
+}
+
+def convert_gfm_admonitions_to_simple(text):
+    lines = text.splitlines()
+    output = []
+    in_admonition = False
+    header = ""
+
+    for line in lines:
+        match = re.match(r"^>\s*\[!(\w+)\]\s*$", line.strip(), re.IGNORECASE)
+        if match:
+            admonition_type = match.group(1).upper()
+            emoji, title = ADMONITION_MAP.get(admonition_type, ("💬", admonition_type.capitalize()))
+            header = f"> {emoji} **{title}:**"
+            output.append(header)
+            in_admonition = True
+        elif in_admonition:
+            if line.strip().startswith(">"):
+                content = line.strip()[1:].lstrip()
+                output.append(f"> {content}")
+            else:
+                # End of admonition block
+                output.append(line)
+                in_admonition = False
+        else:
+            output.append(line)
+
+    return "\n".join(output)
+
+def process_readme_markdown_admonitions(app, docname, source):
+    # Only transform Markdown (MyST) files. It's hardcoded to only transform README
+    if docname.lower() == "readme":
+        source[0] = convert_gfm_admonitions_to_simple(source[0])
+
+#The following function is run when we do the sphinx "make html". It copies the example jupyter notebooks from outside docs and 
 
 def setup(app):
-    print('Setup is being run')
+    #Copy jupyter notebooks to folder docs/examples so nbsphinx can read them for our gallery (these will be ignored to avoid duplication)
     here = Path(__file__).resolve()
     project_root = here.parents[2]  # Goes from /docs/ to project root
     source_notebooks_dir = project_root / 'examples'
@@ -81,3 +125,8 @@ def setup(app):
 
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
+
+    #calls the auxiliary fucntion that transforms the readme
+    # app.connect('source-read', process_readme_markdown_admonitions)  
+
+

@@ -1,5 +1,6 @@
 Module Set Up
 *****************
+.. _installation-label:
 
 
 
