@@ -1,3 +1,6 @@
+"""
+    Contains map-like callables for distribute circuits in virtual QPUS. Useful when working with evolutive optimizators.
+"""
 from cunqa.logger import logger
 from cunqa.qjob import gather
 from qiskit import QuantumCircuit
@@ -6,7 +9,6 @@ from qiskit.qasm2 import QASM2Error
 from cunqa.circuit import from_json_to_qc
 from cunqa.qpu import QPU
 import numpy as np
-
 
 
 class QJobMapper:

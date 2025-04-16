@@ -1,0 +1,2 @@
+.. autoclass:: cunqa.qjob.QJob 
+    :members:

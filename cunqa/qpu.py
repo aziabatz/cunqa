@@ -1,19 +1,19 @@
+"""
+    Contains classes related to the virtual QPUs.
+"""
+
 import os
 from json import JSONDecodeError, load
+from cunqa.qclient import QClient
+from cunqa.backend import Backend
+from cunqa.qjob import QJob
+from cunqa.logger import logger
 # path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
     info_path = STORE+"/.api_simulator/qpus.json"
-# importamos api en C++
-from cunqa.qclient import QClient
-# importamos la clase Backend
-from cunqa.backend import Backend
-from cunqa.qjob import QJob
 
-
-# importing logger
-from cunqa.logger import logger
 
 class QPU():
     """

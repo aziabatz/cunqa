@@ -3,22 +3,29 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Cunqa's documentation!
+Welcome to CUNQA's documentation!
 =================================
 
-**Cunqa** is a Python/C++ library for quantum computing researchers looking to emulate distributed quantum computing using *CESGA's* resources.
-All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa/tree/tmp-cpp-python>`_. 
+**CUNQA** is a Python/C++ platform to simulate distributed quantum computing on the `CESGA HPC environment <https://cesga-docs.gitlab.io/index.html>`_.
 
-Check out the :doc:`first_steps` for instructions on how to get started.
+CUNQA creates and manages virtual QPUs, which are classical resources allocated for emulation tasks, where distributed quantum programs can be executed.
+The Python API is structured in a way which will be familiar to Qiskit users, while the backend is written in C++ for performance.
+All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa>`_. 
+
+First time users can find an installation guide in :doc:`modulesetup`. Additionally, a tutorial to learn how to use **CUNQA** can be found in :doc:`first_steps`. 
+
+For documentation of individual objects and functions check :doc:`cunqa`. Illustrative examples of use can be found in :doc:`examples_gallery`.
 
 
 .. toctree::
-   README <first_steps>
-   api
-
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
-    
+
+   modulesetup
+   first_steps
+   cunqa
+   examples_gallery
+
 
     
 
