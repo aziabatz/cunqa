@@ -13,7 +13,7 @@ The Python API is structured in a way which will be familiar to Qiskit users, wh
 All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa>`_. 
 
 First time users can find a tutorial on :doc:`first_steps`. For documentation of individual objects and functions check :doc:`cunqa`. 
-Illustrative examples of use can be found in ....
+Illustrative examples of use can be found in :doc:`examples_gallery`.
 
 
 .. toctree::

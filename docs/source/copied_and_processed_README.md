@@ -150,7 +150,7 @@ And that's it! Everything is set—either on QMIO or in the FT3—to perform an 
 
 ## RUN YOUR FIRST DISTRIBUTED PROGRAM
 
-Once **CUNQA** is installed :ref:`installation-label`, the basic workflow to use it is:
+Once **CUNQA** is installed (:ref:`installation-label`), the basic workflow to use it is:
 1. Raise the desired QPUs with the command `qraise`.
 2. Run circuits on the QPUs:
     - Connect to the QPUs through the python API.
