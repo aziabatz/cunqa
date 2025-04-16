@@ -24,7 +24,7 @@ For documentation of individual objects and functions check :doc:`cunqa`. Illust
    modulesetup
    first_steps
    cunqa
-   
+   examples_gallery
 
     
 
