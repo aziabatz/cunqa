@@ -9,9 +9,61 @@ import numpy as np
 
 
 
+def run_distributed(circuits, qpus, **run_args):
+    """
+    Method to send circuits to serveral QPUs allowing classical communications among them. 
+    
+    Each circuit will be sent to the given QPUs in order, therefore both lists must be of the same size.
+
+    For a more advanced and personalized mapping see <class 'cunqa.mappers.QJobMapper'> and <class 'cunqa.mappers.QPUCircuitMapper'>
+    described below, but these will not suppor classical communications.
+
+    If `transpile`, `initial_layout` or `opt_level` are passed as **run_args they will be ignored because for the initial version
+    transpilation is not supported. The arguments provided will be the same for the all `QJobs` created.
+
+    Args:
+    ---------
+    circuits (list[json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str]): circuits to be run.
+
+    qpus (list[<class 'cunqa.qpu.QPU'>]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
+    
+    **run_args: any other run arguments and parameters.
+
+    Return:
+    ---------
+    List of <class `cunqa.qjob.QJobs`> objects.
+    """
+
+    distributed_qjobs = []
+
+    if not all(qpu._family_name == qpus[0]._family_name for qpu in qpus):
+        names = set()
+        for qpu in qpus:
+            names.add(qpu._family_name)
+        logger.error(f"QPU objects provided are from different families ({list(names)}). For this version, classical communications beyond families are not supported.")
+        raise SystemExit # User's level
+    
+    logger.debug(f"Run arguments provided for simulation: {run_args}")
+    
+    warn = False
+    run_parameters = {}
+    for k,v in run_args.items():
+        if k == "transpile" or k == "initial_layout" or k == "opt_level":
+            if not warn:
+                logger.warning("Transpilation instructions are not supported for this version. Default `transpilation=False` is set.")
+        else:
+            run_parameters[k] = v
+
+    # no need to capture errors bacuse they are captured at `QPU.run`
+    for circuit, qpu in zip(circuits, qpus):
+        distributed_qjobs.append(qpu.run(circuit, **run_parameters))
+
+    return distributed_qjobs
+
+
 class QJobMapper:
     """
-    Class to map the function `QJob.upgrade_parameters()` to a list of QJobs.
+    Class to map the method `QJob.upgrade_parameters` to a list of QJobs.
     """
     def __init__(self, qjobs):
         """
