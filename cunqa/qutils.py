@@ -21,9 +21,6 @@ class QRaiseError(Exception):
     pass
 
 
-
-
-
 def qraise(n, time, flags = ''):
     """
     Raises a QPU and returns its job_id.

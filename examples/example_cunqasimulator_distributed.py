@@ -117,9 +117,15 @@ d_qc_2_zmq = {
 
 print(d_qc_0_zmq)
 #TODO: Manage the number of shots authomatically. They have to be the same for all jobs
-job0 = qpu0.run(d_qc_0_zmq, shots=10) 
-job1 = qpu1.run(d_qc_1_zmq, shots=10)
-job2 = qpu2.run(d_qc_2_zmq, shots=10)
+print(qpu0._family_name)
+# job0 = qpu0.run(d_qc_0_zmq, shots=10) 
+# job1 = qpu1.run(d_qc_1_zmq, shots=10)
+# job2 = qpu2.run(d_qc_2_zmq, shots=10)
+
+from cunqa.mappers import run_distributed
+
+job0, job1, job2 = run_distributed([d_qc_0_zmq, d_qc_1_zmq,d_qc_2_zmq], qpus[:3], shots = 10, transpile=True )
+
 print("Result QPU0", job0.result().get_counts())
 print("Result QPU1", job1.result().get_counts())
 print("Result QPU2", job2.result().get_counts())
