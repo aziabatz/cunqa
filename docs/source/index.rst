@@ -12,8 +12,9 @@ CUNQA creates and manages virtual QPUs, which are classical resources allocated 
 The Python API is structured in a way which will be familiar to Qiskit users, while the backend is written in C++ for performance.
 All code available on our `GitHub repository <https://github.com/CESGA-Quantum-Spain/cunqa>`_. 
 
-First time users can find a tutorial on :doc:`first_steps`. For documentation of individual objects and functions check :doc:`cunqa`. 
-Illustrative examples of use can be found in :doc:`examples_gallery`.
+First time users can find an installation guide in :doc:`modulesetup`. Additionally, to learn how to use **CUNQA** check :doc:`first_steps`. 
+
+For documentation of individual objects and functions check :doc:`cunqa`. Illustrative examples of use can be found in :doc:`examples_gallery`.
 
 
 .. toctree::
