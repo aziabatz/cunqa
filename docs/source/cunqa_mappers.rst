@@ -5,5 +5,6 @@
     .. autoclass:: cunqa.mappers.QJobMapper 
         :members:
     
-    .. autofunction:: cunqa.mappers.QPUCircuitMapper
+    .. autoclass:: cunqa.mappers.QPUCircuitMapper
+        :members:
     
