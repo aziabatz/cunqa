@@ -1,5 +1,5 @@
 """
-    Holds our wrapper for the qiskit transpiler and the Transpiler error class.
+    Holds our wrapper for the qiskit transpiler and the TranspilerError class.
 """
 from cunqa.backend import Backend
 from cunqa.circuit import from_json_to_qc, qc_to_json
