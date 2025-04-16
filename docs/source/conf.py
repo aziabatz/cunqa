@@ -24,13 +24,15 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', "nbsphinx",] # 'myst_parser', 'sphinx_mdinclude', this ones were troublesome
+extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', "nbsphinx", 'sphinx.ext.mathjax',] # 'myst_parser', 'sphinx_mdinclude', this ones were troublesome
 
 autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer', ]
 
 templates_path = ['_templates']
 exclude_patterns = []
 pygments_style = 'sphinx'
+
+nbsphinx_allow_errors = True
 
 autodoc_default_flags = ['members']
 autosummary_generate = True
