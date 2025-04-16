@@ -119,7 +119,7 @@ def setup(app):
     here = Path(__file__).resolve()
     project_root = here.parents[2]  # Goes from /docs/ to project root
     source_notebooks_dir = project_root / 'examples'
-    dest_dir = here.parent / 'examples'  # This will be docs/examples
+    dest_dir = project_root / 'docs' / 'examples'  # This will be docs/examples
 
     dest_dir.mkdir(exist_ok=True)
 
