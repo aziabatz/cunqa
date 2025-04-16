@@ -3,16 +3,19 @@
 #include <unordered_map>
 #include "aer_simulator.hpp"
 #include "munich_simulator.hpp"
+#include "cunqasimulator.hpp"
 
 // Define Sim Types as a closed list
 enum class SimType {
     Aer,
-    Munich
+    Munich, 
+    Cunqa
 };
 
 const std::unordered_map<std::string, SimType> SIM_NAMES = {
     {"Aer", SimType::Aer},
-    {"Munich", SimType::Munich}
+    {"Munich", SimType::Munich},
+    {"Cunqa", SimType::Cunqa}
 };
 
 template<SimType T, SimType U>
@@ -35,4 +38,9 @@ struct SimClass<SimType::Aer> {
 template <>
 struct SimClass<SimType::Munich> {
     using type = MunichSimulator;
+};
+
+template <>
+struct SimClass<SimType::Cunqa> {
+    using type = CunqaSimulator;
 };

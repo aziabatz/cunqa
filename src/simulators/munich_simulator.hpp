@@ -1,23 +1,43 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
+#include <chrono>
+#include <optional>
+
+#include "config/backend_config.hpp"
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "logger/logger.hpp"
-#include <nlohmann/json.hpp>
-#include <chrono>
+#include "comm/qpu_comm.hpp"
+#include "config/backend_config.hpp"
+#include "utils/constants.hpp"
+#include "simulator.hpp"
 
 using json = nlohmann::json;
 
+
 class MunichSimulator {
 public:
-    static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) 
+    int munich_mpi_rank;
+    MunichSimulator()
+    {
+        MPI_Comm_rank(MPI_COMM_WORLD, &munich_mpi_rank);
+        SPDLOG_LOGGER_DEBUG(logger, "munich_mpi_rank: {}", munich_mpi_rank);
+    }
+    
+    void configure_simulator(json& backend_config)
+    {
+        SPDLOG_LOGGER_DEBUG(logger, "No configuration needed for MunichSimulator");
+    }
+
+    //Offloading execution
+    json execute(json circuit_json, json& noise_model_json,  const config::RunConfig& run_config) 
     {
         try {
-            noise_model_json = noise_model_json;
             SPDLOG_LOGGER_DEBUG(logger, "Noise JSON: {}", noise_model_json.dump(4));
 
-            std::string circuit(circuit_json["instructions"]);
+            std::string circuit(circuit_json.at("instructions"));
             SPDLOG_LOGGER_DEBUG(logger, "Circuit JSON: {}", circuit);
             auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
@@ -53,5 +73,29 @@ public:
             return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
         }
         return {};
+    }
+
+    
+    //Dynamic execution
+    inline int _apply_measure(std::array<int, 3>& qubits)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
+        return -1;
+    }
+    
+    inline void _apply_gate(std::string& gate_name, std::array<int, 3>& qubits, std::vector<double>& param)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
+    }
+
+    inline int _get_statevector_nonzero_position()
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
+        return -1;
+    }
+
+    inline void _reinitialize_statevector()
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
     }
 };

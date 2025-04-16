@@ -48,7 +48,7 @@ public:
         memory{true},
         max_shots{10000},
         coupling_map{{}},
-        basis_gates{BASIS_GATES_JSON},
+        basis_gates{CUNQA::BASIS_GATES},
         description{"Usual AER simulator."}
     { }
 
@@ -65,8 +65,25 @@ public:
         conditional{true},
         memory{true},
         max_shots{10000},
-        basis_gates{BASIS_GATES_JSON},
+        basis_gates{CUNQA::BASIS_GATES},
         description{"Usual Munich simulator."}
+    { }
+
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Cunqa>::value, bool> = true>
+    BackendConfig() : 
+        name{"Cunqa"},
+        version{"0.0.0"},
+        simulator{"CunqaSimulator"},
+        n_qubits{5},
+        url{"https://github.com/CESGA-Quantum-Spain/cunqasimulator"},
+        is_simulator{true},
+        conditional{true},
+        memory{true},
+        max_shots{10000},
+        coupling_map{{}},
+        basis_gates{CUNQA::BASIS_AND_DISTRIBUTED_GATES},
+        description{"CunqaSimulator"}
     { }
 
     template<SimType T = sim_type,
@@ -81,6 +98,14 @@ public:
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
     BackendConfig(const json& config, const json& noise_model)
         : simulator{"MunichSimulator"}, noise_model(noise_model)
+    {
+        from_json(config, *this);
+    }
+
+    template<SimType T = sim_type,
+             typename std::enable_if_t<is_same<T, SimType::Cunqa>::value, bool> = true> 
+    BackendConfig(const json& config, const json& noise_model)
+        : simulator{"CunqaSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
     }

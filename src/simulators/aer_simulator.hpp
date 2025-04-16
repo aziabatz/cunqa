@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>
+#include <optional>
+#include <nlohmann/json.hpp>
+
+#include "config/backend_config.hpp"
 #include "simulators/circuit_executor.hpp"
 #include "framework/json.hpp"
 #include "framework/config.hpp"
@@ -8,9 +13,13 @@
 #include "controllers/controller_execute.hpp"
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
-#include <string>
+#include "comm/qpu_comm.hpp"
+#include "logger/logger.hpp"
 #include "config/run_config.hpp"
-#include <nlohmann/json.hpp>
+#include "config/backend_config.hpp"
+#include "utils/constants.hpp"
+#include "simulator.hpp"
+
 
 using json = nlohmann::json;
 using namespace std::literals;
@@ -19,9 +28,16 @@ using namespace config;
 
 
 class AerSimulator {
+
 public:
-    
-    static json execute(json circuit_json, json noise_model_json, const config::RunConfig& run_config) {
+
+    void configure_simulator(json& backend_config)
+    {
+        SPDLOG_LOGGER_DEBUG(logger, "No configuration needed for AerSimulator");
+    }
+
+    //Offloading execution
+    json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
         
         try {
             //TODO: Maybe improve them to send several circuits at once
@@ -44,4 +60,29 @@ public:
         return {};
     }
 
+
+    //Dynamic execution
+    inline int _apply_measure(std::array<int, 3>& qubits)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+        return -1;
+    }
+    
+    inline void _apply_gate(std::string& gate_name, std::array<int, 3>& qubits, std::vector<double>& param)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+    }
+
+    inline int _get_statevector_nonzero_position()
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+        return -1;
+    }
+
+    inline void _reinitialize_statevector()
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+    }
+
 };
+

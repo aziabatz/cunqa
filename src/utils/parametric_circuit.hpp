@@ -24,10 +24,10 @@ std::vector<double> get_circuit_parameters(const json& circuit = empty_json, std
     for (auto& instruction : circuit.at("instructions")){
 
         std::string name = instruction.at("name");
-        switch(GATE_NAMES[name]){
-            case RX:
-            case RY:
-            case RZ:
+        switch(CUNQA::INSTRUCTIONS_MAP[name]){
+            case CUNQA::RX:
+            case CUNQA::RY:
+            case CUNQA::RZ:
                 list_params.push_back(instruction.at("params")[0]);
                 break;
             default:
@@ -51,20 +51,20 @@ json update_circuit_parameters(json& circuit, const std::vector<double>& params)
 
             std::string name = instruction.at("name");
 
-            switch(GATE_NAMES[name]){
-                case MEASURE:
-                case ID:
-                case X:
-                case Y:
-                case Z:
-                case H:
-                case CX:
-                case CY:
-                case CZ:
+            switch(CUNQA::INSTRUCTIONS_MAP[name]){
+                case CUNQA::MEASURE:
+                case CUNQA::ID:
+                case CUNQA::X:
+                case CUNQA::Y:
+                case CUNQA::Z:
+                case CUNQA::H:
+                case CUNQA::CX:
+                case CUNQA::CY:
+                case CUNQA::CZ:
                     break;
-                case RX:
-                case RY:
-                case RZ:
+                case CUNQA::RX:
+                case CUNQA::RY:
+                case CUNQA::RZ:
                     instruction.at("params")[0] = params[counter];
                     counter = counter + 1;
                     break; 

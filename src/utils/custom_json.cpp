@@ -19,10 +19,11 @@ CustomJson::~CustomJson() = default;
 
 void CustomJson::write(json local_data, const std::string &filename)
 {
-    int flag;
-    MPI_Initialized(&flag);
+    /* int flag;
+    MPI_Initialized(&flag); */
     this->filename = filename;
-    flag ? CustomJson::_write_MPI(local_data) : CustomJson::_write_locks(local_data);
+    //flag ? CustomJson::_write_MPI(local_data) : CustomJson::_write_locks(local_data);
+    CustomJson::_write_locks(local_data);
 }
 
 const std::string CustomJson::dump()
@@ -30,6 +31,7 @@ const std::string CustomJson::dump()
     return custom_json.dump(4);
 }
 
+[[deprecated("Unused because iterference with MPI for classical/quantum communications")]] 
 void CustomJson::_write_MPI(json local_data)
 {
     try {

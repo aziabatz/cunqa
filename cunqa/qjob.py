@@ -48,6 +48,42 @@ def _divide(string, lengths):
         raise SystemExit # User's level
 
 
+def _convert_counts(counts, registers):
+
+    """
+    Funtion to convert counts wirtten in hexadecimal format to binary strings and that applies the division of the bit strings.
+
+    Args:
+    --------
+    counts (dict): dictionary of counts to apply the conversion.
+
+    registers (dict): dictionary of classical registers.
+
+    Return:
+    --------
+    Counts dictionary with keys as binary string correctly separated with spaces accordingly to the classical registers.
+    """
+
+    if isinstance(registers, dict):
+        
+        # counting number of classical bits
+        num_clbits = sum([len(i) for i in registers.values()])
+        # getting lenghts of bits for the different registers
+        lengths = []
+        for v in registers.values():
+            lengths.append(len(v))
+    else:
+        logger.error(f"Error when converting `counts` strings.")
+        raise QJobError # I capture this error in QJob.result()
+
+    new_counts = {}
+    for k,v in counts.items():
+        if k.startswith('0x'): # converting to binary string and dividing in bit strings
+            new_counts[_divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
+        else: # just dividing the bit stings
+            new_counts[_divide(k, lengths)] = v
+    return new_counts
+
 
 class Result():
     """
@@ -75,58 +111,29 @@ class Result():
             raise TypeError # I capture this error in QJob.result() when creating the object.
         
         # processing result
-        if len(result) == 0:
+        if len(self.result) == 0:
             logger.error(f" [{ValueError.__name__}].")
             raise ValueError # I capture this error in QJob.result() when creating the object.
         
-        elif "ERROR" in result:
-            message = result["ERROR"]
+        elif "ERROR" in self.result:
+            message = self.result["ERROR"]
             logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}")
             raise QJobError
 
         else:
             try:
-                counts_aer = None
-                counts_munich = None
-                for k,v in result.items():
-                    if k == "metadata":
-                        for i, m in v.items():
-                            setattr(self, i, m)
-                    elif k == "results":
-                        for i, m in v[0].items():
-                            if i == "data":
-                                counts_aer = m["counts"]
-                            elif i == "metadata":
-                                for j, w in m.items():
-                                    setattr(self,j,w)
-                            else:
-                                setattr(self, i, m)
-                    elif k == "counts":
-                        counts_munich = v
-                        self.num_clbits = sum([len(i) for i in registers.values()])
 
-                    else:
-                        setattr(self, k, v)
+                if "results" in list(self.result.keys()): # aer
+                    self.counts = result["results"][0]["data"]["counts"]
+                    self.time = self.result["results"][0]["time_taken"]
 
-                counts = {}
+                elif "counts" in list(self.result.keys()): # munich and cunqa
+                    self.counts = self.result["counts"]
+                    self.time = self.result["time_taken"]
 
-                # if aer counts are provided, we must transform to binary
-                if counts_aer is not None:
-                    for j,w in counts_aer.items():
-                        counts[format( int(j, 16), '0'+str(self.num_clbits)+'b' )]= w
-                elif counts_munich is not None:
-                    counts = counts_munich
+                if (isinstance(self.counts, dict)): # Aer and Munich
+                    self.counts = _convert_counts(self.counts, registers)
 
-                # check if we have several classical registers
-                lengths = []
-                if registers is not None and isinstance(registers, dict):
-                    for v in registers.values():
-                        lengths.append(len(v))
-
-                # apply division of bits into as many classical registers as provided
-                self.counts = {}
-                for j,w in counts.items():
-                    self.counts[_divide(j, lengths)]= w
 
             except KeyError:
                 logger.error(f"Some error occured with results file, no `counts` found. Check avaliability of the QPUs [{KeyError.__name__}].")
@@ -159,6 +166,17 @@ class Result():
 
         """
         return self.counts
+    
+    def time_taken(self):
+        """
+        Class method to obtain the information for the time_taken for the given experiment.
+
+        Return:
+        -----------
+        Real number representing the execution time
+
+        """
+        return self.time
 
 
 
@@ -222,12 +240,14 @@ class QJob():
             circt = circ
             logger.warning("No transpilation was done, errors might occur if any gate or instruction is not supported by the simulator.")
 
+
         # conversion to the needed format
         try:
             if isinstance(circt, dict):
 
                 logger.debug("A circuit dict was provided.")
 
+                self.num_qubits = circt["num_qubits"]
                 cl_bits = circt["num_clbits"]
                 self._cregisters = circt["classical_registers"]
 
@@ -237,11 +257,23 @@ class QJob():
 
                     circuit = circt['instructions']
 
+                    exec_type = circt['exec_type']
+
                 elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
                     circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+
+                    exec_type = circt['exec_type']
+
+                elif self._QPU.backend.simulator == "CunqaSimulator":
+
+                    logger.debug("Translating to dict for CunqaSimulator...")
+
+                    circuit = circt['instructions']
+
+                    exec_type = circt['exec_type']
             
 
             elif isinstance(circt, QuantumCircuit):
@@ -329,10 +361,13 @@ class QJob():
 
 
             if self._QPU.backend.simulator == "AerSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{} }}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
 
             elif self._QPU.backend.simulator == "MunichSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":"{}" }}""".format(run_config, instructions).replace("'", '"')
+                self._execution_config = """ {{"config":{}, "instructions":"{}", "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
+            
+            elif self._QPU.backend.simulator == "CunqaSimulator":
+                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, exec_type, self.num_qubits).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
@@ -407,7 +442,7 @@ class QJob():
                     self._updated = True
             except Exception as error:
                 logger.error(f"Error while creating Results object [{type(error).__name__}].")
-                raise error # User's level
+                raise SystemExit # User's level
         else:
             logger.debug(f"self._future is None or non-valid, None is returned.")
 
