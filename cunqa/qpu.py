@@ -1,5 +1,5 @@
 """
-This is a description for QPU hehe
+    Contains classes related to the virtual QPUs.
 """
 
 import os

@@ -23,6 +23,7 @@ Illustrative examples of use can be found in ....
    modulesetup
    first_steps
    cunqa
+   examples_gallery
 
     
 

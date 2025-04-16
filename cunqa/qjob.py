@@ -1,4 +1,6 @@
-"""Here I describe QJob"""
+"""
+    Contains objects that define and manage quantum emulation jobs.
+"""
 import json
 from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps

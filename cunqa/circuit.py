@@ -1,3 +1,6 @@
+"""
+    Holds functions to transform between valid circuit formats and extract circuit information.
+"""
 from cunqa.logger import logger
 
 def _qasm2_to_json(qasm_str, version = None):
