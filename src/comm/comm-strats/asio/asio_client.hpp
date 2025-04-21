@@ -39,15 +39,28 @@ public:
         io_context_.stop();
     }
 
-    void connect(const NetConfig& server_ipconfig, const std::string_view& net = INFINIBAND) 
+    void connect(const NetConfig& server_ipconfig) 
     {   
+        std::string net;
         try {
+            if (server_ipconfig.mode == "cloud") {
+                net = INFINIBAND;
+                SPDLOG_LOGGER_DEBUG(logger, "CLOUD mode. INFINIBAND selected as net");
+            } else {
+                net = LOCAL;
+                SPDLOG_LOGGER_DEBUG(logger, "HPC mode. LOCALHOST selected as net");
+                std::string nodename = server_ipconfig.nodename;
+                const char* my_nodename = std::getenv("SLURMD_NODENAME");
+                if ((my_nodename == nullptr) || (nodename != (std::string)my_nodename)) {
+                    throw std::runtime_error("QPU deployed on node " + nodename + ".");
+                }
+            }
             tcp::resolver resolver{io_context_};
-            auto endpoint = resolver.resolve(server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
+            auto endpoint = resolver.resolve(server_ipconfig.IPs.at(net), server_ipconfig.port);
             as::connect(socket_, endpoint);
             SPDLOG_LOGGER_DEBUG(logger, "Client succesfully connected to server.");
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(logger,"Imposible to connect to endpoint {}:{}. Server not available.", server_ipconfig.IPs.at(std::string(net)), server_ipconfig.port);
+            SPDLOG_LOGGER_ERROR(logger,"Imposible to connect to endpoint {}:{}. Server not available.", server_ipconfig.IPs.at(net), server_ipconfig.port);
         }
     }
 
