@@ -22,7 +22,8 @@ struct MyArgs : public argparse::Args
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
     std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
     std::string& mode                    = kwarg("mode", "Infraestructure mode: HPC or CLOUD").set_default("hpc");
-    std::optional<std::string>& comm     = kwarg("comm", "Raise QPUs with MPI communications").set_default("no_comm");
+    bool& classical_comm                 = flag("classical_comm", "Enable classical communications.");
+    bool& quantum_comm                   = flag("quantum_comm", "Enable quantum communications.");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
