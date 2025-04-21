@@ -64,11 +64,9 @@ public:
 
     inline void _send(int& measurement, std::string& destination);
     inline int _recv(std::string& origin);
-    inline bool is_sender_qpu(std::string& endpoint);
-    inline bool is_receiver_qpu(std::string& endpoint);
+    inline int is_sender_or_receiver(std::array<std::string, 2>& endpoints);
 
 private:
-    inline bool _check_endpoint(std::string& endpoint);
 };
 
 
@@ -129,28 +127,41 @@ inline int CommunicationComponent<sim_type>::_recv(std::string& origin)
     
 }
 
+// 0->Sender, 1->Receiver
 template <SimType sim_type>
-inline bool CommunicationComponent<sim_type>::_check_endpoint(std::string& endpoint)
+inline int CommunicationComponent<sim_type>::is_sender_or_receiver(std::array<std::string, 2>& endpoints)
 {
-    if (this->comm_type == "mpi") {
-        int endpoint_int = std::atoi(endpoint.c_str());
-        return endpoint_int == this->mpi_rank; 
-    } else if (this->comm_type == "zmq") {
-        return endpoint == this->zmq_endpoint;
-    } else {
-        return false;
-    }
-}
+    int first_endpoint;
+    int second_endpoint;
+    switch(CUNQA::qpu_comm_map[this->comm_type]){
+        case CUNQA::mpi:
+            first_endpoint = std::atoi(endpoints[0].c_str());
+            second_endpoint = std::atoi(endpoints[1].c_str());
 
-template <SimType sim_type>
-inline bool CommunicationComponent<sim_type>::is_sender_qpu(std::string& endpoint)
-{
-    return this->_check_endpoint(endpoint);
-}
+            if (this->mpi_rank == first_endpoint) {
+                return 0;
+            } else if (this->mpi_rank == second_endpoint) {
+                return 1;
+            } else {
+                return -1;
+            }
+            break;
+        case CUNQA::zmq:
+            if (this->zmq_endpoint.value() == endpoints[0]) {
+                return 0;
+            } else if (this->zmq_endpoint.value() == endpoints[1]) {
+                return 1;
+            } else {
+                return -1;
+            }
+            break;
 
-template <SimType sim_type>
-inline bool CommunicationComponent<sim_type>::is_receiver_qpu(std::string& endpoint)
-{
-    return this->_check_endpoint(endpoint);
-}
+        default: 
+            SPDLOG_LOGGER_ERROR(logger, "Error. This QPU is not sender nor receiver."); 
+            throw std::runtime_error("This QPU is not sender nor receiver.");
+            break;
+        }
 
+    return -1;
+
+}
