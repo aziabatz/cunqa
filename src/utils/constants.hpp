@@ -19,17 +19,32 @@ enum communications {
   quantum_comm
 };
 
+
 std::unordered_map<std::string, int> comm_map = {
 
   {"no_comm", no_comm},
   {"class_comm", class_comm},
   {"quantum_comm", quantum_comm}
-
-
 };
 
 
 namespace CUNQA {
+
+  enum qpu_comm_library {
+    mpi,
+    zmq
+  };
+  
+  std::unordered_map<std::string, int> qpu_comm_map = {
+  
+    {"mpi", CUNQA::mpi},
+    {"zmq", CUNQA::zmq}
+  };
+
+  enum sender_or_receiver {
+    sender,
+    receiver
+  };
 
   enum INSTRUCTIONS {
     MEASURE,
