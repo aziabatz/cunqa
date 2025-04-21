@@ -12,7 +12,6 @@ namespace config {
 template <SimType sim_type = SimType::Aer>
 class QPUConfig {
 public:
-    std::string mode;
     std::string family_name;
     std::string slurm_job_id;
     BackendConfig<sim_type> backend_config;
@@ -51,14 +50,12 @@ public:
 template <SimType sim_type>
 void to_json(json& j, const QPUConfig<sim_type>& qpu_config)
 {
-    std::string mode = qpu_config.mode;
     std::string family_name = qpu_config.family_name;
     std::string slurm_job_id = qpu_config.slurm_job_id;
     json net = qpu_config.net_config;
     json backend = qpu_config.backend_config;
 
     j = {   
-            {"mode", mode},
             {"family_name", family_name},
             {"slurm_job_id", slurm_job_id},
             {"net", net}, 
@@ -69,7 +66,6 @@ void to_json(json& j, const QPUConfig<sim_type>& qpu_config)
 template <SimType sim_type>
 void from_json(const json& j, QPUConfig<sim_type>& qpu_config) 
 {
-    qpu_config.mode = j.at("mode");
     qpu_config.family_name = j.at("family_name");
     qpu_config.slurm_job_id = j.at("slurm_job_id");
     qpu_config.net_config = j.at("net").template get<NetConfig>();
