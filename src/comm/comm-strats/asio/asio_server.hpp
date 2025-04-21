@@ -16,14 +16,23 @@ using namespace std::string_literals;
 using as::ip::tcp;
 
 class AsioServer {
-    NetConfig net_config;
 public:
-    AsioServer(const NetConfig& net_config, const std::string_view& net = INFINIBAND) :
-        net_config{net_config},
-        acceptor_{io_context_, tcp::endpoint{as::ip::address::from_string(net_config.IPs.at(std::string(net))), 
-                            static_cast<unsigned short>(stoul(net_config.port))}},
-        socket_{acceptor_.get_executor()}
-    { 
+    AsioServer(const NetConfig& net_config) 
+        : net_config_{net_config},
+        io_context_{},
+        acceptor_(
+            io_context_,
+            tcp::endpoint{
+                as::ip::address::from_string(
+                    net_config_.IPs.at(
+                        std::string(net_config_.mode == "cloud" ? INFINIBAND : LOCAL)
+                    )
+                ),
+                static_cast<unsigned short>(std::stoul(net_config_.port))
+            }
+        ),
+        socket_{io_context_}  
+    {
         acceptor_.accept(socket_);
     }
 
@@ -76,6 +85,7 @@ public:
     }
 
 private:
+    NetConfig net_config_;
     as::io_context io_context_;
     tcp::acceptor acceptor_;
     tcp::socket socket_;
