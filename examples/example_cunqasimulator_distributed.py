@@ -22,25 +22,25 @@ d_qc_0_zmq = {
 
     {
         "name":"h",
-        "qubits":[0,-1,-1],
+        "qubits":[0],
     },
     {
         "name":"d_c_if_x",
-        "qubits":[0,0,-1],
+        "qubits":[0,0],
         "qpus":["carballido", "losada"]
     },
     {
         "name":"d_c_if_x",
-        "qubits":[0,0,-1],
+        "qubits":[0,0],
         "qpus":["exposito", "carballido"]
     },
     {
         "name": "measure",
-        "qubits": [0,-1,-1]
+        "qubits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1,-1,-1]
+        "qubits": [1]
     }
     ],
     "num_qubits": 2,
@@ -64,15 +64,15 @@ d_qc_1_zmq = {
     },
     {
         "name":"h",
-        "qubits":[0,-1,-1],
+        "qubits":[0],
     },
     {
         "name": "measure",
-        "qubits": [0,-1,-1]
+        "qubits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1,-1,-1]
+        "qubits": [1]
     }
     ],
     "num_qubits": 2,
@@ -91,20 +91,20 @@ d_qc_2_zmq = {
     "instructions": [
     {
         "name":"h",
-        "qubits":[1,-1,-1],
+        "qubits":[1],
     },
     {
         "name":"d_c_if_x",
-        "qubits":[0,0,-1],
+        "qubits":[0,0],
         "qpus":["exposito", "carballido"]
     },
     {
         "name": "measure",
-        "qubits": [0,-1,-1]
+        "qubits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1,-1,-1]
+        "qubits": [1]
     }
     ],
     "num_qubits": 2,
