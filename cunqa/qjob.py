@@ -132,7 +132,7 @@ class Result:
                     self.counts = self.result["counts"]
                     self.time = self.result["time_taken"]
 
-                    self.counts = _convert_counts(self.counts, registers)
+                self.counts = _convert_counts(self.counts, registers)
 
 
             except KeyError:
