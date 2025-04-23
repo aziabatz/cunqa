@@ -82,6 +82,11 @@ public:
         SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Munich simulator. ");
         return -1;
     }
+
+    inline void _apply_unitary(CUNQA::Matrix& matrix, std::vector<int>& qubits)
+    {
+        SPDLOG_LOGGER_ERROR(logger, "Error. Dynamic execution is not available with Aer simulator. ");
+    }
     
     inline void _apply_gate(std::string& gate_name, std::vector<int>& qubits, std::vector<double>& param)
     {
