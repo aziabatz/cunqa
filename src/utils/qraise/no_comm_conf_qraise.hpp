@@ -8,7 +8,7 @@
 #include "logger/logger.hpp"
 #include "args_qraise.hpp"
 
-std::string get_no_comm_run_command(auto& args)
+std::string get_no_comm_run_command(auto& args, std::string& mode)
 {
     std::string run_command;
     std::string subcommand;
@@ -23,12 +23,12 @@ std::string get_no_comm_run_command(auto& args)
         } else {
             backend_path = std::any_cast<std::string>(args.backend.value());
             backend = R"({"backend_path":")" + backend_path + R"("})" ;
-            subcommand = std::any_cast<std::string>(args.mode) + " no_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
+            subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
             run_command = "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " + subcommand;
             SPDLOG_LOGGER_DEBUG(logger, "Qraise with no communications and personalized backend. \n");
         }
     } else {
-        subcommand = std::any_cast<std::string>(args.mode) + " no_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + "\n";
+        subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + "\n";
         run_command = "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " + subcommand;
         SPDLOG_LOGGER_DEBUG(logger, "Qraise default with no communications. \n");
     }
