@@ -26,6 +26,7 @@ public:
 
     inline json run(json& circuit_json);
     inline int apply_measure(std::vector<int>& qubits);
+    inline void apply_unitary(CUNQA::Matrix& matrix, std::vector<int>& qubits);
     inline void apply_gate(std::string& instruction_name, std::vector<int>& qubits, std::vector<double> param = {0.0});
     inline int get_shot_result();
     inline void restart_statevector();
@@ -63,6 +64,13 @@ inline int Backend<sim_type>::apply_measure(std::vector<int>& qubits)
 {
     return this->simulator->_apply_measure(qubits);
     //return SimClass<sim_type>::type::_apply_measure(qubits);
+}
+
+template <SimType sim_type>
+inline void Backend<sim_type>::apply_unitary(CUNQA::Matrix& matrix, std::vector<int>& qubits)
+{
+    this->simulator->_apply_unitary(matrix, qubits);
+    //SimClass<sim_type>::type::_apply_gate(gate_name, qubits, param);
 }
 
 template <SimType sim_type>

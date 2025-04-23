@@ -30,6 +30,8 @@ std::unordered_map<std::string, int> comm_map = {
 
 namespace CUNQA {
 
+  using Matrix = std::vector<std::vector<std::complex<double>>>;
+
   enum qpu_comm_library {
     mpi,
     zmq
@@ -47,6 +49,7 @@ namespace CUNQA {
   };
 
   enum INSTRUCTIONS {
+    UNITARY,
     MEASURE,
     ID,
     X,
@@ -86,6 +89,9 @@ namespace CUNQA {
 };
 
 std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
+    //Personalized gates
+    {"unitary", UNITARY},
+
     // MEASURE
     {"measure", MEASURE},
 
@@ -136,6 +142,7 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 };
 
 std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
+    {UNITARY, "unitary"},
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},
@@ -164,6 +171,7 @@ const std::vector<std::string> BASIS_GATES = {
   };
 
   std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
+    {"d_c_if_unitary", "unitary"},
     {"d_c_if_h", "h"},
     {"d_c_if_x", "x"},
     {"d_c_if_y", "y"},
