@@ -32,13 +32,6 @@ int main(int argc, char* argv[])
     const char* store = std::getenv("STORE");
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
-    //Checking mode:
-    if ((args.mode != "hpc") && (args.mode != "cloud")) {
-        std::cerr << "\033[1;31m" << "Error: " << "mode argument different than hpc or cloud. Given: " << args.mode << "\n";
-        std::cerr << "Aborted." << "\033[0m \n";
-        return 1;
-    }
-
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
     std::string run_command;
@@ -128,6 +121,7 @@ int main(int argc, char* argv[])
     
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
+    //Checking duplicate family name
     std::string family_name = std::any_cast<std::string>(args.family_name);
     if (exists_family_name(family_name, info_path)) { //Check if there exists other QPUs with same family name
         SPDLOG_LOGGER_ERROR(logger, "There are QPUs with the same family name as the provided: {}.", family_name);
@@ -135,13 +129,22 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    //Get mode: hpc or cloud
+    std::string mode;
+    if(args.cloud) {
+        mode = "cloud";
+    } else {
+        mode = "hpc";
+    }
+
+    //Get srun command
     if (args.fakeqmio.has_value()) {
         SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
-        run_command = get_fakeqmio_run_command(args);
+        run_command = get_fakeqmio_run_command(args, mode);
     } else {
         if (args.classical_comm) {
             SPDLOG_LOGGER_DEBUG(logger, "Classical communications");
-            run_command = get_class_comm_run_command(args);
+            run_command = get_class_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
@@ -151,7 +154,7 @@ int main(int argc, char* argv[])
             return 0;
         } else {
             SPDLOG_LOGGER_DEBUG(logger, "No communications");
-            run_command = get_no_comm_run_command(args);
+            run_command = get_no_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
