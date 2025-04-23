@@ -74,7 +74,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     json run_config_json(run_config);
     int shots = run_config_json.at("shots");
     std::string instruction_name;
-    std::array<int, 3> qubits;
+    std::vector<int> qubits;
     int measurement;
     std::array<std::string, 2> comm_endp;
     std::vector<double> param;
@@ -84,10 +84,10 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     for (int i = 0; i < shots; i++) {
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name");
-            qubits = instruction.at("qubits");
+            qubits = instruction.at("qubits").get<std::vector<int>>();
             switch (CUNQA::INSTRUCTIONS_MAP[instruction_name])
             {
-                case measure:
+                case CUNQA::MEASURE:
                     measurement = this->backend.apply_measure(qubits);
                     break;
                 case CUNQA::ID:
