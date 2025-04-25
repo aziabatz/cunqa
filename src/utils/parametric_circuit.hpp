@@ -1,21 +1,20 @@
 #include <iostream>
 #include <string>
-#include <nlohmann/json.hpp>
 #include <vector>
 
 #include <regex>
 #include <sstream>
 
-#include "constants.hpp"
+#include "utils/constants.hpp"
+#include "utils/json.hpp"
 #include "logger/logger.hpp"
 
-using json = nlohmann::json;
 
-json empty_json = {};
+cunqa::JSON empty_json = {};
 std::string empty_string = "";
 
 //TODO: QASM
-std::vector<double> get_circuit_parameters(const json& circuit = empty_json, std::string& qasm = empty_string)
+std::vector<double> get_circuit_parameters(const cunqa::JSON& circuit = empty_json, std::string& qasm = empty_string)
 {
     if (!circuit.contains("instructions"))
         throw std::runtime_error("Invalid circuit format, circuit must have an instruction field.");
@@ -40,7 +39,7 @@ std::vector<double> get_circuit_parameters(const json& circuit = empty_json, std
 
 
 //TODO: Two-qubit gates with parameters. params = list of lists
-json update_circuit_parameters(json& circuit, const std::vector<double>& params)
+cunqa::JSON update_circuit_parameters(cunqa::JSON& circuit, const std::vector<double>& params)
 {
     if (!circuit.contains("instructions")) 
         throw std::runtime_error("Invalid circuit format, circuit must have an instruction field.");
@@ -74,7 +73,7 @@ json update_circuit_parameters(json& circuit, const std::vector<double>& params)
         return circuit;
         
     } catch (const std::exception& e){
-        SPDLOG_LOGGER_ERROR(logger, "Error updating parameters. (check correct size).");
+        LOGGER_ERROR("Error updating parameters. (check correct size).");
         throw std::runtime_error("Error updating parameters.");
     }
 }
@@ -86,7 +85,7 @@ std::string regex_escape(const std::string& str) {
     return std::regex_replace(str, special_chars, R"(\$&)");
 }
 
-json update_qasm_parameters(json& circuit, const std::vector<double>& params) {
+cunqa::JSON update_qasm_parameters(cunqa::JSON& circuit, const std::vector<double>& params) {
     if (!circuit.contains("instructions")) {
         throw std::runtime_error("Invalid circuit format, circuit must have an instruction field.");
     }

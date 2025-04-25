@@ -1,11 +1,10 @@
 #pragma once
 
 #include <string_view>
-#include <unordered_map>
-#include <nlohmann/json.hpp>
-#include<complex>
+#include <complex>
 
-using json = nlohmann::json;
+#include <unordered_map>
+#include "utils/json.hpp"
 
 // NETWORK INTERFACES NAMES
 constexpr std::string_view INFINIBAND = "ib0";

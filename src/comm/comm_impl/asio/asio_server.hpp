@@ -44,11 +44,11 @@ public:
             return data;
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
-                SPDLOG_LOGGER_DEBUG(logger, "Client disconnected, closing conection.");
+                LOGGER_DEBUG("Client disconnected, closing conection.");
                 socket_.close(); 
                 return std::string("CLOSE");
             } else {
-                SPDLOG_LOGGER_ERROR(logger, "Error receiving the circuit.");
+                LOGGER_ERROR("Error receiving the circuit.");
                 throw;
             }
         }
@@ -65,7 +65,7 @@ public:
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(result));
         } catch (const boost::system::system_error& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error sending the result.");
+            LOGGER_ERROR("Error sending the result.");
             throw;
         }
     }

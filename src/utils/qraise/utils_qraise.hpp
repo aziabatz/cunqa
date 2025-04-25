@@ -3,6 +3,8 @@
 #include <string>
 #include <regex>
 
+#include "logger/logger.hpp"
+
 bool check_time_format(const std::string& time)
 {
     std::regex format("^(\\d{2}):(\\d{2}):(\\d{2})$");
@@ -26,7 +28,7 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
         return 2;
     }
 
-    SPDLOG_LOGGER_DEBUG(logger, "Correct memory per core.");
+    LOGGER_DEBUG("Correct memory per core.");
 
     return 0;
 }

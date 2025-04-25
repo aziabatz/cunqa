@@ -1,5 +1,5 @@
 //#include "qpu.hpp"
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 #include <iostream>
 #include <thread>
 #include <queue>
@@ -9,9 +9,7 @@
 #include "comm/server.hpp"
 #include "comm/client.hpp"
 
-using json = nlohmann::json;
-
-json backend_config = json::parse(R"(
+cunqa::JSON backend_config = cunqa::JSON::parse(R"(
 {
     "backend":
     {
@@ -31,7 +29,7 @@ json backend_config = json::parse(R"(
 }
 )");
 
-json execution_config = json::parse(R"(
+cunqa::JSON execution_config = cunqa::JSON::parse(R"(
 {
     "config": {
         "shots": 1024,

@@ -5,12 +5,11 @@
 #include <optional>
 #include <cstdlib>
 #include <map>
-#include <nlohmann/json.hpp>
-#include "argparse.hpp"
 
+#include "utils/json.hpp"
+#include "argparse.hpp"
 #include "logger/logger.hpp"
 
-using json = nlohmann::json;
 using namespace std::literals;
 
 struct MyArgs : public argparse::Args
@@ -38,7 +37,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    json qpus_json;
+    cunqa::JSON qpus_json;
     file >> qpus_json;
 
     if (qpus_json.empty()) {

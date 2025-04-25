@@ -6,9 +6,8 @@
 #include <fstream>
 #include <vector>
 #include <unordered_map>
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
 
+#include "utils/json.hpp"
 
 enum Error {
   Q1Gates,
@@ -25,12 +24,12 @@ std::unordered_map<std::string, int> gate_calibrations =
         {"Qubits", Error::Qubits}
     };
 
-json from_calibrations_to_json(std::string path_to_calibrations){
+cunqa::JSON from_calibrations_to_json(std::string path_to_calibrations){
 
-    std::vector<json> errors;
-    json calibrations;
+    std::vector<cunqa::JSON> errors;
+    cunqa::JSON calibrations;
 
-    json qerror_json = {
+    cunqa::JSON qerror_json = {
         {"type", "qerror"},
         {"operations", {}},
         {"gate_qubits", {}},
@@ -39,7 +38,7 @@ json from_calibrations_to_json(std::string path_to_calibrations){
         //{"instructions", {}} //fundamental
     };
 
-    json roerror_json = {
+    cunqa::JSON roerror_json = {
         {"type", "roerror"},
         {"operations", {"measure"}},
         {"probabilities", {}},
@@ -96,14 +95,14 @@ json from_calibrations_to_json(std::string path_to_calibrations){
         }
     }
 
-/*     json noise_model = {
+/*     cunqa::JSON noise_model = {
         {"error_model", {
             "errors", {errors}
             }
         }
     };  */  
 
-    json noise_model = {
+    cunqa::JSON noise_model = {
         {
             "errors", errors
         }
@@ -115,11 +114,11 @@ json from_calibrations_to_json(std::string path_to_calibrations){
 
 
 
-json fakeqmio_backend(std::string path_to_calibrations){
+cunqa::JSON fakeqmio_backend(std::string path_to_calibrations){
 
-    json calibration_json = from_calibrations_to_json(path_to_calibrations);
+    cunqa::JSON calibration_json = from_calibrations_to_json(path_to_calibrations);
 
-    json fakeqmio_backend = {
+    cunqa::JSON fakeqmio_backend = {
         {"backend", {
             {"basis_gates", ""},
             {"conditional", true},

@@ -26,12 +26,12 @@ public:
             net = LOCAL;
         }
         try {
-            SPDLOG_LOGGER_DEBUG(logger, "Trying to bind ZMQ socket to selected IP");
+            LOGGER_DEBUG("Trying to bind ZMQ socket to selected IP");
             std::string endpoint = "tcp://" + net_config_.IPs.at(net) + ":" + net_config_.port;
             socket_.bind(endpoint);
-            SPDLOG_LOGGER_DEBUG(logger, "Server bound to {}.", endpoint);
+            LOGGER_DEBUG("Server bound to {}.", endpoint);
         } catch (const zmq::error_t& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error binding to endpoint {}: {}.", 
+            LOGGER_ERROR("Error binding to endpoint {}: {}.", 
                                     net_config_.IPs.at(net) + ":" + net_config_.port, e.what());
             throw;
         }
@@ -39,7 +39,7 @@ public:
 
     void accept()
     {
-        SPDLOG_LOGGER_DEBUG(logger, "In ZMQ server we just keep going...");
+        LOGGER_DEBUG("In ZMQ server we just keep going...");
     }
 
     // Wait for a request from a client and return the received data as a string.
@@ -49,12 +49,12 @@ public:
             zmq::message_t message;
             auto size = socket_.recv(message, zmq::recv_flags::none);
             std::string data(static_cast<char*>(message.data()), size.value());
-            SPDLOG_LOGGER_DEBUG(logger, "Received data: {}", data);
+            LOGGER_DEBUG("Received data: {}", data);
             
             rid_queue_.push(message.routing_id());
             return data;
         } catch (const zmq::error_t& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error receiving data: {}", e.what());
+            LOGGER_ERROR("Error receiving data: {}", e.what());
             return std::string("CLOSE");
         }
     }
@@ -68,9 +68,9 @@ public:
             rid_queue_.pop();
 
             socket_.send(message, zmq::send_flags::none);
-            SPDLOG_LOGGER_DEBUG(logger, "Sent result: {}", result);
+            LOGGER_DEBUG("Sent result: {}", result);
         } catch (const zmq::error_t& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error sending result: {}", e.what());
+            LOGGER_ERROR("Error sending result: {}", e.what());
             throw;
         }
     }

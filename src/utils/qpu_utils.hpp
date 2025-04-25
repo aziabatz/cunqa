@@ -17,7 +17,7 @@ std::string get_zmq_endpoint(const std::string_view& net = INFINIBAND)
     auto id = std::getenv("SLURM_LOCALID");
     std::string ports = std::getenv("SLURM_STEP_RESV_PORTS");
     std::string port;
-    SPDLOG_LOGGER_DEBUG(logger, "SLURM_STEP_RESV_PORTS: {}", ports);
+    LOGGER_DEBUG("SLURM_STEP_RESV_PORTS: {}", ports);
 
     if(ports != "" && id != "")
     {
@@ -40,15 +40,15 @@ std::string get_zmq_endpoint(const std::string_view& net = INFINIBAND)
         return "-1"s;
     }
 
-    SPDLOG_LOGGER_DEBUG(logger, "Port selected: {}", port);
+    LOGGER_DEBUG("Port selected: {}", port);
 
     std::unordered_map<std::string, std::string> IPs = get_IP_addresses();
 
-    SPDLOG_LOGGER_DEBUG(logger, "IP addresses picked.");
+    LOGGER_DEBUG("IP addresses picked.");
 
     std::string endpoint = "tcp://" + IPs.at(std::string(net)) + ":" + port;
 
-    SPDLOG_LOGGER_DEBUG(logger, "Endpoint created: {}.", endpoint);
+    LOGGER_DEBUG("Endpoint created: {}.", endpoint);
 
     return endpoint;
 }

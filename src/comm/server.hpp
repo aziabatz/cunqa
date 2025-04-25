@@ -5,21 +5,6 @@
 #include "config/net_config.hpp"
 #include "comm_strat_def.h"
 
-using namespace config;
-
-#if COMM_LIB == ASIO
-    #include "comm-strats/asio/asio_server.hpp"
-    using SelectedServer = AsioServer;
-#elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq/zmq_server.hpp"
-    using SelectedServer = ZmqServer;
-#elif COMM_LIB == CROW
-    #include "comm-strats/crow_comm.hpp"
-    using SelectedServer = CrowServer;
-#else
-    #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
-#endif
-
 class ServerException : public std::exception {
     std::string message;
 public:
@@ -33,23 +18,17 @@ public:
 class Server {
     std::unique_ptr<SelectedServer> comm_strat;
 public:
+    std::string mode;
+    std::string hostname;
+    std::string nodename;
+    std::unordered_map<std::string, std::string> IPs;
+    std::string port;
 
-    Server(const NetConfig& net_config) :
-        comm_strat{std::make_unique<SelectedServer>(net_config)} 
-    { }
+    Server();
 
-    inline std::string recv_circuit() { return comm_strat->recv_data(); }
-    
-    inline void accept() { comm_strat->accept(); }
-
-    inline void send_result(const std::string& result) { 
-        try {
-            comm_strat->send_result(result);
-        } catch (const std::exception& e) {
-            throw ServerException(e.what());
-        }
-    }
-
-    inline void close() {comm_strat->close(); }
+    inline void accept();
+    inline std::string recv_data();
+    inline void send_results(const std::string& results);
+    inline void close();
 };
 

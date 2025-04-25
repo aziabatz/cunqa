@@ -4,36 +4,13 @@
 #include <exception>
 #include <sys/file.h>
 #include <unistd.h>
+#include "json.hpp"
 #include "logger/logger.hpp"
 
-#include "custom_json.hpp"
-
-#include "logger/logger.hpp"
-
-CustomJson::CustomJson()
-{
-    custom_json = json::object();
-}
-
-CustomJson::~CustomJson() = default;
-
-void CustomJson::write(json local_data, const std::string &filename)
-{
-    /* int flag;
-    MPI_Initialized(&flag); */
-    this->filename = filename;
-    //flag ? CustomJson::_write_MPI(local_data) : CustomJson::_write_locks(local_data);
-    CustomJson::_write_locks(local_data);
-}
-
-const std::string CustomJson::dump()
-{
-    return custom_json.dump(4);
-}
+namespace cunqa {
 
 [[deprecated("Unused because iterference with MPI for classical/quantum communications")]] 
-void CustomJson::_write_MPI(json local_data)
-{
+void write_MPI(JSON local_data, const std::string &filename) {
     try {
         int world_rank, world_size;
         MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
@@ -46,14 +23,14 @@ void CustomJson::_write_MPI(json local_data)
         local_data_str = local_data.dump();
         local_length = local_data_str.size();
         send_data = local_data_str.c_str();
-        SPDLOG_LOGGER_DEBUG(logger, "JSON processed to write the data.");
+        LOGGER_DEBUG("JSON processed to write the data.");
 
         // Gather lengths to calculate the displacements
         int *recv_lengths;
         if (world_rank == 0)
             recv_lengths = new int[world_size];
         MPI_Gather(&local_length, 1, MPI_INT, recv_lengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
-        SPDLOG_LOGGER_DEBUG(logger, "Lengths gathered in order to calculate the displacements.");
+        LOGGER_DEBUG("Lengths gathered in order to calculate the displacements.");
 
         // Calculate displacements at root
         int *displs;
@@ -69,7 +46,7 @@ void CustomJson::_write_MPI(json local_data)
                 total_length += recv_lengths[i];
             }
         }
-        SPDLOG_LOGGER_DEBUG(logger, "Calculate displacements at root.");
+        LOGGER_DEBUG("Calculate displacements at root.");
 
         // Gather variable-length data at root
         char *recv_data;
@@ -79,31 +56,31 @@ void CustomJson::_write_MPI(json local_data)
         MPI_Gatherv(send_data, local_length, MPI_CHAR,
                     recv_data, recv_lengths, displs, MPI_CHAR,
                     0, MPI_COMM_WORLD);
-        SPDLOG_LOGGER_DEBUG(logger, "Gather variable-length data at root.");
+        LOGGER_DEBUG("Gather variable-length data at root.");
 
         // Reconstruct strings at root
+        JSON j;
         if (world_rank == 0) {
-            std::vector<json> all_json_data(world_size);
+            std::vector<JSON> all_json_data(world_size);
             for (int i = 0; i < world_size; ++i) {
                 std::string data_str(recv_data + displs[i], recv_lengths[i]);
-                all_json_data[i] = json::parse(data_str);
+                all_json_data[i] = JSON::parse(data_str);
             }
 
             for (const auto &obj : all_json_data)
-                custom_json.update(obj);
+                j.update(obj);
 
             std::fstream file(filename, std::ios::out);
-            file << custom_json.dump(4) << "\n";
+            file << j.dump(4) << "\n";
         }
-        SPDLOG_LOGGER_DEBUG(logger, "Succesfully resconstruction of the strings at root.");
+        LOGGER_DEBUG("Succesfully resconstruction of the strings at root.");
     } catch(const std::exception& e) {
         std::string msg("Error writing the JSON simultaneously using MPI.\nError message thrown by the system: "); 
         throw std::runtime_error(msg + e.what());
     }
 }
 
-void CustomJson::_write_locks(json local_data)
-{
+void write_on_file(JSON local_data, const std::string &filename) {
     try {
         int file = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
         if (file == -1) {
@@ -112,7 +89,7 @@ void CustomJson::_write_locks(json local_data)
         }
         flock(file, LOCK_EX);
 
-        json j;
+        JSON j;
         std::ifstream file_in(filename);
 
         if (file_in.peek() != std::ifstream::traits_type::eof())
@@ -133,7 +110,7 @@ void CustomJson::_write_locks(json local_data)
         std::ofstream file_out(filename, std::ios::trunc);
         file_out << j.dump(4);
         file_out.close();
-        SPDLOG_LOGGER_DEBUG(logger, "Succesfully written this process JSON into the file.");
+        LOGGER_DEBUG("Succesfully written this process JSON into the file.");
 
         flock(file, LOCK_UN);
         close(file);
@@ -141,4 +118,6 @@ void CustomJson::_write_locks(json local_data)
         std::string msg("Error writing the JSON simultaneously using locks.\nError message thrown by the system: "); 
         throw std::runtime_error(msg + e.what());
     }
+}
+
 }

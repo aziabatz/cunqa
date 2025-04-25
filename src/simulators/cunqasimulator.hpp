@@ -2,38 +2,37 @@
 
 #include <vector>
 #include <optional>
-#include <nlohmann/json.hpp>
+
+#include "instructions.hpp"
+#include "result_cunqasim.hpp"
+#include "executor.hpp"
 
 #include "config/backend_config.hpp"
 #include "config/run_config.hpp"
 #include "config/backend_config.hpp"
 #include "comm/qpu_comm.hpp"
-#include "logger/logger.hpp"
-#include "instructions.hpp"
-#include "result_cunqasim.hpp"
-#include "executor.hpp"
 #include "utils/types_cunqasim.hpp"
 #include "utils/constants.hpp"
+#include "utils/json.hpp"
+#include "logger/logger.hpp"
+
 #include "simulator.hpp"
-
-using json = nlohmann::json;
-
 
 class CunqaSimulator {
 
 public:
     std::unique_ptr<Executor> executor;
 
-    void configure_simulator(json& backend_config)
+    void configure_simulator(cunqa::JSON& backend_config)
     {
         int n_qubits = backend_config.at("n_qubits");
         this->executor = std::make_unique<Executor>(n_qubits);
-        SPDLOG_LOGGER_DEBUG(logger, "Cunqa executor configured with {} qubits.", std::to_string(n_qubits));
+        LOGGER_DEBUG("Cunqa executor configured with {} qubits.", std::to_string(n_qubits));
     }
 
     //Offloading execution
-    json execute(json circuit_json, json& noise_model_json, const config::RunConfig& run_config) {
-        SPDLOG_LOGGER_ERROR(logger, "Error. Offloading execution is not available with Cunqa simulator. ");
+    cunqa::JSON execute(cunqa::JSON circuit_json, cunqa::JSON& noise_model_json, const config::RunConfig& run_config) {
+        LOGGER_ERROR("Error. Offloading execution is not available with Cunqa simulator. ");
         return {};
     }
     
@@ -44,7 +43,7 @@ public:
         try {
             return this->executor->apply_measure(qubits); 
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error executing a measure in the Cunqa simulator.");
+            LOGGER_ERROR("Error executing a measure in the Cunqa simulator.");
             return -1;
         }
 
@@ -89,7 +88,7 @@ public:
             }
 
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error executing a gate in the Cunqa simulator.");
+            LOGGER_ERROR("Error executing a gate in the Cunqa simulator.");
         }
     }
 
@@ -98,7 +97,7 @@ public:
         try {
             return this->executor->get_nonzero_position();
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error getting the statevector non-zero position. Check that all qubits are measured.");
+            LOGGER_ERROR("Error getting the statevector non-zero position. Check that all qubits are measured.");
             return -1;
         }
     }
@@ -108,7 +107,7 @@ public:
         try {
             this->executor->restart_statevector();
         } catch (const std::exception& e) {
-            SPDLOG_LOGGER_ERROR(logger, "Error restarting the statevector.");
+            LOGGER_ERROR("Error restarting the statevector.");
         }
     }
     

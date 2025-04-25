@@ -1,16 +1,14 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
 
+#include "utils/json.hpp"
 #include "utils/constants.hpp"
 #include "simulators/simulator.hpp"
 
 using namespace std::literals;
-using json = nlohmann::json;
-
 
 namespace config {
 
@@ -32,7 +30,7 @@ public:
     std::string custom_instructions;
     std::vector<std::string> gates;
     
-    json noise_model;
+    cunqa::JSON noise_model;
     
 
     template<SimType T = sim_type,
@@ -88,7 +86,7 @@ public:
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Aer>::value, bool> = true> 
-    BackendConfig(const json& config, const json& noise_model)
+    BackendConfig(const cunqa::JSON& config, const cunqa::JSON& noise_model)
         : simulator{"AerSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
@@ -96,7 +94,7 @@ public:
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Munich>::value, bool> = true>
-    BackendConfig(const json& config, const json& noise_model)
+    BackendConfig(const cunqa::JSON& config, const cunqa::JSON& noise_model)
         : simulator{"MunichSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
@@ -104,7 +102,7 @@ public:
 
     template<SimType T = sim_type,
              typename std::enable_if_t<is_same<T, SimType::Cunqa>::value, bool> = true> 
-    BackendConfig(const json& config, const json& noise_model)
+    BackendConfig(const cunqa::JSON& config, const cunqa::JSON& noise_model)
         : simulator{"CunqaSimulator"}, noise_model(noise_model)
     {
         from_json(config, *this);
@@ -112,7 +110,7 @@ public:
 };
 
 template <SimType sim_type>
-void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
+void to_json(cunqa::JSON& j, const BackendConfig<sim_type>& backend_conf)
 {
     
     j = {   
@@ -134,7 +132,7 @@ void to_json(json& j, const BackendConfig<sim_type>& backend_conf)
 }
 
 template <SimType sim_type>
-void from_json(const json& j, BackendConfig<sim_type>& backend_conf) 
+void from_json(const cunqa::JSON& j, BackendConfig<sim_type>& backend_conf) 
 {
     j.at("name").get_to(backend_conf.name);
     j.at("version").get_to(backend_conf.version);

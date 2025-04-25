@@ -1,6 +1,5 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
 #include <iostream>
 #include <sys/types.h>
 #include <string_view>
@@ -9,8 +8,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
-#include "utils/constants.hpp"
 
+#include "utils/constants.hpp"
+#include "utils/json.hpp"
 
 #ifndef __USE_POSIX
     #define __USE_POSIX
@@ -18,7 +18,6 @@
 #include <limits.h>
 
 using namespace std::literals;
-using json = nlohmann::json;
 
 namespace config {
 
@@ -32,7 +31,7 @@ public:
 
     NetConfig();
     NetConfig(const std::string& mode, const std::string& hostname, const std::string& nodename, std::unordered_map<std::string, std::string> IPs, std::string port);
-    NetConfig(const json& server_info);
+    NetConfig(const cunqa::JSON& server_info);
 
     static NetConfig myNetConfig(const std::string& mode);
     std::string get_endpoint(const std::string_view& net = INFINIBAND) const;
@@ -45,8 +44,8 @@ std::string get_nodename();
 std::unordered_map<std::string, std::string> get_IP_addresses();
 std::string get_port();
 
-void to_json(json& j, const NetConfig& net_config);
-void from_json(const json& j, NetConfig& NetConfig);
+void to_json(cunqa::JSON& j, const NetConfig& net_config);
+void from_json(const cunqa::JSON& j, NetConfig& NetConfig);
 
 NetConfig::NetConfig() = default;
 
@@ -58,7 +57,7 @@ NetConfig::NetConfig(const std::string& mode, const std::string& hostname, const
         port{port} 
 { }
 
-NetConfig::NetConfig(const json& server_info)
+NetConfig::NetConfig(const cunqa::JSON& server_info)
 {
     from_json(server_info, *this);
 }
@@ -159,9 +158,9 @@ std::string get_port()
 // ----- Conversion functions for json format -----
 // ------------------------------------------------
 
-void to_json(json& j, const NetConfig& net_config)
+void to_json(cunqa::JSON& j, const NetConfig& net_config)
 {
-    json ips{};
+    cunqa::JSON ips{};
 
     for (const auto& net_bind : net_config.IPs) {
         ips[net_bind.first] = net_bind.second;
@@ -177,7 +176,7 @@ void to_json(json& j, const NetConfig& net_config)
         };
 }
 
-void from_json(const json& j, NetConfig& NetConfig) 
+void from_json(const cunqa::JSON& j, NetConfig& NetConfig) 
 {
     j.at("mode").get_to(NetConfig.mode);
     j.at("hostname").get_to(NetConfig.hostname);

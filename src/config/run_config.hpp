@@ -1,10 +1,9 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include "utils/json.hpp"
 #include <iostream>
 
 using namespace std::literals;
-using json = nlohmann::json;
 
 namespace config{
 
@@ -16,11 +15,11 @@ public:
     int seed;
 
     RunConfig();
-    RunConfig(json config);
+    RunConfig(cunqa::JSON config);
 };
 
-void to_json(json& j, const RunConfig& run_conf);
-void from_json(const json& j, RunConfig& run_conf);
+void to_json(cunqa::JSON& j, const RunConfig& run_conf);
+void from_json(const cunqa::JSON& j, RunConfig& run_conf);
 
 RunConfig::RunConfig() :
     shots{1024},
@@ -29,12 +28,12 @@ RunConfig::RunConfig() :
     seed{23423}
 { }
 
-RunConfig::RunConfig(json config)
+RunConfig::RunConfig(cunqa::JSON config)
 { 
         from_json(config, *this);
 }
 
-void to_json(json& j, const RunConfig& run_conf)
+void to_json(cunqa::JSON& j, const RunConfig& run_conf)
 {
     j = {   
             {"shots", run_conf.shots}, 
@@ -44,7 +43,7 @@ void to_json(json& j, const RunConfig& run_conf)
         };
 }
 
-void from_json(const json& j, RunConfig& run_conf) 
+void from_json(const cunqa::JSON& j, RunConfig& run_conf) 
 {
     j.at("shots").get_to(run_conf.shots);
     j.at("method").get_to(run_conf.method);

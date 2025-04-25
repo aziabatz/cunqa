@@ -2,10 +2,8 @@
 
 #include "backend_config.hpp"
 #include "net_config.hpp"
-#include <nlohmann/json.hpp>
-#include "../utils/helpers.hpp"
-
-using json = nlohmann::json;
+#include "utils/json.hpp"
+#include "utils/helpers.hpp"
 
 namespace config {
 
@@ -19,13 +17,13 @@ public:
     NetConfig net_config;
     std::string filepath;
 
-    QPUConfig(const std::string& mode, const json& config, const std::string& filepath) :
+    QPUConfig(const std::string& mode, const cunqa::JSON& config, const std::string& filepath) :
         filepath{filepath}, family_name(config.at("family_name")), slurm_job_id(config.at("slurm_job_id"))
     {
         if (config.contains("backend"))
             this->backend_config = config.contains("noise") ? 
                            BackendConfig<sim_type>(config.at("backend"), config.at("noise")) : 
-                           BackendConfig<sim_type>(config.at("backend"), json());
+                           BackendConfig<sim_type>(config.at("backend"), cunqa::JSON());
         else
             this->backend_config = BackendConfig<sim_type>();
         
@@ -36,11 +34,11 @@ public:
         }
     }
 
-    void set_backendconfig(json backend_conf_json){
+    void set_backendconfig(cunqa::JSON backend_conf_json){
         this->backend_config = BackendConfig<sim_type>(backend_conf_json);
     }
 
-    void set_netconfig(json net_conf_json){
+    void set_netconfig(cunqa::JSON net_conf_json){
         this->net_config = NetConfig(net_conf_json);
     }
 };
@@ -49,13 +47,13 @@ public:
 // ----- Conversion functions for json format -----
 // ------------------------------------------------
 template <SimType sim_type>
-void to_json(json& j, const QPUConfig<sim_type>& qpu_config)
+void to_json(cunqa::JSON& j, const QPUConfig<sim_type>& qpu_config)
 {
     std::string mode = qpu_config.mode;
     std::string family_name = qpu_config.family_name;
     std::string slurm_job_id = qpu_config.slurm_job_id;
-    json net = qpu_config.net_config;
-    json backend = qpu_config.backend_config;
+    cunqa::JSON net = qpu_config.net_config;
+    cunqa::JSON backend = qpu_config.backend_config;
 
     j = {   
             {"mode", mode},
@@ -67,7 +65,7 @@ void to_json(json& j, const QPUConfig<sim_type>& qpu_config)
 }
 
 template <SimType sim_type>
-void from_json(const json& j, QPUConfig<sim_type>& qpu_config) 
+void from_json(const cunqa::JSON& j, QPUConfig<sim_type>& qpu_config) 
 {
     qpu_config.mode = j.at("mode");
     qpu_config.family_name = j.at("family_name");
