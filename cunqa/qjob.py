@@ -3,7 +3,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
-from cunqa.circuit import qc_to_json, from_json_to_qc, _registers_dict, _is_parametric
+from cunqa.circuit import qc_to_json, from_json_to_qc, _registers_dict, _is_parametric, CunqaCircuit
 from cunqa.transpile import transpiler, TranspilerError
 from cunqa.logger import logger
 
@@ -198,7 +198,7 @@ class QJob:
         -----------
         QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-        circ (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run.
+        circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -221,7 +221,7 @@ class QJob:
         else:
             logger.error(f"transpile must be boolean, but a {type(transpile)} was provided [{TypeError.__name__}].")
             raise TypeError # I capture the error in QPU.run() when creating the job
-    
+
         # transpilation
         if transpile:
             try:
@@ -244,9 +244,13 @@ class QJob:
 
                 logger.debug("A circuit dict was provided.")
 
+                if (circt["is_distributed"] and self._QPU.backend.simulator != "CunqaSimulator"):
+                    logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
+                    raise QJobError #captured and passed to QPUs
+
                 self.num_qubits = circt["num_qubits"]
                 cl_bits = circt["num_clbits"]
-                self._cregisters = circt["classical_registers"]
+                self._cregisters = circt["classical_regs"]
 
                 if self._QPU.backend.simulator == "AerSimulator":
 
@@ -273,44 +277,59 @@ class QJob:
                     exec_type = circt['exec_type']
             
 
-            elif isinstance(circt, QuantumCircuit):
+            elif isinstance(circt, CunqaCircuit):
 
-                logger.debug("A QuantumCircuit was provided.")
+                logger.debug("A CunqaCircuit was provided.")
 
-                cl_bits = sum([c.size for c in circt.cregs])
-                self._cregisters = _registers_dict(circt)[1]
+                if (circt.is_distributed and self._QPU.backend.simulator != "CunqaSimulator"):
+                    logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
+                    raise QJobError #captured and passed to QPUs
 
-                if self._QPU.backend.simulator == "AerSimulator":
+                cl_bits = circt.num_clbits
+                self._cregisters = circt.classical_regs
+
+                if self._QPU.backend.simulator == "CunqaSimulator":
+
+                    logger.debug("Extracting CunqaCircuit instructions for CunqaSimulator...")
+
+                    circuit = circt.instructions
+
+                    if circt.is_distributed:
+                        exec_type = "dynamic"
+                    else:
+                        exec_type = "offloading"
+                
+                elif self._QPU.backend.simulator == "AerSimulator":
 
                     logger.debug("Translating to dict for AerSimulator...")
 
-                    circuit = qc_to_json(circt)['instructions']
+                    circuit = circt.instructions
 
                 elif self._QPU.backend.simulator == "MunichSimulator":
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = dumps(circt)
+                    circuit = dumps(circt.instructions)
 
 
-            elif isinstance(circt, str):
+            # elif isinstance(circt, str):
 
-                logger.debug("A QASM2 circuit was provided.")
+            #     logger.debug("A QASM2 circuit was provided.")
 
-                self._cregisters = _registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
-                cl_bits = sum(len(k) for k in self._cregisters.values())
+            #     self._cregisters = _registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+            #     cl_bits = sum(len(k) for k in self._cregisters.values())
 
-                if self._QPU.backend.simulator == "AerSimulator":
+            #     if self._QPU.backend.simulator == "AerSimulator":
 
-                    logger.debug("Translating to dict for AerSimulator...")
+            #         logger.debug("Translating to dict for AerSimulator...")
 
-                    circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
+            #         circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
 
-                elif self._QPU.backend.simulator == "MunichSimulator":
+            #     elif self._QPU.backend.simulator == "MunichSimulator":
 
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
+            #         logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = circt
+            #         circuit = circt
 
             else:
                 logger.error(f"Circuit must be dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
