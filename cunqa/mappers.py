@@ -96,7 +96,7 @@ def run_distributed(circuits, qpus, **run_args):
 
     # no need to capture errors bacuse they are captured at `QPU.run`
     for circuit, qpu in zip(circuit_jsons, qpus):
-        print("Mandamos: ",circuit)
+        logger.debug(f"The following circuit will be sent: {circuit}")
         distributed_qjobs.append(qpu.run(circuit, **run_parameters))
 
     return distributed_qjobs

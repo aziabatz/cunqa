@@ -6,7 +6,7 @@ from json import JSONDecodeError, load
 from cunqa.qclient import QClient  # importamos api en C++
 from cunqa.backend import Backend
 from cunqa.logger import logger
-from cunqa.qpu import QPU
+from cunqa.qpu import QPU, QFamily
 
 # Adding pyhton folder path to detect modules
 sys.path.insert(0,os.getenv("INSTALL_PATH"))
@@ -37,8 +37,8 @@ def qraise(n, time, flags = ''):
         cmd = ["qraise", "-n", str(n), '-t', str(time), str(flags)]
         output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
 
-        # job_id = ''.join(e for e in str(output) if e.isdecimal()) #checks the output on the console (looks like 'Submitted batch job 136285') and selects the number
-        # return job_id
+        job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
+        return QFamily(job_id)
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -69,20 +69,31 @@ def qdrop(*families):
     logger.debug(f"qpu.json file accessed correctly.")
 
 
-    #building the terminal command to drop the specified families
+    #building the terminal command to drop the specified families (using family names or QFamilies)
     cmd = ['qdrop']
+
     if len(dumps) != 0:
         for family in families:
-            for _, dictionary in dumps.items():
-                if dictionary.get("family").get("family_name") == family:
-                    job_id=dictionary.get("family").get("slurm_job_id")
-                    cmd.append(str(job_id)) 
-                    break #pass to the next family name
+            if isinstance(family, str):
+                for _, dictionary in dumps.items():
+                    if dictionary.get("family").get("family_name") == family:
+                        job_id=dictionary.get("slurm_job_id")   
+                        cmd.append(str(job_id)) 
+                        break #pass to the next family name (two qraises must have different family names)
+
+            elif isinstance(family, QFamily):
+                cmd.append(family.jobid)
+
+            else:
+                logger.error(f"Arguments for qdrop must be strings or QFamilies.")
+                raise SystemExit
+            
     else:
-        logger.debug(f"qpus.json is empty, the specified families must have.")
+        logger.debug(f"qpus.json is empty, the specified families must have reached the time limit.")
+
         
     
-    run(cmd) #run 'qdrop slurm_job_id_1 slurm_job_id_2 etc' on terminal
+    run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
     return
 
@@ -212,7 +223,7 @@ def getQPUs(local = True, family_name = None):
     i = 0
     for k, v in targets.items():
         client = QClient(info_path)
-        qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k, comm_info = v["comm_info"]  )  ) # errors captured above
+        qpus.append( QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k, comm_info = v["comm_info"]  )  ) # errors captured above
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
     return qpus
