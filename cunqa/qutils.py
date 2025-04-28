@@ -21,15 +21,27 @@ class QRaiseError(Exception):
     pass
 
 
-def qraise(n, time, *, comm = None,  simulator = None, fakeqmio = False, family_name = None, mode = None, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
+def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, mode = None, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
     """
     Raises a QPU and returns its job_id.
 
     Args
     -----------
-    n (int): number of QPUs to be raised
-    time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU
-    flags (str): any other flag you want to apply, empty by default. Ex: --fakeqmio, --sim=Munich, --backend="path/to/backend", --family_name="carballido", ...
+    n (int): number of QPUs to be raised.
+    time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
+    
+    fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
+    classical_comm (bool): if True the raised QPUs are communicated classically.
+    quantum_comm (bool): if True the raised QPUs have quantum communications.
+    simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
+    family_name (str): name to identify the group of QPUs raised on the specific call of the function.
+    mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud".
+    cores (str):
+    mem_per_qpu (str):
+    n_nodes (str):
+    node_list (str):
+    qpus_per_node (str):
+    backend (str):
 
     """
 
@@ -37,12 +49,14 @@ def qraise(n, time, *, comm = None,  simulator = None, fakeqmio = False, family_
         cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
         # Add specified flags
-        if comm is not None:
-            cmd.append(f"--comm={comm}")
-        if simulator is not None:
-            cmd.append(f"--simulator={simulator}")
         if fakeqmio is not False:
             cmd.append(f"--fakeqmio")
+        if classical_comm:
+            cmd.append(f"--classical_comm")
+        if quantum_comm:
+            cmd.append(f"--quantum_comm")
+        if simulator is not None:
+            cmd.append(f"--simulator={simulator}")
         if family_name is not None:
             cmd.append(f"--family_name={family_name}")
         if mode is not None:
