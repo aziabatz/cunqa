@@ -173,12 +173,14 @@ class QFamily:
 
         else:
             logger.error(f"QFamily name must be str, but {type(name)} was provided [{TypeError.__name__}].")
+
+
         
         if jobid is None:
             logger.error("No family name provided.")
             raise ValueError # capture this in qraise
         
-        elif isinstance(name, str):
+        elif isinstance(jobid, str):
             try:
                 self.jobid = int(jobid)
             except Exception as error:

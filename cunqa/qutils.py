@@ -21,7 +21,7 @@ class QRaiseError(Exception):
     pass
 
 
-def qraise(n, time, flags = ''):
+def qraise(n, time, *, comm = None,  simulator = None, fakeqmio = False, family_name = None, mode = None, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
     """
     Raises a QPU and returns its job_id.
 
@@ -34,11 +34,39 @@ def qraise(n, time, flags = ''):
     """
 
     try:
-        cmd = ["qraise", "-n", str(n), '-t', str(time), str(flags)]
-        output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
+        cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
+        # Add specified flags
+        if comm is not None:
+            cmd.append(f"--comm={comm}")
+        if simulator is not None:
+            cmd.append(f"--simulator={simulator}")
+        if fakeqmio is not False:
+            cmd.append(f"--fakeqmio")
+        if family_name is not None:
+            cmd.append(f"--family_name={family_name}")
+        if mode is not None:
+            cmd.append(f"--mode={mode}")
+        if cores is not None:
+            cmd.append(f"--cores={cores}")
+        if mem_per_qpu is not None:
+            cmd.append(f"--mem_per_qpu={mem_per_qpu}")
+        if n_nodes is not None:
+            cmd.append(f"--n_nodes={n_nodes}")
+        if node_list is not None:
+            cmd.append(f"--node_list={node_list}")
+        if qpus_per_node is not None:
+            cmd.append(f"--qpus_per_node={qpus_per_node}")
+        if backend is not None:
+            cmd.append(f"--backend={backend}")
+
+        output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
-        return QFamily(job_id)
+
+        if family_name is not None:
+            return QFamily(family_name, job_id)
+        else:
+            return QFamily(job_id, job_id)
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -177,9 +205,14 @@ def infoQPUs(local = True, node_name = None):
 
 
 
-def getQPUs(local = True, family_name = None):
+def getQPUs(local = True, family = None):
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
+
+    Args:
+    --------
+    local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
+    family (str or QFamily): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
 
     Return:
     ---------
@@ -187,6 +220,7 @@ def getQPUs(local = True, family_name = None):
     
     """
 
+    #Access raised QPUs information on qpu.json file
     try:
         with open(info_path, "r") as qpus_json:
             dumps = load(qpus_json)
@@ -200,25 +234,35 @@ def getQPUs(local = True, family_name = None):
     
     logger.debug(f"File accessed correctly.")
 
+    #Check if family has valid format
+    if family is not None:
+        if isinstance(family, QFamily):
+            family_name=family.name
+        elif isinstance(family, str):
+            family_name = family
+        else:
+            logger.error(f"Families must be represented by theior family_name string or a <class cunqa.qpu.QFamily>, [TypeError]")
+            raise SystemExit
 
-
+    #Extract selected QPUs from qpu.json information 
     if local:
         local_node = os.getenv("SLURMD_NODENAME")
         logger.debug(f"User at node {local_node}.")
 
-        if family_name is not None:
+        if family is not None:
             targets = { k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) }
         
         else:
             targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node)}
 
     else:
-        if family_name is not None:
+        if family is not None:
             targets = {k:q for k,q in dumps.items() if (q.get("family_name") == family_name) }
         
         else:
             targets = dumps
     
+    # Create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0
     for k, v in targets.items():
