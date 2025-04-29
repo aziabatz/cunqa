@@ -35,8 +35,8 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
     quantum_comm (bool): if True the raised QPUs have quantum communications.
     simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
     family_name (str): name to identify the group of QPUs raised on the specific call of the function.
-    mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud".
-    cores (str):
+    mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
+    cores (str):  
     mem_per_qpu (str):
     n_nodes (str):
     node_list (str):
@@ -56,23 +56,23 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         if quantum_comm:
             cmd.append(f"--quantum_comm")
         if simulator is not None:
-            cmd.append(f"--simulator={simulator}")
+            cmd.append(f"--simulator={str(simulator)}")
         if family_name is not None:
-            cmd.append(f"--family_name={family_name}")
+            cmd.append(f"--family_name={str(family_name)}")
         if mode is not None:
-            cmd.append(f"--mode={mode}")
+            cmd.append(f"--mode={str(mode)}")
         if cores is not None:
-            cmd.append(f"--cores={cores}")
+            cmd.append(f"--cores={str(cores)}")
         if mem_per_qpu is not None:
-            cmd.append(f"--mem_per_qpu={mem_per_qpu}")
+            cmd.append(f"--mem_per_qpu={str(mem_per_qpu)}")
         if n_nodes is not None:
-            cmd.append(f"--n_nodes={n_nodes}")
+            cmd.append(f"--n_nodes={str(n_nodes)}")
         if node_list is not None:
-            cmd.append(f"--node_list={node_list}")
+            cmd.append(f"--node_list={str(node_list)}")
         if qpus_per_node is not None:
-            cmd.append(f"--qpus_per_node={qpus_per_node}")
+            cmd.append(f"--qpus_per_node={str(qpus_per_node)}")
         if backend is not None:
-            cmd.append(f"--backend={backend}")
+            cmd.append(f"--backend={str(backend)}")
 
         output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number

@@ -99,6 +99,14 @@ def qc_to_json(qc):
         for i in range(len(qc.data)):
             if qc.data[i].name == "barrier":
                 pass
+            elif qc.data[i].name == "unitary":
+                qreg = [r._register.name for r in qc.data[i].qubits]
+                qubit = [q._index for q in qc.data[i].qubits]
+
+                json_data["instructions"].append({"name":qc.data[i].name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
+                                                "params":[[list(map(lambda z: [z.real, z.imag], row)) for row in qc.data[i].params[0].tolist()]] #only difference, it ensures that the matrix appears as a list, and converts a+bj to (a,b)
+                                                })
             elif qc.data[i].name != "measure":
 
                 qreg = [r._register.name for r in qc.data[i].qubits]
