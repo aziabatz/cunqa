@@ -1,33 +1,9 @@
 #pragma once
 
-#include <string_view>
 #include <complex>
 
 #include <unordered_map>
 #include "utils/json.hpp"
-
-// NETWORK INTERFACES NAMES
-constexpr std::string_view INFINIBAND = "ib0";
-constexpr std::string_view VLAN120 = "VLAN120";
-constexpr std::string_view VLAN117 = "VLAN117";
-constexpr std::string_view LOCAL = "lo";
-
-enum communications {
-  no_comm,
-  class_comm,
-  quantum_comm
-};
-
-std::unordered_map<std::string, int> comm_map = {
-
-  {"no_comm", no_comm},
-  {"class_comm", class_comm},
-  {"quantum_comm", quantum_comm}
-
-
-};
-
-
 namespace CUNQA {
 
   enum INSTRUCTIONS {

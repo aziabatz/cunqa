@@ -3,14 +3,13 @@
 #include <string>
 
 #include "client.hpp"
-#include "logger/logger.hpp"
+//#include "logger/logger.hpp"
 
 
 namespace cunqa {
 namespace comm {
     
-
-struct Impl {
+struct Client::Impl {
     Impl() :
         socket_{context_, zmq::socket_type::client}
     { }
@@ -24,11 +23,11 @@ struct Impl {
     {
         try {
             socket_.connect("tcp://" + ip + ":" + port);
-            LOGGER_DEBUG("Client successfully connected to server at {}.", endpoint);
+            //LOGGER_DEBUG("Client successfully connected to server at {}.", endpoint);
         } catch (const zmq::error_t& e) {
-            LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());
+            //LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());
         } catch (const std::exception& e) {
-            LOGGER_ERROR("Trying to connect to a QPU located in a external node. {}", e.what());
+            //LOGGER_ERROR("Trying to connect to a QPU located in a external node. {}", e.what());
             throw;
         }
     }
@@ -38,9 +37,9 @@ struct Impl {
         try {
             zmq::message_t message(data.begin(), data.end());
             socket_.send(message, zmq::send_flags::none);
-            LOGGER_DEBUG("Circuit sent: {}", data);
+            //LOGGER_DEBUG("Circuit sent: {}", data);
         } catch (const zmq::error_t& e) {
-            LOGGER_ERROR("Error sending the circuit: {}", e.what());
+            //LOGGER_ERROR("Error sending the circuit: {}", e.what());
         }
     }
 
@@ -50,10 +49,10 @@ struct Impl {
             zmq::message_t reply;
             auto size = socket_.recv(reply, zmq::recv_flags::none);
             std::string result(static_cast<char*>(reply.data()), size.value());
-            LOGGER_DEBUG("Result correctly received: {}", result);
+            //LOGGER_DEBUG("Result correctly received: {}", result);
             return result;
         } catch (const zmq::error_t& e) {
-            LOGGER_ERROR("Error receiving the circuit: {}", e.what());
+            //LOGGER_ERROR("Error receiving the circuit: {}", e.what());
         }
 
         return std::string("{}");
@@ -65,10 +64,10 @@ struct Impl {
 
 
 Client::Client() :
-    pimpl_{std::make_unique<Impl>()},
+    pimpl_{std::make_unique<Impl>()}
 { }
 
-~Client::Client() = default;
+Client::~Client() = default;
 
 void Client::connect(const std::string& ip, const std::string& port) {
     pimpl_->connect(ip, port);

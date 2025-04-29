@@ -1,38 +1,36 @@
-#pragma once
-
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
-#include <fstream>
+
+#include "server.hpp"
+//#include "logger/logger.hpp"
 #include "utils/helpers.hpp"
 #include "utils/constants.hpp"
-#include "logger/logger.hpp"
-#include "config/net_config.hpp"
-#include "logger/logger.hpp"
 
 namespace as = boost::asio;
-using namespace config;
 using namespace std::string_literals;
 using as::ip::tcp;
 
-class AsioServer {
-    NetConfig net_config;
-public:
-    AsioServer(const NetConfig& net_config, const std::string_view& net = INFINIBAND) :
-        net_config{net_config},
-        acceptor_{io_context_, tcp::endpoint{as::ip::address::from_string(net_config.IPs.at(std::string(net))), 
-                            static_cast<unsigned short>(stoul(net_config.port))}},
+namespace cunqa {
+namespace comm {
+
+struct Server::Impl {
+    as::io_context io_context_;
+    tcp::acceptor acceptor_;
+    tcp::socket socket_;
+
+    Impl(const std::string& ip, const std::string& port) :
+        acceptor_{io_context_, tcp::endpoint{as::ip::address::from_string(ip), 
+                            static_cast<unsigned short>(stoul(port))}},
         socket_{acceptor_.get_executor()}
-    { 
-        acceptor_.accept(socket_);
-    }
+    { }
 
     void accept()
     {
         acceptor_.accept(socket_);
     }
 
-    std::string recv_data() 
+    std::string recv() 
     { 
         try {
             uint32_t data_length_network;
@@ -44,11 +42,11 @@ public:
             return data;
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
-                LOGGER_DEBUG("Client disconnected, closing conection.");
+                //LOGGER_DEBUG("Client disconnected, closing conection.");
                 socket_.close(); 
                 return std::string("CLOSE");
             } else {
-                LOGGER_ERROR("Error receiving the circuit.");
+                //LOGGER_ERROR()"Error receiving the circuit.");
                 throw;
             }
         }
@@ -56,7 +54,7 @@ public:
         return std::string();
     }
 
-    inline void send_result(const std::string& result) 
+    void send(const std::string& result) 
     {
         try {    
             auto data_length = legacy_size_cast<uint32_t, std::size_t>(result.size());
@@ -65,18 +63,51 @@ public:
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(result));
         } catch (const boost::system::system_error& e) {
-            LOGGER_ERROR("Error sending the result.");
+            //LOGGER_ERROR("Error sending the result.");
             throw;
         }
     }
 
-    inline void close()
+    void close()
     {
         this->socket_.close();
     }
-
-private:
-    as::io_context io_context_;
-    tcp::acceptor acceptor_;
-    tcp::socket socket_;
 };
+
+Server::Server(const std::string& mode) :
+    mode{mode},
+    hostname{get_hostname()},
+    nodename{get_nodename()},
+    ip{get_IP_address(mode)},
+    port{get_port()},
+    pimpl_{std::make_unique<Impl>(ip, port)}
+{ }
+
+Server::~Server() = default;
+
+void Server::accept() 
+{
+    pimpl_->accept();
+}
+
+std::string Server::recv_data() 
+{ 
+    return pimpl_->recv();
+}
+
+void Server::send_result(const std::string& result) 
+{ 
+    try {
+        pimpl_->send(result);
+    } catch (const std::exception& e) {
+        throw ServerException(e.what());
+    }
+}
+
+void Server::close() 
+{
+    pimpl_->close();
+}
+
+} // End of comm namespace
+} // End of cunqa namespace

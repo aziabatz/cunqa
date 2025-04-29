@@ -4,13 +4,17 @@
 #include <string>
 
 #include "client.hpp"
-#include "logger/logger.hpp"
+//#include "logger/logger.hpp"
 #include "utils/helpers.hpp"
+
+namespace as = boost::asio;
+using namespace std::string_literals;
+using as::ip::tcp;
 
 namespace cunqa {
 namespace comm {
 
-struct Impl {
+struct Client::Impl {
     as::io_context io_context_;
     tcp::socket socket_;
 
@@ -31,14 +35,14 @@ struct Impl {
             tcp::resolver resolver{io_context_};
             auto endpoint = resolver.resolve(ip, port);
             as::connect(socket_, endpoint);
-            LOGGER_DEBUG("Client succesfully connected to server.");
+            //LOGGER_DEBUG("Client succesfully connected to server.");
         } catch (const boost::system::system_error& e) {
-            LOGGER_ERROR("Imposible to connect to endpoint {}:{}. Server not available.", ip, port);
+            //LOGGER_ERROR("Imposible to connect to endpoint {}:{}. Server not available.", ip, port);
             throw;
         }
     }
 
-    void send(const std::string& circuit) 
+    void send(const std::string& data) 
     {
         auto data_length = legacy_size_cast<uint32_t, std::size_t>(data.size());
         auto data_length_network = htonl(data_length);
@@ -46,9 +50,9 @@ struct Impl {
         try {
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(data));
-            LOGGER_DEBUG("Message sent.");
+            //LOGGER_DEBUG("Message sent.");
         } catch (const boost::system::system_error& e) {
-            LOGGER_ERROR("Error sending the circuit.");
+            //LOGGER_ERROR("Error sending the circuit.");
         }
         
     }
@@ -62,21 +66,21 @@ struct Impl {
 
             std::string result(result_length, '\0');
             as::read(socket_, as::buffer(&result[0], result_length));
-            LOGGER_DEBUG("Result received: {}", result);
+            //LOGGER_DEBUG("Result received: {}", result);
             return result;
         } catch (const boost::system::system_error& e) {
-            LOGGER_ERROR("Error receiving the circuit: {} (HINT: Check the circuit format and/or if QPUs are still up working.)", e.code().message());
+            //LOGGER_ERROR("Error receiving the circuit: {} (HINT: Check the circuit format and/or if QPUs are still up working.)", e.code().message());
         }
 
         return std::string("{}");
     }
-}
+};
 
 Client::Client() :
-    pimpl_{std::make_unique<Impl>()},
+    pimpl_{std::make_unique<Impl>()}
 { }
 
-~Client::Client() = default;
+Client::~Client() = default;
 
 void Client::connect(const std::string& ip, const std::string& port) {
     pimpl_->connect(ip, port);
