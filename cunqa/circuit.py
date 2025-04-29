@@ -71,20 +71,25 @@ def qc_to_json(qc):
     ---------
     Json dict with the circuit information.
     """
+    # Check validity of the provided quantum circuit
     if isinstance(qc, dict):
         logger.warning(f"Circuit provided is already a dict.")
         return qc
-    elif isinstance(qc,QuantumCircuit):
+    elif isinstance(qc, QuantumCircuit):
         pass
     else:
         logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict, but {type(qc)} was provided [{TypeError.__name__}].")
         raise TypeError # this error should not be raised bacause in QPU we already check type of the circuit
 
+    # Actual translation
     try:
         
-        quantum_registers, classical_registers = registers_dict(qc)
+        quantum_registers, classical_registers = _registers_dict(qc)
         
         json_data = {
+            "id": "",
+            "is_distributed": False,
+            "is_parametric": _is_parametric(qc),
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
@@ -94,6 +99,14 @@ def qc_to_json(qc):
         for i in range(len(qc.data)):
             if qc.data[i].name == "barrier":
                 pass
+            elif qc.data[i].name == "unitary":
+                qreg = [r._register.name for r in qc.data[i].qubits]
+                qubit = [q._index for q in qc.data[i].qubits]
+
+                json_data["instructions"].append({"name":qc.data[i].name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
+                                                "params":[[list(map(lambda z: [z.real, z.imag], row)) for row in qc.data[i].params[0].tolist()]] #only difference, it ensures that the matrix appears as a list, and converts a+bj to (a,b)
+                                                })
             elif qc.data[i].name != "measure":
 
                 qreg = [r._register.name for r in qc.data[i].qubits]
@@ -140,7 +153,7 @@ def from_json_to_qc(circuit_dict):
     QuantumCircuit with the given instructions.
 
     """
-
+    # Checking validity of the provided circuit
     if isinstance(circuit_dict, QuantumCircuit):
         logger.warning("Circuit provided is already <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.")
         return circuit_dict
@@ -151,6 +164,12 @@ def from_json_to_qc(circuit_dict):
         logger.error(f"circuit_dict must be dict, but {type(circuit_dict)} was provided [{TypeError.__name__}]")
         raise TypeError
 
+    #Check wether the circuit has distributed gates, which aren't supported in qiskit
+    if circuit_dict["is_distributed"]:
+        logger.error("Circuit provided has distributed gates which are not supported in Qiskit [NotImplementedError]")
+        raise SystemError
+
+    #Extract key information from the json
     try:
         instructions = circuit['instructions']
         num_qubits = circuit['num_qubits']
@@ -160,7 +179,7 @@ def from_json_to_qc(circuit_dict):
         logger.error(f"Circuit json not correct, requiered keys must be: 'instructions', 'num_qubits', 'num_clbits', 'quantum_resgisters' and 'classical_registers' [{type(error).__name__}].")
         raise error
         
-        
+    # Proceed with translation
     try:
     
         qc = QuantumCircuit(num_qubits)
@@ -301,6 +320,8 @@ def _is_parametric(circuit):
             if instruction['name'] in parametric_gates:
                 return True
         return False
+    elif isinstance(circuit, CunqaCircuit):
+        return circuit.is_parametric
     elif isinstance(circuit, str):
         lines = circuit.splitlines()
         for line in lines:

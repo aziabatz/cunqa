@@ -1,6 +1,6 @@
 from cunqa.logger import logger
 from cunqa.qjob import gather
-from cunqa.circuit import from_json_to_qc
+from cunqa.circuit import from_json_to_qc, CunqaCircuit, _registers_dict
 from cunqa.qpu import QPU
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
@@ -35,12 +35,39 @@ def run_distributed(circuits, qpus, **run_args):
     """
 
     distributed_qjobs = []
+    circuit_jsons = []
+
     distr_gates = ["d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"]
     correspondence = {}
-    for circuit, qpu in zip(circuits, qpus):
-        correspondence[circuit["id"]] = qpu.endpoint
+
+    #Check wether the circuits are valid and extract jsons
+    for circuit in circuits:
+        if (isinstance(circuit, CunqaCircuit) and not circuit.is_distributed):
+            logger.error(f"Circuits to run must be distributed.")
+            raise SystemExit # User's level
+        
+        if isinstance(circuit, CunqaCircuit):
+            extended_cunqa_info = {"id":circuit.id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.c_registers,"quantum_registers": circuit.q_registers, "exec_type":"dynamic"}
+            circuit_jsons.append(extended_cunqa_info)
+
+        elif isinstance(circuit, dict):
+            circuit_jsons.append(circuit)
+        else:
+            logger.error(f"Objects of the list `circuits` must be  <class 'cunqa.circuit.CunqaCircuit'> or jsons, but {type(circuit)} was given. [{TypeError.__name__}].")
+            raise SystemExit # User's level
+    
+    #check wether there are enough qpus and create an allocation dict that for every circuit id has the info of the QPU to which it will be sent
+    if len(circuit_jsons)>len(qpus):
+        logger.error(f"There are not enough QPUs: {len(circuit_jsons)} circuits were given, but only {len(qpus)} QPUs [{ValueError.__name__}].")
+        raise SystemExit # User's level
+    else:
+        if len(circuit_jsons)<len(qpus):
+            logger.warning("More QPUs provided than the number of circuits. Last QPUs will remain unused.")
+        for circuit, qpu in zip(circuit_jsons, qpus):
+            correspondence[circuit["id"]] = qpu.endpoint
         
 
+    #Check wether the QPUs are valid
     if not all(qpu._family_name == qpus[0]._family_name for qpu in qpus):
         if not all("zmq" in qpu.comm_info for qpu in qpus):
             names = set()
@@ -52,10 +79,11 @@ def run_distributed(circuits, qpus, **run_args):
     logger.debug(f"Run arguments provided for simulation: {run_args}")
     
     #translate circuit ids in comm instruction to qpu endpoints
-    for circuit in circuits:
+    for circuit in circuit_jsons:
         for instr in circuit["instructions"]:
             if instr["name"] in distr_gates:
-                instr["qpus"] = [correspondence[instr["qpus"][0]], correspondence[instr["qpus"][1]]]
+                instr["qpus"] =  [correspondence[instr["circuits"][0]], correspondence[instr["circuits"][1]]]
+                instr.pop("circuits")
     
     warn = False
     run_parameters = {}
@@ -67,7 +95,8 @@ def run_distributed(circuits, qpus, **run_args):
             run_parameters[k] = v
 
     # no need to capture errors bacuse they are captured at `QPU.run`
-    for circuit, qpu in zip(circuits, qpus):
+    for circuit, qpu in zip(circuit_jsons, qpus):
+        logger.debug(f"The following circuit will be sent: {circuit}")
         distributed_qjobs.append(qpu.run(circuit, **run_parameters))
 
     return distributed_qjobs
