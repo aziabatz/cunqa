@@ -255,29 +255,11 @@ class QJob:
                 cl_bits = circt["num_clbits"]
                 self._cregisters = circt["classical_registers"]
 
-                if self._QPU.backend.simulator == "AerSimulator":
+                logger.debug("Translation to dict not necessary...")
 
-                    logger.debug("Translating to dict for AerSimulator...")
+                circuit = circt['instructions']
 
-                    circuit = circt['instructions']
-
-                    exec_type = circt['exec_type']
-
-                elif self._QPU.backend.simulator == "MunichSimulator":
-
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
-
-                    circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
-
-                    exec_type = circt['exec_type']
-
-                elif self._QPU.backend.simulator == "CunqaSimulator":
-
-                    logger.debug("Translating to dict for CunqaSimulator...")
-
-                    circuit = circt['instructions']
-
-                    exec_type = circt['exec_type']
+                exec_type = circt['exec_type']
             
 
             elif isinstance(circt, CunqaCircuit):
@@ -288,83 +270,50 @@ class QJob:
                     logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
                     raise QJobError #captured and passed to QPUs
 
+                self.num_qubits = circt.num_qubits
                 cl_bits = circt.num_clbits
                 self._cregisters = circt.classical_regs
                 
-                if self._QPU.backend.simulator == "AerSimulator":
+                logger.debug("Translating to dict from CunqaCircuit...")
 
-                    logger.debug("Translating to dict for AerSimulator...")
+                circuit = circt.instructions
 
-                    circuit = circt.instructions
-
-                elif self._QPU.backend.simulator == "MunichSimulator":
-
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
-
-                    circuit = dumps(circt.instructions)
-                
-                elif self._QPU.backend.simulator == "CunqaSimulator":
-
-                    logger.debug("Extracting CunqaCircuit instructions for CunqaSimulator...")
-
-                    circuit = circt.instructions
-
-                    if circt.is_distributed:
-                        exec_type = "dynamic"
-                    else:
-                        exec_type = "offloading"
+                if circt.is_distributed:
+                    exec_type = "dynamic"
+                else:
+                    exec_type = "offloading"
 
 
             elif isinstance(circt, QuantumCircuit):
 
                 logger.debug("A QuantumCircuit was provided.")
 
+                self.num_qubits = circt.num_qubits
                 cl_bits = sum([c.size for c in circt.cregs])
                 self._cregisters = _registers_dict(circt)[1]
 
-                if self._QPU.backend.simulator == "AerSimulator":
+                logger.debug("Translating to dict from QuantumCircuit...")
 
-                    logger.debug("Translating to dict for AerSimulator...")
+                circuit = qc_to_json(circt)['instructions']
 
-                    circuit = qc_to_json(circt)['instructions']
-
-                elif self._QPU.backend.simulator == "MunichSimulator":
-
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
-
-                    circuit = dumps(circt)
-
-                elif self._QPU.backend.simulator == "CunqaSimulator":
-
-                    logger.debug("Translating to dict for CunqaSimulator...")
-
-                    circuit = qc_to_json(circt)['instructions']
+                exec_type = "offloading" #As distributed operations are not supported and dynamic execution is not necessary, we execute instructions in batches for performance
 
 
             elif isinstance(circt, str):
 
                 logger.debug("A QASM2 circuit was provided.")
 
-                self._cregisters = _registers_dict(QuantumCircuit.from_qasm_str(circt))[1]
+                qc_from_qasm = QuantumCircuit.from_qasm_str(circt)
+
+                self.num_qubits = qc_from_qasm.num_qubits
+                self._cregisters = _registers_dict(qc_from_qasm)[1]
                 cl_bits = sum(len(k) for k in self._cregisters.values())
 
-                if self._QPU.backend.simulator == "AerSimulator":
+                logger.debug("Translating to dict from QASM2 string...")
 
-                    logger.debug("Translating to dict for AerSimulator...")
+                circuit = qc_to_json(qc_from_qasm)['instructions']
 
-                    circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
-
-                elif self._QPU.backend.simulator == "MunichSimulator":
-
-                    logger.debug("Translating to QASM2 for MunichSimulator...")
-
-                    circuit = circt
-
-                elif self._QPU.backend.simulator == "CunqaSimulator":
-
-                    logger.debug("Translating to dict for CunqaSimulator...")
-
-                    circuit = qc_to_json(QuantumCircuit.from_qasm_str(circt))['instructions']
+                exec_type = "offloading" #As distributed operations are not supported and dynamic execution is not necessary, we execute instructions in batches for performance
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
@@ -406,16 +355,7 @@ class QJob:
             
             # instructions dict/string
             instructions = circuit
-
-
-            if self._QPU.backend.simulator == "AerSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
-
-            elif self._QPU.backend.simulator == "MunichSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":"{}", "exec_type":"{}" }}""".format(run_config, instructions, exec_type).replace("'", '"')
-            
-            elif self._QPU.backend.simulator == "CunqaSimulator":
-                self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, exec_type, self.num_qubits).replace("'", '"')
+            self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, exec_type, self.num_qubits).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
