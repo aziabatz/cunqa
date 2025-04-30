@@ -1,7 +1,9 @@
 
 #include "quantum_task.hpp"
 #include "utils/constants.hpp"
+#include "logger/logger.hpp"
 #include <iostream>
+
 
 namespace cunqa {
 
@@ -52,7 +54,7 @@ void QuantumTask::update_params_(const std::vector<double> params)
         }
         
     } catch (const std::exception& e){
-        //LOGGER_ERROR("Error updating parameters. (check correct size).");
+        LOGGER_ERROR("Error updating parameters. (check correct size).");
         throw std::runtime_error("Error updating parameters.");
     }
 }
