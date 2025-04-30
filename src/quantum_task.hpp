@@ -1,5 +1,8 @@
+#pragma once
 
-#include "utils/json.hpp"
+#include <nlohmann/json.hpp>
+
+using JSON = nlohmann::json;
 
 namespace cunqa {
 
@@ -16,6 +19,6 @@ private:
     bool is_parametric_ = false;
     
     void update_params_(const std::vector<double> params);
-}
+};
 
 } // End of cunqa namespace
