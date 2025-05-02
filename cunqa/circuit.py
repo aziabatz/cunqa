@@ -1,14 +1,22 @@
 from cunqa.logger import logger
 import numpy as np
+import random
+import string
+
+def generate_id(size=4):
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choices(chars, k=size))
+
+
 
 SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz"]
 SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
-SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
+SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
 SUPPORTED_GATES_PARAMETRIC_2 = ["u2", "r"]
 SUPPORTED_GATES_PARAMETRIC_3 = ["u", "u3", "cu3"]
 SUPPORTED_GATES_PARAMETRIC_4 = ["cu"]
-SUPPORTED_GATES_CONDITIONAL = ["c_if_uniraty","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz"]
+SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz"]
 SUPPORTED_GATES_DISTRIBUTED = ["d_c_if_unitary", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"]
 
 class CunqaCircuitError(Exception):
@@ -19,21 +27,23 @@ class CunqaCircuit:
     """
     Class to define a quantum circuit for the `cunqa` api.
 
+    # TODO: Indicate supported gates, supported gates dor send() and recv(),... etc
+
     *** Indicate supported gates ***
     """
 
     def __init__(self, num_qubits, num_clbits = None, id = None):
 
         if isinstance(num_qubits, int):
-            self.num_qubits = num_qubits
+            num_qubits = num_qubits
         else:
             logger.error(f"num_qubits must be an int, but a {type(num_qubits)} was provided [TypeError].")
             raise SystemExit
         
         if id is None:
-            self.id = "cunqacircuit"
+            self._id = "cunqacircuit_" + generate_id()
         elif isinstance(id, str):
-            self.id = id
+            self._id = id
         else:
             logger.error(f"id must be a str, but a {type(id)} was provided [TypeError].")
             raise SystemExit
@@ -44,15 +54,23 @@ class CunqaCircuit:
 
         self.instructions = []
 
-        self.quantum_regs = {'q0':[q for q in range(self.num_qubits)]}
+        self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
 
         if num_clbits is None:
-            self.num_clbits = 0
             self.classical_regs = {}
         
         elif isinstance(num_clbits, int):
-            self.num_clbits = num_clbits
-            self.classical_regs = {'c0':[c for c in range(self.num_clbits)]}
+            self.classical_regs = {'c0':[c for c in range(num_clbits)]}
+
+
+    @property
+    def num_qubits(self):
+        return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
+    
+    @property
+    def num_clbits(self):
+        return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
+
 
     # methods for implementing non parametric single-qubit gates
 
@@ -336,7 +354,7 @@ class CunqaCircuit:
     
     # methods for parametric single-qubit gates
 
-    def u1(self, qubit, param):
+    def u1(self, param, qubit):
         """
         Class method to apply u1 gate to the given qubit.
 
@@ -352,7 +370,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def u2(self, qubit, *params):
+    def u2(self, theta, phi, qubit):
         """
         Class method to apply u2 gate to the given qubit.
 
@@ -365,10 +383,10 @@ class CunqaCircuit:
         self._add_instruction({
             "name":"u2",
             "qubits":[qubit],
-            "params":[*params]
+            "params":[theta,phi]
         })
 
-    def u(self, qubit, *params):
+    def u(self, theta, phi, lam, qubit):
         """
         Class method to apply u gate to the given qubit.
 
@@ -381,10 +399,10 @@ class CunqaCircuit:
         self._add_instruction({
             "name":"u",
             "qubits":[qubit],
-            "params":[*params]
+            "params":[theta,phi,lam]
         })
 
-    def u3(self, qubit, *params):
+    def u3(self, theta, phi, lam, qubit):
         """
         Class method to apply u3 gate to the given qubit.
 
@@ -397,10 +415,10 @@ class CunqaCircuit:
         self._add_instruction({
             "name":"u3",
             "qubits":[qubit],
-            "params":[*params]
+            "params":[theta,phi,lam]
         })
 
-    def p(self, qubit, param):
+    def p(self, param, qubit):
         """
         Class method to apply p gate to the given qubit.
 
@@ -416,7 +434,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def r(self, qubit, *params):
+    def r(self, theta, phi, qubit):
         """
         Class method to apply r gate to the given qubit.
 
@@ -429,10 +447,10 @@ class CunqaCircuit:
         self._add_instruction({
             "name":"r",
             "qubits":[qubit],
-            "params":[*params]
+            "params":[theta, phi]
         })
 
-    def rx(self, qubit, param):
+    def rx(self, param, qubit):
         """
         Class method to apply rx gate to the given qubit.
 
@@ -448,7 +466,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def ry(self, qubit, param):
+    def ry(self, param, qubit):
         """
         Class method to apply ry gate to the given qubit.
 
@@ -464,7 +482,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def rz(self, qubit, param):
+    def rz(self, param, qubit):
         """
         Class method to apply rz gate to the given qubit.
 
@@ -482,7 +500,7 @@ class CunqaCircuit:
 
     # methods for parametric two-qubit gates
 
-    def rxx(self, qubits, param):
+    def rxx(self, param, *qubits):
         """
         Class method to apply rxx gate to the given qubits.
 
@@ -494,11 +512,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"rxx",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
     
-    def ryy(self, qubits, param):
+    def ryy(self, param, *qubits):
         """
         Class method to apply ryy gate to the given qubits.
 
@@ -510,11 +528,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"ryy",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def rzz(self, qubits, param):
+    def rzz(self, param, *qubits):
         """
         Class method to apply rzz gate to the given qubits.
 
@@ -526,11 +544,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"rzz",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def rzx(self, qubits, param):
+    def rzx(self, param, *qubits):
         """
         Class method to apply rzx gate to the given qubits.
 
@@ -542,11 +560,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"rzx",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def crx(self, qubits, param):
+    def crx(self, param, *qubits):
         """
         Class method to apply crx gate to the given qubits.
 
@@ -558,11 +576,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"crx",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def cry(self, qubits, param):
+    def cry(self, param, *qubits):
         """
         Class method to apply cry gate to the given qubits.
 
@@ -574,11 +592,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"cry",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def crz(self, qubits, param):
+    def crz(self, param, *qubits):
         """
         Class method to apply crz gate to the given qubits.
 
@@ -594,7 +612,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cp(self, qubits, param):
+    def cp(self, param, *qubits):
         """
         Class method to apply cp gate to the given qubits.
 
@@ -606,11 +624,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"cp",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
-    def cu1(self, qubits, param):
+    def cu1(self, param, *qubits):
         """
         Class method to apply cu1 gate to the given qubits.
 
@@ -622,11 +640,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"cu1",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
     
-    def cu3(self, qubits, *params): # three parameters
+    def cu3(self, theta, phi, lam, *qubits): # three parameters
         """
         Class method to apply cu3 gate to the given qubits.
 
@@ -638,11 +656,11 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"cu3",
-            "qubits":qubits,
-            "params":[*params]
+            "qubits":[*qubits],
+            "params":[theta,phi,lam]
         })
     
-    def cu(self, qubits, *params): # four parameters
+    def cu(self, theta, phi, lam, gamma, *qubits): # four parameters
         """
         Class method to apply cu gate to the given qubits.
 
@@ -654,8 +672,8 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"cu",
-            "qubits":qubits,
-            "params":[*params]
+            "qubits":[*qubits],
+            "params":[theta, phi, lam, gamma]
         })
     
 
@@ -673,20 +691,21 @@ class CunqaCircuit:
         *qubits (int): qubits to which the unitary operator will be applied.
 
         """
-        if isinstance(matrix, np.ndarray):
+        if isinstance(matrix, np.ndarray) and (matrix.shape[0] == matrix.shape[1]) and (matrix.shape[0]%2 == 0):
             matrix = list(matrix)
-        elif isinstance(matrix, list):
+        elif isinstance(matrix, list) and isinstance(matrix[0], list) and all([len(matrix) == len(m) for m in matrix]) and (len(matrix)%2 == 0):
             matrix = matrix
         else:
-            logger.error(f"matrix must be list or <class 'numpy.ndarray'>, but {type(matrix)} was provided [TypeError].")
+            logger.error(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape (2^n,2^n) [TypeError].")
             raise SystemExit # User's level
+        
+        matrix = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
 
 
         self._add_instruction({
             "name":"unitary",
             "qubits":[*qubits],
-            "matrix":matrix
-
+            "params":[matrix]
         })
         
 
@@ -700,12 +719,15 @@ class CunqaCircuit:
 
         clbits (list[int] or int): clasical bits where the measurement will be registered.
         """
-        self._add_instruction({
-            "name":"measure",
-            "qubits":[*qubits],
-            "clbits":[*clbits]
-        })
-
+        if not (isinstance(qubits,list) and isinstance(clbits,list)):
+            qubits = [qubits]; clbits = [clbits]
+        
+        for q,c in zip(qubits,clbits):
+            self._add_instruction({
+                "name":"measure",
+                "qubits":[q],
+                "clbits":[c]
+            })
 
     def measure_all(self):
         """
@@ -715,11 +737,11 @@ class CunqaCircuit:
 
         new_clreg = self._add_cl_register(new_clreg, self.num_qubits)
 
-        for q in self.num_qubits:
+        for q in range(self.num_qubits):
 
             self._add_instruction({
                 "name":"measure",
-                "qubits":q,
+                "qubits":[q],
                 "clbits":[self.classical_regs[new_clreg][q]]
             })
 
@@ -761,18 +783,38 @@ class CunqaCircuit:
             logger.error(f"target qubits must be int ot list, but {type(target_qubit)} was provided [TypeError].")
             raise SystemExit
         
-        if gate == "unitary":
+        if (gate == "unitary") and (matrix is not None):
+
+            if isinstance(matrix, np.ndarray) and (matrix.shape[0] == matrix.shape[1]) and (matrix.shape[0]%2 == 0):
+                matrix = list(matrix)
+            elif isinstance(matrix, list) and isinstance(matrix[0], list) and all([len(m) == len(matrix) for m in matrix]) and (len(matrix)%2 == 0):
+                matrix = matrix
+            else:
+                logger.error(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape (2^n,2^n) [TypeError].")
+                raise SystemExit # User's level
+
+            matrix = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
 
             self._add_instruction({
                 "name": name,
-                "qubits": flatten(control_qubit, target_qubit),
-                "matrix":matrix
+                "qubits": flatten([control_qubit, target_qubit]),
+                "params":[matrix]
             })
+            # we have to exit here
+            return
+
+        elif (gate == "unitary") and (matrix is None):
+            logger.error(f"For unitary gate a matrix must be provided [ValueError].")
+            raise SystemExit # User's level
+        
+        elif (gate != "unitary") and (matrix is not None):
+            logger.error(f"instruction {gate} does not suppor matrix.")
+            raise SystemExit
 
         
         if gate in SUPPORTED_GATES_PARAMETRIC_1:
             if param is None:
-                logger.error(f"Since a parametric gate was provided ({gate.__str__}) a parameter should be passed [ValueError].")
+                logger.error(f"Since a parametric gate was provided ({gate}) a parameter should be passed [ValueError].")
                 raise SystemExit
             elif isinstance(param, float) or isinstance(param,int):
                 param = [param]
@@ -790,18 +832,17 @@ class CunqaCircuit:
 
             self._add_instruction({
                 "name": name,
-                "qubits": flatten(control_qubit, target_qubit),
-                "clbits":[],
+                "qubits": flatten([control_qubit, target_qubit]),
                 "params":param
             })
 
         else:
-            logger.error(f"Gate {gate.__str__} is not supported for conditional operation.")
+            logger.error(f"Gate {gate} is not supported for conditional operation.")
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
         
 
-    def send_gate(self, gate, control_qubit = None, target_circuit = None, target_qubit = None, *params):
+    def send_gate(self, gate, control_qubit = None, target_qubit = None, target_circuit = None, *params):
         """
         Class method to apply a distributed instruction as a gate condioned by a local classical measurement and applied in a different circuit.
         
@@ -852,7 +893,7 @@ class CunqaCircuit:
             target_circuit = target_circuit
 
         elif isinstance(target_circuit, CunqaCircuit):
-            target_circuit = target_circuit.id
+            target_circuit = target_circuit._id
         else:
             logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
             raise SystemExit
@@ -861,10 +902,9 @@ class CunqaCircuit:
 
             self._add_instruction({
                 "name": name,
-                "qubits": flatten(control_qubit, target_qubit),
-                "clbits":[],
+                "qubits": flatten([control_qubit, target_qubit]),
                 "params":params,
-                "circuits": [self.id, target_circuit]
+                "circuits": [self._id, target_circuit]
             })
         else:
             logger.error(f"Gate {gate.__str__} is not supported for conditional operation.")
@@ -922,7 +962,7 @@ class CunqaCircuit:
             control_circuit = control_circuit
 
         elif isinstance(control_circuit, CunqaCircuit):
-            control_circuit = control_circuit.id
+            control_circuit = control_circuit._id
         else:
             logger.error(f"control_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(control_circuit)} was provided [TypeError].")
             raise SystemExit
@@ -931,10 +971,9 @@ class CunqaCircuit:
 
             self._add_instruction({
                 "name": name,
-                "qubits": flatten(control_qubit, target_qubit),
-                "clbits":[],
+                "qubits": flatten([control_qubit, target_qubit]),
                 "params":params,
-                "circuits": [control_circuit, self.id]
+                "circuits": [control_circuit, self._id]
             })
         else:
             logger.error(f"Gate {gate.__str__} is not supported for conditional operation.")
@@ -955,8 +994,8 @@ class CunqaCircuit:
             self.instructions.append(instruction)
 
         except Exception as error:
-            logger.error(f"Error during processing of instruction [{type(CunqaCircuitError).__name__}].")
-            raise SystemExit
+            logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
+            raise error
 
 
     def _check_instruction(self, instruction):
@@ -980,7 +1019,7 @@ class CunqaCircuit:
                 
                 # checking name
                 if not isinstance(instruction["name"], str):
-                    logger.error(f"instruction name must be str, but {type(instruction["name"])} was provided.")
+                    logger.error(f"instruction name must be str, but {type(instruction['name'])} was provided.")
                     raise TypeError # I capture this at _add_instruction method
                 
                 if (instruction["name"] in SUPPORTED_GATES_1Q):
@@ -991,11 +1030,14 @@ class CunqaCircuit:
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
                     gate_qubits = 3
 
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("matrix" in instruction):
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
                     # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
-                    gate_qubits = int(np.log2(instruction["matrix"]))
+                    gate_qubits = int(np.log2(len(instruction["params"][0])))
                     if not instruction["name"] == "unitary":
                         gate_qubits += 1 # adding the control qubit
+
+                elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
+                    gate_qubits = 1
 
                 else:
                     logger.error(f"instruction is not supported.")
@@ -1003,19 +1045,22 @@ class CunqaCircuit:
 
                 # checking qubits
                 if isinstance(instruction["qubits"], list):
-                    if not isinstance(instruction["qubits"][0], int):
-                        logger.error(f"instruction qubits must be a list of ints, but a list of {type(instruction['qubits'][0])} was provided.")
+                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
+                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
+                    elif len(set(instruction["qubits"])) != len(instruction["qubits"]):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
                 else:
                     logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
                     raise TypeError # I capture this at _add_instruction method
                 
                 if not (len(instruction["qubits"]) == gate_qubits):
-                    logger.error(f"instruction number of qubits is not cosistent with qubits provided.")
+                    logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not any([instruction["qubits"] in q for q in self.quantum_regs.values()]):
-                    logger.error("intruction qubits out of range.")
+                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
 
@@ -1023,23 +1068,25 @@ class CunqaCircuit:
                 if ("clbits" in instruction) and (instruction["name"] in instructions_with_clbits):
 
                     if isinstance(instruction["clbits"], list):
-                        if not isinstance(instruction["clbits"][0], int):
-                            logger.error(f"instruction clbits must be a list of ints, but a list of {type(instruction['clbits'][0])} was provided.")
+                        if not all([isinstance(c, int) for c in instruction["clbits"]]):
+                            logger.error(f"instruction clbits must be a list of ints, but a list of {[type(c) for c in instruction['clbits'] if not isinstance(c,int)]} was provided.")
                             raise TypeError
                     else:
                         logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
                         raise TypeError # I capture this at _add_instruction method
                     
-                    if not any([instruction["clbits"] in c for c in self.classical_regs.values()]):
-                        logger.error("clbits out of range.")
+                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
+                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
                         raise ValueError
                     
                 elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
-                    logger.error(f"instruction {instruction["name"]} does not support clbits.")
+                    logger.error(f"instruction {instruction['name']} does not support clbits.")
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                    self.is_parametric = True
+
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
                         gate_params = 1
                     elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_2):
@@ -1049,7 +1096,7 @@ class CunqaCircuit:
                     elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_4):
                         gate_params = 4
                     else:
-                        logger.error(f"instruction {instruction["name"]} is not paramtric, therefore does not accept params.")
+                        logger.error(f"instruction {instruction['name']} is not paramtric, therefore does not accept params.")
                         raise ValueError
                     
                     if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
@@ -1057,17 +1104,20 @@ class CunqaCircuit:
                         raise TypeError
                     
                     if not len(instruction["params"]) == gate_params:
-                        logger.error(f"instruction number of params is not consistent with params provided.")
+                        logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
                         raise ValueError
-                elif (not ("params" in instruction)) and (instruction["name"] in flatten(SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4)):
+                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
                     logger.error("instruction is parametric, therefore requires params.")
                     raise ValueError
                                 
                 # check distributed instruction circuits
-                if not (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
+                if (not instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
                     # we check in the prrevious method that target/control circuit id is provided
                     logger.error(f"instruction circuits specification is need for distributed intstruction.")
                     raise ValueError
+                elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                    self.is_distributed =True
+                
         
     
     def _add_q_register(self, name, number_qubits):
@@ -1084,8 +1134,6 @@ class CunqaCircuit:
             new_name = name
 
         self.quantum_regs[new_name] = [(self.num_qubits + 1 + i) for i in range(number_qubits)]
-
-        self.num_qubits += number_qubits
 
         return new_name
     
@@ -1105,12 +1153,9 @@ class CunqaCircuit:
 
         self.classical_regs[new_name] = [(self.num_clbits + 1 + i) for i in range(number_clbits)]
 
-        self.num_clbits += number_clbits
-
         return new_name
 
 
-   
 
                 
 def flatten(lists):
