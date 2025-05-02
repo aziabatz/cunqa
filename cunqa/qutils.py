@@ -49,7 +49,7 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
         # Add specified flags
-        if fakeqmio is not False:
+        if fakeqmio:
             cmd.append(f"--fakeqmio")
         if classical_comm:
             cmd.append(f"--classical_comm")
