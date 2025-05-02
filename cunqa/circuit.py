@@ -82,7 +82,7 @@ def qc_to_json(qc):
 
     try:
         
-        quantum_registers, classical_registers = registers_dict(qc)
+        quantum_registers, classical_registers = _registers_dict(qc)
         
         json_data = {
             "instructions":[],

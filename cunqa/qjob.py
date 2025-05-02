@@ -248,7 +248,7 @@ class QJob():
 
                     logger.debug("Translating to QASM2 for MunichSimulator...")
 
-                    circuit = dumps(from_json_to_qc(circt)).translate(str.maketrans({"\"":  r"\"", "\n":r"\n"}))
+                    circuit = dumps(from_json_to_qc(circt))
             
 
             elif isinstance(circt, QuantumCircuit):
