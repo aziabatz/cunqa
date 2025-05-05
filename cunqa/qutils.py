@@ -52,7 +52,7 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         if fakeqmio:
             cmd.append(f"--fakeqmio")
         if classical_comm:
-            cmd.append(f"--classical_comm")
+            cmd.append(f"--comm=class_comm")
         if quantum_comm:
             cmd.append(f"--quantum_comm")
         if simulator is not None:
@@ -73,14 +73,14 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
             cmd.append(f"--qpus_per_node={str(qpus_per_node)}")
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
-
-        output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
+        
+        output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture ist output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
-
+        
         if family_name is not None:
-            return QFamily(family_name, job_id)
+            return QFamily(name=family_name, jobid=str(job_id))
         else:
-            return QFamily(job_id, job_id)
+            return QFamily(name=str(job_id), jobid=str(job_id))
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -124,7 +124,7 @@ def qdrop(*families):
                         break #pass to the next family name (two qraises must have different family names)
 
             elif isinstance(family, QFamily):
-                cmd.append(family.jobid)
+                cmd.append(str(family.jobid))
 
             else:
                 logger.error(f"Arguments for qdrop must be strings or QFamilies.")
