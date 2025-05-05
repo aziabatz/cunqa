@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "utils/json.hpp"
+using JSON = nlohmann::json;
 
 namespace cunqa {
 
