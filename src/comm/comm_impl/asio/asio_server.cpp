@@ -2,9 +2,9 @@
 #include <iostream>
 #include <string>
 
-#include "server.hpp"
-//#include "logger/logger.hpp"
-#include "utils/helpers.hpp"
+#include "comm/server.hpp"
+#include "logger.hpp"
+#include "utils/helpers/net_functions.hpp"
 #include "utils/constants.hpp"
 
 namespace as = boost::asio;
@@ -42,11 +42,11 @@ struct Server::Impl {
             return data;
         } catch (const boost::system::system_error& e) {
             if (e.code() == as::error::eof) {
-                //LOGGER_DEBUG("Client disconnected, closing conection.");
+                LOGGER_DEBUG("Client disconnected, closing conection.");
                 socket_.close(); 
                 return std::string("CLOSE");
             } else {
-                //LOGGER_ERROR()"Error receiving the circuit.");
+                LOGGER_ERROR()"Error receiving the circuit.");
                 throw;
             }
         }
@@ -63,7 +63,7 @@ struct Server::Impl {
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(result));
         } catch (const boost::system::system_error& e) {
-            //LOGGER_ERROR("Error sending the result.");
+            LOGGER_ERROR("Error sending the result.");
             throw;
         }
     }

@@ -3,9 +3,9 @@
 #include <iostream>
 #include <string>
 
-#include "client.hpp"
-//#include "logger/logger.hpp"
-#include "utils/helpers.hpp"
+#include "comm/client.hpp"
+#include "logger.hpp"
+#include "utils/helpers/net_functions.hpp"
 
 namespace as = boost::asio;
 using namespace std::string_literals;
@@ -35,9 +35,9 @@ struct Client::Impl {
             tcp::resolver resolver{io_context_};
             auto endpoint = resolver.resolve(ip, port);
             as::connect(socket_, endpoint);
-            //LOGGER_DEBUG("Client succesfully connected to server.");
+            LOGGER_DEBUG("Client succesfully connected to server.");
         } catch (const boost::system::system_error& e) {
-            //LOGGER_ERROR("Imposible to connect to endpoint {}:{}. Server not available.", ip, port);
+            LOGGER_ERROR("Imposible to connect to endpoint {}:{}. Server not available.", ip, port);
             throw;
         }
     }
@@ -50,9 +50,9 @@ struct Client::Impl {
         try {
             as::write(socket_, as::buffer(&data_length_network, sizeof(data_length_network))); 
             as::write(socket_, as::buffer(data));
-            //LOGGER_DEBUG("Message sent.");
+            LOGGER_DEBUG("Message sent.");
         } catch (const boost::system::system_error& e) {
-            //LOGGER_ERROR("Error sending the circuit.");
+            LOGGER_ERROR("Error sending the circuit.");
         }
         
     }
@@ -66,10 +66,10 @@ struct Client::Impl {
 
             std::string result(result_length, '\0');
             as::read(socket_, as::buffer(&result[0], result_length));
-            //LOGGER_DEBUG("Result received: {}", result);
+            LOGGER_DEBUG("Result received: {}", result);
             return result;
         } catch (const boost::system::system_error& e) {
-            //LOGGER_ERROR("Error receiving the circuit: {} (HINT: Check the circuit format and/or if QPUs are still up working.)", e.code().message());
+            LOGGER_ERROR("Error receiving the circuit: {} (HINT: Check the circuit format and/or if QPUs are still up working.)", e.code().message());
         }
 
         return std::string("{}");

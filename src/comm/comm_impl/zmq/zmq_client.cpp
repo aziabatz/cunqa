@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-#include "client.hpp"
-//#include "logger/logger.hpp"
+#include "comm/client.hpp"
+#include "logger.hpp"
 
 
 namespace cunqa {
@@ -23,11 +23,11 @@ struct Client::Impl {
     {
         try {
             socket_.connect("tcp://" + ip + ":" + port);
-            //LOGGER_DEBUG("Client successfully connected to server at {}.", endpoint);
+            LOGGER_DEBUG("Client successfully connected to server at {}:{}.", ip, port);
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());
+            LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());
         } catch (const std::exception& e) {
-            //LOGGER_ERROR("Trying to connect to a QPU located in a external node. {}", e.what());
+            LOGGER_ERROR("Trying to connect to a QPU located in a external node. {}", e.what());
             throw;
         }
     }
@@ -37,9 +37,9 @@ struct Client::Impl {
         try {
             zmq::message_t message(data.begin(), data.end());
             socket_.send(message, zmq::send_flags::none);
-            //LOGGER_DEBUG("Circuit sent: {}", data);
+            LOGGER_DEBUG("Circuit sent: {}", data);
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Error sending the circuit: {}", e.what());
+            LOGGER_ERROR("Error sending the circuit: {}", e.what());
         }
     }
 
@@ -49,10 +49,10 @@ struct Client::Impl {
             zmq::message_t reply;
             auto size = socket_.recv(reply, zmq::recv_flags::none);
             std::string result(static_cast<char*>(reply.data()), size.value());
-            //LOGGER_DEBUG("Result correctly received: {}", result);
+            LOGGER_DEBUG("Result correctly received: {}", result);
             return result;
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Error receiving the circuit: {}", e.what());
+            LOGGER_ERROR("Error receiving the circuit: {}", e.what());
         }
 
         return std::string("{}");

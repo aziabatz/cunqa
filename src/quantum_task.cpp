@@ -1,5 +1,7 @@
-
 #include "quantum_task.hpp"
+#include "utils/constants.hpp"
+
+#include "logger.hpp"
 
 namespace cunqa {
 
@@ -11,7 +13,7 @@ void QuantumTask::update_circuit(const std::string& quantum_task)
         circuit = quantum_task_json.at("instructions");
         config = quantum_task_json.at("config");
     } else if (quantum_task_json.contains("params")) {
-        upgrade_params_(quantum_task_json.at("params");)
+        update_params_(quantum_task_json.at("params"));
     } else
         throw std::runtime_error("Incorrect format of the circuit.");
 }
@@ -29,20 +31,20 @@ void QuantumTask::update_params_(const std::vector<double> params)
             std::string name = instruction.at("name");
             
             // TODO: Look at the instructions constants and how to work with them
-            switch(CUNQA::INSTRUCTIONS_MAP[name]){
-                case CUNQA::MEASURE:
-                case CUNQA::ID:
-                case CUNQA::X:
-                case CUNQA::Y:
-                case CUNQA::Z:
-                case CUNQA::H:
-                case CUNQA::CX:
-                case CUNQA::CY:
-                case CUNQA::CZ:
+            switch(INSTRUCTIONS_MAP.at(name)){
+                case MEASURE:
+                case ID:
+                case X:
+                case Y:
+                case Z:
+                case H:
+                case CX:
+                case CY:
+                case CZ:
                     break;
-                case CUNQA::RX:
-                case CUNQA::RY:
-                case CUNQA::RZ:
+                case RX:
+                case RY:
+                case RZ:
                     instruction.at("params")[0] = params[counter];
                     counter = counter + 1;
                     break; 

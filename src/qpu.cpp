@@ -1,18 +1,23 @@
 #include <string>
+#include <iostream>
+
+#include "qpu.hpp"
+#include "logger.hpp"
 
 using namespace std::string_literals;
 
 namespace {
     // TODO: not having this hardcoded here is an improvement for other supercomputing centers
-    constexpr auto store = getenv("STORE");
-    constexpr std::string filepath = store + "/.cunqa/qpus.json"s;
+    const auto store = getenv("STORE");
+    const std::string filepath = store + "/.cunqa/qpus.json"s;
 }
 
 namespace cunqa {
 
-QPU::QPU(Backend backend, std::string& mode) :
-    backend{backend},
-    server{std::make_unique<Server>(mode)}
+QPU::QPU(std::unique_ptr<sim::Backend> backend, const std::string& mode, const std::string& family_id) :
+    backend{std::move(backend)},
+    server{std::make_unique<comm::Server>(mode)},
+    family_id_{family_id}
 { }
 
 void QPU::turn_ON() 
@@ -20,7 +25,7 @@ void QPU::turn_ON()
     std::thread listen([this](){this->recv_data_();});
     std::thread compute([this](){this->compute_result_();});
 
-    JSON qpu_config = this;
+    JSON qpu_config = *this;
     write_on_file(qpu_config, filepath);
 
     listen.join();
@@ -29,7 +34,7 @@ void QPU::turn_ON()
 
 void QPU::compute_result_()
 {    
-    QuantumTask quantum_task; 
+    QuantumTask quantum_task_; 
     while (true) 
     {
         std::unique_lock<std::mutex> lock(queue_mutex_);
@@ -42,11 +47,11 @@ void QPU::compute_result_()
                 message_queue_.pop();
                 lock.unlock();
                 
-                quantum_task.update_circuit(message);
-                auto result = backend->execute(quantum_task);
+                quantum_task_.update_circuit(message);
+                auto result = backend->execute(quantum_task_);
                 server->send_result(result);
 
-            } catch(const ServerException& e) {
+            } catch(const comm::ServerException& e) {
                 LOGGER_ERROR("There has happened an error sending the result, probably the client has had an error.");
                 LOGGER_ERROR("Message of the error: {}", e.what());
             } catch(const std::exception& e) {
@@ -63,7 +68,7 @@ void QPU::recv_data_()
 {   
     while (true) {
         try {
-            auto message = server->recv_circuit();
+            auto message = server->recv_data();
                 {
                 std::lock_guard<std::mutex> lock(queue_mutex_);
                 if (message.compare("CLOSE"s) == 0) {
@@ -82,5 +87,5 @@ void QPU::recv_data_()
 }
 
 
-}
+} // End of cunqa namespace
 

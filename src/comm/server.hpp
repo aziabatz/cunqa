@@ -5,6 +5,9 @@
 #include <queue>
 #include <string>
 
+#include "backends/simple_backend.hpp"
+#include "utils/json.hpp"
+
 namespace cunqa {
 namespace comm {
 
@@ -38,11 +41,11 @@ private:
     struct Impl;
     std::unique_ptr<Impl> pimpl_;
 
-    friend void to_json(JSON &j, SimpleBackend obj) {
+    friend void to_json(JSON& j, const Server& obj) {
         //
     }
 
-    friend void from_json(JSON j, SimpleBackend &obj) {
+    friend void from_json(const JSON& j, Server& obj) {
         //
     }
 };

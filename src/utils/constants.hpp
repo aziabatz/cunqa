@@ -1,12 +1,11 @@
 #pragma once
 
 #include <complex>
-
 #include <unordered_map>
-#include "utils/json.hpp"
-namespace CUNQA {
 
-  enum INSTRUCTIONS {
+namespace cunqa {
+
+enum INSTRUCTIONS {
     MEASURE,
     ID,
     X,
@@ -45,7 +44,7 @@ namespace CUNQA {
     D_C_IF_ECR,
 };
 
-std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
+const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     // MEASURE
     {"measure", MEASURE},
 
@@ -95,7 +94,7 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"d_c_if_ecr", D_C_IF_ECR},
 };
 
-std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
+const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},
@@ -113,17 +112,18 @@ std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
 };
 
 const std::vector<std::string> BASIS_GATES = {
-            "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
-            "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
-            "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
-            "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
-            "cswap"};
+    "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
+    "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
+    "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
+    "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
+    "cswap"
+};
 
-  const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
+const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
     "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
-  };
+};
 
-  std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
+const std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
     {"d_c_if_h", "h"},
     {"d_c_if_x", "x"},
     {"d_c_if_y", "y"},
@@ -135,7 +135,7 @@ const std::vector<std::string> BASIS_GATES = {
     {"d_c_if_cy", "cy"},
     {"d_c_if_cz", "cz"},
     {"d_c_if_ecr", "ecr"},
-  };
+};
 
 } //End namespace CUNQA
 

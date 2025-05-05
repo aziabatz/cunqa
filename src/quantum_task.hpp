@@ -1,3 +1,6 @@
+#pragma once
+
+#include <vector>
 
 #include "utils/json.hpp"
 
@@ -8,14 +11,14 @@ public:
     JSON circuit;
     JSON config;
 
-    QuantumTask() = default;
+    QuantumTask() : is_parametric_{false} {};
 
     void update_circuit(const std::string& quantum_task);
 
 private:
-    bool is_parametric_ = false;
+    bool is_parametric_;
     
     void update_params_(const std::vector<double> params);
-}
+};
 
 } // End of cunqa namespace

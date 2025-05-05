@@ -10,7 +10,7 @@
 #include <set>
 
 #include "argparse.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 #include "utils/json.hpp"
 
 using namespace std::literals;

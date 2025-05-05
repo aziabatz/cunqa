@@ -1,8 +1,8 @@
 #include "zmq.hpp"
 
-#include "server.hpp"
-//#include "logger/logger.hpp"
-#include "utils/helpers.hpp"
+#include "comm/server.hpp"
+#include "logger.hpp"
+#include "utils/helpers/net_functions.hpp"
 
 namespace cunqa {
 namespace comm {
@@ -17,9 +17,9 @@ struct Server::Impl {
     {
         try {
             socket_.bind("tcp://" + ip + ":" + port);
-            //LOGGER_DEBUG("Server bound to {}.", endpoint);
+            LOGGER_DEBUG("Server bound to {}:{}.", ip, port);
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Error binding to endpoint {}: {}.", ip + ":" + port, e.what());
+            LOGGER_ERROR("Error binding to endpoint {}: {}.", ip + ":" + port, e.what());
             throw;
         }
     }
@@ -30,12 +30,12 @@ struct Server::Impl {
             zmq::message_t message;
             auto size = socket_.recv(message, zmq::recv_flags::none);
             std::string data(static_cast<char*>(message.data()), size.value());
-            //LOGGER_DEBUG("Received data: {}", data);
+            LOGGER_DEBUG("Received data: {}", data);
             
             rid_queue_.push(message.routing_id());
             return data;
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Error receiving data: {}", e.what());
+            LOGGER_ERROR("Error receiving data: {}", e.what());
             return std::string("CLOSE");
         }
     }
@@ -48,9 +48,9 @@ struct Server::Impl {
             rid_queue_.pop();
 
             socket_.send(message, zmq::send_flags::none);
-            //LOGGER_DEBUG("Sent result: {}", result);
+            LOGGER_DEBUG("Sent result: {}", result);
         } catch (const zmq::error_t& e) {
-            //LOGGER_ERROR("Error sending result: {}", e.what());
+            LOGGER_ERROR("Error sending result: {}", e.what());
             throw;
         }
     }

@@ -5,15 +5,13 @@
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
 
-#include "utils/json.hpp"
-#include "logger/logger.hpp"
-
+#include "logger.hpp"
 #include "munich_simple_simulator.hpp"
 
 namespace cunqa {
 namespace sim {
 
-JSON execute(SimpleBackend backend, QuantumTask quantum_task) 
+JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) const
 {
     try {
 
@@ -23,33 +21,36 @@ JSON execute(SimpleBackend backend, QuantumTask quantum_task)
         auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
         JSON result_json;
+        JSON noise_model_json = backend.config.noise_model;
         float time_taken;
         LOGGER_DEBUG("Noise cunqa::JSON: {}", noise_model_json.dump(4));
 
         if (!noise_model_json.empty()){
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
-            StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, run_config.seed, "APD", noise_model_json["noise_prob"],
+                StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, quantum_task.config["seed"], "APD", noise_model_json["noise_prob"],
                                             noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
             
             auto start = std::chrono::high_resolution_clock::now();
-            auto result = sim.simulate(run_config.shots);
+            auto result = sim.simulate(quantum_task.config["shots"]);
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> duration = end - start;
             time_taken = duration.count();
             
-            !result.empty() ? return {{"counts", json(result)}, {"time_taken", time_taken}} 
-                            : throw std::runtime_error("QASM format is not correct.");
+            if (!result.empty())
+                return {{"counts", JSON(result)}, {"time_taken", time_taken}};
+            throw std::runtime_error("QASM format is not correct."); 
         } else {
             CircuitSimulator sim(std::move(mqt_circuit));
             
             auto start = std::chrono::high_resolution_clock::now();
-            auto result = sim.simulate(run_config.shots);
+            auto result = sim.simulate(quantum_task.config["shots"]);
             auto end = std::chrono::high_resolution_clock::now();
             std::chrono::duration<float> duration = end - start;
             time_taken = duration.count();
             
-            !result.empty() ? return {{"counts", json(result)}, {"time_taken", time_taken}} 
-                            : throw std::runtime_error("QASM format is not correct.");
+            if (!result.empty())
+                return {{"counts", JSON(result)}, {"time_taken", time_taken}};
+            throw std::runtime_error("QASM format is not correct."); 
         }        
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.

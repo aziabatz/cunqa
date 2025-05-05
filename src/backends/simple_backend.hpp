@@ -1,6 +1,18 @@
+#pragma once
 
+#include <vector>
 
 #include "backend.hpp"
+#include "quantum_task.hpp"
+#include "backends/simple_backend.hpp"
+#include "simulators/simulator_strategy.hpp"
+
+#include "utils/json.hpp"
+#include "logger.hpp"
+
+
+namespace cunqa {
+namespace sim {
 
 struct SimpleConfig {
     std::string name = "SimpleSimulator";
@@ -11,31 +23,70 @@ struct SimpleConfig {
     std::vector<std::string> basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
-    json noise_model;
-}
+    JSON noise_model;
 
-class SimpleBackend final : Backend {
+    friend void from_json(const JSON& j, SimpleConfig &obj)
+    {
+        j.at("name").get_to(obj.name);
+        j.at("version").get_to(obj.version);
+        j.at("n_qubits").get_to(obj.n_qubits);
+        j.at("description").get_to(obj.description);
+        j.at("description").get_to(obj.description);
+        j.at("coupling_map").get_to(obj.coupling_map);
+        j.at("basis_gates").get_to(obj.basis_gates);
+        j.at("custom_instructions").get_to(obj.custom_instructions);
+        j.at("gates").get_to(obj.gates);
+        j.at("noise_model").get_to(obj.noise_model);
+    }
+
+    friend void to_json(JSON& j, const SimpleConfig& obj) 
+    {
+        j = {   
+            {"name", obj.name}, 
+            {"version", obj.version},
+            {"n_qubits", obj.n_qubits}, 
+            {"description", obj.description},
+            {"coupling_map", obj.coupling_map},
+            {"basis_gates", obj.basis_gates}, 
+            {"custom_instructions", obj.custom_instructions},
+            {"gates", obj.gates},
+            {"noise_model", obj.noise_model}
+        };
+    }
+    
+};
+
+class SimpleBackend final : public Backend {
 public:
     SimpleConfig config;
     
-    SimpleBackend(SimpleConfig config, SimulatorStrategy simulator) : 
+    SimpleBackend(const SimpleConfig& config, std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator) : 
         config{config},
-        simulator_{std::make_unique<SimulatorStrategy>(simulator)}
+        simulator_{std::move(simulator)}
     { }
 
-    inline JSON execute(QuantumTask circuit) override
+    SimpleBackend(SimpleBackend& simple_backend) = default;
+
+    inline JSON execute(const QuantumTask& quantum_task) const override
     {
-        return simulator_->execute(circuit);
+        return simulator_->execute(*this, quantum_task);
     } 
 
+    JSON to_json() const override 
+    {   
+        if (!simulator_) {
+            LOGGER_DEBUG("puntero vacio.");
+        }
+        LOGGER_DEBUG("presimulator.");
+        const auto simulator_name = simulator_->get_name();
+        LOGGER_DEBUG("postsimulator.");
+        JSON config_json = config;
+        return {config_json, {"simulator", simulator_name}};
+    }
+
 private:
-    std::unique_ptr<SimulatorStrategy> simulator_;
+    std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator_;
+};
 
-    friend void to_json(JSON &j, SimpleBackend obj) {
-        //
-    }
-
-    friend void from_json(JSON j, SimpleBackend &obj) {
-        //
-    }
-}
+} // End of sim namespace
+} // End of cunqa namespace
