@@ -156,7 +156,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::D_C_IF_RY:
                 case CUNQA::D_C_IF_RZ:
                     comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                    SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
+                    //SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
                     param = instruction.at("params").get<std::vector<double>>();
                     switch(this->comm_component.is_sender_or_receiver(comm_endp)) {
                         case CUNQA::sender:
