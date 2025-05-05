@@ -29,12 +29,8 @@ int main(int argc, char* argv[])
 
     auto args = argparse::parse<MyArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
 
-    //Checking mode:
-    if ((args.mode != "hpc") && (args.mode != "cloud")) {
-        std::cerr << "\033[1;31m" << "Error: " << "mode argument different than hpc or cloud. Given: " << args.mode << "\n";
-        std::cerr << "Aborted." << "\033[0m \n";
-        return 1;
-    }
+    const char* store = std::getenv("STORE");
+    std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
@@ -122,35 +118,46 @@ int main(int argc, char* argv[])
         std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
     }
 
-    sbatchFile << "export INFO_PATH=" << std::getenv("STORE") << "/.cunqa/qpus.json\n";
+    
+    sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
-
-    if ( (args.comm.value() != "no_comm") && (args.comm.value() != "class_comm") && (args.comm.value() != "quantum_comm")) {
-        SPDLOG_LOGGER_ERROR(logger, "--comm only admits \"no_comm\", \"class_comm\" or \"quantum_comm\" as valid arguments");
+    //Checking duplicate family name
+    std::string family_name = std::any_cast<std::string>(args.family_name);
+    if (exists_family_name(family_name, info_path)) { //Check if there exists other QPUs with same family name
+        SPDLOG_LOGGER_ERROR(logger, "There are QPUs with the same family name as the provided: {}.", family_name);
         std::system("rm qraise_sbatch_tmp.sbatch");
         return 0;
     }
-    
+
+    //Get mode: hpc or cloud
+    std::string mode;
+    if(args.cloud) {
+        mode = "cloud";
+    } else {
+        mode = "hpc";
+    }
+
+    //Get srun command
     if (args.fakeqmio.has_value()) {
         SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
-        run_command = get_fakeqmio_run_command(args);
+        run_command = get_fakeqmio_run_command(args, mode);
     } else {
-        if (args.comm.value() == "no_comm") {
-            SPDLOG_LOGGER_DEBUG(logger, "No communications");
-            run_command = get_no_comm_run_command(args);
-            if (run_command == "0") {
-                return 0;
-            }
-        } else if (args.comm.value() == "class_comm") {
+        if (args.classical_comm) {
             SPDLOG_LOGGER_DEBUG(logger, "Classical communications");
-            run_command = get_class_comm_run_command(args);
+            run_command = get_class_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
-        } else { //Quantum Communication
+        } else if (args.quantum_comm) {
             SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 0;
+        } else {
+            SPDLOG_LOGGER_DEBUG(logger, "No communications");
+            run_command = get_no_comm_run_command(args, mode);
+            if (run_command == "0") {
+                return 0;
+            }
         }
     }
 

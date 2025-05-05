@@ -50,6 +50,11 @@ public:
 
     }
 
+    inline void _apply_unitary(CUNQA::Matrix& matrix, std::vector<int>& qubits)
+    {
+        this->executor->apply_unitary(matrix, qubits);
+    }
+
     inline void _apply_gate(std::string& gate_name, std::vector<int>& qubits, std::vector<double>& param)
     {
         try {

@@ -19,10 +19,12 @@ struct MyArgs : public argparse::Args
     std::optional<int>& qpus_per_node    = kwarg("qpuN,qpus_per_node", "Number of qpus in each node.");
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
-    std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file", /*implicit*/"last_calibrations");
-    std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together").set_default("default");
-    std::string& mode                    = kwarg("mode", "Infraestructure mode: HPC or CLOUD").set_default("hpc");
-    std::optional<std::string>& comm     = kwarg("comm", "Raise QPUs with MPI communications").set_default("no_comm");
+    std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file.", /*implicit*/"last_calibrations");
+    std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together.").set_default("default");
+    //bool& hpc                          = flag("hpc", "Default HPC mode. The user can connect with the local node QPUs.");
+    bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
+    bool& classical_comm                 = flag("classical_comm", "Enable classical communications.");
+    bool& quantum_comm                   = flag("quantum_comm", "Enable quantum communications.");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;

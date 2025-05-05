@@ -9,7 +9,7 @@
 #include "args_qraise.hpp"
 
 
-std::string get_class_comm_run_command(auto& args)
+std::string get_class_comm_run_command(auto& args, std::string& mode)
 {
     std::string run_command;
     std::string subcommand;
@@ -25,10 +25,10 @@ std::string get_class_comm_run_command(auto& args)
     if (args.backend.has_value()) {
         backend_path = std::any_cast<std::string>(args.backend.value());
         backend = R"({"backend_path":")" + backend_path + R"("})" ;
-        subcommand = std::any_cast<std::string>(args.mode) + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
+        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
         SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and personalized CunqaSimulator backend. \n");
     } else {
-        subcommand = std::any_cast<std::string>(args.mode) + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + "\n";
+        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + "\n";
         SPDLOG_LOGGER_DEBUG(logger, "Qraise with classical communications and default CunqaSimulator backend. \n");
     }
 

@@ -19,19 +19,37 @@ enum communications {
   quantum_comm
 };
 
+
 std::unordered_map<std::string, int> comm_map = {
 
   {"no_comm", no_comm},
   {"class_comm", class_comm},
   {"quantum_comm", quantum_comm}
-
-
 };
 
 
 namespace CUNQA {
 
+  using Matrix = std::vector<std::vector<std::complex<double>>>;
+
+  enum qpu_comm_library {
+    mpi,
+    zmq
+  };
+  
+  std::unordered_map<std::string, int> qpu_comm_map = {
+  
+    {"mpi", CUNQA::mpi},
+    {"zmq", CUNQA::zmq}
+  };
+
+  enum sender_or_receiver {
+    sender,
+    receiver
+  };
+
   enum INSTRUCTIONS {
+    UNITARY,
     MEASURE,
     ID,
     X,
@@ -71,6 +89,9 @@ namespace CUNQA {
 };
 
 std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
+    //Personalized gates
+    {"unitary", UNITARY},
+
     // MEASURE
     {"measure", MEASURE},
 
@@ -121,6 +142,7 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 };
 
 std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
+    {UNITARY, "unitary"},
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},
@@ -145,10 +167,11 @@ const std::vector<std::string> BASIS_GATES = {
             "cswap"};
 
   const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
-    "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
+    "unitary", "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
   };
 
   std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
+    {"d_c_if_unitary", "unitary"},
     {"d_c_if_h", "h"},
     {"d_c_if_x", "x"},
     {"d_c_if_y", "y"},

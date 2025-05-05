@@ -19,9 +19,10 @@ qpu2 = qpus[2]
 d_qc_0_zmq = {
     "id": "carballido",
     "instructions": [
-
+        
     {
         "name":"h",
+        "qubits":[0],
         "qubits":[0],
     },
     {
@@ -37,9 +38,11 @@ d_qc_0_zmq = {
     {
         "name": "measure",
         "qubits": [0]
+        "qubits": [0]
     },
     {
         "name": "measure",
+        "qubits": [1]
         "qubits": [1]
     }
     ],
@@ -65,13 +68,16 @@ d_qc_1_zmq = {
     {
         "name":"h",
         "qubits":[0],
+        "qubits":[0],
     },
     {
         "name": "measure",
         "qubits": [0]
+        "qubits": [0]
     },
     {
         "name": "measure",
+        "qubits": [1]
         "qubits": [1]
     }
     ],
@@ -92,6 +98,7 @@ d_qc_2_zmq = {
     {
         "name":"h",
         "qubits":[1],
+        "qubits":[1],
     },
     {
         "name":"d_c_if_x",
@@ -101,9 +108,11 @@ d_qc_2_zmq = {
     {
         "name": "measure",
         "qubits": [0]
+        "qubits": [0]
     },
     {
         "name": "measure",
+        "qubits": [1]
         "qubits": [1]
     }
     ],

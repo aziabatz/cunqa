@@ -20,7 +20,7 @@ public:
           socket_{context_, zmq::socket_type::server}
     {
         std::string net;
-        if (net_config.mode == "cloud") {
+        if (net_config_.mode == "cloud") {
             net = INFINIBAND;
         } else {
             net = LOCAL;
