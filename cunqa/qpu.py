@@ -182,6 +182,7 @@ class QFamily:
         
         elif isinstance(jobid, str):
             try:
+                print(jobid)
                 self.jobid = int(jobid)
             except Exception as error:
                 logger.error(f"Incorrect format for jobid [{type(error).__name__}].")
