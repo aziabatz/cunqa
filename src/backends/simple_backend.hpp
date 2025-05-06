@@ -70,18 +70,15 @@ public:
     inline JSON execute(const QuantumTask& quantum_task) const override
     {
         return simulator_->execute(*this, quantum_task);
-    } 
+    }
 
+    // TODO: Achieve this using the JSON adl serializer
     JSON to_json() const override 
-    {   
-        if (!simulator_) {
-            LOGGER_DEBUG("puntero vacio.");
-        }
-        LOGGER_DEBUG("presimulator.");
-        const auto simulator_name = simulator_->get_name();
-        LOGGER_DEBUG("postsimulator.");
+    {
         JSON config_json = config;
-        return {config_json, {"simulator", simulator_name}};
+        const auto simulator_name = simulator_->get_name();
+        config_json["simulator"] = simulator_name;
+        return config_json;
     }
 
 private:

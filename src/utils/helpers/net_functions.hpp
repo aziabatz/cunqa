@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <sys/types.h>
-#include <string_view>
+#include <string>
 #include <ifaddrs.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -54,7 +54,7 @@ std::string get_IP_address(const std::string& mode)
 
     char ip[INET6_ADDRSTRLEN];
     for (ifa = interfaces; ifa != nullptr; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == nullptr || ifa->ifa_name != "ib0") continue;
+        if (ifa->ifa_addr == nullptr || std::string(ifa->ifa_name) != "ib0") continue;
         int family = ifa->ifa_addr->sa_family;
         if (family == AF_INET) {
             void *addr;
@@ -63,7 +63,6 @@ std::string get_IP_address(const std::string& mode)
             break;
         }
     }
-
     freeifaddrs(interfaces);
     return ip;
 }
