@@ -2,15 +2,14 @@
 #include <iostream>
 #include <string>
 
-#include "client.hpp"
-#include "logger/logger.hpp"
+#include "comm/client.hpp"
+#include "logger.hpp"
 
 
 namespace cunqa {
 namespace comm {
     
-
-struct Impl {
+struct Client::Impl {
     Impl() :
         socket_{context_, zmq::socket_type::client}
     { }
@@ -24,7 +23,7 @@ struct Impl {
     {
         try {
             socket_.connect("tcp://" + ip + ":" + port);
-            LOGGER_DEBUG("Client successfully connected to server at {}.", endpoint);
+            LOGGER_DEBUG("Client successfully connected to server at {}:{}.", ip, port);
         } catch (const zmq::error_t& e) {
             LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());
         } catch (const std::exception& e) {
@@ -65,10 +64,10 @@ struct Impl {
 
 
 Client::Client() :
-    pimpl_{std::make_unique<Impl>()},
+    pimpl_{std::make_unique<Impl>()}
 { }
 
-~Client::Client() = default;
+Client::~Client() = default;
 
 void Client::connect(const std::string& ip, const std::string& port) {
     pimpl_->connect(ip, port);

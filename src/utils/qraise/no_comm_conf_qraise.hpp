@@ -6,7 +6,7 @@
 #include "argparse.hpp"
 #include "utils/constants.hpp"
 #include "args_qraise.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 std::string get_no_comm_run_command(auto& args)
 {

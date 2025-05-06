@@ -5,7 +5,7 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include "json.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 namespace cunqa {
 

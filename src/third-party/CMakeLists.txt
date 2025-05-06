@@ -23,11 +23,17 @@ set(ENABLE_CPACK OFF            CACHE BOOL "Disable CPACK"          FORCE)
 set(WITH_PERF_TOOL OFF          CACHE BOOL "Disable performance tool" FORCE)
 set(ZMQ_BUILD_TESTS OFF         CACHE BOOL "Disable tests"          FORCE)
 set(ENABLE_DRAFTS ON            CACHE BOOL "Enable drafts"          FORCE)
-set(BUILD_SHARED ON             CACHE BOOL "Build shared library"   FORCE)
-set(BUILD_STATIC OFF            CACHE BOOL "Build static library"   FORCE)
+set(BUILD_SHARED OFF             CACHE BOOL "Build shared library"   FORCE)
+set(BUILD_STATIC ON            CACHE BOOL "Build static library"   FORCE)
 
 FetchContent_Declare(
-    libzmq
+    zmq
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libzmq
 )
-FetchContent_MakeAvailable(libzmq)
+FetchContent_MakeAvailable(zmq)
+
+# TODO: Change this to non global
+set(ZMQ_BINARY_DIR "${zmq_BINARY_DIR}"
+    CACHE PATH "ZeroMQ binary directory from FetchContent")
+set(ZMQ_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include"
+    CACHE PATH "ZeroMQ include directory")

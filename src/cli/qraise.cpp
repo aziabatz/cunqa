@@ -15,7 +15,8 @@
 #include "utils/qraise/no_comm_conf_qraise.hpp"
 #include "utils/qraise/class_comm_conf_qraise.hpp"
 #include "utils/qraise/quantum_comm_conf_qraise.hpp"
-#include "logger/logger.hpp"
+
+#include "logger.hpp"
 
 using namespace std::literals;
 

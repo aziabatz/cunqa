@@ -3,14 +3,18 @@
 #include <iostream>
 #include <string>
 
-#include "client.hpp"
-#include "logger/logger.hpp"
-#include "utils/helpers.hpp"
+#include "comm/client.hpp"
+#include "logger.hpp"
+#include "utils/helpers/net_functions.hpp"
+
+namespace as = boost::asio;
+using namespace std::string_literals;
+using as::ip::tcp;
 
 namespace cunqa {
 namespace comm {
 
-struct Impl {
+struct Client::Impl {
     as::io_context io_context_;
     tcp::socket socket_;
 
@@ -38,7 +42,7 @@ struct Impl {
         }
     }
 
-    void send(const std::string& circuit) 
+    void send(const std::string& data) 
     {
         auto data_length = legacy_size_cast<uint32_t, std::size_t>(data.size());
         auto data_length_network = htonl(data_length);
@@ -70,13 +74,13 @@ struct Impl {
 
         return std::string("{}");
     }
-}
+};
 
 Client::Client() :
-    pimpl_{std::make_unique<Impl>()},
+    pimpl_{std::make_unique<Impl>()}
 { }
 
-~Client::Client() = default;
+Client::~Client() = default;
 
 void Client::connect(const std::string& ip, const std::string& port) {
     pimpl_->connect(ip, port);

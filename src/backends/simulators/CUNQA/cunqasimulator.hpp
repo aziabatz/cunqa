@@ -14,7 +14,7 @@
 #include "utils/types_cunqasim.hpp"
 #include "utils/constants.hpp"
 #include "utils/json.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 #include "simulator.hpp"
 

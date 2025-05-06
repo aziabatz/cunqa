@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_SYSTEM_PREFIX_PATH "")
@@ -51,7 +51,18 @@ else(NOT DEFINED PYBIND_PATH)
 endif()
 
 set(PYBIND11_PYTHON_VERSION 3.9 CACHE STRING "")
+
 find_package(pybind11 2.12 REQUIRED)
+find_package(nlohmann_json 3.7.3 REQUIRED)
+find_package(Threads REQUIRED)
+find_package(MPI REQUIRED)
+find_package(OpenMP REQUIRED)
+find_package(Boost REQUIRED)
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/utils/logger" "${CMAKE_CURRENT_SOURCE_DIR}/src")
+include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
 
 add_subdirectory(src)
 add_subdirectory(cunqa)
