@@ -21,7 +21,7 @@ class QRaiseError(Exception):
     pass
 
 
-def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, mode = None, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
+def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, cloud = True, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
     """
     Raises a QPU and returns its job_id.
 
@@ -52,15 +52,15 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         if fakeqmio:
             cmd.append(f"--fakeqmio")
         if classical_comm:
-            cmd.append(f"--comm=class_comm")
+            cmd.append(f"--classical_comm")
         if quantum_comm:
             cmd.append(f"--quantum_comm")
         if simulator is not None:
             cmd.append(f"--simulator={str(simulator)}")
         if family_name is not None:
             cmd.append(f"--family_name={str(family_name)}")
-        if mode is not None:
-            cmd.append(f"--mode={str(mode)}")
+        if cloud:
+            cmd.append(f"--cloud")
         if cores is not None:
             cmd.append(f"--cores={str(cores)}")
         if mem_per_qpu is not None:
@@ -74,6 +74,7 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
         
+        print(cmd)
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture ist output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         

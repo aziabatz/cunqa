@@ -12,7 +12,7 @@ def generate_id(size=4):
 SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz"]
 SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
-SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
+SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz", "d_c_if_rx","d_c_if_ry","d_c_if_rz"]
 SUPPORTED_GATES_PARAMETRIC_2 = ["u2", "r"]
 SUPPORTED_GATES_PARAMETRIC_3 = ["u", "u3", "cu3"]
 SUPPORTED_GATES_PARAMETRIC_4 = ["cu"]
@@ -608,7 +608,7 @@ class CunqaCircuit:
         """
         self._add_instruction({
             "name":"crz",
-            "qubits":qubits,
+            "qubits":[*qubits],
             "params":[param]
         })
 
@@ -842,7 +842,7 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
         
 
-    def send_gate(self, gate, control_qubit = None, target_qubit = None, target_circuit = None, *params):
+    def send_gate(self, gate, param, control_qubit = None, target_qubit = None, target_circuit = None):
         """
         Class method to apply a distributed instruction as a gate condioned by a local classical measurement and applied in a different circuit.
         
@@ -856,7 +856,7 @@ class CunqaCircuit:
 
         target_qubit (int): qubit where the gate will be conditionally applied.
 
-        *params (float or int): parameters in case the gate provided is parametric.
+        *param (float or int): parameter in case the gate provided is parametric.
 
         """
 
@@ -880,8 +880,8 @@ class CunqaCircuit:
             logger.error(f"target qubits must be int ot list, but {type(target_qubit)} was provided [TypeError].")
             raise SystemExit
         
-        if params is not None:
-            params = [*params]
+        if param is not None:
+            params = [param]
         else:
             params = []
 
@@ -912,7 +912,7 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
     
 
-    def recv_gate(self, gate, control_qubit = None, control_circuit = None, target_qubit = None, *params):
+    def recv_gate(self, gate, param, control_qubit = None, control_circuit = None, target_qubit = None):
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a different circuit and applied locally.
         
@@ -920,13 +920,13 @@ class CunqaCircuit:
         -------
         gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
+        param (float or int): parameter in case the gate provided is parametric.
+
         control_qubit (int): control qubit from self.
 
         target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
 
-        target_qubit (int): qubit where the gate will be conditionally applied.
-
-        *params (float or int): parameters in case the gate provided is parametric.
+        target_qubit (int): qubit where the gate will be conditionally applied.       
         """
 
         if isinstance(gate, str):
@@ -949,8 +949,8 @@ class CunqaCircuit:
             logger.error(f"target qubits must be int ot list, but {type(target_qubit)} was provided [TypeError].")
             raise SystemExit
         
-        if params is not None:
-            params = [*params]
+        if param is not None:
+            params = [param]
         else:
             params = []
 
@@ -1048,7 +1048,10 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif len(set(instruction["qubits"])) != len(instruction["qubits"]):
+                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
@@ -1096,7 +1099,7 @@ class CunqaCircuit:
                     elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_4):
                         gate_params = 4
                     else:
-                        logger.error(f"instruction {instruction['name']} is not paramtric, therefore does not accept params.")
+                        logger.error(f"instruction {instruction['name']} is not parametric, therefore does not accept params.")
                         raise ValueError
                     
                     if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
@@ -1128,7 +1131,7 @@ class CunqaCircuit:
             while new_name in self.quantum_regs:
                 new_name = new_name + "_" + str(i); i += 1
 
-            logger.warning(f"{name} for quantum register in use, renaaming to {new_name}.")
+            logger.warning(f"{name} for quantum register in use, renaming to {new_name}.")
         
         else:
             new_name = name

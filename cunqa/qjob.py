@@ -118,7 +118,7 @@ class Result:
         
         elif "ERROR" in self.result:
             message = self.result["ERROR"]
-            logger.error(f"Error during simulation, please check availability of QPUs, run arguments sintax and circuit sintax: {message}")
+            logger.error(f"Error during simulation, please check availability of QPUs, run arguments syntax and circuit syntax: {message}")
             raise QJobError
 
         else:
@@ -258,7 +258,7 @@ class QJob:
                 logger.debug("Translation to dict not necessary...")
 
                 circuit = circt['instructions']
-
+                
                 exec_type = circt['exec_type']
             
 

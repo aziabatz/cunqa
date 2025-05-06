@@ -7,7 +7,6 @@
 #include "zmq.hpp"
 
 #include "simulators/simulator.hpp"
-#include "logger/logger.hpp"
 #include "classical_node_utils.hpp"
 #include "communication_component.hpp"
 
@@ -92,7 +91,8 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     measurement = this->backend.apply_measure(qubits);
                     break;
                 case CUNQA::UNITARY:
-                    matrix = instruction.at("matrix").get<CUNQA::Matrix>();
+                    SPDLOG_LOGGER_DEBUG(logger, "Entra en CUNQA::UNITARY y yo me voy a cagar en todo.");
+                    matrix = instruction.at("params").get<CUNQA::Matrix>();
                     this->backend.apply_unitary(matrix, qubits);
                     break;
                 case CUNQA::ID:

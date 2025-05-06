@@ -47,8 +47,10 @@ def run_distributed(circuits, qpus, **run_args):
             raise SystemExit # User's level
         
         if isinstance(circuit, CunqaCircuit):
-            extended_cunqa_info = {"id":circuit.id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "exec_type":"dynamic"}
+            extended_cunqa_info = {"id":circuit._id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "exec_type":"dynamic", "is_distributed":circuit.is_distributed, "is_parametric":circuit.is_parametric}
             circuit_jsons.append(extended_cunqa_info)
+            print("Pasa por aqui")
+            print(extended_cunqa_info)
 
         elif isinstance(circuit, dict):
             circuit_jsons.append(circuit)
@@ -69,7 +71,7 @@ def run_distributed(circuits, qpus, **run_args):
 
     #Check wether the QPUs are valid
     if not all(qpu._family_name == qpus[0]._family_name for qpu in qpus):
-        if not all("zmq" in qpu.comm_info for qpu in qpus):
+        if not all("zmq" in qpu._comm_info for qpu in qpus):
             names = set()
             for qpu in qpus:
                 names.add(qpu._family_name)

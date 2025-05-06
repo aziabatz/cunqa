@@ -140,7 +140,7 @@ class QPU:
         """
         if not self.connected:
             self._qclient.connect(self._port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
+            logger.debug(f"QClient connection stablished for QPU {self.id} to port {self._port}.")
         else:
             logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
 
@@ -182,7 +182,6 @@ class QFamily:
         
         elif isinstance(jobid, str):
             try:
-                print(jobid)
                 self.jobid = int(jobid)
             except Exception as error:
                 logger.error(f"Incorrect format for jobid [{type(error).__name__}].")
