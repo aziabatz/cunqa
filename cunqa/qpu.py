@@ -18,7 +18,7 @@ class QPU:
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None, family_name = None, port = None, comm_info = None):
+    def __init__(self, id=None, qclient=None, backend=None, family_name = None, ip = None, port = None, comm_info = None):
         """
         Initializes the QPU class.
 
@@ -69,8 +69,19 @@ class QPU:
             logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
+        if ip == None:
+            logger.error(f"QPU ip not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
+            raise SystemExit # User's level
+        
+        elif isinstance(ip, str):
+            self._ip = ip
+
+        else:
+            logger.error(f"QClient ip must be str, but {type(port)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+        
         if port == None:
-            logger.error(f"QPU client not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
+            logger.error(f"Client port not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
             raise SystemExit # User's level
         
         elif isinstance(port, str):
@@ -139,10 +150,10 @@ class QPU:
         <class 'qjob.Result'> object.
         """
         if not self.connected:
-            self._qclient.connect(self._port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
+            self._qclient.connect(self._ip, self._port)
+            logger.debug(f"QClient connection stabished for QPU {self.id} to {self._ip}:{self._port}.")
         else:
-            logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
+            logger.debug(f"QClient already connected for QPU {self.id} to {self._ip}:{self._port}.")
 
         try:
             qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level, **run_parameters)

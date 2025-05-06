@@ -44,7 +44,11 @@ namespace CUNQA {
     CX,
     CY,
     CZ,
+    CRX,
+    CRY,
+    CRZ,
     ECR,
+    CECR,
     C_IF_H,
     C_IF_X,
     C_IF_Y,
@@ -90,9 +94,15 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"cx", CX},
     {"cy", CY},
     {"cz", CZ},
+    {"crx", CRX},
+    {"cry", CRY},
+    {"crz", CRZ},
     {"ecr", ECR},
 
-    //CONTROLLED GATES
+    // TWO GATE NO PARAM
+    {"cecr", CECR},
+
+    //CLASSICAL CONTROLLED GATES
     {"c_if_h", C_IF_H},
     {"c_if_x", C_IF_X},
     {"c_if_y", C_IF_Y},
@@ -105,7 +115,7 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"c_if_cz", C_IF_CZ},
     {"c_if_ecr", C_IF_ECR},
 
-    //DISTRIBUTED GATES
+    //CLASSICAL CONTROLLED DISTRIBUTED GATES
     {"d_c_if_h", D_C_IF_H},
     {"d_c_if_x", D_C_IF_X},
     {"d_c_if_y", D_C_IF_Y},
