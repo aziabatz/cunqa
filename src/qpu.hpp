@@ -8,8 +8,6 @@
 #include "comm/server.hpp"
 #include "backends/backend.hpp"
 #include "utils/json.hpp"
-#include "logger.hpp"
-
 
 using namespace std::string_literals;
 
@@ -34,9 +32,7 @@ private:
     
     friend void to_json(JSON& j, const QPU& obj) {
         JSON backend_json = obj.backend->to_json();
-        LOGGER_DEBUG("backend hecho.");
         JSON server_json = *(obj.server);
-        LOGGER_DEBUG("server hecho.");
         j = {
             {"backend", backend_json},
             {"net", server_json},

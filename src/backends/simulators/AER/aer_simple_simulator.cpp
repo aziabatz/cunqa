@@ -10,8 +10,10 @@
 #include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
 
-#include "logger.hpp"
+#include "aer_helpers.hpp"
 #include "aer_simple_simulator.hpp"
+
+#include "logger.hpp"
 
 using namespace AER;
 
@@ -24,7 +26,10 @@ JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask
 {
     try {
         //TODO: Maybe improve them to send several circuits at once
-        Circuit circuit(quantum_task.circuit);
+        JSON circuit_json = quantum_task_to_AER(quantum_task);
+        LOGGER_DEBUG("circuit: {}.", circuit_json.dump(4));
+
+        Circuit circuit(circuit_json);
         std::vector<std::shared_ptr<Circuit>> circuits;
         circuits.push_back(std::make_shared<Circuit>(circuit));
 

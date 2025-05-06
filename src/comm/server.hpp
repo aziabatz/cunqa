@@ -42,11 +42,21 @@ private:
     std::unique_ptr<Impl> pimpl_;
 
     friend void to_json(JSON& j, const Server& obj) {
-        //
+        j = {   
+            {"mode", obj.mode}, 
+            {"hostname", obj.hostname},
+            {"nodename", obj.nodename}, 
+            {"ip", obj.ip},
+            {"port", obj.port}
+        };
     }
 
     friend void from_json(const JSON& j, Server& obj) {
-        //
+        j.at("mode").get_to(obj.mode);
+        j.at("hostname").get_to(obj.hostname);
+        j.at("nodename").get_to(obj.nodename);
+        j.at("ip").get_to(obj.ip);
+        j.at("port").get_to(obj.port);
     }
 };
 

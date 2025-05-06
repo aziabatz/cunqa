@@ -95,7 +95,6 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 };
 
 const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
-const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},

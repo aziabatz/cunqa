@@ -1,8 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
-using JSON = nlohmann::json;
+#include "utils/json.hpp"
 
 namespace cunqa {
 

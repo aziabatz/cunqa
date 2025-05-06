@@ -8,7 +8,8 @@ namespace sim {
 
 inline JSON quantum_task_to_AER(QuantumTask quantum_task) 
 {
-    return {{"instructions", quantum_task.circuit}};
+    JSON j = {{"instructions", quantum_task.circuit}};
+    return j;
 }
 
 } // End of sim namespace

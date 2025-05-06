@@ -66,3 +66,4 @@ include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
 
 add_subdirectory(src)
 add_subdirectory(cunqa)
+add_subdirectory(examples)

@@ -31,16 +31,16 @@ void QuantumTask::update_params_(const std::vector<double> params)
             std::string name = instruction.at("name");
             
             // TODO: Look at the instructions constants and how to work with them
-            switch(CUNQA::INSTRUCTIONS_MAP[name]){
-                case CUNQA::MEASURE:
-                case CUNQA::ID:
-                case CUNQA::X:
-                case CUNQA::Y:
-                case CUNQA::Z:
-                case CUNQA::H:
-                case CUNQA::CX:
-                case CUNQA::CY:
-                case CUNQA::CZ:
+            switch(INSTRUCTIONS_MAP.at(name)){
+                case MEASURE:
+                case ID:
+                case X:
+                case Y:
+                case Z:
+                case H:
+                case CX:
+                case CY:
+                case CZ:
                     break;
                 case RX:
                 case RY:
