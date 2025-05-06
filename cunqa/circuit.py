@@ -677,7 +677,7 @@ class CunqaCircuit:
         })
     
 
-     # methhods for implementing conditional LOCAL gates
+    # methhods for implementing conditional LOCAL gates
 
 
     def unitary(self, matrix, *qubits):

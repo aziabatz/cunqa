@@ -12,11 +12,23 @@ from cunqa.qjob import gather
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
 family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-os.system('sleep 18')
+os.system('sleep 15')
 qpus_QPE  = getQPUs(family)
 
-print("Id: ", qpus_QPE[0].id)
-print("Port: ", qpus_QPE[0]._port)
+def distr_rz2_QPE(n_precision):
+    """"
+    Function for distributed quantum phase estimation.
+
+    Args
+    ---------
+    n_precision (str): number of digits of the phase to extract
+    """
+    circuits = {}
+    for i in range(n_precision): 
+        circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
+        circuits[f"cc_{i}"].h(0)
+
+
 
 
 # Helper function, eigenstates and actual phase for each eigenstate
@@ -37,7 +49,7 @@ x2 = np.pi
 #x1 = 0
 #x2 = np.pi
 
-phi = binary_to_float("0.000100110101011100100001101111")
+phi = binary_to_float("0.11111000100110101011100100001101111")
 theta = 2 * np.pi * phi
 
 if x1 == 0 and x2 == 0:            # State |00>
@@ -48,28 +60,32 @@ elif x1 == 0 or x2 == 0:           # State |01> or |10>
     phase = 0
 
 # Define the circuits to be run 
-cc_1 =CunqaCircuit(3, 1, id="first")
+cc_1 =CunqaCircuit(3, 3, id="first")
 
 cc_1.h(0)
 cc_1.rx(x1,1)
 cc_1.rx(x2,2)
 cc_1.crz(theta,0,1)
 cc_1.crz(theta,0,2)
-cc_1.send_gate("rz",  1/2, control_qubit = 0, target_qubit = 0, target_circuit = "second")
 cc_1.h(0)
+cc_1.send_gate("rz",  np.pi*1/2, control_qubit = 0, target_qubit = 0, target_circuit = "second")
 cc_1.measure(0,0)
+cc_1.measure(1,1)
+cc_1.measure(2,2)
 
 
-cc_2 =CunqaCircuit(3, 1, id="second")
+cc_2 =CunqaCircuit(3, 3, id="second")
 
 cc_2.h(0)
 cc_2.rx(x1,1)
 cc_2.rx(x2,2)
 cc_2.crz(theta,0,1)
 cc_2.crz(theta,0,2)
-cc_2.recv_gate("rz", 1/2, control_qubit = 0, control_circuit = "first", target_qubit = 0)
+cc_2.recv_gate("rz", np.pi*1/2, control_qubit = 0, control_circuit = "first", target_qubit = 0)
 cc_2.h(0)
 cc_2.measure(0,0)
+cc_2.measure(1,1)
+cc_2.measure(2,2)
 
 
 circs_QPE = [cc_1, cc_2]
@@ -83,11 +99,11 @@ print(counts_list)
 estimation = ''
 
 for counts in counts_list:
-    bit_string = max(counts, key=lambda x: x[1])[0] #finds the element with the highest count and extracts its binary string
+    max_key = max(counts, key=counts.get) #finds the element with the highest count and extracts its binary string
 
     # TODO: Check if it's necessary to reverse or something
 
-    estimation += bit_string #concatenate binary string to get the full estimation. 
+    estimation += max_key[0] #concatenate binary string to get the full estimation. 
 
 
 # Let the user know the estimated phase

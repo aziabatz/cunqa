@@ -91,7 +91,6 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     measurement = this->backend.apply_measure(qubits);
                     break;
                 case CUNQA::UNITARY:
-                    SPDLOG_LOGGER_DEBUG(logger, "Entra en CUNQA::UNITARY y yo me voy a cagar en todo.");
                     matrix = instruction.at("params").get<CUNQA::Matrix>();
                     this->backend.apply_unitary(matrix, qubits);
                     break;
@@ -117,6 +116,9 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::RX:
                 case CUNQA::RY:
                 case CUNQA::RZ:
+                case CUNQA::CRX:
+                case CUNQA::CRY:
+                case CUNQA::CRZ:
                 case CUNQA::C_IF_RX:
                 case CUNQA::C_IF_RY:
                 case CUNQA::C_IF_RZ:

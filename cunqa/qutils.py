@@ -74,7 +74,6 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
         
-        print(cmd)
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture ist output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         

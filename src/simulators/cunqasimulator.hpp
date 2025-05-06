@@ -41,7 +41,6 @@ public:
     //Dynamic execution
     inline int _apply_measure(std::vector<int>& qubits)
     {
-        SPDLOG_LOGGER_DEBUG(logger, "Measure.");
         try {
             return this->executor->apply_measure(qubits); 
         } catch (const std::exception& e) {
@@ -53,13 +52,11 @@ public:
 
     inline void _apply_unitary(CUNQA::Matrix& matrix, std::vector<int>& qubits)
     {
-        SPDLOG_LOGGER_DEBUG(logger, "Unitary.");
         this->executor->apply_unitary(matrix, qubits);
     }
 
     inline void _apply_gate(std::string& gate_name, std::vector<int>& qubits, std::vector<double>& param)
     {
-        SPDLOG_LOGGER_DEBUG(logger, "Gate.");
         try {
 
             switch (instructions_map[gate_name])
