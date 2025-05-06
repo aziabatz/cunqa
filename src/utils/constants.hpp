@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
 #include <complex>
 #include <unordered_map>
 
 namespace cunqa {
+namespace constants{
 
 enum INSTRUCTIONS {
     MEASURE,
@@ -105,7 +107,6 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 };
 
 const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
-const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},
@@ -148,7 +149,8 @@ const std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
     {"d_c_if_ecr", "ecr"},
 };
 
-} //End namespace CUNQA
+} // End namespace constants
+} //End namespace cunqa
 
 
 

@@ -6,37 +6,18 @@
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "operations/Operation.hpp"
+#include "ir/operations/Operation.hpp"
 #include "Definitions.hpp"
 
-#include "comm/qpu_comm.hpp"
-#include "config/backend_config.hpp"
-#include "utils/constants.hpp"
+#include "quantum_task.hpp"
+#include "backends/simple_backend.hpp"
+#include "backends/simulators/simulator_strategy.hpp"
+
 #include "utils/json.hpp"
-#include "logger/logger.hpp"
-
-#include "simulator.hpp"
-
-namespace cunqa 
-{
-
-class QuantumComputation;
-
-class DistributedCircuitSimulator : public qc::CircuitSimulator
-{
-public:
-    // Constructors
-    DistributedCircuitSimulator() = default;
-    DistributedCircuitSimulator(std::unique_ptr<QuantumComputation>&& qc_) : qc(std::move(qc_))
-    {}
-
-    // Methods
-    std::map<std::size_t, bool> singleShot(bool ignoreNonUnitaries) override;
-
-protected:
 
 
-}
+namespace cunqa {
+namespace sim {
 
 
 // New operation for Distributed Classical Communications
@@ -50,7 +31,7 @@ public:
         sending_endpoint = sending_endpoint;
         receiving_endpoint = receiving_endpoint;
         control_qubit = control_qubit;
-        targets.emplace_back(target_qubits);
+        targets = target_qubits;
         parameter = std::move(params);
     }
 
@@ -59,7 +40,7 @@ public:
     }
 
     // TODO
-    void addControl(const Control c) override {
+    void addControl(qc::Control c) override {
         std::cout << "Dummy method to override the pure virtual addControl()" << "\n";    
     }
 
@@ -67,15 +48,15 @@ public:
         std::cout << "Dummy method to override the pure virtual clearControls()" << "\n"; 
     }
 
-    void removeControl(const Control c) override {
+    void removeControl(const qc::Control c) override {
         std::cout << "Dummy method to override the pure virtual removeControl()" << "\n"; 
     }
 
-    Controls::iterator removeControl(const Controls::iterator it) override {
+    qc::Controls::iterator removeControl(const qc::Controls::iterator it) override {
         return controls.erase(it); 
     }
 
-    void dumpOpenQASM(std::ostream& of, const RegisterNames& qreg, const RegisterNames& creg, std::size_t indent, bool openQASM3) const override {
+    void dumpOpenQASM(std::ostream& of, const qc::RegisterNames& qreg, const qc::RegisterNames& creg, std::size_t indent, bool openQASM3) const override {
         std::cout << "Dummy method to override the pure virtual dumpOpenQASM()" << "\n";
     }
 
@@ -88,7 +69,7 @@ protected:
     std::string receiving_endpoint;
     qc::Qubit control_qubit;
 
-}
+};
 
 
 // Extension of qc::QuantumComputation for Distributed Classical Communications
@@ -112,20 +93,39 @@ public:
 
     void set_circuit();
 
+    
 
-protected:
+    // Attributes
     bool has_classic_communications = false;
     JSON circuit;
+protected:
+    
 
-}
+};
+
+
+class DistributedCircuitSimulator : public CircuitSimulator<dd::DDPackageConfig>
+{
+public:
+    // Constructors
+    DistributedCircuitSimulator() = default;
+    DistributedCircuitSimulator(std::unique_ptr<QuantumComputation>&& qc_) : CircuitSimulator(std::unique_ptr<qc::QuantumComputation>(std::move(qc_)))
+    {}
+
+    // Methods
+    std::map<std::size_t, bool> singleShot(bool ignoreNonUnitaries) override;
+
+};
+    
+
 
 // Execution without communications and with qasm
-JSON execute(JSON& circuit_json, JSON& noise_model_json,  const config::RunConfig& run_config);
+JSON execute(QuantumTask& quantum_task);
 
 // Dynamic execution (for classical communications)
 JSON execute(JSON& circuit, int& shots);
 
 
 
-
+} // End namespace sim
 } // End namespace cunqa
