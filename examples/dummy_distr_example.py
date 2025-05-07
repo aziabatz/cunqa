@@ -14,7 +14,6 @@ from cunqa.qjob import gather
 family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
 os.system('sleep 15')
 qpus_QPE  = getQPUs(family)
-qpus_QPE_2 = [qpus_QPE[0], qpus_QPE[0]]
 
 # Define the circuits to be run 
 cc_1 =CunqaCircuit(3, 3, id="first")
@@ -37,7 +36,7 @@ cc_2.measure(2,2)
 circs_QPE = [cc_1, cc_2]
 
 # Run the QPE, each circuit on a different QPU. Get a list with the counts of each circuit and pick the binary string which appears most often
-distr_jobs = run_distributed(circs_QPE, qpus_QPE_2) 
+distr_jobs = run_distributed(circs_QPE, qpus_QPE) 
 
 counts_list = [result.get_counts() for result in gather(distr_jobs)]
 print(counts_list)

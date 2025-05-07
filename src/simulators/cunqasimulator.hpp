@@ -83,6 +83,9 @@ public:
                 case rx:
                 case ry:
                 case rz:
+                case crx:
+                case cry:
+                case crz:
                 case c_if_rx:
                 case c_if_ry:
                 case c_if_rz:
