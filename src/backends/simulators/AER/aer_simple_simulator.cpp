@@ -26,26 +26,30 @@ JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask
 {
     try {
         //TODO: Maybe improve them to send several circuits at once
-        JSON circuit_json = quantum_task_to_AER(quantum_task);
-        LOGGER_DEBUG("circuit: {}.", circuit_json.dump(4));
+        auto aer_quantum_task = quantum_task_to_AER(quantum_task);
+        JSON circuit_json = aer_quantum_task.circuit;
+
+        LOGGER_DEBUG("Circuit {}.", circuit_json.dump(4));
 
         Circuit circuit(circuit_json);
         std::vector<std::shared_ptr<Circuit>> circuits;
         circuits.push_back(std::make_shared<Circuit>(circuit));
 
-        JSON run_config_json(quantum_task.config);
+        JSON run_config_json(aer_quantum_task.config);
 
         // TODO: See how to manage the seeds
         //run_config_json["seed_simulator"] = run_config.seed;
         Config aer_config(run_config_json);
-        
+
+        //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
         Noise::NoiseModel noise_model(backend.config.noise_model);
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
+
         return result.to_json();
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.
         LOGGER_ERROR("Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
-        return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
+        return {{"ERROR", std::string(e.what())}};
     }
     return {};
 }

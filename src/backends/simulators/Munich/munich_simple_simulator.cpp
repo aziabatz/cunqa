@@ -7,6 +7,7 @@
 
 #include "logger.hpp"
 #include "munich_simple_simulator.hpp"
+#include "munich_helpers.hpp"
 
 namespace cunqa {
 namespace sim {
@@ -14,16 +15,14 @@ namespace sim {
 JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) const
 {
     try {
-
         // TODO: Change the format with the free functions 
-        std::string circuit(quantum_task.circuit);
-        LOGGER_DEBUG("Circuit cunqa::JSON: {}", circuit);
+        std::string circuit = quantum_task_to_Munich(quantum_task);
+        LOGGER_DEBUG("OpenQASM circuit: {}", circuit);
         auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
         JSON result_json;
         JSON noise_model_json = backend.config.noise_model;
         float time_taken;
-        LOGGER_DEBUG("Noise cunqa::JSON: {}", noise_model_json.dump(4));
 
         if (!noise_model_json.empty()){
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
@@ -55,7 +54,7 @@ JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumT
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.
         LOGGER_ERROR("Error executing the circuit in the Munich simulator.\nTry checking the format of the circuit sent and/or of the noise model.");
-        return {{"ERROR", "\"" + std::string(e.what()) + "\""}};
+        return {{"ERROR", std::string(e.what())}};
     }
     return {};
 }

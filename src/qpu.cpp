@@ -49,7 +49,7 @@ void QPU::compute_result_()
                 
                 quantum_task_.update_circuit(message);
                 auto result = backend->execute(quantum_task_);
-                server->send_result(result);
+                server->send_result(result.dump());
 
             } catch(const comm::ServerException& e) {
                 LOGGER_ERROR("There has happened an error sending the result, probably the client has had an error.");

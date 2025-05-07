@@ -14,6 +14,8 @@ public:
 
     QuantumTask() : is_parametric_{false} {};
 
+    QuantumTask(const JSON& circuit,const JSON& config): circuit(circuit), config(config) { };
+
     void update_circuit(const std::string& quantum_task);
 
 private:

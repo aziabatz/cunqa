@@ -3,13 +3,29 @@
 #include "quantum_task.hpp"
 #include "utils/json.hpp"
 
+#include "logger.hpp"
+
 namespace cunqa {
 namespace sim {
 
-inline JSON quantum_task_to_AER(QuantumTask quantum_task) 
+QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
 {
-    JSON j = {{"instructions", quantum_task.circuit}};
-    return j;
+    JSON new_config = {
+        {"method", quantum_task.config.at("method")},
+        {"shots", quantum_task.config.at("shots")},
+        {"memory_slots", quantum_task.config.at("num_clbits")}
+        // TODO: Tune in the different options of the AER simulator
+    };
+
+    //JSON Object because if not it generates an array
+    JSON new_circuit = {
+        {"config", new_config},
+        {"instructions", quantum_task.circuit}
+    };
+
+    LOGGER_DEBUG("Circuito ANTES: {}", new_circuit.dump(4));
+
+    return QuantumTask(new_circuit, new_config);
 }
 
 } // End of sim namespace

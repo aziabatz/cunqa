@@ -199,7 +199,7 @@ def getQPUs(local = True, family_name = None):
         logger.debug(f"User at node {local_node}.")
 
         if family_name is not None:
-            targets = { k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) }
+            targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) }
         
         else:
             targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node)}
@@ -214,7 +214,7 @@ def getQPUs(local = True, family_name = None):
     qpus = []
     i = 0
     for k, v in targets.items():
-        client = QClient(info_path)
+        client = QClient(k["net"]["ip"], k["net"]["port"])
         qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k, comm_info = v["comm_info"]  )  ) # errors captured above
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
