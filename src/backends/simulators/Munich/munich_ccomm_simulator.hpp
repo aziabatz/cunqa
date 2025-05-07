@@ -93,8 +93,12 @@ public:
 
     void set_circuit();
 
-    
+    void saysomething()
+    {
+        std::cout << "Hola caracola" << "\n";
+    }
 
+    
     // Attributes
     bool has_classic_communications = false;
     JSON circuit;
@@ -114,6 +118,11 @@ public:
 
     // Methods
     std::map<std::size_t, bool> singleShot(bool ignoreNonUnitaries) override;
+
+    void sayhello()
+    {
+        this->qc->saysomething();
+    }
 
 };
     
