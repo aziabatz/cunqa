@@ -13,19 +13,25 @@ qc = {
     "instructions": [
     {
         "name":"h",
-        "qubits":[0,-1,-1]
+        "qubits":[0]
     },
     {
         "name":"cx",
-        "qubits":[0,1,-1],
+        "qubits":[0,1],
+    },
+    {
+        "name":"unitary",
+        "params": [[[0.0, 0.0], [0.0, -1.0]], [[0.0, 1.0], [0.0, 0.0]]],
+        "qubits": [0]
+
     },
     {
         "name": "measure",
-        "qubits": [0,-1,-1]
+        "qubits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1,-1,-1]
+        "qubits": [1]
     }
     ],
     "num_qubits": 2,
@@ -44,20 +50,20 @@ qc_param = {
     "instructions": [
     {
         "name":"h",
-        "qubits":[0,-1,-1]
+        "qubits":[0]
     },
     {
         "name":"rx",
-        "qubits":[1,-1,-1],
+        "qubits":[1],
         "params":[1.1111]
     },
     {
         "name": "measure",
-        "qubits": [0,-1,-1]
+        "qubits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1,-1,-1]
+        "qubits": [1]
     }
     ],
     "num_qubits": 2,

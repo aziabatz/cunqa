@@ -32,3 +32,28 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
 
     return 0;
 }
+
+bool exists_family_name(std::string& family_name, std::string& info_path)
+{
+    std::ifstream file(info_path);
+    if (!file.is_open()) {
+        return false;
+    } else {
+        json qpus_json;
+        file >> qpus_json;
+        for (auto& [key, value] : qpus_json.items()) {
+            if (value["family_name"] == family_name) {
+                return true;
+            } 
+        }
+        return false;
+    }
+}
+
+bool check_simulator_name(std::string& sim_name){
+    if (sim_name == "Cunqa" || sim_name == "Munich" || sim_name == "Aer") {  // Add new valid simulators to the check here
+        return true;
+    } else {
+        return false;
+    }
+}

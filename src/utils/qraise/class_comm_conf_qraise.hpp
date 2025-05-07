@@ -9,7 +9,7 @@
 #include "logger.hpp"
 
 
-std::string get_class_comm_run_command(auto& args)
+std::string get_class_comm_run_command(auto& args, std::string& mode)
 {
     std::string run_command;
     std::string subcommand;

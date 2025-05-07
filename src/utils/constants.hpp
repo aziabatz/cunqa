@@ -20,6 +20,9 @@ enum INSTRUCTIONS {
     CX,
     CY,
     CZ,
+    CRX,
+    CRY,
+    CRZ,
     ECR,
     C_IF_H,
     C_IF_X,
@@ -69,6 +72,9 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"cx", CX},
     {"cy", CY},
     {"cz", CZ},
+    {"crx", CRX},
+    {"cry", CRY},
+    {"crz", CRZ},
     {"ecr", ECR},
 
     //CONTROLLED GATES
@@ -113,6 +119,9 @@ const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {CX, "cx"},
     {CY, "cy"},
     {CZ, "cz"},
+    {CRX, "crx"},
+    {CRY, "cry"},
+    {CRZ, "crz"},
     {ECR, "ecr"},
 };
 
