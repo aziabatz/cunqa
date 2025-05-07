@@ -49,8 +49,7 @@ def run_distributed(circuits, qpus, **run_args):
         if isinstance(circuit, CunqaCircuit):
             extended_cunqa_info = {"id":circuit._id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "exec_type":"dynamic", "is_distributed":circuit.is_distributed, "is_parametric":circuit.is_parametric}
             circuit_jsons.append(extended_cunqa_info)
-            print("Pasa por aqui")
-            print(extended_cunqa_info)
+            #print(extended_cunqa_info)
 
         elif isinstance(circuit, dict):
             circuit_jsons.append(circuit)

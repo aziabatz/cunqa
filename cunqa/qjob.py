@@ -319,7 +319,7 @@ class QJob:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-            self._circuit = circuit
+            self._circuit = {"instructions":circuit}
             
         
         except KeyError as error:
@@ -409,7 +409,14 @@ class QJob:
             else:
                 logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
                 raise SystemExit # User's level
-        
+            
+        elif isinstance(parameters, (int, float)):
+            message = """{{"params":{} }}""".format([parameters]).replace("'", '"')
+
+        else:
+            logger.error(f"Parameters must be a single value (int, float) or given in a list, but {type(parameters)} was provided [{TypeError.__name__}].")
+            raise SystemExit # User's level
+
         try:
             logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
             self._future = self._QPU._qclient.send_parameters(message)
