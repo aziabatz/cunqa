@@ -81,14 +81,19 @@ int main(int argc, char* argv[])
         int cores_per_qpu = args.cores_per_qpu;
         sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
     } else {
-        SPDLOG_LOGGER_DEBUG(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
+        SPDLOG_LOGGER_ERROR(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
         return -1;
     }
 
     if (check_time_format(args.time))
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
     else {
-        SPDLOG_LOGGER_DEBUG(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        SPDLOG_LOGGER_ERROR(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        return -1;
+    }
+
+    if (!check_simulator_name(args.simulator)){
+        SPDLOG_LOGGER_ERROR(logger, "Incorrect simulator name ({}).", args.simulator);
         return -1;
     }
 
