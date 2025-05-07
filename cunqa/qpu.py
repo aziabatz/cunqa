@@ -96,7 +96,7 @@ class QPU:
             logger.error(f"Please provide QPU family name [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
             raise SystemExit # User's level
         
-        elif isinstance(port, str):
+        elif isinstance(family_name, str):
             self._family_name = family_name
 
         else:
@@ -124,7 +124,7 @@ class QPU:
 
         Args:
         --------
-        circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPU.
+        circuit (json dict or <class 'qiskit.circuit.CunqaCircuit'>): circuit to be run in the QPU.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -140,7 +140,7 @@ class QPU:
         """
         if not self.connected:
             self._qclient.connect(self._port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
+            logger.debug(f"QClient connection stablished for QPU {self.id} to port {self._port}.")
         else:
             logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
 
@@ -173,12 +173,14 @@ class QFamily:
 
         else:
             logger.error(f"QFamily name must be str, but {type(name)} was provided [{TypeError.__name__}].")
+
+
         
         if jobid is None:
             logger.error("No family name provided.")
             raise ValueError # capture this in qraise
         
-        elif isinstance(name, str):
+        elif isinstance(jobid, str):
             try:
                 self.jobid = int(jobid)
             except Exception as error:

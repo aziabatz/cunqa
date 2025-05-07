@@ -47,3 +47,11 @@ bool exists_family_name(std::string& family_name, std::string& info_path)
         return false;
     }
 }
+
+bool check_simulator_name(std::string& sim_name){
+    if (sim_name == "Cunqa" || sim_name == "Munich" || sim_name == "Aer") {  // Add new valid simulators to the check here
+        return true;
+    } else {
+        return false;
+    }
+}

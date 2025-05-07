@@ -7,7 +7,6 @@
 #include "zmq.hpp"
 
 #include "simulators/simulator.hpp"
-#include "logger/logger.hpp"
 #include "classical_node_utils.hpp"
 #include "communication_component.hpp"
 
@@ -92,7 +91,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     measurement = this->backend.apply_measure(qubits);
                     break;
                 case CUNQA::UNITARY:
-                    matrix = instruction.at("matrix").get<CUNQA::Matrix>();
+                    matrix = instruction.at("params").get<CUNQA::Matrix>();
                     this->backend.apply_unitary(matrix, qubits);
                     break;
                 case CUNQA::ID:
@@ -117,6 +116,9 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::RX:
                 case CUNQA::RY:
                 case CUNQA::RZ:
+                case CUNQA::CRX:
+                case CUNQA::CRY:
+                case CUNQA::CRZ:
                 case CUNQA::C_IF_RX:
                 case CUNQA::C_IF_RY:
                 case CUNQA::C_IF_RZ:
@@ -156,7 +158,7 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                 case CUNQA::D_C_IF_RY:
                 case CUNQA::D_C_IF_RZ:
                     comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                    SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
+                    //SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
                     param = instruction.at("params").get<std::vector<double>>();
                     switch(this->comm_component.is_sender_or_receiver(comm_endp)) {
                         case CUNQA::sender:
