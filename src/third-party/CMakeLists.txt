@@ -23,8 +23,8 @@ set(ENABLE_CPACK OFF            CACHE BOOL "Disable CPACK"          FORCE)
 set(WITH_PERF_TOOL OFF          CACHE BOOL "Disable performance tool" FORCE)
 set(ZMQ_BUILD_TESTS OFF         CACHE BOOL "Disable tests"          FORCE)
 set(ENABLE_DRAFTS ON            CACHE BOOL "Enable drafts"          FORCE)
-set(BUILD_SHARED OFF             CACHE BOOL "Build shared library"   FORCE)
-set(BUILD_STATIC ON            CACHE BOOL "Build static library"   FORCE)
+set(BUILD_SHARED ON             CACHE BOOL "Build shared library"   FORCE)
+set(BUILD_STATIC OFF            CACHE BOOL "Build static library"   FORCE)
 
 FetchContent_Declare(
     zmq
