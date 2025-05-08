@@ -36,7 +36,9 @@ def distr_rz2_QPE(angle, n_precision):
     n_precision (str): number of digits of the phase to extract. We will create the same number of circuits that run in different QPUs to run the distributed QPE.
     """
     family = qraise(n_precision,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+
     os.system('sleep 10')
+
     qpus_QPE  = getQPUs(family)
 
     circuits = {}

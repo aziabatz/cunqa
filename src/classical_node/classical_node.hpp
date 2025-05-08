@@ -163,10 +163,12 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     switch(this->comm_component.is_sender_or_receiver(comm_endp)) {
                         case CUNQA::sender:
                             measurement = this->backend.apply_measure(qubits);
+                            SPDLOG_LOGGER_DEBUG(logger, "Trying to send to {}", comm_endp[1]);
                             this->comm_component._send(measurement, comm_endp[1]);
-                            //SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", comm_endp[1]);
+                            SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", comm_endp[1]);
                             break;
                         case CUNQA::receiver:
+                            SPDLOG_LOGGER_DEBUG(logger, "Trying to receive from {}", comm_endp[0]);
                             measurement = this->comm_component._recv(comm_endp[0]);
                             SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", comm_endp[0]);
                             if (measurement == 1) {
