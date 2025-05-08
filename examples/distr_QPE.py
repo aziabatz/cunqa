@@ -37,7 +37,7 @@ def distr_rz2_QPE(angle, n_precision):
     """
     family = qraise(n_precision,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
 
-    os.system('sleep 10')
+    os.system('sleep 5')
 
     qpus_QPE  = getQPUs(family)
 
@@ -55,7 +55,7 @@ def distr_rz2_QPE(angle, n_precision):
         
 
         for j in range(i):
-            print(f"Recibimos desde {j} en el circ {i}.")
+            print(f"Recibimos de {j} en {i}.")
             circuits[f"cc_{i}"].recv_gate("rz", -np.pi*2**(i-j-2), control_qubit = 0, control_circuit = f"cc_{j}", target_qubit = 0)
 
         circuits[f"cc_{i}"].h(0)

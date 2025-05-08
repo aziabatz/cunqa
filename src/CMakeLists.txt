@@ -29,7 +29,7 @@ elseif(USE_QPU_ZMQ)
     add_definitions(-DQPU_ZMQ)
 else()
     set(QPU_COMM MPI)
-    add_definitions(-DQPU_MPI)
+    add_definitions(-DQPU_ZMQ)
 endif()
 
 

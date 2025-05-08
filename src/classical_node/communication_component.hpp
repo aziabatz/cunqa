@@ -18,7 +18,6 @@ public:
     int mpi_size = -1;
     int mpi_rank = -1;
     std::optional<zmq::context_t> zmq_context;
-    //std::optional<zmq::socket_t> zmq_comm_client;
     std::optional<std::unordered_map<std::string, zmq::socket_t>> zmq_comm_clients;
     std::optional<zmq::socket_t> zmq_comm_server;
     std::optional<std::string> zmq_endpoint;
@@ -140,45 +139,6 @@ inline int CommunicationComponent<sim_type>::_recv(std::string& origin)
     }
     
 }
-
-/* template <SimType sim_type>
-inline int CommunicationComponent<sim_type>::_recv(std::string& origin) 
-{
-    int measurement;
-    if (this->comm_type == "mpi") {
-        int origin_int = std::atoi(origin.c_str());
-        MPI_Recv(&measurement, 1, MPI_INT, origin_int, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        return measurement;
-    } else if (this->comm_type == "zmq") {
-        if (!message_queue[origin].empty()) {
-            SPDLOG_LOGGER_DEBUG(logger, "The message_queue already had a message from client {}.", origin);
-            measurement = message_queue[origin].front();
-            SPDLOG_LOGGER_DEBUG(logger, "Measurement extracted from the message_queue.");
-            message_queue[origin].pop();
-            SPDLOG_LOGGER_DEBUG(logger, "Measurement deleted from the message_queue.");
-            return measurement;
-        } else {
-            while (true) {
-                zmq::message_t client_id;
-                zmq::message_t message;
-                this->zmq_comm_server.value().recv(client_id, zmq::recv_flags::none);
-                this->zmq_comm_server.value().recv(message, zmq::recv_flags::none);
-                std::string client_id_str(static_cast<char*>(client_id.data()), client_id.size());
-                std::memcpy(&measurement, message.data(), sizeof(int));
-                
-                if (client_id_str == origin) {
-                    SPDLOG_LOGGER_DEBUG(logger, "The measurement came from the desired client.");
-                    return measurement;
-                } else {
-                    SPDLOG_LOGGER_DEBUG(logger, "The measurement came from other client with id: {}", client_id_str);
-                    this->message_queue[client_id_str].push(measurement);
-                    SPDLOG_LOGGER_DEBUG(logger, "Message_queue updated.");
-                }
-            }
-        }
-    }
-    
-} */
 
 // 0->Sender, 1->Receiver
 template <SimType sim_type>

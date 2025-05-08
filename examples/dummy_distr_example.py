@@ -12,7 +12,7 @@ from cunqa.qjob import gather
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
 family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-os.system('sleep 10')
+os.system('sleep 5')
 qpus_QPE  = getQPUs(family)
 
 # Define the circuits to be run 
