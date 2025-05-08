@@ -36,7 +36,7 @@ def distr_rz2_QPE(angle, n_precision):
     n_precision (str): number of digits of the phase to extract. We will create the same number of circuits that run in different QPUs to run the distributed QPE.
     """
     family = qraise(n_precision,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-    os.system('sleep 15')
+    os.system('sleep 5')
     qpus_QPE  = getQPUs(family)
 
     circuits = {}
@@ -45,7 +45,6 @@ def distr_rz2_QPE(angle, n_precision):
 
         circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
         circuits[f"cc_{i}"].h(0)
-        circuits[f"cc_{i}"].rx(np.pi,1)
         circuits[f"cc_{i}"].rx(np.pi,1)
         circuits[f"cc_{i}"].rx(np.pi,2)
         circuits[f"cc_{i}"].crz(theta,0,1)

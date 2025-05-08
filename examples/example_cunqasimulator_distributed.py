@@ -28,22 +28,22 @@ d_qc_0_zmq = {
     {
         "name":"d_c_if_x",
         "qubits":[0,0],
-        "qpus":["carballido", "losada"]
+        "circuits":["carballido", "losada"]
     },
     {
         "name":"d_c_if_x",
         "qubits":[0,0],
-        "qpus":["exposito", "carballido"]
+        "circuits":["carballido", "exposito"]
     },
     {
         "name": "measure",
-        "qubits": [0]
-        "qubits": [0]
+        "qubits": [0],
+        "clbits":[0]
     },
     {
         "name": "measure",
-        "qubits": [1]
-        "qubits": [1]
+        "qubits": [1],
+        "clbits": [1]
     }
     ],
     "num_qubits": 2,
@@ -54,7 +54,8 @@ d_qc_0_zmq = {
             1
         ]
     },
-    "exec_type":"dynamic"
+    "exec_type":"dynamic",
+    "is_distributed": True
 }
 
 d_qc_1_zmq = {
@@ -63,7 +64,7 @@ d_qc_1_zmq = {
     {
         "name":"d_c_if_x",
         "qubits":[1,0,-1],
-        "qpus":["carballido", "losada"]
+        "circuits":["carballido", "losada"]
     },
     {
         "name":"h",
@@ -72,13 +73,13 @@ d_qc_1_zmq = {
     },
     {
         "name": "measure",
-        "qubits": [0]
-        "qubits": [0]
+        "qubits": [0],
+        "clbits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1]
-        "qubits": [1]
+        "qubits": [1],
+        "clbits": [1]
     }
     ],
     "num_qubits": 2,
@@ -89,7 +90,8 @@ d_qc_1_zmq = {
             1
         ]
     },
-    "exec_type":"dynamic"
+    "exec_type":"dynamic",
+    "is_distributed": True
 }
 
 d_qc_2_zmq = {
@@ -103,17 +105,17 @@ d_qc_2_zmq = {
     {
         "name":"d_c_if_x",
         "qubits":[0,0],
-        "qpus":["exposito", "carballido"]
+        "circuits":["carballido", "exposito"]
     },
     {
         "name": "measure",
-        "qubits": [0]
-        "qubits": [0]
+        "qubits": [0],
+        "clbits": [0]
     },
     {
         "name": "measure",
-        "qubits": [1]
-        "qubits": [1]
+        "qubits": [1],
+        "clbits": [1]
     }
     ],
     "num_qubits": 2,
@@ -124,7 +126,8 @@ d_qc_2_zmq = {
             1
         ]
     },
-    "exec_type":"dynamic"
+    "exec_type":"dynamic",
+    "is_distributed": True
 }
 
 # print(d_qc_0_zmq)
@@ -136,7 +139,7 @@ d_qc_2_zmq = {
 
 from cunqa.mappers import run_distributed
 
-job0, job1, job2 = run_distributed([d_qc_0_zmq, d_qc_1_zmq,d_qc_2_zmq], qpus[:3], shots = 10, transpile=True )
+job0, job1, job2 = run_distributed([d_qc_0_zmq, d_qc_1_zmq, d_qc_2_zmq], qpus[:3], shots = 1)
 
 print("Result QPU0", job0.result().get_counts())
 print("Result QPU1", job1.result().get_counts())

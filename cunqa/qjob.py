@@ -212,7 +212,7 @@ class QJob:
         **run_parameters : any other simulation instructions.
 
         """
-
+        
         self._QPU = qpu
         self._future = None
         self._result = None
@@ -244,23 +244,21 @@ class QJob:
         # conversion to the needed format
         try:
             if isinstance(circt, dict):
-
-                logger.debug("A circuit dict was provided.")
-
+                
                 if (circt["is_distributed"] and self._QPU.backend.simulator != "CunqaSimulator"):
+                    logger.debug("No puedes pasar por aqui")
                     logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
                     raise QJobError #captured and passed to QPUs
 
-                self.num_qubits = circt["num_qubits"]
+                self.num_qubits = circt['num_qubits']
                 cl_bits = circt["num_clbits"]
                 self._cregisters = circt["classical_registers"]
+                circuit = circt["instructions"]
+                exec_type = circt["exec_type"]
 
                 logger.debug("Translation to dict not necessary...")
 
-                circuit = circt['instructions']
-                
-                exec_type = circt['exec_type']
-            
+
 
             elif isinstance(circt, CunqaCircuit):
 
@@ -323,7 +321,7 @@ class QJob:
             
         
         except KeyError as error:
-            logger.error(f"Format of the cirucit dict not correct, couldn't find 'num_clbits', 'classical_registers' or 'instructions' [{type(error).__name__}].")
+            logger.error(f"Format of the circuit dict not correct, couldn't find 'num_clbits', 'classical_registers' or 'instructions' [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
 
         except QASM2Error as error:
