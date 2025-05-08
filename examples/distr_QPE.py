@@ -36,12 +36,15 @@ def distr_rz2_QPE(angle, n_precision):
     n_precision (str): number of digits of the phase to extract. We will create the same number of circuits that run in different QPUs to run the distributed QPE.
     """
     family = qraise(n_precision,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-    os.system('sleep 5')
+
+    os.system('sleep 10')
+
     qpus_QPE  = getQPUs(family)
 
     circuits = {}
     for i in range(n_precision): 
         theta = angle*2*np.pi*2**(n_precision-i)
+        print(f"Theta: {theta}")
 
         circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
         circuits[f"cc_{i}"].h(0)
@@ -52,11 +55,13 @@ def distr_rz2_QPE(angle, n_precision):
         
 
         for j in range(i):
+            print(f"Recibimos desde {j} en el circ {i}.")
             circuits[f"cc_{i}"].recv_gate("rz", -np.pi*2**(i-j-2), control_qubit = 0, control_circuit = f"cc_{j}", target_qubit = 0)
 
         circuits[f"cc_{i}"].h(0)
 
         for k in range(n_precision-i-1):
+            print(f"Mandamos desde {i} a {i+1+k}.")
             circuits[f"cc_{i}"].send_gate("rz", -np.pi*2**(-i+k-1), control_qubit = 0, target_qubit = 0, target_circuit = f"cc_{i+1+k}") 
 
         circuits[f"cc_{i}"].measure(0,0)
@@ -67,17 +72,18 @@ def distr_rz2_QPE(angle, n_precision):
 
 
     
-    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=1)
+    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=1024)
     
     counts_list = [result.get_counts() for result in gather(distr_jobs)]
     print(counts_list)
     print_results(counts_list)
+    
 
     qdrop(family)
         
         
 
-distr_rz2_QPE(0.1, 3)
+distr_rz2_QPE(0.25, 5)
 
 
 ######################################
