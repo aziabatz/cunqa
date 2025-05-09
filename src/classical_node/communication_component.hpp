@@ -137,7 +137,6 @@ inline int CommunicationComponent<sim_type>::_recv(std::string& origin)
             }
         }
     }
-    
 }
 
 // 0->Sender, 1->Receiver
