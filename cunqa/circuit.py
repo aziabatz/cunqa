@@ -907,7 +907,7 @@ class CunqaCircuit:
                 "circuits": [self._id, target_circuit]
             })
         else:
-            logger.error(f"Gate {gate.__str__} is not supported for conditional operation.")
+            logger.error(f"Gate {name} is not supported for conditional operation.")
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
     
@@ -976,7 +976,7 @@ class CunqaCircuit:
                 "circuits": [control_circuit, self._id]
             })
         else:
-            logger.error(f"Gate {gate.__str__} is not supported for conditional operation.")
+            logger.error(f"Gate {name} is not supported for conditional operation.")
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing
 
@@ -1048,7 +1048,7 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
+                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"][1:])) != len(instruction["qubits"][1:])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                     elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):

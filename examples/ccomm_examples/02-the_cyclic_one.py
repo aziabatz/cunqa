@@ -1,0 +1,51 @@
+import os, sys
+import numpy as np
+import matplotlib.pyplot as plt
+# path to access c++ files
+installation_path = os.getenv("INSTALL_PATH")
+sys.path.append(installation_path)
+
+from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.circuit import CunqaCircuit
+from cunqa.mappers import run_distributed
+from cunqa.qjob import gather
+
+def mod(n, m):
+    return (n % m + m) % m
+
+def cyclic_ccommunication(n):
+    family = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+    os.system('sleep 5')
+    qpus_comm = getQPUs(family)
+
+    circuits = {}
+    circuits["cc_0"]=CunqaCircuit(2,2, id= f"cc_0")
+    circuits["cc_0"].h(1)
+    circuits["cc_0"].cx(1,0)
+    circuits["cc_0"].send_gate("x", param=None, control_qubit = 1, target_qubit = 0, target_circuit = f"cc_{1}") 
+    circuits["cc_0"].recv_gate("x", param=None, control_qubit = 1, control_circuit = f"cc_{n-1}", target_qubit = 0)
+
+    circuits[f"cc_0"].measure(0,0)
+    circuits[f"cc_0"].measure(1,1)
+    
+    for i in range(n-1):
+        circuits[f"cc_{i+1}"]=CunqaCircuit(2,2, id= f"cc_{i+1}")
+        
+        circuits[f"cc_{i+1}"].recv_gate("x", param=None, control_qubit = 1, control_circuit = f"cc_{i}", target_qubit = 0)
+        circuits[f"cc_{i+1}"].h(1)
+        circuits[f"cc_{i+1}"].cx(1,0)
+
+        siguiente = mod(i+2,n)
+        circuits[f"cc_{i+1}"].send_gate("x", param=None, control_qubit = 1, target_qubit = 0, target_circuit = f"cc_{siguiente}") 
+
+        circuits[f"cc_{i+1}"].measure(0,0)
+        circuits[f"cc_{i+1}"].measure(1,1)
+
+
+    distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=1024)
+    
+    counts_list = [result.get_counts() for result in gather(distr_jobs)]
+    qdrop(family)
+    return counts_list
+
+print(cyclic_ccommunication(25))

@@ -37,13 +37,13 @@ def distr_rz2_QPE(angle, n_precision):
     """
     family = qraise(n_precision,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
 
-    os.system('sleep 5')
+    os.system('sleep 10')
 
     qpus_QPE  = getQPUs(family)
 
     circuits = {}
     for i in range(n_precision): 
-        theta = angle*2*np.pi*2**(n_precision-i)
+        theta = angle*np.pi*2**(n_precision-i)
         print(f"Theta: {theta}")
 
         circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
@@ -72,7 +72,7 @@ def distr_rz2_QPE(angle, n_precision):
 
 
     
-    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=1024)
+    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=2000)
     
     counts_list = [result.get_counts() for result in gather(distr_jobs)]
     print(counts_list)
@@ -83,8 +83,8 @@ def distr_rz2_QPE(angle, n_precision):
         
         
 
-distr_rz2_QPE(0.25, 5)
+#distr_rz2_QPE(0.25, 8)
 
-
+distr_rz2_QPE(0.63, 10)
 
 
