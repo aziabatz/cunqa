@@ -11,22 +11,22 @@ from cunqa.qjob import gather
 
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
-""" family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-os.system('sleep 5')
-qpus_QPE  = getQPUs(family) """
+family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+os.system('sleep 10')
+qpus_QPE  = getQPUs(family)
 
-qpus_QPE = getQPUs(local=False)
+#qpus_QPE = getQPUs(local=False)
 
 ########## Circuits to run ##########
 ########## First circuit ############
-cc_1 =CunqaCircuit(1, 1, id="first")
+cc_1 = CunqaCircuit(1, 1, id="first")
 cc_1.h(0)
-cc_1.send_gate("x", param=None, control_qubit = 0, target_qubit = 0, target_circuit = "second")
+cc_1.measure_and_send(control_qubit = 0, target_circuit = "second")
 #cc_1.measure(0,0)
 
 ########## Second circuit ###########
-cc_2 =CunqaCircuit(1, 1, id="second")
-cc_2.recv_gate("x", param=None, control_qubit = 0, control_circuit = "first", target_qubit = 0)
+cc_2 = CunqaCircuit(1, 1, id="second")
+cc_2.remote_c_if("x", target_qubits = 0, param=None, control_circuit = "first")
 cc_2.measure(0,0)
 
 
@@ -42,3 +42,6 @@ counts_list = [result.get_counts() for result in gather(distr_jobs)]
 
 ########## Print the counts #######
 print(counts_list)
+
+########## Drop the deployed QPUs #
+qdrop(family)

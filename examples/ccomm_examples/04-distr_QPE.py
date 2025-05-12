@@ -44,7 +44,7 @@ def distr_rz2_QPE(angle, n_precision):
     circuits = {}
     for i in range(n_precision): 
         theta = angle*np.pi*2**(n_precision-i)
-        print(f"Theta: {theta}")
+        #print(f"Theta: {theta}")
 
         circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
         circuits[f"cc_{i}"].h(0)
@@ -55,14 +55,14 @@ def distr_rz2_QPE(angle, n_precision):
         
 
         for j in range(i):
-            print(f"Recibimos de {j} en {i}.")
-            circuits[f"cc_{i}"].recv_gate("rz", -np.pi*2**(i-j-2), control_qubit = 0, control_circuit = f"cc_{j}", target_qubit = 0)
+            #print(f"Recibimos de {j} en {i}.")
+            circuits[f"cc_{i}"].remote_c_if("rz", target_qubits = 0, param = -np.pi*2**(i-j-2), control_circuit = f"cc_{j}")
 
         circuits[f"cc_{i}"].h(0)
 
         for k in range(n_precision-i-1):
-            print(f"Mandamos desde {i} a {i+1+k}.")
-            circuits[f"cc_{i}"].send_gate("rz", -np.pi*2**(-i+k-1), control_qubit = 0, target_qubit = 0, target_circuit = f"cc_{i+1+k}") 
+            #print(f"Mandamos desde {i} a {i+1+k}.")
+            circuits[f"cc_{i}"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{i+1+k}") 
 
         circuits[f"cc_{i}"].measure(0,0)
         circuits[f"cc_{i}"].measure(1,1)
@@ -83,8 +83,8 @@ def distr_rz2_QPE(angle, n_precision):
         
         
 
-#distr_rz2_QPE(0.25, 8)
+distr_rz2_QPE(1/2**4, 8)
 
-distr_rz2_QPE(0.63, 10)
+#distr_rz2_QPE(0.63, 10)
 
 

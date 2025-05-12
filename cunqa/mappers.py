@@ -37,7 +37,7 @@ def run_distributed(circuits, qpus, **run_args):
     distributed_qjobs = []
     circuit_jsons = []
 
-    distr_gates = ["d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"]
+    remote_controlled_gates = ["measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons
@@ -81,8 +81,8 @@ def run_distributed(circuits, qpus, **run_args):
     #translate circuit ids in comm instruction to qpu endpoints
     for circuit in circuit_jsons:
         for instr in circuit["instructions"]:
-            if instr["name"] in distr_gates:
-                instr["qpus"] =  [correspondence[instr["circuits"][0]], correspondence[instr["circuits"][1]]]
+            if instr["name"] in remote_controlled_gates:
+                instr["qpus"] =  [correspondence[instr["circuits"][0]]]
                 instr.pop("circuits")
     
     warn = False
