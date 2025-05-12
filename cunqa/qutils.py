@@ -8,6 +8,8 @@ from cunqa.backend import Backend
 from cunqa.logger import logger
 from cunqa.qpu import QPU, QFamily
 
+
+
 # Adding pyhton folder path to detect modules
 sys.path.insert(0,os.getenv("INSTALL_PATH"))
 
@@ -20,6 +22,27 @@ class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
 
+def check_raised(n, job_id):
+    try:
+        with open(info_path, "r") as qpus_json: #access the qpus file
+            dumps = json.load(qpus_json)
+
+    except Exception as error:
+        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
+        raise SystemExit # User's level
+        
+    logger.debug(f"qpu.json file accessed correctly.")
+
+    i=0
+    for _, dictionary in dumps.items():
+        if dictionary.get("slurm_job_id") == job_id:
+            i += 1 
+            continue #pass to the next QPU
+
+    if i == n:
+        return True
+    else:
+        return False
 
 def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, cloud = True, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
     """
@@ -36,15 +59,14 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
     simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
     family_name (str): name to identify the group of QPUs raised on the specific call of the function.
     mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
-    cores (str):  
-    mem_per_qpu (str):
-    n_nodes (str):
-    node_list (str):
-    qpus_per_node (str):
-    backend (str):
+    cores (str): 
+    mem_per_qpu (str): 
+    n_nodes (str): 
+    node_list (str): 
+    qpus_per_node (str): 
+    backend (str): 
 
     """
-
     try:
         cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
@@ -73,10 +95,18 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
             cmd.append(f"--qpus_per_node={str(qpus_per_node)}")
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
+
+        old_time = os.stat(info_path).st_mtime #stablish when the file qpus.json was modified last to check later that we did modify it
         
-        output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture ist output on the variable 'output'
+        output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         
+        # Wait for QPUs to be raised, so that getQPUs can be done inmediately
+        while True:
+            if old_time != os.stat(info_path).st_mtime: #checks that the file has been modified
+                break
+
+        # Create the QFamily to return
         if family_name is not None:
             return QFamily(name=family_name, jobid=str(job_id))
         else:

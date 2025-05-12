@@ -27,6 +27,6 @@ struct MyArgs : public argparse::Args
     bool& quantum_comm                   = flag("quantum_comm", "Enable quantum communications.");
 
     void welcome() {
-        std::cout << "Welcome to qraise command, a command responsible for turn on the required QPUs.\n" << std::endl;
+        std::cout << "Welcome to qraise command, a command responsible for turning on the required QPUs.\n" << std::endl;
     }
 };

@@ -9,13 +9,10 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
-""" family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-os.system('sleep 5')
-qpus_QPE  = getQPUs(family) """
+family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+qpus_QPE  = getQPUs(family)
 
-qpus_QPE = getQPUs(local=False)
 
 ########## Circuits to run ##########
 ########## First circuit ############
@@ -42,3 +39,5 @@ counts_list = [result.get_counts() for result in gather(distr_jobs)]
 
 ########## Print the counts #######
 print(counts_list)
+
+qdrop(family)

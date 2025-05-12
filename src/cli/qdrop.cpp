@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
     if (args.all) {
         if (args.ids.has_value())
-        std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You arr setting the --all flag and putting IDs (every qraise process will be eliminated).\n";
+        std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You are setting the --all flag and putting IDs (every qraise process will be eliminated).\n";
         removeAllJobs(id_str); 
         if (id_str.empty()) {
             std::cerr << "\033[1;31m" << "Error: " << "\033[0m" << "No qraise jobs are currently running.\n";
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
                     SPDLOG_LOGGER_DEBUG(logger, "Removed QPUs from qraise job {}.", id);
                     break;
                 case 1:
-                    std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You are removing a job different than qraise, use scancel if wou want to stop it.\n";
+                    std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You are removing a job different than qraise, use scancel if you want to stop it.\n";
                     return -1;
                     break;
                 default:
