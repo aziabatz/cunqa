@@ -76,7 +76,8 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
     std::vector<int> qubits;
     CUNQA::Matrix matrix;
     int measurement;
-    std::array<std::string, 2> comm_endp;
+    std::array<std::string, 1> origin_endpoint;
+    std::array<std::string, 1> target_endpoint;
     std::vector<double> param;
     std::unordered_map<int, int> counts;
 
@@ -125,60 +126,40 @@ inline void QPUClassicalNode<sim_type>::send_instructions_to_execute(json& kerne
                     param =  instruction.at("params").get<std::vector<double>>();
                     this->backend.apply_gate(instruction_name, qubits, param);
                     break;
-                case CUNQA::D_C_IF_H:
-                case CUNQA::D_C_IF_X:
-                case CUNQA::D_C_IF_Y:
-                case CUNQA::D_C_IF_Z:
-                case CUNQA::D_C_IF_CX:
-                case CUNQA::D_C_IF_CY:
-                case CUNQA::D_C_IF_CZ:
-                case CUNQA::D_C_IF_ECR:
-                    comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                    SPDLOG_LOGGER_DEBUG(logger, "Communication endpoints: {}, {}", comm_endp[0], comm_endp[1]);
-                    switch(this->comm_component.is_sender_or_receiver(comm_endp)) {
-                        case CUNQA::sender:
-                            measurement = this->backend.apply_measure(qubits);
-                            this->comm_component._send(measurement, comm_endp[1]);
-                            //SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", comm_endp[1]);
-                            break;
-                        case CUNQA::receiver:
-                            measurement = this->comm_component._recv(comm_endp[0]);
-                            SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", comm_endp[0]);
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CUNQA::CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits);
-                            }
-                            break;
-                        default:
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}", comm_endp[0], comm_endp[1]); 
-                            throw std::runtime_error("Error with the QPU IDs.");
-                            break;
-                        }
+                case CUNQA::MEASURE_AND_SEND:
+                    target_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    measurement = this->backend.apply_measure(qubits); 
+                    SPDLOG_LOGGER_DEBUG(logger, "Trying to send to {}", target_endpoint[0]);
+                    this->comm_component._send(measurement, target_endpoint[0]); 
+                    SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", target_endpoint[0]);
                     break;
-                case CUNQA::D_C_IF_RX:
-                case CUNQA::D_C_IF_RY:
-                case CUNQA::D_C_IF_RZ:
-                    comm_endp = instruction.at("qpus").get<std::array<std::string, 2>>();
-                    //SPDLOG_LOGGER_DEBUG(logger, "Communication endpoint: {}, {}", comm_endp[0], comm_endp[1]);
+                case CUNQA::REMOTE_C_IF_H:
+                case CUNQA::REMOTE_C_IF_X:
+                case CUNQA::REMOTE_C_IF_Y:
+                case CUNQA::REMOTE_C_IF_Z:
+                case CUNQA::REMOTE_C_IF_CX:
+                case CUNQA::REMOTE_C_IF_CY:
+                case CUNQA::REMOTE_C_IF_CZ:
+                case CUNQA::REMOTE_C_IF_ECR:
+                    origin_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    SPDLOG_LOGGER_DEBUG(logger, "Origin endpoints: {}", origin_endpoint[0]);
+                    measurement = this->comm_component._recv(origin_endpoint[0]); 
+                    SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", origin_endpoint[0]);
+                    if (measurement == 1) {
+                        this->backend.apply_gate(CUNQA::CORRESPONDENCE_REMOTE_GATE_MAP[instruction_name], qubits);
+                    }
+                    break;
+                case CUNQA::REMOTE_C_IF_RX:
+                case CUNQA::REMOTE_C_IF_RY:
+                case CUNQA::REMOTE_C_IF_RZ:
+                    origin_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    SPDLOG_LOGGER_DEBUG(logger, "Origin endpoint: {}", origin_endpoint[0]);
                     param = instruction.at("params").get<std::vector<double>>();
-                    switch(this->comm_component.is_sender_or_receiver(comm_endp)) {
-                        case CUNQA::sender:
-                            measurement = this->backend.apply_measure(qubits);
-                            SPDLOG_LOGGER_DEBUG(logger, "Trying to send to {}", comm_endp[1]);
-                            this->comm_component._send(measurement, comm_endp[1]);
-                            SPDLOG_LOGGER_DEBUG(logger, "Measurement sent to {}", comm_endp[1]);
-                            break;
-                        case CUNQA::receiver:
-                            SPDLOG_LOGGER_DEBUG(logger, "Trying to receive from {}", comm_endp[0]);
-                            measurement = this->comm_component._recv(comm_endp[0]);
-                            SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", comm_endp[0]);
-                            if (measurement == 1) {
-                                this->backend.apply_gate(CUNQA::CORRESPONDENCE_D_GATE_MAP[instruction_name], qubits, param);
-                            }
-                            break;
-                        default:
-                            SPDLOG_LOGGER_ERROR(logger, "This QPU has no ID {} nor {}", comm_endp[0], comm_endp[1]); 
-                            throw std::runtime_error("Error with the QPU IDs.");
-                        }
+                    measurement = this->comm_component._recv(origin_endpoint[0]); 
+                    SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", origin_endpoint[0]);
+                    if (measurement == 1) {
+                        this->backend.apply_gate(CUNQA::CORRESPONDENCE_REMOTE_GATE_MAP[instruction_name], qubits);
+                    }
                     break;  
                 default:
                     SPDLOG_LOGGER_ERROR(logger, "Invalid gate name."); 

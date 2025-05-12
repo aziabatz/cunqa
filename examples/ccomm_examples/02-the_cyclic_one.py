@@ -22,8 +22,8 @@ def cyclic_ccommunication(n):
     circuits["cc_0"]=CunqaCircuit(2,2, id= f"cc_0")
     circuits["cc_0"].h(1)
     circuits["cc_0"].cx(1,0)
-    circuits["cc_0"].send_gate("x", param=None, control_qubit = 1, target_qubit = 0, target_circuit = f"cc_{1}") 
-    circuits["cc_0"].recv_gate("x", param=None, control_qubit = 1, control_circuit = f"cc_{n-1}", target_qubit = 0)
+    circuits["cc_0"].measure_and_send(control_qubit = 1, target_circuit = f"cc_{1}") 
+    circuits["cc_0"].remote_c_if("x", target_qubits = 0, param=None, control_circuit = f"cc_{n-1}")
 
     circuits[f"cc_0"].measure(0,0)
     circuits[f"cc_0"].measure(1,1)
@@ -31,12 +31,12 @@ def cyclic_ccommunication(n):
     for i in range(n-1):
         circuits[f"cc_{i+1}"]=CunqaCircuit(2,2, id= f"cc_{i+1}")
         
-        circuits[f"cc_{i+1}"].recv_gate("x", param=None, control_qubit = 1, control_circuit = f"cc_{i}", target_qubit = 0)
+        circuits[f"cc_{i+1}"].remote_c_if("x", target_qubits = 0, param=None, control_circuit = f"cc_{i}")
         circuits[f"cc_{i+1}"].h(1)
         circuits[f"cc_{i+1}"].cx(1,0)
 
         siguiente = mod(i+2,n)
-        circuits[f"cc_{i+1}"].send_gate("x", param=None, control_qubit = 1, target_qubit = 0, target_circuit = f"cc_{siguiente}") 
+        circuits[f"cc_{i+1}"].measure_and_send(control_qubit = 1, target_circuit = f"cc_{siguiente}") 
 
         circuits[f"cc_{i+1}"].measure(0,0)
         circuits[f"cc_{i+1}"].measure(1,1)
@@ -48,4 +48,4 @@ def cyclic_ccommunication(n):
     qdrop(family)
     return counts_list
 
-print(cyclic_ccommunication(25))
+print(cyclic_ccommunication(5))

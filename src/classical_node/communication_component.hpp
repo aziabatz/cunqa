@@ -175,5 +175,5 @@ inline int CommunicationComponent<sim_type>::is_sender_or_receiver(std::array<st
         }
 
     return -1;
-
+        
 }

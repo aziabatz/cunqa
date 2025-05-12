@@ -26,12 +26,12 @@ d_qc_0_zmq = {
         "qubits":[0],
     },
     {
-        "name":"d_c_if_x",
+        "name":"remote_c_if_x",
         "qubits":[0,0],
         "circuits":["carballido", "losada"]
     },
     {
-        "name":"d_c_if_x",
+        "name":"remote_c_if_x",
         "qubits":[0,0],
         "circuits":["carballido", "exposito"]
     },
@@ -62,7 +62,7 @@ d_qc_1_zmq = {
     "id": "losada",
     "instructions": [
     {
-        "name":"d_c_if_x",
+        "name":"remote_c_if_x",
         "qubits":[1,0,-1],
         "circuits":["carballido", "losada"]
     },
@@ -103,7 +103,7 @@ d_qc_2_zmq = {
         "qubits":[1],
     },
     {
-        "name":"d_c_if_x",
+        "name":"remote_c_if_x",
         "qubits":[0,0],
         "circuits":["carballido", "exposito"]
     },
