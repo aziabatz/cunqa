@@ -4,31 +4,23 @@ import os, sys
 installation_path = os.getenv("INSTALL_PATH")
 sys.path.append(installation_path)
 
-
-from qiskit import QuantumCircuit
-from qiskit.circuit.library import QFT
 from cunqa import getQPUs
+from cunqa.circuit import CunqaCircuit
 
 qpus  = getQPUs(local=False)
 
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}, simulator: {q.backend.simulator}, version: {q.backend.version}.")
 
-n = 5 # number of qubits
-qc = QuantumCircuit(n)
-qc.x(0); qc.x(n-1); qc.x(n-2)
-qc.append(QFT(n), range(n))
-qc.append(QFT(n).inverse(), range(n))
+qc = CunqaCircuit(2, 2)
+qc.h(0)
+qc.cx(0, 1)
 qc.measure_all()
 
-counts = []
+qpu = qpus[0]
+qjob = qpu.run(qc, shots = 1000)# non-blocking call
 
-for i, qpu in enumerate(qpus):
+counts = qjob.result.counts
+time = qjob.time_taken
 
-    print(f"For QPU {qpu.id}, with backend {qpu.backend.name}:")
-    qjob = qpu.run(qc, transpile = True, shots = 1000)# non-blocking call
-    result = qjob.result() # bloking call
-    time = qjob.time_taken()
-    counts.append(result.get_counts())
-
-    print(f"Result: \n{result.get_counts()}\n Time taken: {time} s.")
+print(f"Result: \n{counts}\n Time taken: {time} s.")

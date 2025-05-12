@@ -20,7 +20,7 @@ struct MyArgs : public argparse::Args
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file.", /*implicit*/"last_calibrations");
-    std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together.").set_default("default");
+    std::string& family             = kwarg("fam,family", "Name that identifies which QPUs were raised together.").set_default("default");
     //bool& hpc                          = flag("hpc", "Default HPC mode. The user can connect with the local node QPUs.");
     bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
     bool& classical_comm                 = flag("classical_comm", "Enable classical communications.");

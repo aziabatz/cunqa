@@ -115,7 +115,7 @@ std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
                 //    break;
                 // Measure, duh
                 case MEASURE:
-                    qasm_circt += "measure q[" + to_string(qubits[0]) + "] -> c[" + to_string(instruction.at("memory")[0]) + "];\n";
+                    qasm_circt += "measure q[" + to_string(qubits[0]) + "] -> c[" + to_string(instruction.at("clbits")[0]) + "];\n";
                     break;
                 default:
                     std::cout << "Error. Invalid gate name" << "\n";

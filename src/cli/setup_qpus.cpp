@@ -19,12 +19,12 @@ using namespace cunqa;
 using namespace cunqa::sim;
 
 template<typename Simulator, typename Config, typename BackendType>
-void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::string& family_name)
+void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::string& family)
 {
     std::unique_ptr<Simulator> simulator = std::make_unique<Simulator>();
     JSON config_json = Config();
     Config config = (backend_json.empty() ? config_json : backend_json);
-    QPU qpu(std::make_unique<BackendType>(config, std::move(simulator)), mode, family_name);
+    QPU qpu(std::make_unique<BackendType>(config, std::move(simulator)), mode, family);
     qpu.turn_ON();
 }
 
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     std::string info_path(argv[1]);
     std::string mode(argv[2]);
     std::string communications(argv[3]);
-    std::string family_name(argv[4]);
+    std::string family(argv[4]);
     std::string sim_arg(argv[5]);
     auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
                                      : JSON());
@@ -54,19 +54,17 @@ int main(int argc, char *argv[])
         backend_json = JSON::parse(f);
     }
 
-    if (family_name == "default")
-        family_name = std::getenv("SLURM_JOB_ID");
-
-    //qpu_config_json["slurm_job_id"] = std::getenv("SLURM_JOB_ID");
+    if (family == "default")
+        family = std::getenv("SLURM_JOB_ID");
 
     switch(murmur::hash(communications)) {
         case murmur::hash("no_comm"): 
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Aer"): 
-                    turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family_name);
+                    turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     break;
                 case murmur::hash("Munich"):
-                    turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family_name);
+                    turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
