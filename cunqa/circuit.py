@@ -9,15 +9,15 @@ def generate_id(size=4):
 
 
 
-SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz"]
-SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz"]
+SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz"]
+SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz", "remote_c_if_unitary","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
-SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz", "d_c_if_rx","d_c_if_ry","d_c_if_rz"]
+SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz", "remote_c_if_rx","remote_c_if_ry","remote_c_if_rz"]
 SUPPORTED_GATES_PARAMETRIC_2 = ["u2", "r"]
 SUPPORTED_GATES_PARAMETRIC_3 = ["u", "u3", "cu3"]
 SUPPORTED_GATES_PARAMETRIC_4 = ["cu"]
 SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz"]
-SUPPORTED_GATES_DISTRIBUTED = ["d_c_if_unitary", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"]
+SUPPORTED_GATES_DISTRIBUTED = ["measure_and_send", "remote_c_if_unitary", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
 
 class CunqaCircuitError(Exception):
     """Exception for error during circuit desing in CunqaCircuit."""
@@ -842,48 +842,25 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
         
 
-    def send_gate(self, gate, param, control_qubit = None, target_qubit = None, target_circuit = None):
+    def measure_and_send(self, control_qubit = None, target_circuit = None):
         """
-        Class method to apply a distributed instruction as a gate condioned by a local classical measurement and applied in a different circuit.
+        Class method to measure and send a bit from the current circuit to a remote one.
         
         Args:
         -------
-        gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
         control_qubit (int): control qubit from self.
 
         target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
 
-        target_qubit (int): qubit where the gate will be conditionally applied.
-
-        *param (float or int): parameter in case the gate provided is parametric.
-
         """
 
-        if isinstance(gate, str):
-            name = "d_c_if_" + gate
-        else:
-            logger.error(f"gate specification must be str, but {type(gate)} was provided [TypeError].")
-            raise SystemExit
         
         if isinstance(control_qubit, int):
             control_qubit = [control_qubit]
         else:
             logger.error(f"control qubit must be int, but {type(control_qubit)} was provided [TypeError].")
             raise SystemExit
-        
-        if isinstance(target_qubit, int):
-            target_qubit = [target_qubit]
-        elif isinstance(target_qubit, list):
-            pass
-        else:
-            logger.error(f"target qubits must be int ot list, but {type(target_qubit)} was provided [TypeError].")
-            raise SystemExit
-        
-        if param is not None:
-            params = [param]
-        else:
-            params = []
 
         if target_circuit is None:
             logger.error("target_circuit not provided.")
@@ -898,23 +875,17 @@ class CunqaCircuit:
             logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
             raise SystemExit
         
-        if name in SUPPORTED_GATES_DISTRIBUTED:
 
-            self._add_instruction({
-                "name": name,
-                "qubits": flatten([control_qubit, target_qubit]),
-                "params":params,
-                "circuits": [self._id, target_circuit]
-            })
-        else:
-            logger.error(f"Gate {name} is not supported for conditional operation.")
-            raise SystemExit
-            # TODO: maybe in the future this can be check at the begining for a more efficient processing 
-    
+        self._add_instruction({
+            "name": "measure_and_send",
+            "qubits": flatten([control_qubit]),
+            "circuits": [target_circuit]
+        })
 
-    def recv_gate(self, gate, param, control_qubit = None, control_circuit = None, target_qubit = None):
+
+    def remote_c_if(self, gate, target_qubits, param, control_circuit = None):
         """
-        Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a different circuit and applied locally.
+        Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
         
         Args:
         -------
@@ -930,23 +901,17 @@ class CunqaCircuit:
         """
 
         if isinstance(gate, str):
-            name = "d_c_if_" + gate
+            name = "remote_c_if_" + gate
         else:
             logger.error(f"gate specification must be str, but {type(gate)} was provided [TypeError].")
             raise SystemExit
         
-        if isinstance(control_qubit, int):
-            control_qubit = [control_qubit]
-        else:
-            logger.error(f"control qubit must be int, but {type(control_qubit)} was provided [TypeError].")
-            raise SystemExit
-        
-        if isinstance(target_qubit, int):
-            target_qubit = [target_qubit]
-        elif isinstance(target_qubit, list):
+        if isinstance(target_qubits, int):
+            target_qubits = [target_qubits]
+        elif isinstance(target_qubits, list):
             pass
         else:
-            logger.error(f"target qubits must be int ot list, but {type(target_qubit)} was provided [TypeError].")
+            logger.error(f"target qubits must be int ot list, but {type(target_qubits)} was provided [TypeError].")
             raise SystemExit
         
         if param is not None:
@@ -971,9 +936,9 @@ class CunqaCircuit:
 
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([control_qubit, target_qubit]),
+                "qubits": flatten([target_qubits]),
                 "params":params,
-                "circuits": [control_circuit, self._id]
+                "circuits": [control_circuit]
             })
         else:
             logger.error(f"Gate {name} is not supported for conditional operation.")
@@ -1024,13 +989,13 @@ class CunqaCircuit:
                 
                 if (instruction["name"] in SUPPORTED_GATES_1Q):
                     gate_qubits = 1
-                elif (instruction["name"] in SUPPORTED_GATES_2Q) or (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                elif (instruction["name"] in SUPPORTED_GATES_2Q):
                     # we include as 2 qubit gates the distributed gates
                     gate_qubits = 2
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
                     gate_qubits = 3
 
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
                     # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
                     gate_qubits = int(np.log2(len(instruction["params"][0])))
                     if not instruction["name"] == "unitary":
@@ -1048,9 +1013,6 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"][1:])) != len(instruction["qubits"][1:])):
-                        logger.error(f"qubits provided for instruction cannot be repeated.")
-                        raise ValueError
                     elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
@@ -1087,7 +1049,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):

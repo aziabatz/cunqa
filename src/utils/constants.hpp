@@ -78,17 +78,18 @@ namespace CUNQA {
     C_IF_CY,
     C_IF_CZ,
     C_IF_ECR,
-    D_C_IF_H,
-    D_C_IF_X,
-    D_C_IF_Y,
-    D_C_IF_Z,
-    D_C_IF_RX,
-    D_C_IF_RY,
-    D_C_IF_RZ,
-    D_C_IF_CX,
-    D_C_IF_CY,
-    D_C_IF_CZ,
-    D_C_IF_ECR,
+    MEASURE_AND_SEND,
+    REMOTE_C_IF_H,
+    REMOTE_C_IF_X,
+    REMOTE_C_IF_Y,
+    REMOTE_C_IF_Z,
+    REMOTE_C_IF_RX,
+    REMOTE_C_IF_RY,
+    REMOTE_C_IF_RZ,
+    REMOTE_C_IF_CX,
+    REMOTE_C_IF_CY,
+    REMOTE_C_IF_CZ,
+    REMOTE_C_IF_ECR,
 };
 
 std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
@@ -133,18 +134,21 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"c_if_cz", C_IF_CZ},
     {"c_if_ecr", C_IF_ECR},
 
-    //DISTRIBUTED GATES
-    {"d_c_if_h", D_C_IF_H},
-    {"d_c_if_x", D_C_IF_X},
-    {"d_c_if_y", D_C_IF_Y},
-    {"d_c_if_z", D_C_IF_Z},
-    {"d_c_if_rx", D_C_IF_RX},
-    {"d_c_if_ry", D_C_IF_RY},
-    {"d_c_if_rz", D_C_IF_RZ},
-    {"d_c_if_cx", D_C_IF_CX},
-    {"d_c_if_cy", D_C_IF_CY},
-    {"d_c_if_cz", D_C_IF_CZ},
-    {"d_c_if_ecr", D_C_IF_ECR},
+    // SEND CLASSICAL QUBIT
+    {"measure_and_send", MEASURE_AND_SEND},
+
+    // REMOTE CONTROLLED GATES
+    {"remote_c_if_h", REMOTE_C_IF_H},
+    {"remote_c_if_x", REMOTE_C_IF_X},
+    {"remote_c_if_y", REMOTE_C_IF_Y},
+    {"remote_c_if_z", REMOTE_C_IF_Z},
+    {"remote_c_if_rx", REMOTE_C_IF_RX},
+    {"remote_c_if_ry", REMOTE_C_IF_RY},
+    {"remote_c_if_rz", REMOTE_C_IF_RZ},
+    {"remote_c_if_cx", REMOTE_C_IF_CX},
+    {"remote_c_if_cy", REMOTE_C_IF_CY},
+    {"remote_c_if_cz", REMOTE_C_IF_CZ},
+    {"remote_c_if_ecr", REMOTE_C_IF_ECR},
 };
 
 std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
@@ -176,22 +180,22 @@ const std::vector<std::string> BASIS_GATES = {
             "cswap"};
 
   const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
-    "unitary", "id", "h", "x", "y", "z", "rx", "ry", "rz", "cx", "cy", "cz", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
+    "unitary", "id", "h", "x", "y", "z", "rx", "ry", "rz", "cx", "cy", "cz", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"
   };
 
-  std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
-    {"d_c_if_unitary", "unitary"},
-    {"d_c_if_h", "h"},
-    {"d_c_if_x", "x"},
-    {"d_c_if_y", "y"},
-    {"d_c_if_z", "z"},
-    {"d_c_if_rx", "rx"},
-    {"d_c_if_ry", "ry"},
-    {"d_c_if_rz", "rz"},
-    {"d_c_if_cx", "cx"},
-    {"d_c_if_cy", "cy"},
-    {"d_c_if_cz", "cz"},
-    {"d_c_if_ecr", "ecr"},
+  std::unordered_map<std::string, std::string> CORRESPONDENCE_REMOTE_GATE_MAP = {
+    {"remote_c_if_unitary", "unitary"},
+    {"remote_c_if_h", "h"},
+    {"remote_c_if_x", "x"},
+    {"remote_c_if_y", "y"},
+    {"remote_c_if_z", "z"},
+    {"remote_c_if_rx", "rx"},
+    {"remote_c_if_ry", "ry"},
+    {"remote_c_if_rz", "rz"},
+    {"remote_c_if_cx", "cx"},
+    {"remote_c_if_cy", "cy"},
+    {"remote_c_if_cz", "cz"},
+    {"remote_c_if_ecr", "ecr"},
   };
 
 } //End namespace CUNQA
