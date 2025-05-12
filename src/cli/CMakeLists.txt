@@ -24,10 +24,10 @@ add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu aer_simulator munich_simulator munich_ccomm_simulator)
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-# INFOQPUS executable
-add_executable(infoqpus infoqpus.cpp)
-target_link_libraries(infoqpus PRIVATE json)
-target_include_directories(infoqpus PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
-install(TARGETS infoqpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
+# QINFO executable
+add_executable(qinfo qinfo.cpp)
+target_link_libraries(qinfo PRIVATE json)
+target_include_directories(qinfo PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
+install(TARGETS qinfo DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 

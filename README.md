@@ -240,7 +240,7 @@ INSTALL_PATH = os.getenv("INSTALL_PATH")
 sys.path.insert(0, INSTALL_PATH)
 
 # Let's get the raised QPUs
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 
 qpus  = getQPUs() # List of raised QPUs
 for q in qpus:

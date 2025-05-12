@@ -14,7 +14,7 @@ using namespace std::literals;
 
 struct MyArgs : public argparse::Args
 {
-    std::optional<std::string>& node     = kwarg("node", "Info about the QPUs on the selected node.");
+    std::optional<std::string>& node     = arg("node", "Info about the QPUs on the selected node.");
     bool& my_node                        = flag("mynode", "Info about the QPUs on the current node.");
 
     void welcome() {
@@ -63,9 +63,11 @@ int main(int argc, char* argv[]) {
         for (auto& id : node_ids) {
             std::cout << "ID: \033[32m" << id << "\033[0m \n";
             std::cout << indent << "Name: " << qpus_json[id]["backend"]["name"] << "\n";
-            std::cout << indent << "Simulator: " << qpus_json[id]["backend"]["simulator"] << "\n";
-            std::cout << indent << "Family_name: " << qpus_json[id]["family_name"] << "\n";
             std::cout << indent << "Description: " << qpus_json[id]["backend"]["description"] << "\n";
+            std::cout << indent << "Family_name: " << qpus_json[id]["family_name"] << "\n";
+            std::cout << indent << "Simulator: " << qpus_json[id]["backend"]["simulator"] << "\n";
+            std::cout << indent << "Mode: " << qpus_json[id]["net"]["mode"] << "\n";
+            
         }
     } else if (args.my_node) {
         const char* slurm_nodename = std::getenv("SLURMD_NODENAME");
@@ -78,7 +80,7 @@ int main(int argc, char* argv[]) {
         if (family_counts_per_node.find(slurm_nodename) != family_counts_per_node.end()) {
             std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are: " << "\n";
             for (auto& [family_name, number] : family_counts_per_node[slurm_nodename]) {
-                std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
+                std::cout << indent << number << " QPUs with family name " << family_name << "\n";
             }
         } else {
             std::cout << "\033[33mNode No QPUs deployed on the current node " << slurm_nodename << "\033[0m \n";

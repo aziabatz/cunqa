@@ -6,7 +6,7 @@ from json import JSONDecodeError, load
 from cunqa.qclient import QClient  # importamos api en C++
 from cunqa.backend import Backend
 from cunqa.logger import logger
-from cunqa.qpu import QPU
+from cunqa.qpu import QPU, QFamily
 
 # Adding pyhton folder path to detect modules
 sys.path.insert(0,os.getenv("INSTALL_PATH"))
@@ -21,27 +21,66 @@ class QRaiseError(Exception):
     pass
 
 
-
-
-
-def qraise(n, time, flags = ''):
+def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, cloud = True, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
     """
     Raises a QPU and returns its job_id.
 
     Args
     -----------
-    n (int): number of QPUs to be raised
-    time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU
-    flags (str): any other flag you want to apply, empty by default. Ex: --fakeqmio, --sim=Munich, --backend="path/to/backend", --family_name="carballido", ...
+    n (int): number of QPUs to be raised.
+    time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
+    
+    fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
+    classical_comm (bool): if True the raised QPUs are communicated classically.
+    quantum_comm (bool): if True the raised QPUs have quantum communications.
+    simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
+    family_name (str): name to identify the group of QPUs raised on the specific call of the function.
+    mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
+    cores (str):  
+    mem_per_qpu (str):
+    n_nodes (str):
+    node_list (str):
+    qpus_per_node (str):
+    backend (str):
 
     """
 
     try:
-        cmd = ["qraise", "-n", str(n), '-t', str(time), str(flags)]
-        output = run(cmd, capture_output=True).stdout #run the command on terminal and capture ist output on the variable 'output'
+        cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
-        # job_id = ''.join(e for e in str(output) if e.isdecimal()) #checks the output on the console (looks like 'Submitted batch job 136285') and selects the number
-        # return job_id
+        # Add specified flags
+        if fakeqmio:
+            cmd.append(f"--fakeqmio")
+        if classical_comm:
+            cmd.append(f"--classical_comm")
+        if quantum_comm:
+            cmd.append(f"--quantum_comm")
+        if simulator is not None:
+            cmd.append(f"--simulator={str(simulator)}")
+        if family_name is not None:
+            cmd.append(f"--family_name={str(family_name)}")
+        if cloud:
+            cmd.append(f"--cloud")
+        if cores is not None:
+            cmd.append(f"--cores={str(cores)}")
+        if mem_per_qpu is not None:
+            cmd.append(f"--mem_per_qpu={str(mem_per_qpu)}")
+        if n_nodes is not None:
+            cmd.append(f"--n_nodes={str(n_nodes)}")
+        if node_list is not None:
+            cmd.append(f"--node_list={str(node_list)}")
+        if qpus_per_node is not None:
+            cmd.append(f"--qpus_per_node={str(qpus_per_node)}")
+        if backend is not None:
+            cmd.append(f"--backend={str(backend)}")
+        
+        output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture ist output on the variable 'output'
+        job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
+        
+        if family_name is not None:
+            return QFamily(name=family_name, jobid=str(job_id))
+        else:
+            return QFamily(name=str(job_id), jobid=str(job_id))
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -72,20 +111,31 @@ def qdrop(*families):
     logger.debug(f"qpu.json file accessed correctly.")
 
 
-    #building the terminal command to drop the specified families
+    #building the terminal command to drop the specified families (using family names or QFamilies)
     cmd = ['qdrop']
+
     if len(dumps) != 0:
         for family in families:
-            for _, dictionary in dumps.items():
-                if dictionary.get("family").get("family_name") == family:
-                    job_id=dictionary.get("family").get("slurm_job_id")
-                    cmd.append(str(job_id)) 
-                    break #pass to the next family name
+            if isinstance(family, str):
+                for _, dictionary in dumps.items():
+                    if dictionary.get("family").get("family_name") == family:
+                        job_id=dictionary.get("slurm_job_id")   
+                        cmd.append(str(job_id)) 
+                        break #pass to the next family name (two qraises must have different family names)
+
+            elif isinstance(family, QFamily):
+                cmd.append(str(family.jobid))
+
+            else:
+                logger.error(f"Arguments for qdrop must be strings or QFamilies.")
+                raise SystemExit
+            
     else:
-        logger.debug(f"qpus.json is empty, the specified families must have.")
+        logger.debug(f"qpus.json is empty, the specified families must have reached the time limit.")
+
         
     
-    run(cmd) #run 'qdrop slurm_job_id_1 slurm_job_id_2 etc' on terminal
+    run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
     return
 
@@ -169,9 +219,14 @@ def infoQPUs(local = True, node_name = None):
 
 
 
-def getQPUs(local = True, family_name = None):
+def getQPUs(local = True, family = None):
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
+
+    Args:
+    --------
+    local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
+    family (str or QFamily): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
 
     Return:
     ---------
@@ -179,6 +234,7 @@ def getQPUs(local = True, family_name = None):
     
     """
 
+    #Access raised QPUs information on qpu.json file
     try:
         with open(info_path, "r") as qpus_json:
             dumps = load(qpus_json)
@@ -192,14 +248,23 @@ def getQPUs(local = True, family_name = None):
     
     logger.debug(f"File accessed correctly.")
 
+    #Check if family has valid format
+    if family is not None:
+        if isinstance(family, QFamily):
+            family_name=family.name
+        elif isinstance(family, str):
+            family_name = family
+        else:
+            logger.error(f"Families must be represented by theior family_name string or a <class cunqa.qpu.QFamily>, [TypeError]")
+            raise SystemExit
 
-
+    #Extract selected QPUs from qpu.json information 
     if local:
         local_node = os.getenv("SLURMD_NODENAME")
         logger.debug(f"User at node {local_node}.")
 
         if family_name is not None:
-            targets = { k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name)}
+            targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name)}
         
         else:
             targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node)}
@@ -211,6 +276,7 @@ def getQPUs(local = True, family_name = None):
         else:
             targets = dumps
     
+    # Create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0
     for k, v in targets.items():

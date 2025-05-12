@@ -18,7 +18,7 @@ class QPU:
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None, family_name = None, ip = None, port = None, comm_info = None):
+    def __init__(self, id=None, qclient=None, backend=None, family_name = None, endpoint = None, comm_info = None):
         """
         Initializes the QPU class.
 
@@ -31,7 +31,7 @@ class QPU:
             
         backend (<class 'backend.Backend'>): object that provides information about the QPU backend.
 
-        port (str): String refering to the port of the server to which the QPU corresponds.
+        endpoint (str): String refering to the endpoint of the server to which the QPU corresponds.
         """
         
         if id == None:
@@ -69,26 +69,15 @@ class QPU:
             logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
-        if ip == None:
-            logger.error(f"QPU ip not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
+        if endpoint == None:
+            logger.error(f"QPU client not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
             raise SystemExit # User's level
         
-        elif isinstance(ip, str):
-            self._ip = ip
+        elif isinstance(endpoint, str):
+            self._endpoint = endpoint
 
         else:
-            logger.error(f"QClient ip must be str, but {type(port)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        if port == None:
-            logger.error(f"Client port not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
-            raise SystemExit # User's level
-        
-        elif isinstance(port, str):
-            self._port = port
-
-        else:
-            logger.error(f"QClient port must be str, but {type(port)} was provided [{TypeError.__name__}].")
+            logger.error(f"QClient endpoint must be str, but {type(endpoint)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
         
         if comm_info == None:
@@ -107,7 +96,7 @@ class QPU:
             logger.error(f"Please provide QPU family name [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
             raise SystemExit # User's level
         
-        elif isinstance(port, str):
+        elif isinstance(family_name, str):
             self._family_name = family_name
 
         else:
@@ -135,7 +124,7 @@ class QPU:
 
         Args:
         --------
-        circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPU.
+        circuit (json dict or <class 'qiskit.circuit.CunqaCircuit'>): circuit to be run in the QPU.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -150,10 +139,10 @@ class QPU:
         <class 'qjob.Result'> object.
         """
         if not self.connected:
-            self._qclient.connect(self._ip, self._port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to {self._ip}:{self._port}.")
+            self._qclient.connect(self._port)
+            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
         else:
-            logger.debug(f"QClient already connected for QPU {self.id} to {self._ip}:{self._port}.")
+            logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
 
         try:
             qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level, **run_parameters)
@@ -184,12 +173,14 @@ class QFamily:
 
         else:
             logger.error(f"QFamily name must be str, but {type(name)} was provided [{TypeError.__name__}].")
+
+
         
         if jobid is None:
             logger.error("No family name provided.")
             raise ValueError # capture this in qraise
         
-        elif isinstance(name, str):
+        elif isinstance(jobid, str):
             try:
                 self.jobid = int(jobid)
             except Exception as error:

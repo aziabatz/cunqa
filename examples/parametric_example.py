@@ -13,7 +13,7 @@ sys.path.insert(0, INSTALL_PATH)
 
 # loading necesary modules
 
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 qpus = getQPUs()
 
 

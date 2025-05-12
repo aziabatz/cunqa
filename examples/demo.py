@@ -9,7 +9,7 @@ sys.path.append(installation_path)
 
 # Let's get the QPUs raised
 
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 
 qpus  = getQPUs()
 

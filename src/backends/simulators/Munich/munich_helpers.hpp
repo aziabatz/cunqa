@@ -3,15 +3,9 @@
 #include <vector>
 #include "utils/constants.hpp"
 #include "quantum_task.hpp"
-#include <nlohmann/json.hpp>
+#include "utils/json.hpp"
 
-using JSON = nlohmann::json;
 namespace cunqa {
-
-class MunichConfig {
-    //
-};
-
 
 // Used in the quantum_task_to_Munich function for printing correctly the matrices of custom unitary gates
 std::string triple_vector_to_string(const std::vector<std::vector<std::vector<double>>>& data) {
@@ -39,39 +33,25 @@ std::string triple_vector_to_string(const std::vector<std::vector<std::vector<do
 
 
 // Transfroms a quantum_task, which has config and circuit (these are the instructions) to an OpenQASM2 string
-std::string quantum_task_to_Munich(QuantumTask& quantum_task) 
+std::string quantum_task_to_Munich(const QuantumTask& quantum_task) 
 { 
     JSON instructions = quantum_task.circuit;
     JSON config_json = quantum_task.config;
-    std::string qasm_circt = "openqasm 2.0;\ninclude \"qelib1.inc\";\n";
+    std::string qasm_circt = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\n";
 
-    std::cout << "Empieza la diversión" << "\n";
+    try {
+        // Quantum and classical register declaration
+        qasm_circt += "qreg q[" + to_string(config_json.at("num_qubits")) + "];";
+        qasm_circt += "creg c[" + to_string(config_json.at("num_clbits")) + "];";
 
-    // Quantum register declaration
-    auto quantum_registers = config_json.at("quantum_registers");
-    for (auto& reg : quantum_registers.items()) {
-        std::string reg_name = reg.key();
-        auto qubits = reg.value();
-        qasm_circt += "qreg " + reg_name + "[" + std::to_string(qubits.size()) + "];\n";
-    }
-
-    // Classical register declaration
-    auto classical_registers = config_json.at("classical_registers");
-    for (auto& reg : classical_registers.items()) {
-        std::string reg_name = reg.key();
-        auto clbits = reg.value();
-        qasm_circt += "creg " + reg_name + "[" + std::to_string(clbits.size()) + "];\n";
-    }
-
-    // Instruction processing
-    for (const auto& instruction : instructions) {
-        std::string gate_name = instruction.at("name");
-        std::cout << "Sacar el nombre de una instruction rula " << gate_name << "\n";
-        auto qubits = instruction.at("qubits");
-        std::cout << "Sacar los qubits de una instruction rula " << qubits[0] << "\n";
-        std::vector<double> params;
-        std::vector<std::vector<std::vector<std::vector<double>>>> matrix;
-        
+        // Instruction processing
+        for (const auto& instruction : instructions) {
+            std::string gate_name = instruction.at("name");
+            std::cout << "Sacar el nombre de una instruction rula " << gate_name << "\n";
+            auto qubits = instruction.at("qubits");
+            std::cout << "Sacar los qubits de una instruction rula " << qubits[0] << "\n";
+            std::vector<double> params;
+            std::vector<std::vector<std::vector<std::vector<double>>>> matrix;
 
         try {
             switch (cunqa::INSTRUCTIONS_MAP.at(gate_name))
@@ -142,12 +122,11 @@ std::string quantum_task_to_Munich(QuantumTask& quantum_task)
                     std::cout << "Error. Invalid gate name" << "\n";
                     break;
             }
-
-        } catch (const std::exception& e) {
-            //SPDLOG_LOGGER_ERROR(logger, "Error translating a gate from JSON to QASM2.");
-            std::cout << "Error. Something didn't work." << "\n";
         }
+    } catch (const std::exception& e) {
+        LOGGER_ERROR("Error translating a gate from JSON to QASM2.");
     }
+        
     return qasm_circt;
 }
-}
+} // End of cunqa namespace

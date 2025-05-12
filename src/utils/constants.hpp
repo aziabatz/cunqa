@@ -8,6 +8,7 @@ namespace cunqa {
 namespace constants{
 
 enum INSTRUCTIONS {
+    UNITARY,
     MEASURE,
     ID,
     X,
@@ -51,6 +52,9 @@ enum INSTRUCTIONS {
 };
 
 const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
+    // UNITARY
+    {"unitary", UNITARY},
+
     // MEASURE
     {"measure", MEASURE},
 
@@ -107,6 +111,7 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 };
 
 const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
+    {UNITARY, "unitary"},
     {MEASURE, "measure"},
     {ID, "id"},
     {X, "x"},
@@ -120,6 +125,9 @@ const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {CX, "cx"},
     {CY, "cy"},
     {CZ, "cz"},
+    {CRX, "crx"},
+    {CRY, "cry"},
+    {CRZ, "crz"},
     {ECR, "ecr"},
 };
 
