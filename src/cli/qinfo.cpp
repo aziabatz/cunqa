@@ -50,9 +50,9 @@ int main(int argc, char* argv[]) {
     
     for (auto& [key, inner] : qpus_json.items()) {
         std::string node = inner["net"]["node_name"];
-        std::string family_name = inner["family_name"];
+        std::string family = inner["family"];
         
-        family_counts_per_node[node][family_name]++;
+        family_counts_per_node[node][family]++;
         id_per_node[node].push_back(key);
     }
 
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
             std::cout << "ID: \033[32m" << id << "\033[0m \n";
             std::cout << indent << "Name: " << qpus_json[id]["backend"]["name"] << "\n";
             std::cout << indent << "Description: " << qpus_json[id]["backend"]["description"] << "\n";
-            std::cout << indent << "Family_name: " << qpus_json[id]["family_name"] << "\n";
+            std::cout << indent << "family: " << qpus_json[id]["family"] << "\n";
             std::cout << indent << "Simulator: " << qpus_json[id]["backend"]["simulator"] << "\n";
             std::cout << indent << "Mode: " << qpus_json[id]["net"]["mode"] << "\n";
             
@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
         
         if (family_counts_per_node.find(slurm_nodename) != family_counts_per_node.end()) {
             std::cout << "In current \033[34mNode " << slurm_nodename << "\033[0m there are: " << "\n";
-            for (auto& [family_name, number] : family_counts_per_node[slurm_nodename]) {
-                std::cout << indent << number << " QPUs with family name " << family_name << "\n";
+            for (auto& [family, number] : family_counts_per_node[slurm_nodename]) {
+                std::cout << indent << number << " QPUs with family name " << family << "\n";
             }
         } else {
             std::cout << "\033[33mNode No QPUs deployed on the current node " << slurm_nodename << "\033[0m \n";
@@ -88,8 +88,8 @@ int main(int argc, char* argv[]) {
     } else {
         for (auto& [node_name, node_info] : family_counts_per_node) {
             std::cout << "In \033[34mNode " << node_name << "\033[0m there are: " << "\n";
-            for (auto& [family_name, number] : node_info) {
-                std::cout << indent << number << " QPUs with family name: " << family_name << "\n";
+            for (auto& [family, number] : node_info) {
+                std::cout << indent << number << " QPUs with family name: " << family << "\n";
             }
         }
     }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <regex>
+#include <string>
 #include "quantum_task.hpp"
 #include "utils/json.hpp"
 
@@ -20,7 +22,8 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
     //JSON Object because if not it generates an array
     JSON new_circuit = {
         {"config", new_config},
-        {"instructions", quantum_task.circuit}
+        {"instructions", JSON::parse(std::regex_replace(quantum_task.circuit.dump(),
+                       std::regex("clbits"), "memory"))}
     };
 
     LOGGER_DEBUG("Circuito ANTES: {}", new_circuit.dump(4));

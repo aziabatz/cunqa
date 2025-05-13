@@ -1,9 +1,12 @@
 import os
-from json import JSONDecodeError, load
-from cunqa.qclient import QClient  # importamos api en C++
+from typing import  Union, Any
+
+from cunqa.qclient import QClient
+from cunqa.circuit import CunqaCircuit 
 from cunqa.backend import Backend
 from cunqa.qjob import QJob
 from cunqa.logger import logger
+from cunqa.transpile import transpiler, TranspilerError
 
 # path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
@@ -18,7 +21,7 @@ class QPU:
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None, family_name = None, endpoint = None, comm_info = None):
+    def __init__(self, id : int, qclient : QClient, backend : Backend, family : str, endpoint : tuple):
         """
         Initializes the QPU class.
 
@@ -34,84 +37,24 @@ class QPU:
         endpoint (str): String refering to the endpoint of the server to which the QPU corresponds.
         """
         
-        if id == None:
-            logger.error(f"QPU id not provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif type(id) == int:
-            self.id = id
-
-        else:
-            logger.error(f"QPU id must be int, but {type(id)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-
-        if qclient == None:
-            logger.error(f"QPU client not assigned [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif isinstance(qclient, QClient):
-            self._qclient = qclient
-
-        else:
-            logger.error(f"QPU qclient must be <class 'python.qclient.QClient'>, but {type(qclient)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-
-        if backend == None:
-            logger.error(f"QPU backend not provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif isinstance(backend, Backend):
-            self.backend = backend
-
-        else:
-            logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        if endpoint == None:
-            logger.error(f"QPU client not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
-            raise SystemExit # User's level
-        
-        elif isinstance(endpoint, str):
-            self._endpoint = endpoint
-
-        else:
-            logger.error(f"QClient endpoint must be str, but {type(endpoint)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        if comm_info == None:
-            logger.error(f"QPU communication info not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
-            raise SystemExit # User's level
-        
-        elif isinstance(comm_info, dict):
-            self._comm_info = comm_info
-            self.endpoint = list(comm_info.values())[0]
-
-        else:
-            logger.error(f"QClient comm_info must be dict, but {type(comm_info)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        if family_name == None:
-            logger.error(f"Please provide QPU family name [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
-            raise SystemExit # User's level
-        
-        elif isinstance(family_name, str):
-            self._family_name = family_name
-
-        else:
-            logger.error(f"Family name must be str, but {type(family_name)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-
-
-        # argument to track weather the QPU is connected. It will be connected at `run` method.
-        self.connected = False
+        self._id = id
+        self._backend = backend
+        self._connected = False
+        self._qclient = qclient
+        self._endpoint = endpoint
+        self._family = family
         
         logger.debug(f"Object for QPU {id} created correctly.")
 
+    @property
+    def id(self):
+        return self._id
+    
+    @property
+    def backend(self):
+        return self._backend
 
-    def run(self, circuit, transpile = False, initial_layout = None, opt_level = 1, **run_parameters):
+    def run(self, circuit: Union[dict, CunqaCircuit], transpile: bool = False, initial_layout: list[int] = None, opt_level: int = 1, **run_parameters: Any) -> QJob:
         """
         Class method to run a circuit in the QPU.
 
@@ -136,58 +79,27 @@ class QPU:
 
         Return:
         --------
-        <class 'qjob.Result'> object.
+        <class 'QJob'> object.
         """
-        if not self.connected:
+        if not self._connected:
             ip, port = self._endpoint
             self._qclient.connect(ip, port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to endpoint {ip}:{port}.")
-        else:
-            logger.debug(f"QClient already connected for QPU {self.id} to endpoint {ip}:{port}.")
+            logger.debug(f"QClient connection stabished for QPU {self._id} to endpoint {ip}:{port}.")
+
+        if transpile:
+            try:
+                circuit = transpiler(circuit, self._backend, initial_layout = initial_layout, opt_level = opt_level)
+                logger.debug("Transpilation done.")
+            except Exception as error:
+                logger.error(f"Transpilation failed [{type(error).__name__}].")
+                raise TranspilerError # I capture the error in QPU.run() when creating the job
 
         try:
-            qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level, **run_parameters)
+            qjob = QJob(self._qclient, self._backend, circuit, **run_parameters)
             qjob.submit()
-            logger.debug(f"Qjob submitted to QPU {self.id}.")
+            logger.debug(f"Qjob submitted to QPU {self._id}.")
         except Exception as error:
             logger.error(f"Error when submitting QJob [{type(error).__name__}].")
-            raise SystemExit # User's level
+            raise SystemExit
 
         return qjob
-
-
-class QFamily:
-    """
-    Class to represent a group of QPUs that where raised in the same job.
-    """
-    def __init__(self, name = None, jobid = None):
-        """
-        Initializes the QFamily class.
-        """
-
-        if name is None:
-            logger.error("No family name provided.")
-            raise ValueError # capture this in qraise
-        
-        elif isinstance(name, str):
-            self.name = name
-
-        else:
-            logger.error(f"QFamily name must be str, but {type(name)} was provided [{TypeError.__name__}].")
-
-
-        
-        if jobid is None:
-            logger.error("No family name provided.")
-            raise ValueError # capture this in qraise
-        
-        elif isinstance(jobid, str):
-            try:
-                self.jobid = int(jobid)
-            except Exception as error:
-                logger.error(f"Incorrect format for jobid [{type(error).__name__}].")
-
-        else:
-            logger.error(f"QFamily name must be str, but {type(name)} was provided [{TypeError.__name__}].")
-
-        

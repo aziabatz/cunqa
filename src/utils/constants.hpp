@@ -1,9 +1,11 @@
 #pragma once
 
+#include <vector>
 #include <complex>
 #include <unordered_map>
 
 namespace cunqa {
+namespace constants{
 
 enum INSTRUCTIONS {
     UNITARY,
@@ -24,6 +26,7 @@ enum INSTRUCTIONS {
     CRY,
     CRZ,
     ECR,
+    CECR,
     C_IF_H,
     C_IF_X,
     C_IF_Y,
@@ -77,7 +80,10 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"crz", CRZ},
     {"ecr", ECR},
 
-    //CONTROLLED GATES
+    // TWO GATE NO PARAM
+    {"cecr", CECR},
+
+    //CLASSICAL CONTROLLED GATES
     {"c_if_h", C_IF_H},
     {"c_if_x", C_IF_X},
     {"c_if_y", C_IF_Y},
@@ -90,7 +96,7 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"c_if_cz", C_IF_CZ},
     {"c_if_ecr", C_IF_ECR},
 
-    //DISTRIBUTED GATES
+    //CLASSICAL CONTROLLED DISTRIBUTED GATES
     {"d_c_if_h", D_C_IF_H},
     {"d_c_if_x", D_C_IF_X},
     {"d_c_if_y", D_C_IF_Y},
@@ -151,7 +157,8 @@ const std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
     {"d_c_if_ecr", "ecr"},
 };
 
-} //End namespace CUNQA
+} // End namespace constants
+} //End namespace cunqa
 
 
 

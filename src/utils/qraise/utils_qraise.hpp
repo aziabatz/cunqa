@@ -3,6 +3,7 @@
 #include <string>
 #include <regex>
 
+#include "utils/json.hpp"
 #include "logger.hpp"
 
 bool check_time_format(const std::string& time)
@@ -33,16 +34,16 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
     return 0;
 }
 
-bool exists_family_name(std::string& family_name, std::string& info_path)
+bool exists_family_name(std::string& family, std::string& info_path)
 {
     std::ifstream file(info_path);
     if (!file.is_open()) {
         return false;
     } else {
-        json qpus_json;
+        cunqa::JSON qpus_json;
         file >> qpus_json;
         for (auto& [key, value] : qpus_json.items()) {
-            if (value["family_name"] == family_name) {
+            if (value["family"] == family) {
                 return true;
             } 
         }
