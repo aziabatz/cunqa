@@ -1,0 +1,141 @@
+
+from cunqa.logger import logger
+
+class ResultError(Exception):
+    """Exception for error during job submission to QPUs."""
+    pass
+
+class Result:
+    """
+    Class to describe the result of an experiment.
+    """
+    def __init__(self, result: dict, registers: dict):
+        """
+        Initializes the Result class.
+
+        Args:
+        -----------
+        result (dict): dictionary given as the result of the simulation.
+
+        registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
+        """
+        
+        if result is None or len(result) == 0:
+            logger.error(f"Empty object passed, result is {None} [{ValueError.__name__}].")
+            raise ValueError
+        
+        logger.debug(f"Result received: {result}\n")
+
+        # processing result
+        if "ERROR" in result:
+            message = result["ERROR"]
+            logger.error(f"Error during simulation, please check availability of QPUs, run arguments syntax and circuit syntax: {message}")
+            raise ResultError
+        
+        self._result = result
+        self._registers = registers
+        logger.debug("Results correctly loaded.")
+
+    @property
+    def result(self) -> dict:
+        return self._result
+    
+    @property
+    def counts(self) -> dict:
+        try:
+            if "results" in list(self._result.keys()): # aer
+                counts = self._result["results"][0]["data"]["counts"]
+
+            elif "counts" in list(self._result.keys()): # munich and cunqa
+                counts = self._result["counts"]
+
+            counts = convert_counts(counts, self._registers)            
+        except Exception as error:
+            logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
+            raise error
+        return counts
+
+    @property
+    def time_taken(self) -> str:
+        try:
+            if "results" in list(self._result.keys()): # aer
+                time = self._result["results"][0]["time_taken"]
+
+            elif "counts" in list(self._result.keys()): # munich and cunqa
+                time = self._result["time_taken"]          
+        except Exception as error:
+            logger.error(f"Some error occured with time taken [{type(error).__name__}]: {error}.")
+            raise error
+        return time
+    
+def divide(string: str, lengths: list[int]):
+    """
+    Divides a string of bits in groups of given lenghts separated by spaces.
+
+    Args:
+    --------
+    string (str): string that we want to divide.
+
+    lengths (list[int]): lenghts of the resulting strings in which the original one is divided.
+
+    Return:
+    --------
+    A new string in which the resulting groups are separated by spaces.
+
+    """
+
+    parts = []
+    init = 0
+    try:
+        if len(lengths) == 0:
+            return string
+        else:
+            for length in lengths:
+                parts.append(string[init:init + length])
+                init += length
+            return ' '.join(parts)
+    
+    except Exception as error:
+        logger.error(f"Something failed with division of string [{error.__name__}].")
+        raise SystemExit # User's level
+
+
+def convert_counts(counts: dict, registers: dict):
+
+    """
+    Funtion to convert counts wirtten in hexadecimal format to binary strings and that applies the division of the bit strings.
+
+    Args:
+    --------
+    counts (dict): dictionary of counts to apply the conversion.
+
+    registers (dict): dictionary of classical registers.
+
+    Return:
+    --------
+    Counts dictionary with keys as binary string correctly separated with spaces accordingly to the classical registers.
+    """
+
+    if isinstance(registers, dict):
+        
+        # counting number of classical bits
+        num_clbits = sum([len(i) for i in registers.values()])
+        # getting lenghts of bits for the different registers
+        lengths = []
+        for v in registers.values():
+            lengths.append(len(v))
+    else:
+        logger.error(f"Error when converting `counts` strings.")
+        raise ResultError # I capture this error in QJob.result()
+
+    new_counts = {}
+    if isinstance(counts, dict):
+        for k,v in counts.items():
+            if k.startswith('0x'): # converting to binary string and dividing in bit strings
+                new_counts[divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
+            else: # just dividing the bit stings
+                new_counts[divide(k, lengths)] = v
+    elif isinstance(counts, list):
+        for count in counts:
+            new_counts[divide(format(count[0],'0'+str(num_clbits)+'b')[::-1], lengths)] = count[1] 
+    return new_counts

@@ -7,7 +7,8 @@ std::string circuit_correct = R"(
     "config": {
         "shots": 1024,
         "method": "statevector",
-        "memory_slots": 7
+        "num_clbits": 2,
+        "num_qubits": 2
     },
     "instructions": [
     {
@@ -37,7 +38,8 @@ std::string circuit_broken = R"(
         "config": {
             "shots": 1024,
             "method": "statevector",
-            "memory_slots": 7
+            "num_clbits": 2,
+            "num_qubits": 2
         },
         "instructions": [
         

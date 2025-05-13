@@ -85,7 +85,7 @@ if isinstance(datos, dict):
 
 print(nodeswithQPUs())
 print(infoQPUs(node_name=nodeswithQPUs()[0]))
-print(getQPUs(local=False, family_name="Exposito")) """
+print(getQPUs(local=False, family="Exposito")) """
 
 #for clave in claves_primer_nivel:
 client = QClient(conf_file)
