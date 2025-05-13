@@ -151,6 +151,9 @@ int main(int argc, char* argv[])
     if (args.fakeqmio.has_value()) {
         SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
         run_command = get_fakeqmio_run_command(args, mode);
+    } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+        SPDLOG_LOGGER_ERROR(logger, "FakeQmio flags where provided but --fakeqmio was not included.");
+        return 0;
     } else {
         if (args.classical_comm) {
             SPDLOG_LOGGER_DEBUG(logger, "Classical communications");
