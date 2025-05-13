@@ -32,7 +32,12 @@ int main(int argc, char *argv[])
             backend = std::string(argv[6]);
             backend_json = json::parse(backend);
             if (backend_json.contains("fakeqmio_path")) {
-                std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + backend_json.at("fakeqmio_path").get<std::string>() + " "s +  std::getenv("SLURM_JOB_ID"));
+                std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s
+                                                                             + backend_json.at("fakeqmio_path").get<std::string>().c_str() + " "s +
+                                                                             + backend_json.at("thermal_relaxation").get<std::string>().c_str() + " "s +
+                                                                             + backend_json.at("readout_error").get<std::string>().c_str() + " "s +
+                                                                             + backend_json.at("gate_error").get<std::string>().c_str() + " "s +  std::getenv("SLURM_JOB_ID"));
+                
                 std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
                 std::string fq_path = std::getenv("STORE") + "/.cunqa/tmp_fakeqmio_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
                 std::ifstream f(fq_path);

@@ -19,7 +19,13 @@ struct MyArgs : public argparse::Args
     std::optional<int>& qpus_per_node    = kwarg("qpuN,qpus_per_node", "Number of qpus in each node.");
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
+    
+    // fakeqmio kwarg and flags
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file.", /*implicit*/"last_calibrations");
+    bool& no_thermal_relaxation          = flag("no-thermal-relaxation", "Deactivate thermal relaxation on FakeQmio.");
+    bool& no_readout_error               = flag("no-readout-error", "Deactivate readout error on FakeQmio.");
+    bool& no_gate_error                  = flag("no-gate-error", "Deactivate gate error on FakeQmio.");
+
     std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together.").set_default("default");
     //bool& hpc                          = flag("hpc", "Default HPC mode. The user can connect with the local node QPUs.");
     bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
