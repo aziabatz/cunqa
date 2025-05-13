@@ -12,9 +12,12 @@
 #include "utils/qraise/utils_qraise.hpp"
 #include "utils/qraise/args_qraise.hpp"
 #include "utils/qraise/fakeqmio_conf_qraise.hpp"
+#include "utils/qraise/noise_model_conf_qraise.hpp"
 #include "utils/qraise/no_comm_conf_qraise.hpp"
 #include "utils/qraise/class_comm_conf_qraise.hpp"
 #include "utils/qraise/quantum_comm_conf_qraise.hpp"
+
+
 
 using json = nlohmann::json;
 
@@ -151,9 +154,19 @@ int main(int argc, char* argv[])
     if (args.fakeqmio.has_value()) {
         SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
         run_command = get_fakeqmio_run_command(args, mode);
+    
+    } else if (args.properties.has_value()){
+        SPDLOG_LOGGER_DEBUG(logger, "properties json path provided");
+        run_command = get_noise_model_run_command(args, mode);
+
     } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         SPDLOG_LOGGER_ERROR(logger, "FakeQmio flags where provided but --fakeqmio was not included.");
         return 0;
+
+    } else if (!args.properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+        SPDLOG_LOGGER_ERROR(logger, "properties flags where provided but --properties arg was not included.");
+        return 0;
+
     } else {
         if (args.classical_comm) {
             SPDLOG_LOGGER_DEBUG(logger, "Classical communications");

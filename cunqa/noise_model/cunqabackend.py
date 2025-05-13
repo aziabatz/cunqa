@@ -17,7 +17,6 @@ from qiskit.qobj import QobjExperimentHeader
 from qiskit import qasm2, qasm3, transpile
 from qiskit.qobj.utils import MeasLevel
 
-from qmiotools.integrations.utils import Calibrations
 
 class CunqaBackend(BackendV2):
 
