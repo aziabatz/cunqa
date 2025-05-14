@@ -1,4 +1,5 @@
 import json
+from typing import  Union, Any
 from qiskit import QuantumCircuit
 from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
@@ -48,7 +49,7 @@ def _divide(string, lengths):
 def _convert_counts(counts, registers):
 
     """
-    Funtion to convert counts wirtten in hexadecimal format to binary strings and that applies the division of the bit strings.
+    Function to convert counts written in hexadecimal format to binary strings and that applies the division of the bit strings.
 
     Args:
     --------
@@ -256,6 +257,9 @@ class QJob:
                 circuit = circt["instructions"]
                 exec_type = circt["exec_type"]
 
+                if circt["is_distributed"]:
+                    self._circuit_id = circt["id"]
+
                 logger.debug("Translation to dict not necessary...")
 
 
@@ -271,6 +275,7 @@ class QJob:
                 self.num_qubits = circt.num_qubits
                 cl_bits = circt.num_clbits
                 self._cregisters = circt.classical_regs
+                self._circuit_id = circt._id
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -318,6 +323,7 @@ class QJob:
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
             self._circuit = {"instructions":circuit}
+            
             
         
         except KeyError as error:
@@ -475,21 +481,24 @@ class QJob:
 
 
 
-def gather(qjobs):
+def gather(qjobs: Union[QJob, list[QJob]], show_name: bool = False) -> Union[Result, list[Result], list[list[str, Result]]]:
     """
         Function to get result of several QJob objects, it also takes one QJob object.
 
         Args:
         ------
-        qjobs (list of QJob objects or QJob object)
+        qjobs (QJob object or list of QJob objects)
 
         Return:
-        -------
+        ------- 
         Result or list of results.
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
-            return [q.result() for q in qjobs]
+            if show_name:
+                return [[q._circuit_id, q.result()] for q in qjobs]
+            else:
+                return [q.result() for q in qjobs]
         else:
             logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level
@@ -500,3 +509,4 @@ def gather(qjobs):
     else:
         logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")
         raise SystemError # User's level
+    
