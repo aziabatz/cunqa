@@ -1,17 +1,17 @@
 import os
 import sys
+from typing import Union
 from subprocess import run
-import json
-from json import JSONDecodeError, load
+from json import load
 from cunqa.qclient import QClient  # importamos api en C++
 from cunqa.backend import Backend
 from cunqa.logger import logger
-from cunqa.qpu import QPU, QFamily
+from cunqa.qpu import QPU
 
 
 
 # Adding pyhton folder path to detect modules
-sys.path.insert(0,os.getenv("INSTALL_PATH"))
+sys.path.insert(0, os.getenv("INSTALL_PATH"))
 
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
@@ -44,7 +44,19 @@ def check_raised(n, job_id):
     else:
         return False
 
-def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator = None, fakeqmio = False, family_name = None, cloud = True, cores = None, mem_per_qpu = None, n_nodes = None, node_list = None, qpus_per_node= None, backend = None):
+def qraise(n, time, *, 
+           classical_comm = False, 
+           quantum_comm = False,  
+           simulator = None, 
+           fakeqmio = False, 
+           family = None, 
+           cloud = True, 
+           cores = None, 
+           mem_per_qpu = None, 
+           n_nodes = None, 
+           node_list = None, 
+           qpus_per_node= None, 
+           backend = None) -> Union[tuple, str]:
     """
     Raises a QPU and returns its job_id.
 
@@ -57,7 +69,7 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
     classical_comm (bool): if True the raised QPUs are communicated classically.
     quantum_comm (bool): if True the raised QPUs have quantum communications.
     simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
-    family_name (str): name to identify the group of QPUs raised on the specific call of the function.
+    family (str): name to identify the group of QPUs raised on the specific call of the function.
     mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
     cores (str): 
     mem_per_qpu (str): 
@@ -79,8 +91,8 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
             cmd.append(f"--quantum_comm")
         if simulator is not None:
             cmd.append(f"--simulator={str(simulator)}")
-        if family_name is not None:
-            cmd.append(f"--family_name={str(family_name)}")
+        if family is not None:
+            cmd.append(f"--family={str(family)}")
         if cloud:
             cmd.append(f"--cloud")
         if cores is not None:
@@ -106,16 +118,12 @@ def qraise(n, time, *, classical_comm = False, quantum_comm = False,  simulator 
             if old_time != os.stat(info_path).st_mtime: #checks that the file has been modified
                 break
 
-        # Create the QFamily to return
-        if family_name is not None:
-            return QFamily(name=family_name, jobid=str(job_id))
-        else:
-            return QFamily(name=str(job_id), jobid=str(job_id))
+        return family if family is not None else str(job_id)
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
 
-def qdrop(*families):
+def qdrop(*families: Union[tuple, str]):
     """
     Drops the QPU families corresponding to the the entered QPU objects. By default, all raised QPUs will be dropped.
 
@@ -128,11 +136,10 @@ def qdrop(*families):
     if len( families ) == 0:
         job_id = ['--all'] 
 
-
     #access the large dictionary containing all QPU dictionaries
     try:
-        with open(info_path, "r") as qpus_json:
-            dumps = json.load(qpus_json)
+        with open(info_path, "r") as f:
+            qpus_json = load(f)
 
     except Exception as error:
         logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
@@ -140,37 +147,30 @@ def qdrop(*families):
     
     logger.debug(f"qpu.json file accessed correctly.")
 
-
     #building the terminal command to drop the specified families (using family names or QFamilies)
     cmd = ['qdrop']
 
-    if len(dumps) != 0:
+    if len(qpus_json) != 0:
         for family in families:
             if isinstance(family, str):
-                for _, dictionary in dumps.items():
-                    if dictionary.get("family").get("family_name") == family:
+                for _, dictionary in qpus_json.items():
+                    if dictionary.get("family") == family:
                         job_id=dictionary.get("slurm_job_id")   
                         cmd.append(str(job_id)) 
                         break #pass to the next family name (two qraises must have different family names)
 
-            elif isinstance(family, QFamily):
-                cmd.append(str(family.jobid))
-
+            elif isinstance(family, tuple):
+                cmd.append(family[1])
             else:
                 logger.error(f"Arguments for qdrop must be strings or QFamilies.")
                 raise SystemExit
-            
     else:
         logger.debug(f"qpus.json is empty, the specified families must have reached the time limit.")
-
-        
-    
+ 
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
-    return
 
-
-def nodeswithQPUs():
+def nodeswithQPUs() -> list[set]:
     """
     Global function to know what nodes of the computer host virtual QPUs.
 
@@ -179,13 +179,12 @@ def nodeswithQPUs():
     List of the corresponding node names.
     """
     try:
-        with open(info_path, "r") as qpus_json:
-            dumps = json.load(qpus_json)
+        with open(info_path, "r") as f:
+            qpus_json = load(f)
 
         node_names = set()
-
-        for v in dumps.values():
-            node_names.add(v["net"]["node_name"])
+        for info in qpus_json.values():
+            node_names.add(info["net"]["node_name"])
 
         return list(node_names)
 
@@ -195,7 +194,7 @@ def nodeswithQPUs():
 
 
 
-def infoQPUs(local = True, node_name = None):
+def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
     """
     Global function that returns information about the QPUs available either in the local node or globaly.
 
@@ -203,23 +202,22 @@ def infoQPUs(local = True, node_name = None):
     """
 
     try:
-        with open(info_path, "r") as qpus_json:
-            dumps = load(qpus_json)
-            if len(dumps) == 0:
+        with open(info_path, "r") as f:
+            qpus_json = load(f)
+            if len(qpus_json) == 0:
                 logger.warning(f"No QPUs were found.")
                 return
         
         if node_name is not None:
-            targets = [{k:q} for k,q in dumps.items() if (q["net"].get("node_name") == node_name ) ]
+            targets = [{qpu_id:info} for qpu_id,info in qpus_json.items() if (info["net"].get("node_name") == node_name ) ]
         
         else:
             if local:
                 local_node = os.getenv("SLURMD_NODENAME")
                 logger.debug(f"User at node {local_node}.")
-                # filtering by node_name to select local node
-                targets = [{k:q} for k,q in dumps.items() if (q["net"].get("node_name")==local_node) ]
+                targets = [{qpu_id:info} for qpu_id,info in qpus_json.items() if (info["net"].get("node_name")==local_node) ]
             else:
-                targets =[{k:q} for k,q in dumps.items()]
+                targets =[{qpu_id:info} for qpu_id,info in qpus_json.items()]
         
         info = []
         for t in targets:
@@ -227,7 +225,7 @@ def infoQPUs(local = True, node_name = None):
             info.append({
                 "QPU":key,
                 "node":t[key]["net"]["node_name"],
-                "family_name":t[key]["family_name"],
+                "family":t[key]["family"],
                 "backend":{
                     "name":t[key]["backend"]["name"],
                     "simulator":t[key]["backend"]["simulator"],
@@ -240,8 +238,6 @@ def infoQPUs(local = True, node_name = None):
                 }
             })
         return info
-            
-            
 
     except Exception as error:
         logger.error(f"Some exception occurred [{type(error).__name__}].")
@@ -249,14 +245,14 @@ def infoQPUs(local = True, node_name = None):
 
 
 
-def getQPUs(local = True, family = None):
+def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
     Args:
     --------
     local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
-    family (str or QFamily): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
+    family (str): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
 
     Return:
     ---------
@@ -266,9 +262,9 @@ def getQPUs(local = True, family = None):
 
     #Access raised QPUs information on qpu.json file
     try:
-        with open(info_path, "r") as qpus_json:
-            dumps = load(qpus_json)
-            if len(dumps) == 0:
+        with open(info_path, "r") as f:
+            qpus_json = load(f)
+            if len(qpus_json) == 0:
                 logger.error(f"No QPUs were found.")
                 raise Exception
 
@@ -278,40 +274,28 @@ def getQPUs(local = True, family = None):
     
     logger.debug(f"File accessed correctly.")
 
-    #Check if family has valid format
-    if family is not None:
-        if isinstance(family, QFamily):
-            family_name=family.name
-        elif isinstance(family, str):
-            family_name = family
-        else:
-            logger.error(f"Families must be represented by theior family_name string or a <class cunqa.qpu.QFamily>, [TypeError]")
-            raise SystemExit
-
     #Extract selected QPUs from qpu.json information 
     if local:
         local_node = os.getenv("SLURMD_NODENAME")
         logger.debug(f"User at node {local_node}.")
 
         if family is not None:
-            targets = { k:q for k,q in dumps.items() if (q.get("node_name")==local_node) and (q.get("family_name") == family_name) }
-        
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node) and (info.get("family") == family)}
         else:
-            targets = {k:q for k,q in dumps.items() if (q.get("node_name")==local_node)}
-
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node)}
     else:
         if family is not None:
-            targets = {k:q for k,q in dumps.items() if (q.get("family_name") == family_name) }
-        
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("family") == family)}
         else:
-            targets = dumps
+            targets = qpus_json
     
     # Create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0
-    for k, v in targets.items():
-        client = QClient(info_path)
-        qpus.append( QPU(id = i, qclient = client, backend = Backend(v['backend']), family_name = v["family_name"], port = k, comm_info = v["comm_info"]  )  ) # errors captured above
+    for _, info in targets.items():
+        client = QClient()
+        endpoint = (info["net"]["ip"], info["net"]["port"])
+        qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint))
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
     return qpus

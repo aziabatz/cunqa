@@ -1,7 +1,5 @@
 from cunqa.logger import logger
 from cunqa.qjob import gather
-from cunqa.circuit import from_json_to_qc, CunqaCircuit, _registers_dict
-from cunqa.qpu import QPU
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error

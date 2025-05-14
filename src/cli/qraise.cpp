@@ -2,13 +2,13 @@
 #include <fstream>
 #include <regex>
 #include <any>
-#include <nlohmann/json.hpp>
+
 #include <iostream>
 #include <cstdlib>
 
 #include "argparse.hpp"
-#include "logger/logger.hpp"
-#include "constants.hpp"
+
+#include "utils/constants.hpp"
 #include "utils/qraise/utils_qraise.hpp"
 #include "utils/qraise/args_qraise.hpp"
 #include "utils/qraise/fakeqmio_conf_qraise.hpp"
@@ -17,10 +17,7 @@
 #include "utils/qraise/class_comm_conf_qraise.hpp"
 #include "utils/qraise/quantum_comm_conf_qraise.hpp"
 
-
-
-using json = nlohmann::json;
-
+#include "logger.hpp"
 
 using namespace std::literals;
 
@@ -41,7 +38,7 @@ int main(int argc, char* argv[])
     }
 
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-    SPDLOG_LOGGER_DEBUG(logger, "Temporal file qraise_sbatch_tmp.sbatch created.");
+    LOGGER_DEBUG("Temporal file qraise_sbatch_tmp.sbatch created.");
     std::string run_command;
 
     // Escribir el contenido del script SBATCH
@@ -89,29 +86,29 @@ int main(int argc, char* argv[])
         int cores_per_qpu = args.cores_per_qpu;
         sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
     } else {
-        SPDLOG_LOGGER_ERROR(logger, "Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
+        LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
         return -1;
     }
 
     if (check_time_format(args.time))
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
     else {
-        SPDLOG_LOGGER_ERROR(logger, "Time format is incorrect, must be: xx:xx:xx.");
+        LOGGER_ERROR("Time format is incorrect, must be: xx:xx:xx.");
         return -1;
     }
 
     if (!check_simulator_name(args.simulator)){
-        SPDLOG_LOGGER_ERROR(logger, "Incorrect simulator name ({}).", args.simulator);
+        LOGGER_ERROR("Incorrect simulator name ({}).", args.simulator);
         return -1;
     }
 
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
 
     if (memory_specs == 1) {
-        SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in QMIO. Please, decrease the mem-per-QPU or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
+        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-QPU or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
         return -1;
     } else if (memory_specs == 2) {
-        SPDLOG_LOGGER_ERROR(logger, "Too much memory per QPU in FT3. Please, decrease the mem-per-QPU or increase the cores-per-qpu. Max mem-per-cpu = 4");
+        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-QPU or increase the cores-per-qpu. Max mem-per-cpu = 4");
         return -1;
     }
 
@@ -135,9 +132,9 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
     //Checking duplicate family name
-    std::string family_name = std::any_cast<std::string>(args.family_name);
-    if (exists_family_name(family_name, info_path)) { //Check if there exists other QPUs with same family name
-        SPDLOG_LOGGER_ERROR(logger, "There are QPUs with the same family name as the provided: {}.", family_name);
+    std::string family = std::any_cast<std::string>(args.family);
+    if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
+        LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
         std::system("rm qraise_sbatch_tmp.sbatch");
         return 0;
     }
@@ -152,34 +149,34 @@ int main(int argc, char* argv[])
 
     //Get srun command
     if (args.fakeqmio.has_value()) {
-        SPDLOG_LOGGER_DEBUG(logger, "Fakeqmio provided as a FLAG");
+        LOGGER_DEBUG("Fakeqmio provided as a FLAG");
         run_command = get_fakeqmio_run_command(args, mode);
     
     // } else if (args.properties.has_value()){
-    //     SPDLOG_LOGGER_DEBUG(logger, "properties json path provided");
+    //     LOGGER_DEBUG("properties json path provided");
     //     run_command = get_noise_model_run_command(args, mode);
 
     } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
-        SPDLOG_LOGGER_ERROR(logger, "FakeQmio flags where provided but --fakeqmio was not included.");
+        LOGGER_ERROR("FakeQmio flags where provided but --fakeqmio was not included.");
         return 0;
 
     // } else if (!args.properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
-    //     SPDLOG_LOGGER_ERROR(logger, "properties flags where provided but --properties arg was not included.");
+    //     LOGGER_ERROR("properties flags where provided but --properties arg was not included.");
     //     return 0;
 
     } else {
         if (args.classical_comm) {
-            SPDLOG_LOGGER_DEBUG(logger, "Classical communications");
+            LOGGER_DEBUG("Classical communications");
             run_command = get_class_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
         } else if (args.quantum_comm) {
-            SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
+            LOGGER_ERROR("Quantum communications are not implemented yet");
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 0;
         } else {
-            SPDLOG_LOGGER_DEBUG(logger, "No communications");
+            LOGGER_DEBUG("No communications");
             run_command = get_no_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
@@ -187,7 +184,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    SPDLOG_LOGGER_DEBUG(logger, "Run command: ", run_command);
+    LOGGER_DEBUG("Run command: ", run_command);
     sbatchFile << run_command;
 
     sbatchFile.close();
@@ -195,7 +192,7 @@ int main(int argc, char* argv[])
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");
 
-    SPDLOG_LOGGER_DEBUG(logger, "Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
+    LOGGER_DEBUG("Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
 
     return 0;
 }

@@ -4,9 +4,9 @@
 #include <any>
 
 #include "argparse.hpp"
-#include "constants.hpp"
-#include "logger/logger.hpp"
+#include "utils/constants.hpp"
 #include "args_qraise.hpp"
+#include "logger.hpp"
 
 std::string get_fakeqmio_run_command(auto& args, std::string& mode)
 {
@@ -45,8 +45,8 @@ std::string get_fakeqmio_run_command(auto& args, std::string& mode)
 
     subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " Aer \'" + backend + "\'" + "\n";
     run_command =  "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " + subcommand;
-    SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
-    SPDLOG_LOGGER_DEBUG(logger, "Run command: {}", run_command);
+    LOGGER_DEBUG("Qraise FakeQmio. \n");
+    LOGGER_DEBUG("Run command: {}", run_command);
 
     return run_command;
 }

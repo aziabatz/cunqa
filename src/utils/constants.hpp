@@ -1,54 +1,11 @@
 #pragma once
 
-#include <string_view>
+#include <complex>
 #include <unordered_map>
-#include <nlohmann/json.hpp>
-#include<complex>
 
-using json = nlohmann::json;
+namespace cunqa {
 
-// NETWORK INTERFACES NAMES
-constexpr std::string_view INFINIBAND = "ib0";
-constexpr std::string_view VLAN120 = "VLAN120";
-constexpr std::string_view VLAN117 = "VLAN117";
-constexpr std::string_view LOCAL = "lo";
-
-enum communications {
-  no_comm,
-  class_comm,
-  quantum_comm
-};
-
-
-std::unordered_map<std::string, int> comm_map = {
-
-  {"no_comm", no_comm},
-  {"class_comm", class_comm},
-  {"quantum_comm", quantum_comm}
-};
-
-
-namespace CUNQA {
-
-  using Matrix = std::vector<std::vector<std::complex<double>>>;
-
-  enum qpu_comm_library {
-    mpi,
-    zmq
-  };
-  
-  std::unordered_map<std::string, int> qpu_comm_map = {
-  
-    {"mpi", CUNQA::mpi},
-    {"zmq", CUNQA::zmq}
-  };
-
-  enum sender_or_receiver {
-    sender,
-    receiver
-  };
-
-  enum INSTRUCTIONS {
+enum INSTRUCTIONS {
     UNITARY,
     MEASURE,
     ID,
@@ -92,8 +49,8 @@ namespace CUNQA {
     REMOTE_C_IF_ECR,
 };
 
-std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
-    //Personalized gates
+const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
+    // UNITARY
     {"unitary", UNITARY},
 
     // MEASURE
@@ -151,7 +108,7 @@ std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"remote_c_if_ecr", REMOTE_C_IF_ECR},
 };
 
-std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
+const std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
     {UNITARY, "unitary"},
     {MEASURE, "measure"},
     {ID, "id"},
@@ -173,30 +130,30 @@ std::unordered_map<int, std::string> INVERTED_GATE_NAMES = {
 };
 
 const std::vector<std::string> BASIS_GATES = {
-            "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
-            "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
-            "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
-            "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
-            "cswap"};
+    "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "id",
+    "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
+    "swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3",
+    "rxx", "ryy", "rzz", "rzx", "ccx", "ccz", "crx", "cry", "crz",
+    "cswap"
+};
 
-  const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
-    "unitary", "id", "h", "x", "y", "z", "rx", "ry", "rz", "cx", "cy", "cz", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"
-  };
+const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
+    "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "d_c_if_h", "d_c_if_x","d_c_if_y","d_c_if_z","d_c_if_rx","d_c_if_ry","d_c_if_rz","d_c_if_cx","d_c_if_cy","d_c_if_cz", "d_c_if_ecr"
+};
 
-  std::unordered_map<std::string, std::string> CORRESPONDENCE_REMOTE_GATE_MAP = {
-    {"remote_c_if_unitary", "unitary"},
-    {"remote_c_if_h", "h"},
-    {"remote_c_if_x", "x"},
-    {"remote_c_if_y", "y"},
-    {"remote_c_if_z", "z"},
-    {"remote_c_if_rx", "rx"},
-    {"remote_c_if_ry", "ry"},
-    {"remote_c_if_rz", "rz"},
-    {"remote_c_if_cx", "cx"},
-    {"remote_c_if_cy", "cy"},
-    {"remote_c_if_cz", "cz"},
-    {"remote_c_if_ecr", "ecr"},
-  };
+const std::unordered_map<std::string, std::string> CORRESPONDENCE_D_GATE_MAP = {
+    {"d_c_if_h", "h"},
+    {"d_c_if_x", "x"},
+    {"d_c_if_y", "y"},
+    {"d_c_if_z", "z"},
+    {"d_c_if_rx", "rx"},
+    {"d_c_if_ry", "ry"},
+    {"d_c_if_rz", "rz"},
+    {"d_c_if_cx", "cx"},
+    {"d_c_if_cy", "cy"},
+    {"d_c_if_cz", "cz"},
+    {"d_c_if_ecr", "ecr"},
+};
 
 } //End namespace CUNQA
 

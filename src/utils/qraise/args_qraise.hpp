@@ -3,7 +3,7 @@
 #include <optional>
 
 #include "argparse.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
 
 using namespace std::literals;
 

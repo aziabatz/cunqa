@@ -1,1 +1,1 @@
-configure_file(comm_strat_def.h.in comm_strat_def.h)
+add_subdirectory(comm_impl)

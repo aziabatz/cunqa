@@ -34,9 +34,7 @@ class CunqaCircuit:
 
     def __init__(self, num_qubits, num_clbits = None, id = None):
 
-        if isinstance(num_qubits, int):
-            num_qubits = num_qubits
-        else:
+        if not isinstance(num_qubits, int):
             logger.error(f"num_qubits must be an int, but a {type(num_qubits)} was provided [TypeError].")
             raise SystemExit
         
@@ -71,8 +69,186 @@ class CunqaCircuit:
     def num_clbits(self):
         return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
+    def _add_instruction(self, instruction):
+        """
+        Class method to add an instruction to the CunqaCircuit.
 
-    # methods for implementing non parametric single-qubit gates
+        Args:
+        --------
+        instruction (dict): instruction to be added.
+        """
+        try:
+            self._check_instruction(instruction)
+            self.instructions.append(instruction)
+
+        except Exception as error:
+            logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
+            raise error
+
+
+    def _check_instruction(self, instruction):
+        """
+        Class method to check format for circuit instruction. If method finds some inconsistency, raises an error that must be captured avobe.
+        
+        If format is correct, no error is raise and nothing is returned.
+
+        Args:
+        ----------
+        instruction (dict): instruction to be checked.
+        """
+
+        mandatory_keys = {"name", "qubits"}
+
+        instructions_with_clbits = {"measure"}
+
+        if isinstance(instruction, dict):
+        # check if the given instruction has the mandatory keys
+            if mandatory_keys.issubset(instruction):
+                
+                # checking name
+                if not isinstance(instruction["name"], str):
+                    logger.error(f"instruction name must be str, but {type(instruction['name'])} was provided.")
+                    raise TypeError # I capture this at _add_instruction method
+                
+                if (instruction["name"] in SUPPORTED_GATES_1Q):
+                    gate_qubits = 1
+                elif (instruction["name"] in SUPPORTED_GATES_2Q) or (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                    # we include as 2 qubit gates the distributed gates
+                    gate_qubits = 2
+                elif (instruction["name"] in SUPPORTED_GATES_3Q):
+                    gate_qubits = 3
+
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
+                    # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
+                    gate_qubits = int(np.log2(len(instruction["params"][0])))
+                    if not instruction["name"] == "unitary":
+                        gate_qubits += 1 # adding the control qubit
+
+                elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
+                    gate_qubits = 1
+
+                else:
+                    logger.error(f"instruction is not supported.")
+                    raise ValueError # I capture this at _add_instruction method
+
+                # checking qubits
+                if isinstance(instruction["qubits"], list):
+                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
+                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
+                        raise TypeError
+                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                else:
+                    logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
+                    raise TypeError # I capture this at _add_instruction method
+                
+                if not (len(instruction["qubits"]) == gate_qubits):
+                    logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
+                    raise ValueError # I capture this at _add_instruction method
+
+                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
+                    raise ValueError # I capture this at _add_instruction method
+
+
+                # checking clibits
+                if ("clbits" in instruction) and (instruction["name"] in instructions_with_clbits):
+
+                    if isinstance(instruction["clbits"], list):
+                        if not all([isinstance(c, int) for c in instruction["clbits"]]):
+                            logger.error(f"instruction clbits must be a list of ints, but a list of {[type(c) for c in instruction['clbits'] if not isinstance(c,int)]} was provided.")
+                            raise TypeError
+                    else:
+                        logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
+                        raise TypeError # I capture this at _add_instruction method
+                    
+                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
+                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
+                        raise ValueError
+                    
+                elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
+                    logger.error(f"instruction {instruction['name']} does not support clbits.")
+                    raise ValueError
+                
+                # checking params
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                    self.is_parametric = True
+
+                    if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
+                        gate_params = 1
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_2):
+                        gate_params = 2
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_3):
+                        gate_params = 3
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_4):
+                        gate_params = 4
+                    else:
+                        logger.error(f"instruction {instruction['name']} is not parametric, therefore does not accept params.")
+                        raise ValueError
+                    
+                    if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
+                        logger.error(f"instruction params must be int or float, but {type(instruction['params'])} was provided.")
+                        raise TypeError
+                    
+                    if not len(instruction["params"]) == gate_params:
+                        logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
+                        raise ValueError
+                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
+                    logger.error("instruction is parametric, therefore requires params.")
+                    raise ValueError
+                                
+                # check distributed instruction circuits
+                if (not instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
+                    # we check in the prrevious method that target/control circuit id is provided
+                    logger.error(f"instruction circuits specification is need for distributed intstruction.")
+                    raise ValueError
+                elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                    self.is_distributed =True
+                
+        
+    
+    def _add_q_register(self, name, number_qubits):
+
+        if name in self.quantum_regs:
+            i = 0
+            new_name = name
+            while new_name in self.quantum_regs:
+                new_name = new_name + "_" + str(i); i += 1
+
+            logger.warning(f"{name} for quantum register in use, renaming to {new_name}.")
+        
+        else:
+            new_name = name
+
+        self.quantum_regs[new_name] = [(self.num_qubits + 1 + i) for i in range(number_qubits)]
+
+        return new_name
+    
+    
+    def _add_cl_register(self, name, number_clbits):
+
+        if name in self.classical_regs:
+            i = 0
+            new_name = name
+            while new_name in self.classical_regs:
+                new_name = new_name + "_" + str(i); i += 1
+
+            logger.warning(f"{name} for classcial register in use, renaaming to {new_name}.")
+        
+        else:
+            new_name = name
+
+        self.classical_regs[new_name] = [(self.num_clbits + i) for i in range(number_clbits)]
+
+        return new_name
+    
+    # =============== INSTRUCTIONS ===============
+    
+    # Methods for implementing non parametric single-qubit gates
 
     def id(self, qubit):
         """
@@ -677,9 +853,7 @@ class CunqaCircuit:
         })
     
 
-    # methhods for implementing conditional LOCAL gates
-
-
+    # methods for implementing conditional LOCAL gates
     def unitary(self, matrix, *qubits):
         """
         Class method to apply a unitary gate created from an unitary matrix provided.
@@ -1126,74 +1300,10 @@ class CunqaCircuit:
 def flatten(lists):
     return [element for sublist in lists for element in sublist]
 
+from qiskit import QuantumCircuit
+from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
-
-
-
-
-
-
-
-def _qasm2_to_json(qasm_str, version = None):
-    """
-    Transforms a QASM circuit to json.
-
-    Args:
-    ---------
-    qc (str): circuit to transform to json.
-
-    Return:
-    ---------
-    json dict with the circuit information.
-    """
-    lines = qasm_str.splitlines()
-    json_data = {
-        "qasm_version": None,
-        "includes": [],
-        "registers": [],
-        "instructions": []
-    }
-    
-    for line in lines:
-        line = line.strip()
-        if line.startswith("OPENQASM"):
-            json_data["qasm_version"] = line.split()[1].replace(";", "")
-        elif line.startswith("include"):
-            json_data["includes"].append(line.split()[1].replace(";", "").strip('"'))
-        elif line.startswith("qreg") or line.startswith("creg"):
-            parts = line.split()
-            register_type = parts[0]
-            name, size = parts[1].split("[")
-            size = int(size.replace("];", ""))
-            json_data["registers"].append({"type": register_type, "name": name, "size": size})
-        else:
-            if line:
-                parts = line.split()
-                operation_name = parts[0]
-                if operation_name != "measure":
-                    if "," not in parts[1]:
-                        qubits = parts[1].lstrip("q[").rstrip("];")
-                        json_data["instructions"].append({"name":operation_name, "qubits":[qubits]})
-
-                    #qubits = parts[1].replace(";", "").split(",")
-                    else:
-                        parts_split = parts[1].rstrip(";").split(",")
-                        q_first = parts_split[0].split("[")[1].rstrip("]")
-                        print(parts_split)
-                        q_second = parts_split[1].split("[")[1].rstrip("]")
-                        json_data["instructions"].append({"name":operation_name, "qubits":[q_first, q_second]})
-                else:
-                    qubits = parts[1].split("[")[1].rstrip("]")
-                    memory_aux = parts[3].rstrip(";")
-                    if "meas" in memory_aux:
-                        memory = memory_aux.lstrip("meas[").rstrip("]")
-                    else:
-                        memory = memory_aux.lstrip("c[").rstrip("]")
-                    json_data["instructions"].append({"name":operation_name, "qubits":[qubits], "memory":memory})
-
-    return json_data
-
-def qc_to_json(qc):
+def qc_to_json(qc: QuantumCircuit):
     """
     Transforms a QuantumCircuit to json dict.
 
@@ -1218,12 +1328,12 @@ def qc_to_json(qc):
     # Actual translation
     try:
         
-        quantum_registers, classical_registers = _registers_dict(qc)
+        quantum_registers, classical_registers = registers_dict(qc)
         
         json_data = {
             "id": "",
             "is_distributed": False,
-            "is_parametric": _is_parametric(qc),
+            "is_parametric": is_parametric(qc),
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
@@ -1268,11 +1378,6 @@ def qc_to_json(qc):
     except Exception as error:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
         raise error
-
-
-from qiskit import QuantumCircuit
-from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
-
 
 def from_json_to_qc(circuit_dict):
     """
@@ -1377,8 +1482,7 @@ def from_json_to_qc(circuit_dict):
         logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
         raise error
 
-
-def _registers_dict(qc):
+def registers_dict(qc):
     """
     Extracts the number of classical and quantum registers from a QuantumCircuit.
 
@@ -1461,4 +1565,3 @@ def _is_parametric(circuit):
             if any(line.startswith(gate) for gate in parametric_gates):
                 return True
         return False
-           

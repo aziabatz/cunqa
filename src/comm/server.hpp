@@ -2,23 +2,14 @@
 
 #include <iostream>
 #include <memory>
-#include "config/net_config.hpp"
-#include "comm_strat_def.h"
+#include <queue>
+#include <string>
 
-using namespace config;
+#include "backends/simple_backend.hpp"
+#include "utils/json.hpp"
 
-#if COMM_LIB == ASIO
-    #include "comm-strats/asio/asio_server.hpp"
-    using SelectedServer = AsioServer;
-#elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq/zmq_server.hpp"
-    using SelectedServer = ZmqServer;
-#elif COMM_LIB == CROW
-    #include "comm-strats/crow_comm.hpp"
-    using SelectedServer = CrowServer;
-#else
-    #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
-#endif
+namespace cunqa {
+namespace comm {
 
 class ServerException : public std::exception {
     std::string message;
@@ -31,25 +22,44 @@ public:
 };
 
 class Server {
-    std::unique_ptr<SelectedServer> comm_strat;
 public:
+    std::string mode;
+    std::string hostname;
+    std::string nodename;
+    std::string ip;
+    std::string port;
 
-    Server(const NetConfig& net_config) :
-        comm_strat{std::make_unique<SelectedServer>(net_config)} 
-    { }
+    Server(const std::string& mode);
+    ~Server();
 
-    inline std::string recv_circuit() { return comm_strat->recv_data(); }
-    
-    inline void accept() { comm_strat->accept(); }
+    void accept();
+    std::string recv_data();
+    void send_result(const std::string& result);
+    void close();
 
-    inline void send_result(const std::string& result) { 
-        try {
-            comm_strat->send_result(result);
-        } catch (const std::exception& e) {
-            throw ServerException(e.what());
-        }
+private:
+    struct Impl;
+    std::unique_ptr<Impl> pimpl_;
+
+    friend void to_json(JSON& j, const Server& obj) {
+        j = {   
+            {"mode", obj.mode}, 
+            {"hostname", obj.hostname},
+            {"nodename", obj.nodename}, 
+            {"ip", obj.ip},
+            {"port", obj.port}
+        };
     }
 
-    inline void close() {comm_strat->close(); }
+    friend void from_json(const JSON& j, Server& obj) {
+        j.at("mode").get_to(obj.mode);
+        j.at("hostname").get_to(obj.hostname);
+        j.at("nodename").get_to(obj.nodename);
+        j.at("ip").get_to(obj.ip);
+        j.at("port").get_to(obj.port);
+    }
 };
+
+} // End of comm namespace
+} // End of cunqa namespace
 
