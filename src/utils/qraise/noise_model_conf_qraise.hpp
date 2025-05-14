@@ -43,7 +43,7 @@ std::string get_noise_model_run_command(auto& args, std::string& mode)
                + R"(","readout_error":")" +  std::to_string(readout_error)
                + R"(","gate_error":")" +  std::to_string(gate_error)+ R"("})" ;
 
-    subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " Aer \'" + backend + "\'" + "\n";
+    subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " Aer \'" + properties + "\'" + "\n";
     run_command =  "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " + subcommand;
     SPDLOG_LOGGER_DEBUG(logger, "Qraise FakeQmio. \n");
     SPDLOG_LOGGER_DEBUG(logger, "Run command: {}", run_command);
