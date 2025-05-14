@@ -27,7 +27,9 @@ public:
     std::string hostname;
     std::string nodename;
     std::string ip;
+    std::string global_ip;
     std::string port;
+    std::string comm_port;
 
     Server(const std::string& mode);
     ~Server();
@@ -47,7 +49,9 @@ private:
             {"hostname", obj.hostname},
             {"nodename", obj.nodename}, 
             {"ip", obj.ip},
-            {"port", obj.port}
+            {"global_ip", obj.global_ip},
+            {"port", obj.port},
+            {"comm_port", obj.comm_port}
         };
     }
 
@@ -56,7 +60,9 @@ private:
         j.at("hostname").get_to(obj.hostname);
         j.at("nodename").get_to(obj.nodename);
         j.at("ip").get_to(obj.ip);
+        j.at("global_ip").get_to(obj.global_ip);
         j.at("port").get_to(obj.port);
+        j.at("comm_port").get_to(obj.port);
     }
 };
 

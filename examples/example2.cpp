@@ -12,7 +12,6 @@ int main() {
 
     cunqa::sim::DistributedCircuitSimulator dcs(std::move(qc));
 
-    dcs.sayhello();
 
     return 0;
 }

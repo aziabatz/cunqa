@@ -8,6 +8,8 @@
 #include "backends/simple_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
+#include "backends/simulators/CUNQA/cunqa_simple_simulator.hpp"
+#include "backends/simulators/CUNQA/cunqa_classical_comm_simulator.hpp"
 
 #include "utils/json.hpp"
 #include "utils/helpers/murmur_hash.hpp"
@@ -66,16 +68,18 @@ int main(int argc, char *argv[])
                 case murmur::hash("Munich"):
                     turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     break;
+                case murmur::hash("Cunqa"):
+                    turn_ON_QPU<CunqaSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
-        case murmur::hash("class_comm"): 
+        case murmur::hash("classical_comm"): 
             switch(murmur::hash(sim_arg)) {
-                case murmur::hash("Aer"): 
-                    //
-                case murmur::hash("Munich"):
-                    //
+                case murmur::hash("Cunqa"): 
+                    turn_ON_QPU<CunqaCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;

@@ -148,70 +148,70 @@ void QuantumComputation::set_circuit()
                 clreg = std::make_pair(clbits[0], size);
                 this->classicControlled(qc::OpType::RZ, qubits[0], clreg, 1U, params);
                 break;
-            case cunqa::constants::D_C_IF_H:
+            case cunqa::constants::REMOTE_C_IF_H:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 this->classicControlledDistributed(qc::OpType::H, endpoints[0], endpoints[1], qubits[0], targets); // (gate[OpType], send_endpoints[std::string], recv_endpoints[std::string], class_control_qubit[int], target_qubit[std::vector<int>], params[std::vector<double>])
                 break;
-            case cunqa::constants::D_C_IF_X:
+            case cunqa::constants::REMOTE_C_IF_X:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 this->classicControlledDistributed(qc::OpType::X, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_Y:
+            case cunqa::constants::REMOTE_C_IF_Y:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 this->classicControlledDistributed(qc::OpType::Y, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_Z:
+            case cunqa::constants::REMOTE_C_IF_Z:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 this->classicControlledDistributed(qc::OpType::Z, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_RX:
+            case cunqa::constants::REMOTE_C_IF_RX:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 params = instruction.at("params").get<std::vector<double>>();
                 this->classicControlledDistributed(qc::OpType::RX, endpoints[0], endpoints[1], qubits[0], targets, params);
                 break;
-            case cunqa::constants::D_C_IF_RY:
+            case cunqa::constants::REMOTE_C_IF_RY:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 params = instruction.at("params").get<std::vector<double>>();
                 this->classicControlledDistributed(qc::OpType::RY, endpoints[0], endpoints[1], qubits[0], targets, params);
                 break;
-            case cunqa::constants::D_C_IF_RZ:
+            case cunqa::constants::REMOTE_C_IF_RZ:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1]};
                 params = instruction.at("params").get<std::vector<double>>();
                 this->classicControlledDistributed(qc::OpType::RZ, endpoints[0], endpoints[1], qubits[0], targets, params);
                 break;
-            case cunqa::constants::D_C_IF_CX:
+            case cunqa::constants::REMOTE_C_IF_CX:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1], qubits[2]};
                 this->classicControlledDistributed(qc::OpType::X, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_CY:
+            case cunqa::constants::REMOTE_C_IF_CY:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1], qubits[2]};
                 this->classicControlledDistributed(qc::OpType::Y, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_CZ:
+            case cunqa::constants::REMOTE_C_IF_CZ:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1], qubits[2]};
                 this->classicControlledDistributed(qc::OpType::Z, endpoints[0], endpoints[1], qubits[0], targets);
                 break;
-            case cunqa::constants::D_C_IF_ECR:
+            case cunqa::constants::REMOTE_C_IF_ECR:
                 this->has_classic_communications = true;
                 endpoints = instruction.at("circuits").get<std::vector<std::string>>();
                 targets = {qubits[1], qubits[2]};

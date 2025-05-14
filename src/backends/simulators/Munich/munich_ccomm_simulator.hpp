@@ -119,11 +119,11 @@ public:
     // Methods
     std::map<std::size_t, bool> singleShot(bool ignoreNonUnitaries) override;
 
-    void sayhello()
+/*     void sayhello()
     {
         this->qc->saysomething();
     }
-
+ */
 };
     
 
