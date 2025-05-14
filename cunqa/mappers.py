@@ -1,5 +1,6 @@
 from cunqa.logger import logger
 from cunqa.qjob import gather
+from cunqa.circuit import CunqaCircuit
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error

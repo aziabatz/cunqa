@@ -1333,7 +1333,7 @@ def qc_to_json(qc: QuantumCircuit):
         json_data = {
             "id": "",
             "is_distributed": False,
-            "is_parametric": is_parametric(qc),
+            "is_parametric": _is_parametric(qc),
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
