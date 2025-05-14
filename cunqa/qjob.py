@@ -1,5 +1,5 @@
-from typing import  Union, Any
 import json
+from typing import  Union, Any
 from qiskit import QuantumCircuit
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
@@ -59,7 +59,7 @@ class QJob:
         self._configure(**run_parameters)
 
     @property
-    def result(self):
+    def result(self) -> Result:
         """
         Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
         """
@@ -133,7 +133,7 @@ class QJob:
         if self._result is None:
             self._future.get()
 
-        if not is_parametric(self._circuit):
+        if not _is_parametric(self._circuit):
             logger.error(f"Cannot upgrade parameters. Please check that the circuit provided has gates that accept parameters [{QJobError.__name__}].")
             raise SystemExit # User's level
 
@@ -234,7 +234,7 @@ class QJob:
                 self._exec_type = "offloading" #As distributed operations are not supported and dynamic execution is not necessary, we execute instructions in batches for performance
 
             else:
-                logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
+                logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
             self._circuit = {"instructions":circuit}
@@ -292,112 +292,6 @@ class QJob:
             logger.error(f"Some error occured when generating configuration for the simulation [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
         
-
-
-    def submit(self):
-        """
-        Asynchronous method to submit a job to the corresponding QClient.
-        """
-        if self._future is not None:
-            logger.warning("QJob has already been submitted.")
-        else:
-            try:
-                self._future = self._QPU._qclient.send_circuit(self._execution_config)
-                logger.debug("Circuit was sent.")
-            except Exception as error:
-                logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
-                raise QJobError # I capture the error in QPU.run() when creating the job
-            
-    def upgrade_parameters(self, parameters):
-        """
-        Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
-
-         Args:
-        -----------
-        parameters (list[float or int]): list of parameters to assign to the parametrized circuit.
-        """
-
-        if self._result is None:
-            self._future.get()
-
-        if not _is_parametric(self._circuit):
-            logger.error(f"Cannot upgrade parameters. Please check that the circuit provided has gates that accept parameters [{QJobError.__name__}].")
-            raise SystemExit # User's level
-
-        if isinstance(parameters, list):
-
-            if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
-                message = """{{"params":{} }}""".format(parameters).replace("'", '"')
-
-            else:
-                logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
-                raise SystemExit # User's level
-            
-        elif isinstance(parameters, (int, float)):
-            message = """{{"params":{} }}""".format([parameters]).replace("'", '"')
-
-        else:
-            logger.error(f"Parameters must be a single value (int, float) or given in a list, but {type(parameters)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-        try:
-            logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
-            self._future = self._QPU._qclient.send_parameters(message)
-
-        except Exception as error:
-            logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
-            raise SystemExit # User's level
-        
-        self._updated = False # We indicate that new results will come, in order to call server
-
-        return self
-
-    def result(self):
-        """
-        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
-        """
-        if (self._future is not None) and (self._future.valid()):
-            try:
-                if self._result is not None:
-                    if not self._updated: # if the result was already obtained, we only call the server if an update was done
-                        res = self._future.get()
-                        self._result = Result(json.loads(res), registers=self._cregisters)
-                        self._updated = True
-                    else:
-                        pass
-                else:
-                    res = self._future.get()
-                    self._result = Result(json.loads(res), registers=self._cregisters)
-                    self._updated = True
-            except Exception as error:
-                logger.error(f"Error while creating Results object [{type(error).__name__}].")
-                raise SystemExit # User's level
-        else:
-            logger.debug(f"self._future is None or non-valid, None is returned.")
-
-        return self._result
-
-
-    def time_taken(self):
-        """
-        Method to obtain the time that the job took. It can also be obtained by `QJob._result.time_taken`.
-        """
-
-        if self._future is not None and self._future.valid():
-            if self._result is not None:
-                try:
-                    return self._result.time_taken
-                except AttributeError:
-                    logger.warning("Time taken not available.")
-                    return None
-            else:
-                logger.error(f"QJob not finished [{QJobError.__name__}].")
-                raise SystemExit # User's level
-        else:
-            logger.error(f"No QJob submited [{QJobError.__name__}].")
-            raise SystemExit # User's level
-
-
 
 
 def gather(qjobs: Union[QJob, list[QJob]], show_name: bool = False) -> Union[Result, list[Result], list[list[str, Result]]]:

@@ -51,7 +51,7 @@ class QPU:
         return self._id
     
     @property
-    def backend(self):
+    def backend(self) -> Backend:
         return self._backend
 
     def run(self, circuit: Union[dict, CunqaCircuit], transpile: bool = False, initial_layout: list[int] = None, opt_level: int = 1, **run_parameters: Any) -> QJob:
