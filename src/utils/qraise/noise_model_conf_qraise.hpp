@@ -4,8 +4,8 @@
 #include <any>
 
 #include "argparse.hpp"
-#include "constants.hpp"
-#include "logger/logger.hpp"
+#include "utils/constants.hpp"
+#include "logger.hpp"
 #include "args_qraise.hpp"
 
 std::string get_noise_model_run_command(auto& args, std::string& mode)
