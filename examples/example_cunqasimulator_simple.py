@@ -86,8 +86,6 @@ for q in qpus:
 
 qpu0 = qpus[-1]
 
-print("QPU endpoint: ", qpu0.endpoint)
-
 job = qpu0.run(qc, shots=19)
 print(job.result().get_counts())
 

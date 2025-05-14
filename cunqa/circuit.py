@@ -17,7 +17,7 @@ SUPPORTED_GATES_PARAMETRIC_2 = ["u2", "r"]
 SUPPORTED_GATES_PARAMETRIC_3 = ["u", "u3", "cu3"]
 SUPPORTED_GATES_PARAMETRIC_4 = ["cu"]
 SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz"]
-SUPPORTED_GATES_DISTRIBUTED = ["measure_and_send", "remote_c_if_unitary", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
+SUPPORTED_GATES_DISTRIBUTED = ["remote_c_if_unitary", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
 
 class CunqaCircuitError(Exception):
     """Exception for error during circuit desing in CunqaCircuit."""
@@ -118,7 +118,7 @@ class CunqaCircuit:
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
                     gate_qubits = 3
 
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
                     # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
                     gate_qubits = int(np.log2(len(instruction["params"][0])))
                     if not instruction["name"] == "unitary":
@@ -175,7 +175,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):

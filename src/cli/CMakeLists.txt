@@ -21,7 +21,7 @@ endif()
 
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
-target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu munich_simulator aer_simulator)
+target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu aer_simulator munich_simulator cunqa_simple_simulator cunqa_classical_comm_sim)
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # QINFO executable

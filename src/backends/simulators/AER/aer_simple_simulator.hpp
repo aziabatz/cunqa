@@ -16,7 +16,7 @@ public:
     ~AerSimpleSimulator() override;
 
     inline std::string get_name() const override { return "SimpleAER"; } 
-    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) const override;
+    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) override;
 };
 
 } // End of sim namespace
