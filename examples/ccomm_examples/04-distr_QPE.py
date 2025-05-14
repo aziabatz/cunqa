@@ -74,7 +74,7 @@ def distr_rz2_QPE(angle, n_precision):
     
     distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=2000)
     
-    counts_list = [result.get_counts() for result in gather(distr_jobs)]
+    counts_list = [[circ_res[0],circ_res[1].get_counts()] for circ_res in gather(distr_jobs, True)]
     print(counts_list)
     print_results(counts_list)
     

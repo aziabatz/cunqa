@@ -35,14 +35,10 @@ circs_QPE = [cc_1, cc_2]
 distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1024) 
 
 ########## Collect the counts #######
-counts_list = [result.get_counts() for result in gather(distr_jobs)]
+counts_list = [[circ_res[0],circ_res[1].get_counts()] for circ_res in gather(distr_jobs, True)]
 
 ########## Print the counts #######
 print(counts_list)
 
-<<<<<<< HEAD
-qdrop(family)
-=======
 ########## Drop the deployed QPUs #
 qdrop(family)
->>>>>>> 7e93156235744aecc51c4da7a6e42e48a746d699
