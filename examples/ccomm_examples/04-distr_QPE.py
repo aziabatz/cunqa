@@ -10,16 +10,13 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-def print_results(counts_list, show_name = False):
-    aux_list = []
-    if show_name:
-        for pair in counts_list:
-            aux_list.append(pair[1])
-    else:
-         aux_list = counts_list
-        
+def print_results(result_list):
+    counts_list = []
+    for result in result_list:
+        counts_list.append(result.counts)
+
     estimation = ""
-    for counts in aux_list:
+    for counts in counts_list:
         # Extract the most frequent measurement (the best estimate of theta)
         most_frequent_output = max(counts, key=counts.get)
         total = sum([v for v in counts.values()])
@@ -30,8 +27,6 @@ def print_results(counts_list, show_name = False):
     print(f"Measured output: {estimation[::-1]}")
     print(f"Estimated theta: {estimated_theta}")
     #print(f"With probability: {counts[most_frequent_output]/total}", )
-
-
 
 
 
@@ -79,17 +74,15 @@ def distr_rz2_QPE(angle, n_precision):
     
     distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=2000)
     
-    counts_list = [[circ_res[0], circ_res[1].counts] for circ_res in gather(distr_jobs, True)]
-    print(counts_list)
-    print_results(counts_list, True)
-    
-
+    counts_list = [circ_res for circ_res in gather(distr_jobs)]
     qdrop(family)
+    return counts_list
         
         
+result_list = distr_rz2_QPE(1/2**4, 8)
+for result in result_list:
+    print(result)
 
-distr_rz2_QPE(1/2**4, 8)
-
-#distr_rz2_QPE(0.63, 10)
+print_results(result_list)
 
 

@@ -35,7 +35,7 @@ circs_QPE = [cc_1, cc_2]
 distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1) 
 
 ########## Collect the counts #######
-counts_list = [circ_res for circ_res in gather(distr_jobs, True)]
+counts_list = [circ_res for circ_res in gather(distr_jobs)]
 
 ########## Print the counts #######
 print(counts_list)
