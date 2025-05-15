@@ -25,7 +25,7 @@ class QRaiseError(Exception):
 def check_raised(n, job_id):
     try:
         with open(info_path, "r") as qpus_json: #access the qpus file
-            dumps = json.load(qpus_json)
+            dumps = load(qpus_json)
 
     except Exception as error:
         logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")

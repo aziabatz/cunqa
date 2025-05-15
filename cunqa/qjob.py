@@ -305,7 +305,7 @@ def gather(qjobs: Union[QJob, list[QJob]]) -> Union[Result, list[Result], list[l
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
-            return [q.result() for q in qjobs]
+            return [q.result for q in qjobs]
         else:
             logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level

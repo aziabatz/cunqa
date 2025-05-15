@@ -37,6 +37,13 @@ class Result:
         self._registers = registers
         logger.debug("Results correctly loaded.")
 
+    def __str__(self):
+        RED = "\033[31m"
+        YELLOW = "\033[33m"
+        RESET = "\033[0m"   
+        GREEN = "\033[32m"
+        return f"{YELLOW}{self._id}{RESET}, {self.counts},    time_taken (ns): {GREEN}{self.time_taken}{RESET}\n"
+
     @property
     def result(self) -> dict:
         return self._result
@@ -68,12 +75,6 @@ class Result:
             logger.error(f"Some error occured with time taken [{type(error).__name__}]: {error}.")
             raise error
         return time
-    
-    def __str__(self):
-        YELLOW = "\033[33m"
-        RESET = "\033[0m"   
-        GREEN = "\033[32m"
-        return f"{YELLOW}{self._id}{RESET}, {self.counts}, time_taken: {GREEN}{self.time_taken}{RESET}\n"
     
 def divide(string: str, lengths: list[int]):
     """

@@ -43,9 +43,9 @@ def cyclic_ccommunication(n):
 
 
     distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=1024)
-    qdrop(family)
-    return gather(distr_jobs)
 
+    #qdrop(family)
+    return gather(distr_jobs)
 
 for circ_result in cyclic_ccommunication(5):
     print(circ_result)
