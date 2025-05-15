@@ -27,17 +27,19 @@ struct ClassicalChannel::Impl
     {
         int target_int = std::atoi(target.c_str());
         MPI_Send(&measurement, 1, MPI_INT, target_int, 1, MPI_COMM_WORLD);
+        
     }
 
     int recv(std::string& origin)
     {
+        int measurement;
         int origin_int = std::atoi(origin.c_str());
         MPI_Recv(&measurement, 1, MPI_INT, origin_int, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         return measurement;
     }
 };
 
-ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()}
+ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()}, endpoint{std::to_string(pimpl_->mpi_rank)}
 {}
 
 ClassicalChannel::~ClassicalChannel() = default;

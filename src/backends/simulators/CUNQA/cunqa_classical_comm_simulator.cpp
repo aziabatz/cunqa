@@ -100,7 +100,7 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
                 case constants::REMOTE_C_IF_CZ:
                 case constants::REMOTE_C_IF_ECR:
                     origin_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    SPDLOG_LOGGER_DEBUG(logger, "Origin endpoints: {}", origin_endpoint[0]);
+                    SPDLOG_LOGGER_DEBUG(logger, "Origin endpoint: {}", origin_endpoint[0]);
                     measurement = classical_channel->recv_measure(origin_endpoint[0]); 
                     SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", origin_endpoint[0]);
                     if (measurement == 1) {
@@ -143,6 +143,12 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
 
     return result;
 
+}
+
+std::string CunqaCCSimulator::get_communication_endpoint()
+{
+    std::string endpoint = this->classical_channel->endpoint;
+    return endpoint;
 }
 
 } // End namespace sim

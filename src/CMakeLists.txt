@@ -1,8 +1,8 @@
 add_subdirectory(third-party)
+add_subdirectory(classical_channel)
 add_subdirectory(backends)
 add_subdirectory(utils)
 add_subdirectory(comm)
-add_subdirectory(classical_channel)
 
 add_library(quantum_task quantum_task.cpp)
 target_link_libraries(quantum_task PUBLIC json)

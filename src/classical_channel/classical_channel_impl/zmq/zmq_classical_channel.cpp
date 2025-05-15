@@ -100,7 +100,7 @@ struct ClassicalChannel::Impl
 };
 
 
-ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()}
+ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()}, endpoint{pimpl_->zmq_endpoint}
 {}
 
 ClassicalChannel::~ClassicalChannel() = default;
