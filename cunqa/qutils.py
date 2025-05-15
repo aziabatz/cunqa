@@ -295,7 +295,8 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     for _, info in targets.items():
         client = QClient()
         endpoint = (info["net"]["ip"], info["net"]["port"])
-        qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint))
+        comm_endpoint = (info["net"]["global_ip"], info["net"]["comm_port"])
+        qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint, comm_endpoint = comm_endpoint))
         i+=1
     logger.debug(f"{len(qpus)} QPU objects were created.")
     return qpus

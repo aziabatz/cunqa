@@ -1,6 +1,7 @@
 from cunqa.logger import logger
 from cunqa.qjob import gather
 from cunqa.circuit import CunqaCircuit
+from cunqa.qpu import QPU
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error
@@ -63,15 +64,15 @@ def run_distributed(circuits, qpus, **run_args):
         if len(circuit_jsons)<len(qpus):
             logger.warning("More QPUs provided than the number of circuits. Last QPUs will remain unused.")
         for circuit, qpu in zip(circuit_jsons, qpus):
-            correspondence[circuit["id"]] = qpu.endpoint
+            correspondence[circuit["id"]] = qpu._comm_endpoint
         
 
     #Check wether the QPUs are valid
-    if not all(qpu._family_name == qpus[0]._family_name for qpu in qpus):
+    if not all(qpu._family == qpus[0]._family for qpu in qpus):
         if not all("zmq" in qpu._comm_info for qpu in qpus):
             names = set()
             for qpu in qpus:
-                names.add(qpu._family_name)
+                names.add(qpu._family)
             logger.error(f"QPU objects provided are from different families ({list(names)}). For this version, classical communications beyond families are only supported with zmq communication type.")
             raise SystemExit # User's level
     
@@ -202,7 +203,7 @@ class QPUCircuitMapper:
                 qpu = self.qpus[i % len(self.qpus)]
                 circuit_assembled = self.ansatz.assign_parameters(params)
 
-                logger.debug(f"Sending QJob to QPU {qpu.id}...")
+                logger.debug(f"Sending QJob to QPU {qpu._id}...")
                 qjobs.append(qpu.run(circuit_assembled, transpile = self.transpile, initial_layout = self.initial_layout, **self.run_parameters))
 
             

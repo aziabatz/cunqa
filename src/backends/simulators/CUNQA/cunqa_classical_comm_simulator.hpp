@@ -18,12 +18,13 @@ class CunqaCCSimulator final : public SimulatorStrategy<SimpleBackend>
 {
 public:
     // Constructors
-    CunqaCCSimulator() = default;
+    CunqaCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
+    {}
     ~CunqaCCSimulator() override;
 
 
     // Methods
-    inline std::string get_name() const override { return "CunqaClassicalCommunications";};
+    inline std::string get_name() const override { return "CunqaSimulator";};
     JSON execute(const SimpleBackend& backend, const QuantumTask& quantumtask) override; 
 
     // Attributes

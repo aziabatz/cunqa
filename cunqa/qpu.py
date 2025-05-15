@@ -21,7 +21,7 @@ class QPU:
     ----------------------
     """
     
-    def __init__(self, id : int, qclient : QClient, backend : Backend, family : str, endpoint : tuple):
+    def __init__(self, id : int, qclient : QClient, backend : Backend, family : str, endpoint : tuple, comm_endpoint : tuple):
         """
         Initializes the QPU class.
 
@@ -42,6 +42,7 @@ class QPU:
         self._connected = False
         self._qclient = qclient
         self._endpoint = endpoint
+        self._comm_endpoint = "tcp://" + comm_endpoint[0] + ":" + comm_endpoint[1]
         self._family = family
         
         logger.debug(f"Object for QPU {id} created correctly.")

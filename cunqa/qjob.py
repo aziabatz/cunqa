@@ -55,8 +55,9 @@ class QJob:
         self._result = None
 
         self._convert_circuit(circuit)
-        print(self._circuit)
+        logger.debug("Circuit converted")
         self._configure(**run_parameters)
+        logger.debug("Qjob configured")
 
     @property
     def result(self) -> Result:
@@ -69,7 +70,6 @@ class QJob:
                     if not self._updated: # if the result was already obtained, we only call the server if an update was done
                         res = self._future.get()
                         self._result = Result(json.loads(res), registers=self._cregisters)
-                        print("result definido")
                         self._updated = True
                     else:
                         pass
@@ -108,14 +108,11 @@ class QJob:
         """
         Asynchronous method to submit a job to the corresponding QClient.
         """
-        print("1")
         if self._future is not None:
             logger.warning("QJob has already been submitted.")
         else:
             try:
-                print("2")
                 self._future = self._qclient.send_circuit(self._execution_config)
-                print("3")
                 logger.debug("Circuit was sent.")
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
@@ -172,12 +169,12 @@ class QJob:
 
                 logger.debug("Translation to dict not necessary...")
 
-                circuit = circuit['instructions']
 
                 self._exec_type = circuit['exec_type']
 
                 # might explode
                 self._circuit_id = circuit["id"]
+                circuit = circuit['instructions']
             
 
             elif isinstance(circuit, CunqaCircuit):
@@ -258,7 +255,6 @@ class QJob:
 
     def _configure(self, **run_parameters):
         # configuration
-        print("Entramos a configurar")
         try:
             # config dict
             run_config = {
@@ -309,15 +305,15 @@ def gather(qjobs: Union[QJob, list[QJob]], show_name: bool = False) -> Union[Res
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
             if show_name:
-                return [[q._circuit_id, q.result()] for q in qjobs]
+                return [[q._circuit_id, q.result] for q in qjobs]
             else:
-                return [q.result() for q in qjobs]
+                return [q.result for q in qjobs]
         else:
             logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level
             
     elif isinstance(qjobs, QJob):
-        return qjobs.result()
+        return qjobs.result
 
     else:
         logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")

@@ -22,7 +22,7 @@ public:
 
 
     // Methods
-    inline std::string get_name() const override { return "CunqaSimpleSimulator";};
+    inline std::string get_name() const override { return "CunqaSimulator";};
     JSON execute(const SimpleBackend& backend, const QuantumTask& quantumtask) override;
 
     // Attributes

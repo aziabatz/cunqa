@@ -17,13 +17,13 @@ CunqaCCSimulator::~CunqaCCSimulator() = default;
 
 JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantumtask)
 {
-    JSON instructions = quantumtask.circuit;
+    std::vector<JSON> instructions = quantumtask.circuit.at("instructions").get<std::vector<JSON>>();
     JSON run_config = quantumtask.config;
     int shots = run_config.at("shots");
     std::string instruction_name;
     std::vector<int> qubits;
-    std::array<std::string, 1> origin_endpoint;
-    std::array<std::string, 1> target_endpoint;
+    std::vector<std::string> origin_endpoint;
+    std::vector<std::string> target_endpoint;
     std::vector<double> param;
     Matrix matrix;
     int measurement;
@@ -41,8 +41,9 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
         for (auto& instruction : instructions) {
-            instruction_name = instruction.at("name");
+            instruction_name = instruction.at("name").get<std::string>();
             qubits = instruction.at("qubits").get<std::vector<int>>();
+            LOGGER_DEBUG("Instruction name and qubits well read.");
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
@@ -84,7 +85,7 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
                     executor->apply_parametric_gate(instruction_name, qubits, param);
                     break;
                 case constants::MEASURE_AND_SEND:
-                    target_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    target_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     measurement = executor->apply_measure(qubits); 
                     SPDLOG_LOGGER_DEBUG(logger, "Trying to send to {}", target_endpoint[0]);
                     classical_channel->send_measure(measurement, target_endpoint[0]); 
@@ -98,7 +99,7 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
                 case constants::REMOTE_C_IF_CY:
                 case constants::REMOTE_C_IF_CZ:
                 case constants::REMOTE_C_IF_ECR:
-                    origin_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    origin_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     SPDLOG_LOGGER_DEBUG(logger, "Origin endpoints: {}", origin_endpoint[0]);
                     measurement = classical_channel->recv_measure(origin_endpoint[0]); 
                     SPDLOG_LOGGER_DEBUG(logger, "Measurement received from {}", origin_endpoint[0]);
@@ -109,7 +110,7 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
                 case constants::REMOTE_C_IF_RX:
                 case constants::REMOTE_C_IF_RY:
                 case constants::REMOTE_C_IF_RZ:
-                    origin_endpoint = instruction.at("qpus").get<std::array<std::string, 1>>();
+                    origin_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     SPDLOG_LOGGER_DEBUG(logger, "Origin endpoint: {}", origin_endpoint[0]);
                     param = instruction.at("params").get<std::vector<double>>();
                     measurement = classical_channel->recv_measure(origin_endpoint[0]); 

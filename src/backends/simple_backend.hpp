@@ -15,7 +15,7 @@ namespace cunqa {
 namespace sim {
 
 struct SimpleConfig {
-    std::string name = "SimpleSimulator";
+    std::string name = "SimpleBackend";
     std::string version = "0.0.1";
     int n_qubits = 32;
     std::string description = "Simple backend with no communications.";
