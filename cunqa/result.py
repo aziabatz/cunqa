@@ -9,7 +9,7 @@ class Result:
     """
     Class to describe the result of an experiment.
     """
-    def __init__(self, result: dict, registers: dict):
+    def __init__(self, result: dict, circ_id: str, registers: dict):
         """
         Initializes the Result class.
 
@@ -33,6 +33,7 @@ class Result:
             raise ResultError
         
         self._result = result
+        self._id = circ_id
         self._registers = registers
         logger.debug("Results correctly loaded.")
 
@@ -67,6 +68,12 @@ class Result:
             logger.error(f"Some error occured with time taken [{type(error).__name__}]: {error}.")
             raise error
         return time
+    
+    def __str__(self):
+        YELLOW = "\033[33m"
+        RESET = "\033[0m"   
+        GREEN = "\033[32m"
+        return f"{YELLOW}{self._id}{RESET}, {self.counts}, time_taken: {GREEN}{self.time_taken}{RESET}\n"
     
 def divide(string: str, lengths: list[int]):
     """

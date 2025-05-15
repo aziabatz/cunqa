@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
     //Checking duplicate family name
-    std::string family = std::any_cast<std::string>(args.family);
+    std::string family = std::any_cast<std::string>(args.family_name);
     if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
         LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
         std::system("rm qraise_sbatch_tmp.sbatch");

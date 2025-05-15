@@ -16,6 +16,7 @@ def mod(n, m):
 def cyclic_ccommunication(n):
     family = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
     qpus_comm = getQPUs(family)
+    
 
     circuits = {}
     circuits["cc_0"]=CunqaCircuit(2,2, id= f"cc_0")
@@ -42,13 +43,9 @@ def cyclic_ccommunication(n):
 
 
     distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=1024)
-    
-    counts_list = [[circ_res[0],circ_res[1].get_counts()] for circ_res in gather(distr_jobs, True)]
     qdrop(family)
-    return counts_list
+    return gather(distr_jobs)
 
-YELLOW = "\033[33m"
-RESET = "\033[0m"
-print("\n")
-for circ_count in cyclic_ccommunication(5):
-    print(f"{YELLOW}{circ_count[0]}{RESET}, {circ_count[1]}\n")
+
+for circ_result in cyclic_ccommunication(5):
+    print(circ_result)

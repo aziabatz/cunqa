@@ -25,10 +25,10 @@ std::string get_class_comm_run_command(auto& args, std::string& mode)
     if (args.backend.has_value()) {
         backend_path = std::any_cast<std::string>(args.backend.value());
         backend = R"({"backend_path":")" + backend_path + R"("})" ;
-        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
+        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + " \'" + backend + "\'" "\n";
         LOGGER_DEBUG("Qraise with classical communications and personalized CunqaSimulator backend. \n");
     } else {
-        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family) + " " + std::any_cast<std::string>(args.simulator) + "\n";
+        subcommand = mode + " class_comm " + std::any_cast<std::string>(args.family_name) + " " + std::any_cast<std::string>(args.simulator) + "\n";
         LOGGER_DEBUG("Qraise with classical communications and default CunqaSimulator backend. \n");
     }
 
