@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    LOGGER_DEBUG("Run command: ", run_command);
+    LOGGER_DEBUG("Run command: {}", run_command);
     sbatchFile << run_command;
 
     sbatchFile.close();

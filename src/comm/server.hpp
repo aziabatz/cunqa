@@ -29,7 +29,6 @@ public:
     std::string ip;
     std::string global_ip;
     std::string port;
-    std::string comm_port;
 
     Server(const std::string& mode);
     ~Server();
@@ -51,7 +50,6 @@ private:
             {"ip", obj.ip},
             {"global_ip", obj.global_ip},
             {"port", obj.port},
-            {"comm_port", obj.comm_port}
         };
     }
 
@@ -62,7 +60,6 @@ private:
         j.at("ip").get_to(obj.ip);
         j.at("global_ip").get_to(obj.global_ip);
         j.at("port").get_to(obj.port);
-        j.at("comm_port").get_to(obj.port);
     }
 };
 
