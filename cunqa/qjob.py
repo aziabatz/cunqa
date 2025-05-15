@@ -53,6 +53,7 @@ class QJob:
         self._updated = False
         self._future = None
         self._result = None
+        self._circuit_id = ""
 
         self._convert_circuit(circuit)
         logger.debug("Circuit converted")
@@ -75,7 +76,7 @@ class QJob:
                         pass
                 else:
                     res = self._future.get()
-                    self._result = Result(json.loads(res), registers=self._cregisters)
+                    self._result = Result(json.loads(res), self._circuit_id, registers=self._cregisters)
                     self._updated = True
             else:
                 logger.debug(f"self._future is None or non-valid, None is returned.")
@@ -172,7 +173,7 @@ class QJob:
 
                 self._exec_type = circuit['exec_type']
 
-                # might explode
+                # might explode for handmade dicts not design for ditributed execution
                 self._circuit_id = circuit["id"]
                 circuit = circuit['instructions']
             
@@ -290,7 +291,7 @@ class QJob:
         
 
 
-def gather(qjobs: Union[QJob, list[QJob]], show_name: bool = False) -> Union[Result, list[Result], list[list[str, Result]]]:
+def gather(qjobs: Union[QJob, list[QJob]]) -> Union[Result, list[Result], list[list[str, Result]]]:
     """
         Function to get result of several QJob objects, it also takes one QJob object.
 
@@ -304,10 +305,7 @@ def gather(qjobs: Union[QJob, list[QJob]], show_name: bool = False) -> Union[Res
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
-            if show_name:
-                return [[q._circuit_id, q.result] for q in qjobs]
-            else:
-                return [q.result for q in qjobs]
+            return [q.result for q in qjobs]
         else:
             logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level

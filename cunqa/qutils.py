@@ -25,7 +25,7 @@ class QRaiseError(Exception):
 def check_raised(n, job_id):
     try:
         with open(info_path, "r") as qpus_json: #access the qpus file
-            dumps = json.load(qpus_json)
+            dumps = load(qpus_json)
 
     except Exception as error:
         logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
@@ -108,7 +108,7 @@ def qraise(n, time, *,
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
 
-        old_time = os.stat(info_path).st_mtime #stablish when the file qpus.json was modified last to check later that we did modify it
+        old_time = os.stat(info_path).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number

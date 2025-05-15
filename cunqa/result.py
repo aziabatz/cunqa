@@ -9,7 +9,7 @@ class Result:
     """
     Class to describe the result of an experiment.
     """
-    def __init__(self, result: dict, registers: dict):
+    def __init__(self, result: dict, circ_id: str, registers: dict):
         """
         Initializes the Result class.
 
@@ -33,8 +33,16 @@ class Result:
             raise ResultError
         
         self._result = result
+        self._id = circ_id
         self._registers = registers
         logger.debug("Results correctly loaded.")
+
+    def __str__(self):
+        RED = "\033[31m"
+        YELLOW = "\033[33m"
+        RESET = "\033[0m"   
+        GREEN = "\033[32m"
+        return f"{YELLOW}{self._id}{RESET}, {self.counts},    time_taken (ns): {GREEN}{self.time_taken}{RESET}\n"
 
     @property
     def result(self) -> dict:
