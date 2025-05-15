@@ -14,8 +14,8 @@ public:
     MunichSimpleSimulator() = default;
     ~MunichSimpleSimulator() = default;
 
-    inline std::string get_name() const override { return "SimpleMunich"; }
-    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) const override;
+    inline std::string get_name() const override { return "MunichSimulator"; }
+    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) override;
 };
 
 } // End of sim namespace

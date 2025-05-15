@@ -10,9 +10,16 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-def print_results(counts_list):
+def print_results(counts_list, show_name = False):
+    aux_list = []
+    if show_name:
+        for pair in counts_list:
+            aux_list.append(pair[1])
+    else:
+         aux_list = counts_list
+        
     estimation = ""
-    for counts in counts_list:
+    for counts in aux_list:
         # Extract the most frequent measurement (the best estimate of theta)
         most_frequent_output = max(counts, key=counts.get)
         total = sum([v for v in counts.values()])
@@ -23,6 +30,7 @@ def print_results(counts_list):
     print(f"Measured output: {estimation[::-1]}")
     print(f"Estimated theta: {estimated_theta}")
     #print(f"With probability: {counts[most_frequent_output]/total}", )
+
 
 
 
@@ -68,15 +76,12 @@ def distr_rz2_QPE(angle, n_precision):
         circuits[f"cc_{i}"].measure(1,1)
         circuits[f"cc_{i}"].measure(2,2)
 
-    #print({"id":circuits["cc_2"]._id, "instructions":circuits[f"cc_{2}"].instructions, "num_qubits": circuits[f"cc_{2}"].num_qubits,"num_clbits": circuits[f"cc_{2}"].num_clbits,"classical_registers": circuits[f"cc_{2}"].classical_regs,"quantum_registers": circuits[f"cc_{2}"].quantum_regs, "exec_type":"dynamic", "is_distributed":circuits[f"cc_{2}"].is_distributed, "is_parametric":circuits[f"cc_{2}"].is_parametric})
-
-
     
     distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=2000)
     
-    counts_list = [[circ_res[0],circ_res[1].get_counts()] for circ_res in gather(distr_jobs, True)]
+    counts_list = [[circ_res[0], circ_res[1].counts] for circ_res in gather(distr_jobs, True)]
     print(counts_list)
-    print_results(counts_list)
+    print_results(counts_list, True)
     
 
     qdrop(family)

@@ -118,7 +118,7 @@ class CunqaCircuit:
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
                     gate_qubits = 3
 
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
                     # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
                     gate_qubits = int(np.log2(len(instruction["params"][0])))
                     if not instruction["name"] == "unitary":
@@ -175,7 +175,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):

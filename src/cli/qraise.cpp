@@ -14,7 +14,7 @@
 #include "utils/qraise/fakeqmio_conf_qraise.hpp"
 #include "utils/qraise/noise_model_conf_qraise.hpp"
 #include "utils/qraise/no_comm_conf_qraise.hpp"
-#include "utils/qraise/class_comm_conf_qraise.hpp"
+#include "utils/qraise/classical_comm_conf_qraise.hpp"
 #include "utils/qraise/quantum_comm_conf_qraise.hpp"
 
 #include "logger.hpp"
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
     } else {
         if (args.classical_comm) {
             LOGGER_DEBUG("Classical communications");
-            run_command = get_class_comm_run_command(args, mode);
+            run_command = get_classical_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
