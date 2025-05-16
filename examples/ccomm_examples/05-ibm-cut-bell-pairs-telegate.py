@@ -19,7 +19,7 @@ family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = Tr
 qpus_QPE  = getQPUs(family)
 
 # Params for the gates in the Cut Bell Pair Factory #
-with open("/mnt/netapp1/Store_CESGA/home/cesga/dexposito/repos/CUNQA/examples/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
+with open("/CUNQA/examples/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
     params2 = [[float(val) for val in line.replace("\n","").split(" ")] for line in fin.readlines()]
 z = params2[0]
 
