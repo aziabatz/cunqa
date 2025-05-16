@@ -58,6 +58,7 @@ JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& 
                 case constants::Y:
                 case constants::Z:
                 case constants::H:
+                case constants::SX:
                 case constants::CX:
                 case constants::CY:
                 case constants::CZ:
