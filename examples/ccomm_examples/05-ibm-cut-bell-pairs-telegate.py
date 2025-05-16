@@ -2,6 +2,7 @@ import os, sys
 import numpy as np
 # path to access c++ files
 installation_path = os.getenv("INSTALL_PATH")
+examples_path = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/repos/CUNQA/examples'
 sys.path.append(installation_path)
 
 from cunqa.qutils import getQPUs, qraise, qdrop
@@ -19,7 +20,7 @@ family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = Tr
 qpus_QPE  = getQPUs(family)
 
 # Params for the gates in the Cut Bell Pair Factory #
-with open("/CUNQA/examples/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
+with open(examples_path + "/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
     params2 = [[float(val) for val in line.replace("\n","").split(" ")] for line in fin.readlines()]
 z = params2[0]
 
@@ -28,12 +29,12 @@ Alice = CunqaCircuit(3,3, id="Alice")
 # Cut Bell Pair Factory 1 #
 Alice.rz(z[0] + np.pi/2 ,1)   
 Alice.rz(z[1] + np.pi/2 ,2)   
-#Alice.sx(1)                        SX NOT YET IMPLEMENTED
-#Alice.sx(2)
+Alice.sx(1)                       
+Alice.sx(2)
 Alice.rz(z[4],1)
 Alice.rz(z[5],2)
-#Alice.sx(1)
-#Alice.sx(2)
+Alice.sx(1)
+Alice.sx(2)
 Alice.rz(5*np.pi/2 + z[8],1)   
 Alice.rz(5*np.pi/2 + z[9],2)   
 Alice.cx(1,2)
@@ -44,12 +45,12 @@ Alice.rz(z[14],1)
 
 # First telegate #
 Alice.cx(0,1)
-Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bob")
-Alice.measure_and_send(control_qubit = 1, target_circuit = "Bob")
+Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bobby")
+Alice.measure_and_send(control_qubit = 1, target_circuit = "Bobby")
 # Second telegate #
 Alice.cx(0,2)
-Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bob")
-Alice.measure_and_send(control_qubit = 2, target_circuit = "Bob")
+Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bobby")
+Alice.measure_and_send(control_qubit = 2, target_circuit = "Bobby")
 
 Alice.measure(0,0)
 Alice.measure(1,1)
@@ -57,16 +58,16 @@ Alice.measure(2,2)
 
 ############# CIRCUIT 2 ######################
 
-Bob = CunqaCircuit(3,3, id="Bob")
+Bob = CunqaCircuit(3,3, id="Bobby")
 # Cut Bell Pair Factory 2 #
 Bob.rz(z[2]+ np.pi/2 ,0)   
 Bob.rz(z[3]+ np.pi/2 ,1)   
-#Bob.sx(0)
-#Bob.sx(1)
+Bob.sx(0)
+Bob.sx(1)
 Bob.rz(z[6],0)
 Bob.rz(z[7],1)
-#Bob.sx(0)
-#Bob.sx(1)
+Bob.sx(0)
+Bob.sx(1)
 Bob.rz(5*np.pi/2 + z[10],0)   
 Bob.rz(5*np.pi/2 + z[11],1)   
 Bob.cx(1,0)

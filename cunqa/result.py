@@ -43,7 +43,9 @@ class Result:
         YELLOW = "\033[33m"
         RESET = "\033[0m"   
         GREEN = "\033[32m"
-        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken (ns): {GREEN}{self.time_taken}{RESET}{'}'}\n"
+        displace = int(len(self._id) + len("{'{'}counts: ") + len(str(self.counts)) -4 - len("time_taken: ") - len(str(float(self.time_taken)/1e3)) )
+        time_taken_str = "time_taken: "
+        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t {time_taken_str:>{displace}.{11}} {GREEN}{float(self.time_taken)/1e3} ms{RESET}{'}'}\n"
 
     @property
     def result(self) -> dict:
