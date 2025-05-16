@@ -7,6 +7,8 @@ from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error
 import numpy as np
 
+import re
+
 
 
 def run_distributed(circuits, qpus, **run_args):
@@ -69,7 +71,8 @@ def run_distributed(circuits, qpus, **run_args):
 
     #Check wether the QPUs are valid
     if not all(qpu._family == qpus[0]._family for qpu in qpus):
-        if not all("zmq" in qpu._comm_info for qpu in qpus):
+        logger.debug(f"QPUs of different families were provided.")
+        if not all(re.match(r"^tcp://", qpu._comm_endpoint) for qpu in qpus):
             names = set()
             for qpu in qpus:
                 names.add(qpu._family)

@@ -18,7 +18,9 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> pimpl_;
-};
+public:
+    std::string endpoint;
+};  
 
 } // End of comm namespace
 } // End of cunqa namespace

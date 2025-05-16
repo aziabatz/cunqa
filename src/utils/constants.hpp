@@ -27,10 +27,11 @@ enum INSTRUCTIONS {
     CRZ,
     ECR,
     CECR,
-    C_IF_H,
     C_IF_X,
     C_IF_Y,
     C_IF_Z,
+    C_IF_H,
+    C_IF_SX,
     C_IF_RX,
     C_IF_RY,
     C_IF_RZ,
@@ -39,10 +40,11 @@ enum INSTRUCTIONS {
     C_IF_CZ,
     C_IF_ECR,
     MEASURE_AND_SEND,
-    REMOTE_C_IF_H,
     REMOTE_C_IF_X,
     REMOTE_C_IF_Y,
     REMOTE_C_IF_Z,
+    REMOTE_C_IF_H,
+    REMOTE_C_IF_SX,
     REMOTE_C_IF_RX,
     REMOTE_C_IF_RY,
     REMOTE_C_IF_RZ,
@@ -85,11 +87,12 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"cecr", CECR},
 
     //CLASSICAL CONTROLLED GATES
-    {"c_if_h", C_IF_H},
     {"c_if_x", C_IF_X},
     {"c_if_y", C_IF_Y},
     {"c_if_z", C_IF_Z},
-    {"c_if_rx", C_IF_RX},
+    {"c_if_h", C_IF_H},
+    {"c_if_sx", C_IF_H},
+    {"c_if_rx", C_IF_SX},
     {"c_if_ry", C_IF_RY},
     {"c_if_rz", C_IF_RZ},
     {"c_if_cx", C_IF_CX},
@@ -101,10 +104,11 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"measure_and_send", MEASURE_AND_SEND},
 
     // REMOTE CONTROLLED GATES
-    {"remote_c_if_h", REMOTE_C_IF_H},
     {"remote_c_if_x", REMOTE_C_IF_X},
     {"remote_c_if_y", REMOTE_C_IF_Y},
     {"remote_c_if_z", REMOTE_C_IF_Z},
+    {"remote_c_if_h", REMOTE_C_IF_H},
+    {"remote_c_if_sx", REMOTE_C_IF_SX},
     {"remote_c_if_rx", REMOTE_C_IF_RX},
     {"remote_c_if_ry", REMOTE_C_IF_RY},
     {"remote_c_if_rz", REMOTE_C_IF_RZ},
@@ -144,14 +148,15 @@ const std::vector<std::string> BASIS_GATES = {
 };
 
 const std::vector<std::string> BASIS_AND_DISTRIBUTED_GATES = {
-    "id", "h", "x", "y", "z", "cx", "cy", "cz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"
+    "id", "x", "y", "z", "h", "sx", "cx", "cy", "cz", "ecr", "c_if_x","c_if_y","c_if_z", "c_if_h", "c_if_sx", "c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "measure_and_send", "remote_c_if_x","remote_c_if_y","remote_c_if_z", "remote_c_if_h", "remote_c_if_sx", "remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"
 };
 
 const std::unordered_map<std::string, std::string> CORRESPONDENCE_REMOTE_GATE_MAP = {
-    {"remote_c_if_h", "h"},
     {"remote_c_if_x", "x"},
     {"remote_c_if_y", "y"},
     {"remote_c_if_z", "z"},
+    {"remote_c_if_h", "h"},
+    {"remote_c_if_sx", "sx"},
     {"remote_c_if_rx", "rx"},
     {"remote_c_if_ry", "ry"},
     {"remote_c_if_rz", "rz"},

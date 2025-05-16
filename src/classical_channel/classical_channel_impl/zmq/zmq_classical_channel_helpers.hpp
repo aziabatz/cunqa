@@ -68,7 +68,7 @@ std::vector<std::string> get_others_endpoints(std::string& my_endpoint)
     qpus_json_file >> qpus_json; 
 
     for (auto& item : qpus_json) {
-        std::string aux_endpoint =  "tcp://"s + item.at("net").at("global_ip").get<std::string>().c_str() + ":" + item.at("net").at("comm_port").get<std::string>().c_str();
+        std::string aux_endpoint =  item.at("communications_endpoint").get<std::string>();
         if (aux_endpoint != my_endpoint) {
             others_endpoints.push_back(aux_endpoint);
         }

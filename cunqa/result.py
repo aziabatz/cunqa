@@ -37,12 +37,13 @@ class Result:
         self._registers = registers
         logger.debug("Results correctly loaded.")
 
+    # TODO: Use length of counts to justify time_taken (ns) at the end of the line.
     def __str__(self):
         RED = "\033[31m"
         YELLOW = "\033[33m"
         RESET = "\033[0m"   
         GREEN = "\033[32m"
-        return f"{YELLOW}{self._id}{RESET}, {self.counts},    time_taken (ns): {GREEN}{self.time_taken}{RESET}\n"
+        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken (ns): {GREEN}{self.time_taken}{RESET}{'}'}\n"
 
     @property
     def result(self) -> dict:

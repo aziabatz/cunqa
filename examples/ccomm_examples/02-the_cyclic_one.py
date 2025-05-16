@@ -14,8 +14,11 @@ def mod(n, m):
     return (n % m + m) % m
 
 def cyclic_ccommunication(n):
-    family = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-    qpus_comm = getQPUs(family)
+    family_0 = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+    #family_1 = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+    qpus_comm_0 = getQPUs(family_0)
+    #qpus_comm_1 = getQPUs(family_1)
+    qpus_comm = qpus_comm_0 #+ qpus_comm_1
     
 
     circuits = {}
@@ -44,8 +47,9 @@ def cyclic_ccommunication(n):
 
     distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=1024)
 
-    #qdrop(family)
-    return gather(distr_jobs)
+    results_list = gather(distr_jobs)
+    qdrop(family_0) #, family_1)
+    return results_list
 
-for circ_result in cyclic_ccommunication(5):
-    print(circ_result)
+for result in cyclic_ccommunication(5):
+    print(result)
