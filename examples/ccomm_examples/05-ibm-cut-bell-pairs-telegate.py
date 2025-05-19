@@ -136,7 +136,7 @@ for _ in range(shots): # Each shot uses a different circuit of the linear combin
 
 YELLOW = "\033[33m"
 RESET = "\033[0m"
-print(f"{YELLOW}Alice:{RESET} {Alice_counts}\n {YELLOW}Bob:{RESET} {Bob_counts}")
+print(f"{YELLOW}Alice:{RESET} {dict(Alice_counts)}\n {YELLOW}Bob:{RESET} {dict(Bob_counts)}")
 
 # Drop the deployed QPUs #
 qdrop(family)
