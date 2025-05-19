@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Union
+from typing import Union, Optional
 from subprocess import run
 from json import load
 from cunqa.qclient import QClient  # importamos api en C++
@@ -11,20 +11,30 @@ from cunqa.qpu import QPU
 
 
 # Adding pyhton folder path to detect modules
-sys.path.insert(0, os.getenv("INSTALL_PATH"))
+INSTALL_PATH: Optional[str] = os.getenv("INSTALL_PATH")
+if INSTALL_PATH is not None:
+    sys.path.insert(0, INSTALL_PATH) # TODO: Check that the INSTALL_PATH is not None
+else:
+    logger.error(f"Cannot find $INSTALL_PATH enviroment variable.")
+    raise SystemExit
 
-info_path = os.getenv("INFO_PATH")
-if info_path is None:
-    STORE = os.getenv("STORE")
-    info_path = STORE+"/.cunqa/qpus.json"
+INFO_PATH: Optional[str] = os.getenv("INFO_PATH")
+if INFO_PATH is None:
+    STORE: Optional[str] = os.getenv("STORE")
+    if STORE is not None:
+        INFO_PATH = STORE + "/.cunqa/qpus.json" 
+    else:
+        logger.error(f"Cannot find $STORE enviroment variable.")
+        raise SystemExit
 
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
 
-def check_raised(n, job_id):
+
+def check_raised(n: int, job_id: str) -> bool:
     try:
-        with open(info_path, "r") as qpus_json: #access the qpus file
+        with open(INFO_PATH, "r") as qpus_json: #access the qpus file
             dumps = load(qpus_json)
 
     except Exception as error:
@@ -108,14 +118,14 @@ def qraise(n, time, *,
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
 
-        old_time = os.stat(info_path).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
+        old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         
         # Wait for QPUs to be raised, so that getQPUs can be done inmediately
         while True:
-            if old_time != os.stat(info_path).st_mtime: #checks that the file has been modified
+            if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
                 break
 
         return family if family is not None else str(job_id)
@@ -138,7 +148,7 @@ def qdrop(*families: Union[tuple, str]):
 
     #access the large dictionary containing all QPU dictionaries
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
 
     except Exception as error:
@@ -170,7 +180,7 @@ def qdrop(*families: Union[tuple, str]):
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
 
-def nodeswithQPUs() -> list[set]:
+def nodeswithQPUs() -> "list[set]":
     """
     Global function to know what nodes of the computer host virtual QPUs.
 
@@ -179,7 +189,7 @@ def nodeswithQPUs() -> list[set]:
     List of the corresponding node names.
     """
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
 
         node_names = set()
@@ -194,7 +204,7 @@ def nodeswithQPUs() -> list[set]:
 
 
 
-def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
+def infoQPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]":
     """
     Global function that returns information about the QPUs available either in the local node or globaly.
 
@@ -202,11 +212,11 @@ def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
     """
 
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.warning(f"No QPUs were found.")
-                return
+                return [{}]
         
         if node_name is not None:
             targets = [{qpu_id:info} for qpu_id,info in qpus_json.items() if (info["net"].get("node_name") == node_name ) ]
@@ -245,7 +255,7 @@ def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
 
 
 
-def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
+def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
@@ -262,7 +272,7 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
 
     #Access raised QPUs information on qpu.json file
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.error(f"No QPUs were found.")

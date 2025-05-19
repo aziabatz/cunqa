@@ -2,16 +2,18 @@ from cunqa.logger import logger
 from cunqa.qjob import gather
 from cunqa.circuit import CunqaCircuit
 from cunqa.qpu import QPU
+from cunqa.qjob import QJob
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error
 import numpy as np
+from typing import  Optional, Union, Any
 
 import re
 
 
 
-def run_distributed(circuits, qpus, **run_args):
+def run_distributed(circuits, qpus: "list['QPU']", **run_args: Any):
     """
     Method to send circuits to serveral QPUs allowing classical communications among them. 
     
@@ -109,7 +111,9 @@ class QJobMapper:
     """
     Class to map the method `QJob.upgrade_parameters` to a list of QJobs.
     """
-    def __init__(self, qjobs):
+    qjobs: "list['QJob']"
+
+    def __init__(self, qjobs: "list['QJob']"):
         """
         Initializes the QJobMapper class.
 
@@ -138,7 +142,7 @@ class QJobMapper:
         qjobs_ = []
         for i, params in enumerate(population):
             qjob = self.qjobs[i]
-            logger.debug(f"Uptading params for QJob {qjob} in QPU {qjob._QPU.id}...")
+            logger.debug(f"Uptading params for QJob {qjob}...")
             qjob.upgrade_parameters(params.tolist())
             qjobs_.append(qjob)
 
@@ -152,7 +156,13 @@ class QPUCircuitMapper:
     """
     Class to map the function `qpu.QPU.run()` to a list of QPUs.
     """
-    def __init__(self, qpus, ansatz, transpile = False, initial_layout = None, **run_parameters):
+    qpus: "list['QPU']"
+    ansatz: 'QuantumCircuit'
+    transpile: Optional[bool]
+    initial_layout: Optional["list[int]"]
+    run_parameters: Optional[Any]
+
+    def __init__(self, qpus: "list['QPU']", ansatz: 'QuantumCircuit', transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
         Initializes the QPUCircuitMapper class.
 

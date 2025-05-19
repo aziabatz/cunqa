@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         std::ifstream f(generate_FakeQMIO(back_path_json));
         backend_json = JSON::parse(f);
     } else if (back_path_json.contains("backend_path")) {
-        std::ifstream f(back_path_json.at("backend_path"));
+        std::ifstream f(back_path_json.at("backend_path").get<std::string>());
         backend_json = JSON::parse(f);
     }
 
