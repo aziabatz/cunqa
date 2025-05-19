@@ -1,5 +1,8 @@
 import os, sys
 import numpy as np
+import random
+from collections import defaultdict
+
 # path to access c++ files
 installation_path = os.getenv("INSTALL_PATH")
 examples_path = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/repos/CUNQA/examples'
@@ -10,9 +13,18 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-def how_big_a_combination(n):
-    print(f"For generating a {n}-Cut Bell Pair Factory one needs to specify {4**(n)-2**(n)+2**(2**n)-1} parameter sets.")
-    return 4**(n)-2**(n) + 2**(2**n)-1
+def n_plus(k):
+    return 2**(2**k)-1
+
+def n_minus(k):
+    return 4**(k)-2**(k)
+
+def t_k(k):
+    return 2**k-1
+
+def how_big_a_combination(k):
+    #print(f"For generating a {k}-Cut Bell Pair Factory one needs to specify {4**(k)-2**(k)+2**(2**k)-1} parameter sets.")
+    return 4**(k)-2**(k) + 2**(2**k)-1
 
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs #
@@ -22,7 +34,7 @@ qpus_QPE  = getQPUs(family)
 # Params for the gates in the Cut Bell Pair Factory #
 with open(examples_path + "/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
     params2 = [[float(val) for val in line.replace("\n","").split(" ")] for line in fin.readlines()]
-z = params2[0]
+z = params2[0] # This one doesn't matter, it will be overwritten afterwards
 
 ############ CIRCUIT 1 #########################
 Alice = CunqaCircuit(3,3, id="Alice")
@@ -93,13 +105,37 @@ Bob.measure(2,2)
 
 
 circs_QPE = [Alice, Bob]
+distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1) # create the jobs to store the circuits for upgrade_parameters,
+                                                           # but the results of this first submission will be discarded.
 
-########## Distributed run + print results ##########
-distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1024) 
-result_list = gather(distr_jobs)
+########## Circuit combination for successful circuit cutting ##########
+shots = 1024
+Alice_counts = defaultdict(int)
+Bob_counts = defaultdict(int)
 
-for res in result_list:
-    print(res)
+# Calculate the probability of each circuit in the linear combination
+probs = [(1+t_k(2))/n_plus(2) for _ in range(n_plus(2)-1)]
+probs.append([abs(-t_k(2)/n_minus(2)) for _ in range(n_minus(2)-1)])
+gamma = sum(probs)
+probs /= gamma
+print(f"Check: the total sum of the probabilities is {sum(probs)}")
+
+for _ in range(shots): # Each shot uses a different circuit of the linear combination, which is randomly chosen in the next line depending on the weights on the linear combination
+    z = params2[random.choices(range(len(probs)), weights=probs, k=1)[0]] 
+    distr_jobs[0].upgrade_parameters([z[0],z[1],z[4],z[5],z[8],z[9],z[12],z[14]]) #Alice
+    distr_jobs[1].upgrade_parameters([z[2],z[3],z[6],z[7],z[10],z[11],z[13],z[15]]) #Bob
+    result_list = gather(distr_jobs)
+
+    # Recombines the counts, adding the result of this shot
+    for key, value in result_list[0].get_counts().items():
+        Alice_counts[key] += value
+    for key, value in result_list[1].get_counts().items():
+        Bob_counts[key] += value    
+
+
+YELLOW = "\033[33m"
+RESET = "\033[0m"
+print(f"{YELLOW}Alice:{RESET} {Alice_counts}\n {YELLOW}Bob:{RESET} {Bob_counts}")
 
 # Drop the deployed QPUs #
 qdrop(family)
