@@ -1,13 +1,19 @@
 import os, sys
 
 # path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
+sys.path.append(os.getenv("HOME"))
 
 from cunqa import getQPUs
 from cunqa.circuit import CunqaCircuit
 
+
+# --------------------------------------------------
+# Key difference between cloud and HPC
+# example: local = False. This allows to look for
+# QPUs out of the node where the work is executing.
+# --------------------------------------------------
 qpus  = getQPUs(local=False)
+
 
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}, simulator: {q.backend.simulator}, version: {q.backend.version}.")

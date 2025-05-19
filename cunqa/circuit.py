@@ -46,7 +46,6 @@ class CunqaCircuit:
         
         self.is_parametric = False
 
-        self.is_distributed = False
 
         self.instructions = []
 
@@ -198,17 +197,7 @@ class CunqaCircuit:
                 elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
                     logger.error("instruction is parametric, therefore requires params.")
                     raise ValueError
-                                
-                # check distributed instruction circuits
-                if (not instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
-                    # we check in the prrevious method that target/control circuit id is provided
-                    logger.error(f"instruction circuits specification is need for distributed intstruction.")
-                    raise ValueError
-                elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
-                    self.is_distributed =True
-                
-        
-    
+                    
     def _add_q_register(self, name, number_qubits):
 
         if name in self.quantum_regs:
@@ -1190,7 +1179,6 @@ def qc_to_json(qc: QuantumCircuit):
         
         json_data = {
             "id": "",
-            "is_distributed": False,
             "is_parametric": is_parametric(qc),
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
@@ -1260,11 +1248,6 @@ def from_json_to_qc(circuit_dict):
     else:
         logger.error(f"circuit_dict must be dict, but {type(circuit_dict)} was provided [{TypeError.__name__}]")
         raise TypeError
-
-    #Check wether the circuit has distributed gates, which aren't supported in qiskit
-    if circuit_dict["is_distributed"]:
-        logger.error("Circuit provided has distributed gates which are not supported in Qiskit [NotImplementedError]")
-        raise SystemError
 
     #Extract key information from the json
     try:

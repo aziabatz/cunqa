@@ -113,16 +113,7 @@ int main(int argc, char* argv[])
     sbatchFile << "mkdir $STORE/.cunqa\n";
     sbatchFile << "fi\n";
 
-    const char* var_name = "INSTALL_PATH"; // Replace with your variable name
-    const char* var_install_path = std::getenv(var_name);
-
-    if (var_install_path) {
-        sbatchFile << "BINARIES_DIR=" << var_install_path << "/bin\n";
-    } else {
-        std::cerr << "Environment variable INSTALL_PATH is not set: aborting.\n"; 
-    }
-
-    
+    sbatchFile << "BINARIES_DIR=" << std::getenv("HOME") << "/bin\n";
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
     //Checking duplicate family name
@@ -153,7 +144,7 @@ int main(int argc, char* argv[])
                 return 0;
             }
         } else if (args.quantum_comm) {
-            SPDLOG_LOGGER_ERROR(logger, "Quantum communications are not implemented yet");
+            LOGGER_ERROR("Quantum communications are not implemented yet");
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 0;
         } else {

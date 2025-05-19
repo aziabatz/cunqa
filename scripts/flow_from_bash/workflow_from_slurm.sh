@@ -19,10 +19,6 @@ ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind1
 # Importing auxiliar functions (Could be defined in this .sh) (NOT TO MODIFY)
 source controllers.sh
 
-# Installation PATHs (TO BE FILLED BY THE USER)
-export INSTALL_PATH=/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/installation
-export PATH=$PATH:$INSTALL_PATH/bin
-
 # Where QPUs information will be saved (TO BE FILLED BY THE USER)
 export INFO_PATH=$STORE/.cunqa/qpus.json
 ######################################################################################################
@@ -98,13 +94,13 @@ check_total_resources ${total_qpus} ${total_cores} ${total_memory}
 
 
 ######################################## RAISE QPUS ################################################
-srun -n ${n_qpus_0} -N ${number_of_nodes_0} -c ${cores_per_qpu_0} --mem-per-cpu="${mem_per_core_0}G" --task-epilog=$INSTALL_PATH/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_0} &
+srun -n ${n_qpus_0} -N ${number_of_nodes_0} -c ${cores_per_qpu_0} --mem-per-cpu="${mem_per_core_0}G" --task-epilog=$HOME/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_0} &
 echo "First srun passed"
 
-srun -n ${n_qpus_1} -N ${number_of_nodes_1} -c ${cores_per_qpu_1} --mem-per-cpu="${mem_per_core_1}G" --task-epilog=$INSTALL_PATH/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_1} &
+srun -n ${n_qpus_1} -N ${number_of_nodes_1} -c ${cores_per_qpu_1} --mem-per-cpu="${mem_per_core_1}G" --task-epilog=$HOME/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_1} &
 echo "Second srun passed"
 
-srun -n ${n_qpus_2} -c ${cores_per_qpu_2} --mem-per-cpu="${mem_per_core_2}G" -N ${number_of_nodes_2} --task-epilog=$INSTALL_PATH/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_0} &
+srun -n ${n_qpus_2} -c ${cores_per_qpu_2} --mem-per-cpu="${mem_per_core_2}G" -N ${number_of_nodes_2} --task-epilog=$HOME/bin/epilog.sh setup_qpus ${INFO_PATH} ${simulator_0} &
 echo "Third srun passed"
 
 ####################################################################################################

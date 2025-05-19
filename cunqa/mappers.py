@@ -36,7 +36,7 @@ class QJobMapper:
         qjobs_ = []
         for i, params in enumerate(population):
             qjob = self.qjobs[i]
-            logger.debug(f"Uptading params for QJob {qjob} in QPU {qjob._QPU.id}...")
+            logger.debug(f"Uptading params for QJob {qjob}...")
             qjob.upgrade_parameters(params.tolist())
             qjobs_.append(qjob)
 

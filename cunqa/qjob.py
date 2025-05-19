@@ -55,7 +55,6 @@ class QJob:
         self._result = None
 
         self._convert_circuit(circuit)
-        print(self._circuit)
         self._configure(**run_parameters)
 
     @property
@@ -69,7 +68,6 @@ class QJob:
                     if not self._updated: # if the result was already obtained, we only call the server if an update was done
                         res = self._future.get()
                         self._result = Result(json.loads(res), registers=self._cregisters)
-                        print("result definido")
                         self._updated = True
                     else:
                         pass
@@ -108,14 +106,11 @@ class QJob:
         """
         Asynchronous method to submit a job to the corresponding QClient.
         """
-        print("1")
         if self._future is not None:
             logger.warning("QJob has already been submitted.")
         else:
             try:
-                print("2")
                 self._future = self._qclient.send_circuit(self._execution_config)
-                print("3")
                 logger.debug("Circuit was sent.")
             except Exception as error:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
@@ -133,10 +128,6 @@ class QJob:
         if self._result is None:
             self._future.get()
 
-        if not is_parametric(self._circuit):
-            logger.error(f"Cannot upgrade parameters. Please check that the circuit provided has gates that accept parameters [{QJobError.__name__}].")
-            raise SystemExit # User's level
-
         if isinstance(parameters, list):
 
             if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
@@ -147,11 +138,11 @@ class QJob:
                 raise SystemExit # User's level
         
         try:
-            logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
-            self._future = self.qclient.send_parameters(message)
+            logger.debug(f"Sending parameters to QPU.")
+            self._future = self._qclient.send_parameters(message)
 
         except Exception as error:
-            logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
+            logger.error(f"Some error occured when sending the new parameters to QPU [{type(error).__name__}].")
             raise SystemExit # User's level
         
         self._updated = False # We indicate that new results will come, in order to call server
@@ -162,10 +153,6 @@ class QJob:
 
                 logger.debug("A circuit dict was provided.")
 
-                if (circuit["is_distributed"] and self._backend.simulator != "CunqaSimulator"):
-                    logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
-                    raise QJobError #captured and passed to QPUs
-
                 self.num_qubits = circuit["num_qubits"]
                 self.num_clbits = circuit["num_clbits"]
                 self._cregisters = circuit["classical_registers"]
@@ -173,16 +160,11 @@ class QJob:
                 logger.debug("Translation to dict not necessary...")
 
                 circuit = circuit['instructions']
-                self._exec_type = circuit['exec_type']
             
 
             elif isinstance(circuit, CunqaCircuit):
 
                 logger.debug("A CunqaCircuit was provided.")
-
-                if (circuit.is_distributed and self._backend.simulator != "CunqaSimulator"):
-                    logger.error(f"Currently only Cunqasimulator supports communications [NotImplementedError]")
-                    raise QJobError #captured and passed to QPUs
 
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = circuit.num_clbits
@@ -190,10 +172,6 @@ class QJob:
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
-                if circuit.is_distributed:
-                    self._exec_type = "dynamic"
-                else:
-                    self._exec_type = "offloading"
                 circuit = circuit.instructions
 
 
@@ -209,9 +187,6 @@ class QJob:
 
                 circuit = qc_to_json(circuit)['instructions']
 
-                self._exec_type = "offloading" #As distributed operations are not supported and dynamic execution is not necessary, we execute instructions in batches for performance
-
-
             elif isinstance(circuit, str):
 
                 logger.debug("A QASM2 circuit was provided.")
@@ -225,8 +200,6 @@ class QJob:
                 logger.debug("Translating to dict from QASM2 string...")
 
                 circuit = qc_to_json(qc_from_qasm)['instructions']
-
-                self._exec_type = "offloading" #As distributed operations are not supported and dynamic execution is not necessary, we execute instructions in batches for performance
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circ)} was provided [{TypeError.__name__}].")
@@ -252,7 +225,6 @@ class QJob:
 
     def _configure(self, **run_parameters):
         # configuration
-        print("Entramos a configurar")
         try:
             # config dict
             run_config = {
@@ -273,7 +245,7 @@ class QJob:
             
             # instructions dict/string
             instructions = self._circuit
-            self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, self._exec_type, self.num_qubits).replace("'", '"')
+            self._execution_config = """ {{"config":{}, "instructions":{}, "num_qubits":{} }}""".format(run_config, instructions, self.num_qubits).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)
@@ -301,13 +273,13 @@ def gather(qjobs) -> list[Result]:
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
-            return [q.result() for q in qjobs]
+            return [q.result for q in qjobs]
         else:
             logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level
             
     elif isinstance(qjobs, QJob):
-        return qjobs.result()
+        return qjobs.result
 
     else:
         logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")

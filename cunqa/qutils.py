@@ -9,7 +9,7 @@ from cunqa.logger import logger
 from cunqa.qpu import QPU
 
 # Adding pyhton folder path to detect modules
-sys.path.insert(0, os.getenv("INSTALL_PATH"))
+sys.path.append(os.getenv("HOME"))
 
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
@@ -22,8 +22,6 @@ class QRaiseError(Exception):
 
 
 def qraise(n, time, *, 
-           classical_comm = False, 
-           quantum_comm = False,  
            simulator = None, 
            fakeqmio = False, 
            family = None, 
@@ -63,10 +61,6 @@ def qraise(n, time, *,
         # Add specified flags
         if fakeqmio:
             cmd.append(f"--fakeqmio")
-        if classical_comm:
-            cmd.append(f"--classical_comm")
-        if quantum_comm:
-            cmd.append(f"--quantum_comm")
         if simulator is not None:
             cmd.append(f"--simulator={str(simulator)}")
         if family is not None:
@@ -251,9 +245,9 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
         logger.debug(f"User at node {local_node}.")
 
         if family is not None:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node) and (info.get("family") == family)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) and (info.get("family") == family)}
         else:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node)}
     else:
         if family is not None:
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("family") == family)}

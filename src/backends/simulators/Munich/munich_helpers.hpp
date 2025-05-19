@@ -47,9 +47,7 @@ std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
         // Instruction processing
         for (const auto& instruction : instructions) {
             std::string gate_name = instruction.at("name");
-            std::cout << "Sacar el nombre de una instruction rula " << gate_name << "\n";
             auto qubits = instruction.at("qubits");
-            std::cout << "Sacar los qubits de una instruction rula " << qubits[0] << "\n";
             std::vector<double> params;
             std::vector<std::vector<std::vector<std::vector<double>>>> matrix;
 
@@ -118,7 +116,7 @@ std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
                     qasm_circt += "measure q[" + to_string(qubits[0]) + "] -> c[" + to_string(instruction.at("clbits")[0]) + "];\n";
                     break;
                 default:
-                    std::cout << "Error. Invalid gate name" << "\n";
+                    LOGGER_ERROR("Error. Invalid gate name: {}", INSTRUCTIONS_MAP.at(gate_name));
                     break;
             }
         }

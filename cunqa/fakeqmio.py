@@ -6,7 +6,6 @@ from qmiotools.integrations.qiskitqmio import FakeQmio
 from qiskit_aer.noise import NoiseModel
 
 STORE_PATH = os.getenv("STORE")
-INSTALL_PATH = os.getenv("INSTALL_PATH")
 BASIS_GATES = ["sx", "x", "rz", "ecr"]
 COUPLING_MAP = [
     [0,1],
@@ -65,22 +64,15 @@ noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
 
 backend_json = {
-    "backend":{
-        "name": "FakeQmio", 
-        "version": args.backend_path,
-        "n_qubits": 32, 
-        "url": "",
-        "is_simulator": True,
-        "conditional": True, 
-        "memory": True,
-        "max_shots": 1000000,
-        "description": "FakeQmio backend",
-        "coupling_map" : COUPLING_MAP,
-        "basis_gates": BASIS_GATES, 
-        "custom_instructions": "",
-        "gates": []
-    },
-    "noise":noise_model_json
+    "name": "FakeQmio", 
+    "version": args.backend_path,
+    "n_qubits": 32, 
+    "description": "FakeQmio backend",
+    "coupling_map" : COUPLING_MAP,
+    "basis_gates": BASIS_GATES, 
+    "custom_instructions": "",
+    "gates": [],
+    "noise_model": noise_model_json
 }
 
 

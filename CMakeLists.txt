@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
-set(CMAKE_SYSTEM_PREFIX_PATH "")
-set(CMAKE_INSTALL_PREFIX "")
-#set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Adding C++20 standard as required
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE "Release")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
 
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
 message(STATUS "${CMAKE_VERSION}")
@@ -17,12 +16,8 @@ if(${CMAKE_VERSION} VERSION_EQUAL "3.27.6")
 endif()
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
-if(NOT DEFINED ENV{INSTALL_PATH})
-    message(FATAL_ERROR "Install location is not set: define INSTALL_PATH environment variables")
-else()
-    message(STATUS "Install location will be: (INSTALL_PATH) $ENV{INSTALL_PATH}")
-    set(CMAKE_INSTALL_PREFIX "$ENV{INSTALL_PATH}")
-endif()
+message(STATUS "Install location will be: $ENV{HOME}")
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib64")
 set(CMAKE_INSTALL_BINDIR "bin")
@@ -30,7 +25,6 @@ set(CMAKE_INSTALL_BINDIR "bin")
 find_package(Python 3.9.9 EXACT COMPONENTS Interpreter Development)
 
 #TODO: Load pybind11 depending on the environment
-
 if(DEFINED PYBIND_PATH)
     set(pybind11_DIR "${PYBIND_PATH}/share/cmake/pybind11")
 else(NOT DEFINED PYBIND_PATH)

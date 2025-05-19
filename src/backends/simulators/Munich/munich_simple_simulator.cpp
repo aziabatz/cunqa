@@ -53,8 +53,8 @@ JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumT
         }        
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.
-        LOGGER_ERROR("Error executing the circuit in the Munich simulator.\nTry checking the format of the circuit sent and/or of the noise model.");
-        return {{"ERROR", std::string(e.what())}};
+        LOGGER_ERROR("Error executing the circuit in the Munich simulator.");
+        return {{"ERROR", std::string(e.what()) + ". Try checking the format of the circuit sent and/or of the noise model."}};
     }
     return {};
 }

@@ -7,6 +7,7 @@
 #include "backends/simple_backend.hpp"
 #include "simulators/simulator_strategy.hpp"
 
+#include "utils/constants.hpp"
 #include "utils/json.hpp"
 #include "logger.hpp"
 
@@ -20,7 +21,7 @@ struct SimpleConfig {
     int n_qubits = 32;
     std::string description = "Simple backend with no communications.";
     std::vector<std::vector<int>> coupling_map;
-    std::vector<std::string> basis_gates;
+    std::vector<std::string> basis_gates = BASIS_GATES;
     std::string custom_instructions;
     std::vector<std::string> gates;
     JSON noise_model;
@@ -30,7 +31,6 @@ struct SimpleConfig {
         j.at("name").get_to(obj.name);
         j.at("version").get_to(obj.version);
         j.at("n_qubits").get_to(obj.n_qubits);
-        j.at("description").get_to(obj.description);
         j.at("description").get_to(obj.description);
         j.at("coupling_map").get_to(obj.coupling_map);
         j.at("basis_gates").get_to(obj.basis_gates);

@@ -13,9 +13,8 @@ A clear and concise description of what the bug is.
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Packages or modules loaded '...'
-2. Value of INSTALL_PATH and PATH '...'
-3. Last logger message in the qraise_XXXXXX file (where `qraise` was called) '...'
-4. Last logger message in the `$STORE/.api_simulator/log/logging.log` file (where the client writes) '...'
+2. Last logger message in the qraise_XXXXXX file (where `qraise` was called) '...'
+3. Last logger message in the `$STORE/.api_simulator/log/logging.log` file (where the client writes) '...'
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.

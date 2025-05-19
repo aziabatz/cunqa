@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     std::map<std::string, std::vector<std::string>> id_per_node;
     
     for (auto& [key, inner] : qpus_json.items()) {
-        std::string node = inner["net"]["node_name"];
+        std::string node = inner["net"]["nodename"];
         std::string family = inner["family"];
         
         family_counts_per_node[node][family]++;

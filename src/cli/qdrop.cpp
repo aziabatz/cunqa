@@ -70,7 +70,7 @@ void removeAllJobs(std::string& id_str)
 int main(int argc, char* argv[]) 
 {
     auto args = argparse::parse<MyArgs>(argc, argv);
-    std::string install_path = getenv("INSTALL_PATH");
+    std::string install_path = getenv("HOME");
     setenv("SLURM_CONF", (install_path + "/slurm.conf").c_str(), 1); 
     std::string id_str;
     std::string cmd;
