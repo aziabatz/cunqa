@@ -110,7 +110,7 @@ distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1) # create the jobs to 
                                                            # but the results of this first submission will be discarded.
 
 ########## Circuit combination for successful circuit cutting ##########
-shots = 2
+shots = 1024
 Alice_counts = defaultdict(int)
 Bob_counts = defaultdict(int)
 
