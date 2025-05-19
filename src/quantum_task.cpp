@@ -26,9 +26,10 @@ void QuantumTask::update_params_(const std::vector<double> params)
 
     try{
         int counter = 0;
-        for (auto& instruction : circuit){
+        for (auto& instruction : circuit.at("instructions")){
 
             std::string name = instruction.at("name");
+            
             
             // TODO: Look at the instructions constants and how to work with them
             switch(cunqa::constants::INSTRUCTIONS_MAP.at(name)){
@@ -53,7 +54,7 @@ void QuantumTask::update_params_(const std::vector<double> params)
         
     } catch (const std::exception& e){
         LOGGER_ERROR("Error updating parameters. (check correct size).");
-        throw std::runtime_error("Error updating parameters.");
+        throw std::runtime_error("Error updating parameters:" + std::string(e.what())); //"Error updating parameters."
     }
 }
 

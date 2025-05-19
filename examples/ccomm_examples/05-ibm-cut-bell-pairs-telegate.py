@@ -8,6 +8,7 @@ installation_path = os.getenv("INSTALL_PATH")
 examples_path = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/repos/CUNQA/examples'
 sys.path.append(installation_path)
 
+from cunqa.logger import logger
 from cunqa.qutils import getQPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
@@ -109,28 +110,28 @@ distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1) # create the jobs to 
                                                            # but the results of this first submission will be discarded.
 
 ########## Circuit combination for successful circuit cutting ##########
-shots = 1024
+shots = 2
 Alice_counts = defaultdict(int)
 Bob_counts = defaultdict(int)
 
 # Calculate the probability of each circuit in the linear combination
-probs = [(1+t_k(2))/n_plus(2) for _ in range(n_plus(2)-1)]
-probs.append([abs(-t_k(2)/n_minus(2)) for _ in range(n_minus(2)-1)])
-gamma = sum(probs)
-probs /= gamma
-print(f"Check: the total sum of the probabilities is {sum(probs)}")
+probs_aux_1 = [(1+t_k(2))/n_plus(2) for _ in range(n_plus(2)-1)]
+probs_aux_2 =  probs_aux_1 + [abs(-t_k(2)/n_minus(2)) for _ in range(n_minus(2)-1)]
+gamma = sum(probs_aux_2)
+probs =[ x /gamma for x in probs_aux_2]
+
 
 for _ in range(shots): # Each shot uses a different circuit of the linear combination, which is randomly chosen in the next line depending on the weights on the linear combination
     z = params2[random.choices(range(len(probs)), weights=probs, k=1)[0]] 
-    distr_jobs[0].upgrade_parameters([z[0],z[1],z[4],z[5],z[8],z[9],z[12],z[14]]) #Alice
-    distr_jobs[1].upgrade_parameters([z[2],z[3],z[6],z[7],z[10],z[11],z[13],z[15]]) #Bob
+    distr_jobs[0].upgrade_parameters([z[0]+ np.pi/2, z[1]+ np.pi/2, z[4], z[5], 5*np.pi/2 +z[8], 5*np.pi/2 +z[9], z[12], z[14]]) #Alice
+    distr_jobs[1].upgrade_parameters([z[2]+ np.pi/2, z[3]+ np.pi/2, z[6], z[7], 5*np.pi/2 +z[10], 5*np.pi/2 +z[11], z[13], z[15]]) #Bob
     result_list = gather(distr_jobs)
-
+    
     # Recombines the counts, adding the result of this shot
-    for key, value in result_list[0].get_counts().items():
-        Alice_counts[key] += value
-    for key, value in result_list[1].get_counts().items():
-        Bob_counts[key] += value    
+    for key, value in result_list[0].counts.items():
+        Alice_counts[key] += int(value)
+    for key, value in result_list[1].counts.items():
+        Bob_counts[key] += int(value)
 
 
 YELLOW = "\033[33m"

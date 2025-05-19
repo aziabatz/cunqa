@@ -70,7 +70,7 @@ class QJob:
                 if self._result is not None:
                     if not self._updated: # if the result was already obtained, we only call the server if an update was done
                         res = self._future.get()
-                        self._result = Result(json.loads(res), registers=self._cregisters)
+                        self._result = Result(json.loads(res), self._circuit_id,registers=self._cregisters)
                         self._updated = True
                     else:
                         pass
@@ -80,7 +80,8 @@ class QJob:
                     self._updated = True
             else:
                 logger.debug(f"self._future is None or non-valid, None is returned.")
-        except Exception as _:
+        except Exception as error:
+                logger.error(f"Error while reading the results {error}")
                 raise SystemExit # User's level
 
         return self._result
@@ -145,11 +146,11 @@ class QJob:
                 raise SystemExit # User's level
         
         try:
-            logger.debug(f"Sending parameters to QPU {self._QPU.id}.")
-            self._future = self.qclient.send_parameters(message)
+            logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
+            self._future = self._qclient.send_parameters(message)
 
         except Exception as error:
-            logger.error(f"Some error occured when sending the new parameters to QPU {self._QPU.id} [{type(error).__name__}].")
+            logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
             raise SystemExit # User's level
         
         self._updated = False # We indicate that new results will come, in order to call server
@@ -291,7 +292,7 @@ class QJob:
         
 
 
-def gather(qjobs: Union[QJob, list[QJob]]) -> Union[Result, list[Result], list[list[str, Result]]]:
+def gather(qjobs: Union[QJob, list[QJob]]) -> Union[Result, list[Result]]:
     """
         Function to get result of several QJob objects, it also takes one QJob object.
 
