@@ -1,0 +1,7 @@
+cunqa.mappers.QJobMapper
+========================
+
+.. currentmodule:: cunqa.mapppers
+
+.. autoclass:: cunqa.mappers.QJobMapper
+    :members:

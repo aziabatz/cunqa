@@ -1,3 +1,7 @@
+"""
+    Contains objects that define and manage quantum emulation jobs.
+"""
+
 from typing import  Union, Any
 import json
 

@@ -1,0 +1,2 @@
+.. autofunction:: cunqa.qpu.getQPUs 
+    

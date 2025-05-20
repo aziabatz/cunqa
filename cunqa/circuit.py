@@ -1,3 +1,6 @@
+"""
+    Holds functions to transform between valid circuit formats and extract circuit information.
+"""
 from cunqa.logger import logger
 import numpy as np
 import random
