@@ -99,10 +99,10 @@ int main(int argc, char* argv[])
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
 
     if (memory_specs == 1) {
-        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-QPU or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
+        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
         return -1;
     } else if (memory_specs == 2) {
-        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-QPU or increase the cores-per-qpu. Max mem-per-cpu = 4");
+        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-qpu or increase the cores-per-qpu. Max mem-per-cpu = 4");
         return -1;
     }
 
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     sbatchFile << "mkdir $STORE/.cunqa\n";
     sbatchFile << "fi\n";
 
-    sbatchFile << "BINARIES_DIR=" << std::getenv("HOME") << "/bin\n";
+    sbatchFile << "BINARIES_DIR=" << std::getenv("STORE") << "/.cunqa\n";
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
     //Checking duplicate family name

@@ -13,7 +13,7 @@ struct MyArgs : public argparse::Args
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");
     std::string& time                    = kwarg("t,time", "Time for the QPUs to be raised.");
     int& cores_per_qpu                   = kwarg("c,cores", "Number of cores per QPU.").set_default(2);
-    int& mem_per_qpu                     = kwarg("mem,mem-per-qpu", "Memory given to each QPU in GB.").set_default(24);
+    int& mem_per_qpu                     = kwarg("mem,mem-per-qpu", "Memory given to each QPU in GB.").set_default(8);
     std::optional<int>& number_of_nodes  = kwarg("N,n_nodes", "Number of nodes.").set_default(1);
     std::optional<std::vector<std::string>>& node_list = kwarg("node_list", "List of nodes where the QPUs will be deployed.").multi_argument(); 
     std::optional<int>& qpus_per_node    = kwarg("qpuN,qpus_per_node", "Number of qpus in each node.");
@@ -21,7 +21,6 @@ struct MyArgs : public argparse::Args
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     std::optional<std::string>& fakeqmio = kwarg("fq,fakeqmio", "Raise FakeQmio backend from calibration file.", /*implicit*/"last_calibrations");
     std::string& family             = kwarg("fam,family", "Name that identifies which QPUs were raised together.").set_default("default");
-    //bool& hpc                          = flag("hpc", "Default HPC mode. The user can connect with the local node QPUs.");
     bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
     bool& classical_comm                 = flag("classical_comm", "Enable classical communications.");
     bool& quantum_comm                   = flag("quantum_comm", "Enable quantum communications.");

@@ -51,7 +51,7 @@ git clone --recursive git@github.com:CESGA-Quantum-Spain/cunqa.git
 As a additional step, we encourage to run the *setup_submodules.sh* file, which removes some of the files unused in the submodules and makes the repository lighter:
 
 ```console
-cd cunqa/scripts
+cd scripts
 bash setup_submodules.sh
 ```
 
@@ -80,19 +80,7 @@ conda deactivate
 ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9
 ```
 
-3. Define the enviroment variable `INSTALL_PATH` as the **ABSOLUTE PATH** to the directory where **CUNQA** wants to be installed. 
-
-```console
-export INSTALL_PATH=<your/installation/path>
-```
-
-4. Afterwards, add the bin folder to `PATH` in order to correctly execute all the commands to use the platform.
-
-```console
-export PATH=$PATH:$INSTALL_PATH/bin
-```
-
-5. Once the previous steps are done, everything is set for the build/installation. There are two options: 
+3. Once the previous steps are done, everything is set for the build/installation. There are two options: 
     
 * **Standard way (slower)**
 ```console
@@ -121,7 +109,7 @@ source configure.sh <your/installation/path>
 ``` 
 
 #### Manual installation
-In the case of a **manual installation**, the steps 1-4 are analogous to the shown above for QMIO:
+In the case of a **manual installation**, the steps are analogous to the shown above for QMIO:
 
 1. Conda deactivation:
 
@@ -135,23 +123,18 @@ conda deactivate
 ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake qiskit/1.2.4
 ```
 
-3. INSTALL_PATH:
+5. Again: configure, compile and install using CMake:
 
+* **Standard way (slower)**
 ```console
-export INSTALL_PATH=<your/installation/path>
+cmake -B build/ 
+cmake --build build/
+cmake --install build/
 ```
 
-4. Bin PATH:
-
-```console
-export PATH=$PATH:$INSTALL_PATH/bin
-```
-
-5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
-6. 
 * **Using [Ninja](https://ninja-build.org/) (faster)**
 ```console
-cmake -G Ninja -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
 cmake --install build/
 ```

@@ -11,7 +11,7 @@ add_executable(qdrop qdrop.cpp)
 target_include_directories(qdrop PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 target_link_libraries(qdrop PRIVATE logger_client SLURM::SLURM json)
 install(TARGETS qdrop DESTINATION "${CMAKE_INSTALL_BINDIR}")
-install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "$ENV{STORE}/.cunqa")
 
 if("$ENV{LMOD_SYSTEM_NAME}" STREQUAL "QMIO")
     install(FILES "slurm_qmio.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}" RENAME "slurm.conf")
