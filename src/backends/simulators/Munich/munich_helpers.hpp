@@ -35,7 +35,7 @@ std::string triple_vector_to_string(const std::vector<std::vector<std::vector<do
 // Transfroms a quantum_task, which has config and circuit (these are the instructions) to an OpenQASM2 string
 std::string quantum_task_to_Munich(const QuantumTask& quantum_task) 
 { 
-    JSON instructions = quantum_task.circuit;
+    std::vector<JSON> instructions = quantum_task.circuit;
     JSON config_json = quantum_task.config;
     std::string qasm_circt = "OPENQASM 2.0;\ninclude \"qelib1.inc\";\n";
 
