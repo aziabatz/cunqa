@@ -87,7 +87,8 @@ class QJob:
                     self._updated = True
             else:
                 logger.debug(f"self._future is None or non-valid, None is returned.")
-        except Exception as _:
+        except Exception as error:
+                logger.error(f"Error while reading the results {error}")
                 raise SystemExit # User's level
 
         return self._result
@@ -151,13 +152,16 @@ class QJob:
                 logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
                 raise SystemExit # User's level
         
-        try:
-            logger.debug(f"Sending parameters to QPU")
-            self._future = self._qclient.send_parameters(message)
+            try:
+                logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
+                self._future = self._qclient.send_parameters(message)
 
-        except Exception as error:
-            logger.error(f"Some error occured when sending the new parameters to QPU [{type(error).__name__}].")
-            raise SystemExit # User's level
+            except Exception as error:
+                logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
+                raise SystemExit # User's level
+        else:
+            logger.error(f"Ivalid parameter type, list was expected but {type(parameters)} was given. [{TypeError.__name__}].")
+            raise SystemExit # User's level            
         
         self._updated = False # We indicate that new results will come, in order to call server
 
@@ -248,7 +252,7 @@ class QJob:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-            self._circuit = {"instructions":instructions}
+            self._circuit = instructions
             
             
         except KeyError as error:
@@ -305,7 +309,7 @@ class QJob:
         
 
 
-def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']", "list[list[Union[str, 'Result']]]"]:
+def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"]:
     """
         Function to get result of several QJob objects, it also takes one QJob object.
 

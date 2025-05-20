@@ -32,28 +32,6 @@ class QRaiseError(Exception):
     pass
 
 
-def check_raised(n: int, job_id: str) -> bool:
-    try:
-        with open(INFO_PATH, "r") as qpus_json: #access the qpus file
-            dumps = load(qpus_json)
-
-    except Exception as error:
-        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
-        raise SystemExit # User's level
-        
-    logger.debug(f"qpu.json file accessed correctly.")
-
-    i=0
-    for _, dictionary in dumps.items():
-        if dictionary.get("slurm_job_id") == job_id:
-            i += 1 
-            continue #pass to the next QPU
-
-    if i == n:
-        return True
-    else:
-        return False
-
 def qraise(n, time, *, 
            classical_comm = False, 
            quantum_comm = False,  
@@ -123,12 +101,12 @@ def qraise(n, time, *,
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         
-        # Wait for QPUs to be raised, so that getQPUs can be done inmediately
+        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
         while True:
             if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
                 break
 
-        return family if family is not None else str(job_id)
+        return (family, str(job_id)) if family is not None else str(job_id)
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -142,40 +120,23 @@ def qdrop(*families: Union[tuple, str]):
     qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
     """
     
-    #if no QPU is provided we drop all QPU slurm jobs
-    if len( families ) == 0:
-        job_id = ['--all'] 
-
-    #access the large dictionary containing all QPU dictionaries
-    try:
-        with open(INFO_PATH, "r") as f:
-            qpus_json = load(f)
-
-    except Exception as error:
-        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
-        raise SystemExit # User's level
-    
-    logger.debug(f"qpu.json file accessed correctly.")
-
-    #building the terminal command to drop the specified families (using family names or QFamilies)
+    # Building the terminal command to drop the specified families (using family names or QFamilies)
     cmd = ['qdrop']
 
-    if len(qpus_json) != 0:
+    # If no QPU is provided we drop all QPU slurm jobs
+    if len( families ) == 0:
+        cmd.append('--all') 
+    else:
         for family in families:
             if isinstance(family, str):
-                for _, dictionary in qpus_json.items():
-                    if dictionary.get("family") == family:
-                        job_id=dictionary.get("slurm_job_id")   
-                        cmd.append(str(job_id)) 
-                        break #pass to the next family name (two qraises must have different family names)
+                cmd.append(family)
 
             elif isinstance(family, tuple):
                 cmd.append(family[1])
             else:
-                logger.error(f"Arguments for qdrop must be strings or QFamilies.")
+                logger.error(f"Invalid type for qdrop.")
                 raise SystemExit
-    else:
-        logger.debug(f"qpus.json is empty, the specified families must have reached the time limit.")
+    
  
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 

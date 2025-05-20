@@ -76,6 +76,7 @@ class CunqaCircuit:
         return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
     
+    
     # =============== INSTRUCTIONS ===============
     
     # Methods for implementing non parametric single-qubit gates
@@ -1361,6 +1362,11 @@ def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bo
         return False
     elif isinstance(circuit, dict):
         for instruction in circuit['instructions']:
+            if instruction['name'] in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, list):
+        for instruction in circuit:
             if instruction['name'] in parametric_gates:
                 return True
         return False
