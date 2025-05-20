@@ -29,6 +29,7 @@ void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::s
         config = backend_json;
     JSON config_json = config;
     QPU qpu(std::make_unique<BackendType>(config, std::move(simulator)), mode, family);
+    LOGGER_DEBUG("QPU instantiated.");
     qpu.turn_ON();
 }
 
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
         std::ifstream f(generate_noise_instructions(back_path_json, family));
         backend_json = JSON::parse(f);
     } else if (back_path_json.contains("backend_path")) {
-        std::ifstream f(back_path_json.at("backend_path"));
+        std::ifstream f(back_path_json.at("backend_path").get<std::string>());
         backend_json = JSON::parse(f);
     } else {
         LOGGER_DEBUG("No backend_path, fakeqmio_path nor noise_properties_path were provided.");
@@ -100,24 +101,30 @@ int main(int argc, char *argv[])
 
     switch(murmur::hash(communications)) {
         case murmur::hash("no_comm"): 
+        LOGGER_DEBUG("Raising QPU without communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Aer"): 
                     turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with AerSimpleSimulator.");
                     break;
                 case murmur::hash("Munich"):
                     turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with MunichSimpleSimulator.");
                     break;
                 case murmur::hash("Cunqa"):
                     turn_ON_QPU<CunqaSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with CunqaSimpleSimulator.");
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
         case murmur::hash("classical_comm"): 
+        LOGGER_DEBUG("Raising QPU with classical communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Cunqa"): 
                     turn_ON_QPU<CunqaCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);

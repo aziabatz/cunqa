@@ -83,6 +83,12 @@ public:
         return config_json;
     }
 
+    std::string get_communication_endpoint() override
+    {
+        std::string endpoint = this->simulator_->_get_communication_endpoint();
+        return endpoint;
+    }
+
 private:
     std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator_;
 };

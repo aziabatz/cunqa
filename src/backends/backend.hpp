@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <iostream>
 #include <fstream>
 #include <memory>
@@ -17,6 +18,7 @@ public:
     virtual ~Backend() = default;
     virtual inline JSON execute(const QuantumTask& quantum_task) const = 0;
     virtual JSON to_json() const = 0;
+    virtual std::string get_communication_endpoint() = 0;
 };
 
 } // End of sim namespace

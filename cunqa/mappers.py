@@ -2,14 +2,18 @@ from cunqa.logger import logger
 from cunqa.qjob import gather
 from cunqa.circuit import CunqaCircuit
 from cunqa.qpu import QPU
+from cunqa.qjob import QJob
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
 from qiskit.qasm2 import QASM2Error
 import numpy as np
+from typing import  Optional, Union, Any
+
+import re
 
 
 
-def run_distributed(circuits, qpus, **run_args):
+def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['QPU']", **run_args: Any):
     """
     Method to send circuits to serveral QPUs allowing classical communications among them. 
     
@@ -23,7 +27,7 @@ def run_distributed(circuits, qpus, **run_args):
 
     Args:
     ---------
-    circuits (list[json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str]): circuits to be run.
+    circuits (list[dict, CunqaCircuit]): circuits to be run.
 
     qpus (list[<class 'cunqa.qpu.QPU'>]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
@@ -68,7 +72,8 @@ def run_distributed(circuits, qpus, **run_args):
 
     #Check wether the QPUs are valid
     if not all(qpu._family == qpus[0]._family for qpu in qpus):
-        if not all("zmq" in qpu._comm_info for qpu in qpus):
+        logger.debug(f"QPUs of different families were provided.")
+        if not all(re.match(r"^tcp://", qpu._comm_endpoint) for qpu in qpus):
             names = set()
             for qpu in qpus:
                 names.add(qpu._family)
@@ -83,6 +88,8 @@ def run_distributed(circuits, qpus, **run_args):
             if instr["name"] in remote_controlled_gates:
                 instr["qpus"] =  [correspondence[instr["circuits"][0]]]
                 instr.pop("circuits")
+        for i in range(len(circuit["sending_to"])):
+            circuit["sending_to"][i] = correspondence[circuit["sending_to"][i]]
     
     warn = False
     run_parameters = {}
@@ -105,7 +112,9 @@ class QJobMapper:
     """
     Class to map the method `QJob.upgrade_parameters` to a list of QJobs.
     """
-    def __init__(self, qjobs):
+    qjobs: "list['QJob']"
+
+    def __init__(self, qjobs: "list['QJob']"):
         """
         Initializes the QJobMapper class.
 
@@ -134,7 +143,7 @@ class QJobMapper:
         qjobs_ = []
         for i, params in enumerate(population):
             qjob = self.qjobs[i]
-            logger.debug(f"Uptading params for QJob {qjob} in QPU {qjob._QPU.id}...")
+            logger.debug(f"Uptading params for QJob {qjob}...")
             qjob.upgrade_parameters(params.tolist())
             qjobs_.append(qjob)
 
@@ -148,7 +157,13 @@ class QPUCircuitMapper:
     """
     Class to map the function `qpu.QPU.run()` to a list of QPUs.
     """
-    def __init__(self, qpus, ansatz, transpile = False, initial_layout = None, **run_parameters):
+    qpus: "list['QPU']"
+    ansatz: 'QuantumCircuit'
+    transpile: Optional[bool]
+    initial_layout: Optional["list[int]"]
+    run_parameters: Optional[Any]
+
+    def __init__(self, qpus: "list['QPU']", ansatz: 'QuantumCircuit', transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
         Initializes the QPUCircuitMapper class.
 

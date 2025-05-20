@@ -1,5 +1,5 @@
 import os
-from typing import  Union, Any
+from typing import  Union, Any, Optional
 
 from cunqa.qclient import QClient
 from cunqa.circuit import CunqaCircuit 
@@ -9,10 +9,15 @@ from cunqa.logger import logger
 from cunqa.transpile import transpiler, TranspileError
 
 # path to access to json file holding information about the raised QPUs
-info_path = os.getenv("INFO_PATH")
-if info_path is None:
-    STORE = os.getenv("STORE")
-    info_path = STORE+"/.cunqa/qpus.json"
+INFO_PATH: Optional[str] = os.getenv("INFO_PATH")
+if INFO_PATH is None:
+    STORE: Optional[str] = os.getenv("STORE")
+    if STORE is not None:
+        INFO_PATH = STORE + "/.cunqa/qpus.json"
+    else:
+        logger.error(f"Cannot find $STORE enviroment variable.")
+        raise SystemExit
+
 
 
 class QPU:
@@ -20,8 +25,15 @@ class QPU:
     Class to define a QPU.
     ----------------------
     """
+    _id: int 
+    _qclient: 'QClient' 
+    _backend: 'Backend' 
+    _family: str 
+    _endpoint: "tuple[str, int]" 
+    _comm_endpoint: str 
+    _connected: bool 
     
-    def __init__(self, id : int, qclient : QClient, backend : Backend, family : str, endpoint : tuple, comm_endpoint : tuple):
+    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]", comm_endpoint: str):
         """
         Initializes the QPU class.
 
@@ -38,24 +50,24 @@ class QPU:
         """
         
         self._id = id
-        self._backend = backend
-        self._connected = False
         self._qclient = qclient
-        self._endpoint = endpoint
-        self._comm_endpoint = "tcp://" + comm_endpoint[0] + ":" + comm_endpoint[1]
+        self._backend = backend
         self._family = family
+        self._endpoint = endpoint
+        self._comm_endpoint = comm_endpoint
+        self._connected = False
         
         logger.debug(f"Object for QPU {id} created correctly.")
 
     @property
-    def id(self):
+    def id(self) -> int:
         return self._id
     
     @property
     def backend(self) -> Backend:
         return self._backend
 
-    def run(self, circuit: Union[dict, CunqaCircuit], transpile: bool = False, initial_layout: list[int] = None, opt_level: int = 1, **run_parameters: Any) -> QJob:
+    def run(self, circuit: Union[dict, 'CunqaCircuit'], transpile: bool = False, initial_layout: Optional["list[int]"] = None, opt_level: int = 1, **run_parameters: Any) -> 'QJob':
         """
         Class method to run a circuit in the QPU.
 
@@ -85,6 +97,7 @@ class QPU:
         if not self._connected:
             ip, port = self._endpoint
             self._qclient.connect(ip, port)
+            self._connected = True
             logger.debug(f"QClient connection stabished for QPU {self._id} to endpoint {ip}:{port}.")
 
         if transpile:

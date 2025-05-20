@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Union
+from typing import Union, Optional
 from subprocess import run
 from json import load
 from cunqa.qclient import QClient  # importamos api en C++
@@ -11,38 +11,26 @@ from cunqa.qpu import QPU
 
 
 # Adding pyhton folder path to detect modules
-sys.path.insert(0, os.getenv("INSTALL_PATH"))
+INSTALL_PATH: Optional[str] = os.getenv("INSTALL_PATH")
+if INSTALL_PATH is not None:
+    sys.path.insert(0, INSTALL_PATH) # TODO: Check that the INSTALL_PATH is not None
+else:
+    logger.error(f"Cannot find $INSTALL_PATH enviroment variable.")
+    raise SystemExit
 
-info_path = os.getenv("INFO_PATH")
-if info_path is None:
-    STORE = os.getenv("STORE")
-    info_path = STORE+"/.cunqa/qpus.json"
+INFO_PATH: Optional[str] = os.getenv("INFO_PATH")
+if INFO_PATH is None:
+    STORE: Optional[str] = os.getenv("STORE")
+    if STORE is not None:
+        INFO_PATH = STORE + "/.cunqa/qpus.json" 
+    else:
+        logger.error(f"Cannot find $STORE enviroment variable.")
+        raise SystemExit
 
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
 
-def check_raised(n, job_id):
-    try:
-        with open(info_path, "r") as qpus_json: #access the qpus file
-            dumps = json.load(qpus_json)
-
-    except Exception as error:
-        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
-        raise SystemExit # User's level
-        
-    logger.debug(f"qpu.json file accessed correctly.")
-
-    i=0
-    for _, dictionary in dumps.items():
-        if dictionary.get("slurm_job_id") == job_id:
-            i += 1 
-            continue #pass to the next QPU
-
-    if i == n:
-        return True
-    else:
-        return False
 
 def qraise(n, time, *, 
            classical_comm = False, 
@@ -108,17 +96,17 @@ def qraise(n, time, *,
         if backend is not None:
             cmd.append(f"--backend={str(backend)}")
 
-        old_time = os.stat(info_path).st_mtime #stablish when the file qpus.json was modified last to check later that we did modify it
+        old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         
         output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         
-        # Wait for QPUs to be raised, so that getQPUs can be done inmediately
+        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
         while True:
-            if old_time != os.stat(info_path).st_mtime: #checks that the file has been modified
+            if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
                 break
 
-        return family if family is not None else str(job_id)
+        return (family, str(job_id)) if family is not None else str(job_id)
     
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
@@ -132,45 +120,28 @@ def qdrop(*families: Union[tuple, str]):
     qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
     """
     
-    #if no QPU is provided we drop all QPU slurm jobs
-    if len( families ) == 0:
-        job_id = ['--all'] 
-
-    #access the large dictionary containing all QPU dictionaries
-    try:
-        with open(info_path, "r") as f:
-            qpus_json = load(f)
-
-    except Exception as error:
-        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
-        raise SystemExit # User's level
-    
-    logger.debug(f"qpu.json file accessed correctly.")
-
-    #building the terminal command to drop the specified families (using family names or QFamilies)
+    # Building the terminal command to drop the specified families (using family names or QFamilies)
     cmd = ['qdrop']
 
-    if len(qpus_json) != 0:
+    # If no QPU is provided we drop all QPU slurm jobs
+    if len( families ) == 0:
+        cmd.append('--all') 
+    else:
         for family in families:
             if isinstance(family, str):
-                for _, dictionary in qpus_json.items():
-                    if dictionary.get("family") == family:
-                        job_id=dictionary.get("slurm_job_id")   
-                        cmd.append(str(job_id)) 
-                        break #pass to the next family name (two qraises must have different family names)
+                cmd.append(family)
 
             elif isinstance(family, tuple):
                 cmd.append(family[1])
             else:
-                logger.error(f"Arguments for qdrop must be strings or QFamilies.")
+                logger.error(f"Invalid type for qdrop.")
                 raise SystemExit
-    else:
-        logger.debug(f"qpus.json is empty, the specified families must have reached the time limit.")
+    
  
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
 
-def nodeswithQPUs() -> list[set]:
+def nodeswithQPUs() -> "list[set]":
     """
     Global function to know what nodes of the computer host virtual QPUs.
 
@@ -179,7 +150,7 @@ def nodeswithQPUs() -> list[set]:
     List of the corresponding node names.
     """
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
 
         node_names = set()
@@ -194,7 +165,7 @@ def nodeswithQPUs() -> list[set]:
 
 
 
-def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
+def infoQPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]":
     """
     Global function that returns information about the QPUs available either in the local node or globaly.
 
@@ -202,11 +173,11 @@ def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
     """
 
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.warning(f"No QPUs were found.")
-                return
+                return [{}]
         
         if node_name is not None:
             targets = [{qpu_id:info} for qpu_id,info in qpus_json.items() if (info["net"].get("node_name") == node_name ) ]
@@ -245,7 +216,7 @@ def infoQPUs(local: bool = True, node_name: str = None) -> list[dict]:
 
 
 
-def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
+def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
@@ -262,7 +233,7 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
 
     # access raised QPUs information on qpu.json file
     try:
-        with open(info_path, "r") as f:
+        with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.error(f"No QPUs were found.")
@@ -294,7 +265,7 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     for _, info in targets.items():
         client = QClient()
         endpoint = (info["net"]["ip"], info["net"]["port"])
-        comm_endpoint = (info["net"]["global_ip"], info["net"]["comm_port"])
+        comm_endpoint = info["communications_endpoint"]
         qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint, comm_endpoint = comm_endpoint))
         i+=1
     if len(qpus) != 0:

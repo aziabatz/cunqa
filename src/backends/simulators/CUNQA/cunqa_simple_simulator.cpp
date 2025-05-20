@@ -17,7 +17,7 @@ CunqaSimpleSimulator::~CunqaSimpleSimulator() = default;
 
 JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantumtask)
 {
-    JSON instructions = quantumtask.circuit;
+    std::vector<JSON> instructions = quantumtask.circuit;
     JSON run_config = quantumtask.config;
     int shots = run_config.at("shots");
     std::string instruction_name;
@@ -57,6 +57,7 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
                 case constants::Y:
                 case constants::Z:
                 case constants::H:
+                case constants::SX:
                 case constants::CX:
                 case constants::CY:
                 case constants::CZ:
@@ -84,7 +85,7 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
                     executor->apply_parametric_gate(instruction_name, qubits, param);
                     break;
                 default:
-                    SPDLOG_LOGGER_ERROR(logger, "Invalid gate name."); 
+                    LOGGER_ERROR("Invalid gate name."); 
                     throw std::runtime_error("Invalid gate name.");
                     break;
             }

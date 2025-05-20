@@ -6,6 +6,7 @@
 #include "logger.hpp"
 #include "utils/helpers/net_functions.hpp"
 #include "utils/constants.hpp"
+#include "classical_channel/classical_channel_helpers.hpp"
 
 namespace as = boost::asio;
 using namespace std::string_literals;
@@ -81,7 +82,6 @@ Server::Server(const std::string& mode) :
     ip{get_IP_address(mode)},
     global_ip{get_global_IP_address()},
     port{get_port()},
-    comm_port{get_comm_port()},
     pimpl_{std::make_unique<Impl>(ip, port)}
 { }
 
