@@ -3,8 +3,6 @@ import sys
 import json
 import time
 
-install_path = os.getenv("INSTALL_PATH")
-sys.path.insert(0, install_path)
 from cunqa.qutils import getQPUs
 
 qpus = getQPUs(local=False)

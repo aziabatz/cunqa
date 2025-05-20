@@ -1,8 +1,8 @@
 import os, sys
 import numpy as np
+
 # path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
+sys.path.append(os.getenv("HOME"))
 
 from cunqa.qutils import getQPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
@@ -10,8 +10,8 @@ from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
-#family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-qpus_QPE  = getQPUs(local=False)
+family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+qpus_QPE  = getQPUs(local=False, family = family)
 
 
 ########## Circuits to run ##########
@@ -46,4 +46,4 @@ for result in result_list:
     print(result)
 
 ########## Drop the deployed QPUs #
-#qdrop(family)
+qdrop(family)

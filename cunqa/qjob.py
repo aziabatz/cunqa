@@ -177,8 +177,6 @@ class QJob:
 
                 logger.debug("Translation to dict not necessary...")
 
-                self._exec_type = circuit['exec_type']
-
                 # might explode for handmade dicts not design for ditributed execution
                 self._circuit_id = circuit["id"]
                 instructions = circuit['instructions']
@@ -196,10 +194,6 @@ class QJob:
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
-                if circuit.is_distributed:
-                    self._exec_type = "dynamic"
-                else:
-                    self._exec_type = "offloading"
                 instructions = circuit.instructions
 
 
@@ -275,7 +269,7 @@ class QJob:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
             # instructions dict/string
-            self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{}, "sending_to":{} }}""".format(run_config, self._circuit, self._exec_type, self.num_qubits, self._sending_to).replace("'", '"')
+            self._execution_config = """ {{"config":{}, "instructions":{}, "num_qubits":{}, "sending_to":{} }}""".format(run_config, self._circuit, self.num_qubits, self._sending_to).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)

@@ -1,9 +1,9 @@
 import os, sys
 import numpy as np
 import matplotlib.pyplot as plt
+
 # path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
+sys.path.append(os.getenv("HOME"))
 
 from cunqa.qutils import getQPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
@@ -18,7 +18,7 @@ def cyclic_ccommunication(n):
     # Raise and get QPUs
     family = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
     os.system('sleep 5')
-    qpus_comm = getQPUs(family)
+    qpus_comm = getQPUs(local = False, family = family)
 
     if n<5:
         print(f"This circuit relations topology needs at leats 5 circuits, but only {n} were requested.")

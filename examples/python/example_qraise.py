@@ -9,7 +9,6 @@ from cunqa.circuit import CunqaCircuit
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
 family = qraise(2, "00:10:00", simulator = "Munich", cloud = True)
-sleep(15)
 
 qpus  = getQPUs(local = False, family = family)
 

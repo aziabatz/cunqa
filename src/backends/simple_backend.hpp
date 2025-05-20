@@ -21,7 +21,7 @@ struct SimpleConfig {
     int n_qubits = 32;
     std::string description = "Simple backend with no communications.";
     std::vector<std::vector<int>> coupling_map;
-    std::vector<std::string> basis_gates = BASIS_GATES;
+    std::vector<std::string> basis_gates = constants::BASIS_GATES;
     std::string custom_instructions;
     std::vector<std::string> gates;
     JSON noise_model;

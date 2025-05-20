@@ -116,7 +116,7 @@ std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
                     qasm_circt += "measure q[" + to_string(qubits[0]) + "] -> c[" + to_string(instruction.at("clbits")[0]) + "];\n";
                     break;
                 default:
-                    LOGGER_ERROR("Error. Invalid gate name: {}", INSTRUCTIONS_MAP.at(gate_name));
+                    LOGGER_ERROR("Error. Invalid gate name: {}", constants::INSTRUCTIONS_MAP.at(gate_name));
                     break;
             }
         } 

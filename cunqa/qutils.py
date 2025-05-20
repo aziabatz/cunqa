@@ -11,52 +11,20 @@ from cunqa.qpu import QPU
 # Adding pyhton folder path to detect modules
 sys.path.append(os.getenv("HOME"))
 
-
-# Adding pyhton folder path to detect modules
-INSTALL_PATH: Optional[str] = os.getenv("INSTALL_PATH")
-if INSTALL_PATH is not None:
-    sys.path.insert(0, INSTALL_PATH) # TODO: Check that the INSTALL_PATH is not None
+STORE: Optional[str] = os.getenv("STORE")
+if STORE is not None:
+    INFO_PATH = STORE + "/.cunqa/qpus.json"
 else:
     logger.error(f"Cannot find $INSTALL_PATH enviroment variable.")
     raise SystemExit
-
-INFO_PATH: Optional[str] = os.getenv("INFO_PATH")
-if INFO_PATH is None:
-    STORE: Optional[str] = os.getenv("STORE")
-    if STORE is not None:
-        INFO_PATH = STORE + "/.cunqa/qpus.json" 
-    else:
-        logger.error(f"Cannot find $STORE enviroment variable.")
-        raise SystemExit
 
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
 
-
-def check_raised(n: int, job_id: str) -> bool:
-    try:
-        with open(INFO_PATH, "r") as qpus_json: #access the qpus file
-            dumps = load(qpus_json)
-
-    except Exception as error:
-        logger.error(f"Some exception occurred while retrieving the raised QPUs [{type(error).__name__}].")
-        raise SystemExit # User's level
-        
-    logger.debug(f"qpu.json file accessed correctly.")
-
-    i=0
-    for _, dictionary in dumps.items():
-        if dictionary.get("slurm_job_id") == job_id:
-            i += 1 
-            continue #pass to the next QPU
-
-    if i == n:
-        return True
-    else:
-        return False
-
 def qraise(n, time, *, 
+           classical_comm = False, 
+           quantum_comm = False,  
            simulator = None, 
            fakeqmio = False, 
            family = None, 
@@ -95,6 +63,10 @@ def qraise(n, time, *,
         # Add specified flags
         if fakeqmio:
             cmd.append(f"--fakeqmio")
+        if classical_comm:
+            cmd.append(f"--classical_comm")
+        if quantum_comm:
+            cmd.append(f"--quantum_comm")
         if simulator is not None:
             cmd.append(f"--simulator={str(simulator)}")
         if family is not None:
@@ -280,22 +252,21 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     
     logger.debug(f"File accessed correctly.")
 
-    #Extract selected QPUs from qpu.json information 
+    # extract selected QPUs from qpu.json information
+    local_node = os.getenv("SLURMD_NODENAME")
+    logger.debug(f"User at node {local_node}.")
     if local:
-        local_node = os.getenv("SLURMD_NODENAME")
-        logger.debug(f"User at node {local_node}.")
-
         if family is not None:
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) and (info.get("family") == family)}
         else:
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node)}
     else:
         if family is not None:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("family") == family)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if ((info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")) and (info.get("family") == family)}
         else:
-            targets = qpus_json
-    
-    # Create QPU objects from the dictionary information + return them on a list
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")}
+
+    # create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0
     for _, info in targets.items():
@@ -304,5 +275,9 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
         comm_endpoint = info["communications_endpoint"]
         qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint, comm_endpoint = comm_endpoint))
         i+=1
-    logger.debug(f"{len(qpus)} QPU objects were created.")
-    return qpus
+    if len(qpus) != 0:
+        logger.debug(f"{len(qpus)} QPU objects were created.")
+        return qpus
+    else:
+        logger.error(f"No QPUs where found with the characteristics provided: local={local}, family_name={family}.")
+        raise SystemExit

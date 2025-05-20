@@ -131,7 +131,7 @@ class CunqaCircuit:
                 
                 if (instruction["name"] in SUPPORTED_GATES_1Q):
                     gate_qubits = 1
-                elif (instruction["name"] in SUPPORTED_GATES_2Q) or (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                elif (instruction["name"] in SUPPORTED_GATES_2Q):
                     # we include as 2 qubit gates the distributed gates
                     gate_qubits = 2
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
@@ -155,10 +155,7 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
-                        logger.error(f"qubits provided for instruction cannot be repeated.")
-                        raise ValueError
-                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
+                    elif (len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
@@ -1041,7 +1038,8 @@ class CunqaCircuit:
 
         """
 
-        
+        self.is_distributed = True
+
         if isinstance(control_qubit, int):
             list_control_qubit = [control_qubit]
         else:
@@ -1087,6 +1085,8 @@ class CunqaCircuit:
 
         target_qubit (int): qubit where the gate will be conditionally applied.       
         """
+
+        self.is_distributed = True
 
         if isinstance(gate, str):
             name = "remote_c_if_" + gate
@@ -1173,12 +1173,7 @@ def qc_to_json(qc: QuantumCircuit) -> dict:
         
         json_data = {
             "id": "",
-<<<<<<< HEAD
-            "is_parametric": is_parametric(qc),
-=======
-            "is_distributed": False,
             "is_parametric": _is_parametric(qc),
->>>>>>> 84-communications_and_improvements
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),

@@ -5,8 +5,6 @@ import random
 
 from qiskit import QuantumCircuit
 
-install_path = os.getenv("INSTALL_PATH")
-sys.path.insert(0, install_path)
 from cunqa.qutils import getQPUs
 
 qc = {
