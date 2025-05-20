@@ -221,13 +221,13 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     
     """
 
-    #Access raised QPUs information on qpu.json file
+    # access raised QPUs information on qpu.json file
     try:
         with open(INFO_PATH, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.error(f"No QPUs were found.")
-                raise Exception
+                raise SystemExit
 
     except Exception as error:
         logger.error(f"Some exception occurred [{type(error).__name__}].")
@@ -235,7 +235,7 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     
     logger.debug(f"File accessed correctly.")
 
-    # extract selected QPUs from qpu.json information
+    # extract selected QPUs from qpu.json information 
     local_node = os.getenv("SLURMD_NODENAME")
     logger.debug(f"User at node {local_node}.")
     if local:
@@ -248,7 +248,7 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if ((info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")) and (info.get("family") == family)}
         else:
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")}
-
+    
     # create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0

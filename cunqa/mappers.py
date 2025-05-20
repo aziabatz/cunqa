@@ -54,8 +54,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
             raise SystemExit # User's level
         
         if isinstance(circuit, CunqaCircuit):
-            extended_cunqa_info = {"id":circuit._id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "is_distributed":circuit.is_distributed, "is_parametric":circuit.is_parametric, "sending_to":circuit.sending_to}
-            circuit_jsons.append(extended_cunqa_info)
+            circuit_jsons.append(circuit.info)
 
         elif isinstance(circuit, dict):
             circuit_jsons.append(circuit)

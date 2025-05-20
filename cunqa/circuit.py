@@ -85,8 +85,20 @@ class CunqaCircuit:
         return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
-    def num_clbits(self) -> int:
+    def info(self):
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "exec_type":"dynamic", "is_distributed":self.is_distributed, "is_parametric":self.is_parametric}
+
+
+    @property
+    def num_clbits(self):
         return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
+
+
+    def from_instructions(self, instructions):
+        for instruction in instructions:
+            self._add_instruction(instruction)
+        return self
+
 
     def _add_instruction(self, instruction):
         """
@@ -131,13 +143,13 @@ class CunqaCircuit:
                 
                 if (instruction["name"] in SUPPORTED_GATES_1Q):
                     gate_qubits = 1
-                elif (instruction["name"] in SUPPORTED_GATES_2Q):
+                elif (instruction["name"] in SUPPORTED_GATES_2Q) or (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
                     # we include as 2 qubit gates the distributed gates
                     gate_qubits = 2
                 elif (instruction["name"] in SUPPORTED_GATES_3Q):
                     gate_qubits = 3
 
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "d_c_if_unitary"]]) and ("params" in instruction):
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
                     # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
                     gate_qubits = int(np.log2(len(instruction["params"][0])))
                     if not instruction["name"] == "unitary":
@@ -155,7 +167,10 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif (len(set(instruction["qubits"])) != len(instruction["qubits"])):
+                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
@@ -191,7 +206,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "d_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
@@ -1133,7 +1148,7 @@ class CunqaCircuit:
             logger.error(f"Gate {name} is not supported for conditional operation.")
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing
-
+                
 
 def flatten(lists: "list[list]"):
     return [element for sublist in lists for element in sublist]
@@ -1269,11 +1284,15 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
 
         for instruction in instructions:
             if instruction['name'] != 'measure':
+                if 'params' in instruction:
+                    params = instruction['params']
+                else:
+                    params = []
                 inst = CircuitInstruction( 
                     operation = Instruction(name = instruction['name'],
                                             num_qubits = len(instruction['qubits']),
                                             num_clbits = 0,
-                                            params = instruction['params']
+                                            params = params
                                             ),
                     qubits = (Qubit(QuantumRegister(num_qubits, 'q'), q) for q in instruction['qubits']),
                     clbits = ()

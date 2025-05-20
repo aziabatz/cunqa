@@ -14,5 +14,5 @@
 
    .. autosummary::
    
-      TranspilerError
+      TranspileError
    
