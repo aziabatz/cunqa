@@ -72,9 +72,161 @@ class CunqaCircuit:
         return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
-    def num_clbits(self) -> int:
+    def info(self):
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "exec_type":"dynamic", "is_distributed":self.is_distributed, "is_parametric":self.is_parametric}
+
+
+    @property
+    def num_clbits(self):
         return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
+
+    def from_instructions(self, instructions):
+        for instruction in instructions:
+            self._add_instruction(instruction)
+        return self
+
+
+    def _add_instruction(self, instruction):
+        """
+        Class method to add an instruction to the CunqaCircuit.
+
+        Args:
+        --------
+        instruction (dict): instruction to be added.
+        """
+        try:
+            self._check_instruction(instruction)
+            self.instructions.append(instruction)
+
+        except Exception as error:
+            logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
+            raise error
+
+
+    def _check_instruction(self, instruction):
+        """
+        Class method to check format for circuit instruction. If method finds some inconsistency, raises an error that must be captured avobe.
+        
+        If format is correct, no error is raise and nothing is returned.
+
+        Args:
+        ----------
+        instruction (dict): instruction to be checked.
+        """
+
+        mandatory_keys = {"name", "qubits"}
+
+        instructions_with_clbits = {"measure"}
+
+        if isinstance(instruction, dict):
+        # check if the given instruction has the mandatory keys
+            if mandatory_keys.issubset(instruction):
+                
+                # checking name
+                if not isinstance(instruction["name"], str):
+                    logger.error(f"instruction name must be str, but {type(instruction['name'])} was provided.")
+                    raise TypeError # I capture this at _add_instruction method
+                
+                if (instruction["name"] in SUPPORTED_GATES_1Q):
+                    gate_qubits = 1
+                elif (instruction["name"] in SUPPORTED_GATES_2Q) or (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                    # we include as 2 qubit gates the distributed gates
+                    gate_qubits = 2
+                elif (instruction["name"] in SUPPORTED_GATES_3Q):
+                    gate_qubits = 3
+
+                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
+                    # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
+                    gate_qubits = int(np.log2(len(instruction["params"][0])))
+                    if not instruction["name"] == "unitary":
+                        gate_qubits += 1 # adding the control qubit
+
+                elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
+                    gate_qubits = 1
+
+                else:
+                    logger.error(f"instruction is not supported.")
+                    raise ValueError # I capture this at _add_instruction method
+
+                # checking qubits
+                if isinstance(instruction["qubits"], list):
+                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
+                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
+                        raise TypeError
+                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
+                        logger.error(f"qubits provided for instruction cannot be repeated.")
+                        raise ValueError
+                else:
+                    logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
+                    raise TypeError # I capture this at _add_instruction method
+                
+                if not (len(instruction["qubits"]) == gate_qubits):
+                    logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
+                    raise ValueError # I capture this at _add_instruction method
+
+                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
+                    raise ValueError # I capture this at _add_instruction method
+
+
+                # checking clibits
+                if ("clbits" in instruction) and (instruction["name"] in instructions_with_clbits):
+
+                    if isinstance(instruction["clbits"], list):
+                        if not all([isinstance(c, int) for c in instruction["clbits"]]):
+                            logger.error(f"instruction clbits must be a list of ints, but a list of {[type(c) for c in instruction['clbits'] if not isinstance(c,int)]} was provided.")
+                            raise TypeError
+                    else:
+                        logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
+                        raise TypeError # I capture this at _add_instruction method
+                    
+                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
+                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
+                        raise ValueError
+                    
+                elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
+                    logger.error(f"instruction {instruction['name']} does not support clbits.")
+                    raise ValueError
+                
+                # checking params
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                    self.is_parametric = True
+
+                    if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
+                        gate_params = 1
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_2):
+                        gate_params = 2
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_3):
+                        gate_params = 3
+                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_4):
+                        gate_params = 4
+                    else:
+                        logger.error(f"instruction {instruction['name']} is not parametric, therefore does not accept params.")
+                        raise ValueError
+                    
+                    if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
+                        logger.error(f"instruction params must be int or float, but {type(instruction['params'])} was provided.")
+                        raise TypeError
+                    
+                    if not len(instruction["params"]) == gate_params:
+                        logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
+                        raise ValueError
+                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
+                    logger.error("instruction is parametric, therefore requires params.")
+                    raise ValueError
+                                
+                # check distributed instruction circuits
+                if (not instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
+                    # we check in the prrevious method that target/control circuit id is provided
+                    logger.error(f"instruction circuits specification is need for distributed intstruction.")
+                    raise ValueError
+                elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
+                    self.is_distributed =True
+                
     
     
     # =============== INSTRUCTIONS ===============
@@ -956,123 +1108,6 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing
 
 
-    def _add_instruction(self, instruction: dict) -> None:
-        """
-        Class method to add an instruction to the CunqaCircuit.
-
-        Args:
-        --------
-        instruction (dict): instruction to be added.
-        """
-
-        try:
-            self._check_instruction(instruction)
-            self.instructions.append(instruction)
-        except Exception as error:
-            logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
-            raise error
-        
-
-    def _check_instruction(self, instruction: dict) -> None:
-        """
-        Class method to check format for circuit instruction. If method finds some inconsistency, raises an error that must be captured avobe.
-        If format is correct, no error is raise and nothing is returned.
-
-        Args:
-        ----------
-        instruction (dict): instruction to be checked.
-        """
-
-        mandatory_keys = {"name", "qubits"}
-        instructions_with_clbits = {"measure"}
-        if isinstance(instruction, dict):
-        # check if the given instruction has the mandatory keys
-            if mandatory_keys.issubset(instruction):
-                # checking name
-                if not isinstance(instruction["name"], str):
-                    logger.error(f"instruction name must be str, but {type(instruction['name'])} was provided.")
-                    raise TypeError # I capture this at _add_instruction method
-                if (instruction["name"] in SUPPORTED_GATES_1Q):
-                    gate_qubits = 1
-                elif (instruction["name"] in SUPPORTED_GATES_2Q):
-                    # we include as 2 qubit gates the distributed gates
-                    gate_qubits = 2
-                elif (instruction["name"] in SUPPORTED_GATES_3Q):
-                    gate_qubits = 3
-                elif any([instruction["name"] == u for u in ["unitary", "c_if_unitary", "remote_c_if_unitary"]]) and ("params" in instruction):
-                    # in previous method, format of the matrix is checked, a list must be passed with the correct length given the number of qubits
-                    gate_qubits = int(np.log2(len(instruction["params"][0])))
-                    if not instruction["name"] == "unitary":
-                        gate_qubits += 1 # adding the control qubit
-                elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
-                    gate_qubits = 1
-                else:
-                    logger.error(f"instruction is not supported.")
-                    raise ValueError # I capture this at _add_instruction method
-                # checking qubits
-                if isinstance(instruction["qubits"], list):
-                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
-                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
-                        raise TypeError
-                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
-                        logger.error(f"qubits provided for instruction cannot be repeated.")
-                        raise ValueError
-                else:
-                    logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
-                    raise TypeError # I capture this at _add_instruction method
-                if not (len(instruction["qubits"]) == gate_qubits):
-                    logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
-                    raise ValueError # I capture this at _add_instruction method
-                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
-                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
-                    raise ValueError # I capture this at _add_instruction method
-                # checking clibits
-                if ("clbits" in instruction) and (instruction["name"] in instructions_with_clbits):
-                    if isinstance(instruction["clbits"], list):
-                        if not all([isinstance(c, int) for c in instruction["clbits"]]):
-                            logger.error(f"instruction clbits must be a list of ints, but a list of {[type(c) for c in instruction['clbits'] if not isinstance(c,int)]} was provided.")
-                            raise TypeError
-                    else:
-                        logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
-                        raise TypeError # I capture this at _add_instruction method
-                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
-                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
-                        raise ValueError
-                elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
-                    logger.error(f"instruction {instruction['name']} does not support clbits.")
-                    raise ValueError
-    
-                # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
-                    self.is_parametric = True
-                    if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
-                        gate_params = 1
-                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_2):
-                        gate_params = 2
-                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_3):
-                        gate_params = 3
-                    elif (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_4):
-                        gate_params = 4
-                    else:
-                        logger.error(f"instruction {instruction['name']} is not parametric, therefore does not accept params.")
-                        raise ValueError
-                    if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
-                        logger.error(f"instruction params must be int or float, but {type(instruction['params'])} was provided.")
-                        raise TypeError
-                    if not len(instruction["params"]) == gate_params:
-                        logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
-                        raise ValueError
-                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
-                    logger.error("instruction is parametric, therefore requires params.")
-                    raise ValueError
-                # check distributed instruction circuits
-                if (not instruction["name"] in SUPPORTED_GATES_DISTRIBUTED) and ("circuits" in instruction):
-                    # we check in the prrevious method that target/control circuit id is provided
-                    logger.error(f"instruction circuits specification is need for distributed intstruction.")
-                    raise ValueError
-                elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED):
-                    self.is_distributed =True
-
 
     def _add_q_register(self, name: str, number_qubits: int) -> str:
         if name in self.quantum_regs:
@@ -1096,7 +1131,8 @@ class CunqaCircuit:
             logger.warning(f"{name} for classcial register in use, renaaming to {new_name}.")
         else:
             new_name = name
-        self.classical_regs[new_name] = [(self.num_clbits + 1 + i) for i in range(number_clbits)]
+
+        self.classical_regs[new_name] = [(self.num_clbits + i) for i in range(number_clbits)]
         return new_name
                 
 
@@ -1240,11 +1276,15 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
 
         for instruction in instructions:
             if instruction['name'] != 'measure':
+                if 'params' in instruction:
+                    params = instruction['params']
+                else:
+                    params = []
                 inst = CircuitInstruction( 
                     operation = Instruction(name = instruction['name'],
                                             num_qubits = len(instruction['qubits']),
                                             num_clbits = 0,
-                                            params = instruction['params']
+                                            params = params
                                             ),
                     qubits = (Qubit(QuantumRegister(num_qubits, 'q'), q) for q in instruction['qubits']),
                     clbits = ()

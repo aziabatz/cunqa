@@ -43,6 +43,7 @@ JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask
 
         //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
         Noise::NoiseModel noise_model(backend.config.noise_model);
+
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
 
         return result.to_json();

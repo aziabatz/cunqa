@@ -6,7 +6,7 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.backend import Backend
 from cunqa.qjob import QJob
 from cunqa.logger import logger
-from cunqa.transpile import transpiler, TranspilerError
+from cunqa.transpile import transpiler, TranspileError
 
 # path to access to json file holding information about the raised QPUs
 INFO_PATH: Optional[str] = os.getenv("INFO_PATH")
@@ -102,11 +102,12 @@ class QPU:
 
         if transpile:
             try:
+                logger.debug(f"About to transpile: {circuit}")
                 circuit = transpiler(circuit, self._backend, initial_layout = initial_layout, opt_level = opt_level)
                 logger.debug("Transpilation done.")
             except Exception as error:
                 logger.error(f"Transpilation failed [{type(error).__name__}].")
-                raise TranspilerError # I capture the error in QPU.run() when creating the job
+                raise TranspileError # I capture the error in QPU.run() when creating the job
 
         try:
             qjob = QJob(self._qclient, self._backend, circuit, **run_parameters)

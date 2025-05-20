@@ -204,6 +204,7 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = circuit.num_clbits
                 self._cregisters = circuit.classical_regs
+                logger.debug(self._cregisters)
                 self._circuit_id = circuit._id
                 self._sending_to = circuit.sending_to
                 
@@ -251,9 +252,8 @@ class QJob:
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
-            
-            self._circuit = instructions
-            
+
+            self._circuit = instructions            
             
         except KeyError as error:
             logger.error(f"Format of the circuit dict not correct, couldn't find 'num_clbits', 'classical_registers' or 'instructions' [{type(error).__name__}].")
