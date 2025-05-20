@@ -1,5 +1,5 @@
 from cunqa.backend import Backend
-from cunqa.circuit import from_json_to_qc, qc_to_json
+from cunqa.circuit import from_json_to_qc, qc_to_json, CunqaCircuit
 from cunqa.logger import logger
 
 from qiskit import QuantumCircuit
@@ -8,9 +8,11 @@ from qiskit.exceptions import QiskitError
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.backend_compat import convert_to_target
+from qiskit.transpiler.exceptions import TranspilerError
 from qiskit.qasm2 import dumps
 
-class TranspilerError(Exception):
+
+class TranspileError(Exception):
     """Exception for error during the transpilation of a circuit to a given Backend. """
     pass
 
@@ -39,6 +41,14 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
             else:
                 qc = circuit
 
+        elif isinstance(circuit, CunqaCircuit):
+
+            if circuit.is_distributed:
+                logger.error(f"CunqaCircuit with distributed instructions was provided, transpilation is not avaliable at the moment. Make sure you are using a cunqasimulator backend, then transpilation is not necessary [{TypeError.__name__}].")
+                raise SystemExit
+            else:
+                qc = from_json_to_qc(circuit.info)
+
         elif isinstance(circuit, dict):
             if initial_layout is not None and len(initial_layout) != circuit['num_qubits']:
                 logger.error(f"initial_layout must be of the size of the circuit: {circuit.num_qubits} [{TypeError.__name__}].")
@@ -62,7 +72,7 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
         raise SystemExit # User's level
     
     except Exception as error:
-        logger.error(f"Some error occurred with QASM2 string, please check sintax and logic of the resulting circuit [{type(error).__name__}]: {error}")
+        logger.error(f"Some error occurred, please check sintax and logic of the resulting circuit [{type(error).__name__}]: {error}")
         raise SystemExit # User's level
         
 
@@ -82,11 +92,11 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
             "basis_gates": configuration["basis_gates"],
             "gates":[], # might not work
             "local":False,
-            "simulator":configuration["is_simulator"],
-            "conditional":configuration["conditional"],
+            "simulator":False if configuration["simulator"] == "QMIO" else True,
+            "conditional":True,
             "open_pulse":False,# TODO: another simulator distinct from Aer might suppor open pulse.
-            "memory":configuration["memory"],
-            "max_shots":configuration["max_shots"],
+            "memory":True,
+            "max_shots":100000,
             "coupling_map":configuration["coupling_map"]
         }
 
@@ -98,6 +108,10 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     except KeyError as error:
         logger.error(f"Error in cofiguration of the backend, some keys are missing [{type(error).__name__}].")
         raise SystemExit # User's level
+    
+    except TranspilerError as error:
+        logger.error(f"Error during transpilation: {error}")
+        raise SystemExit
     
     except Exception as error:
         logger.error(f"Some error occurred with configuration of the backend, please check that the formats are correct [{type(error).__name__}].")
@@ -112,3 +126,8 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     
     elif isinstance(circuit, dict):
         return qc_to_json(qc_transpiled)
+    
+    elif isinstance(circuit, CunqaCircuit):
+        return CunqaCircuit(qc_transpiled.num_qubits, qc_transpiled.num_clbits).from_instructions(qc_to_json(qc_transpiled)["instructions"])
+
+    

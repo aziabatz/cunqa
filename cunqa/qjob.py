@@ -188,6 +188,7 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = circuit.num_clbits
                 self._cregisters = circuit.classical_regs
+                logger.debug(self._cregisters)
                 self._circuit_id = circuit._id
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
@@ -234,7 +235,7 @@ class QJob:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-            self._circuit = {"instructions":circuit}
+            self._circuit = circuit
             
             
         except KeyError as error:

@@ -6,12 +6,6 @@
     "type": "object",
     "properties": 
     {
-        "backend": 
-        {
-            "description": "Physical properties of the QPU",
-            "type": "object",
-            "properties": 
-            {
                 "name": 
                 {
                     "description":"Name of the QPU backend",
@@ -103,8 +97,5 @@
                     }
                 }
             }
-        }
-    },
 
-    "required": ["backend"]
 }

@@ -150,19 +150,25 @@ int main(int argc, char* argv[])
     //Get srun command
     if (args.fakeqmio.has_value()) {
         LOGGER_DEBUG("Fakeqmio provided as a FLAG");
+        if (args.simulator == "Munich" or args.simulator == "Cunqa"){
+            LOGGER_WARN("Personalized noise model only supported for AerSimulator, switching simulator setting from {} to Aer.", args.simulator.c_str());
+        }
         run_command = get_fakeqmio_run_command(args, mode);
     
-    // } else if (args.properties.has_value()){
-    //     LOGGER_DEBUG("properties json path provided");
-    //     run_command = get_noise_model_run_command(args, mode);
+    } else if (args.noise_properties.has_value()){
+        LOGGER_DEBUG("noise_properties json path provided");
+        if (args.simulator == "Munich" or args.simulator == "Cunqa"){
+            LOGGER_WARN("Personalized noise model only supported for AerSimulator, switching simulator setting from {} to Aer.", args.simulator.c_str());
+        }
+        run_command = get_noise_model_run_command(args, mode);
 
     } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         LOGGER_ERROR("FakeQmio flags where provided but --fakeqmio was not included.");
         return 0;
 
-    // } else if (!args.properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
-    //     LOGGER_ERROR("properties flags where provided but --properties arg was not included.");
-    //     return 0;
+    } else if (!args.noise_properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+        LOGGER_ERROR("noise_properties flags where provided but --noise_properties arg was not included.");
+        return 0;
 
     } else {
         if (args.classical_comm) {
@@ -184,7 +190,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    LOGGER_DEBUG("Run command: ", run_command);
+    LOGGER_DEBUG("Run command: {}", run_command);
     sbatchFile << run_command;
 
     sbatchFile.close();

@@ -260,13 +260,13 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     
     """
 
-    #Access raised QPUs information on qpu.json file
+    # access raised QPUs information on qpu.json file
     try:
         with open(info_path, "r") as f:
             qpus_json = load(f)
             if len(qpus_json) == 0:
                 logger.error(f"No QPUs were found.")
-                raise Exception
+                raise SystemExit
 
     except Exception as error:
         logger.error(f"Some exception occurred [{type(error).__name__}].")
@@ -274,22 +274,21 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     
     logger.debug(f"File accessed correctly.")
 
-    #Extract selected QPUs from qpu.json information 
+    # extract selected QPUs from qpu.json information 
+    local_node = os.getenv("SLURMD_NODENAME")
+    logger.debug(f"User at node {local_node}.")
     if local:
-        local_node = os.getenv("SLURMD_NODENAME")
-        logger.debug(f"User at node {local_node}.")
-
         if family is not None:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node) and (info.get("family") == family)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) and (info.get("family") == family)}
         else:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("node_name") == local_node)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node)}
     else:
         if family is not None:
-            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info.get("family") == family)}
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if ((info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")) and (info.get("family") == family)}
         else:
-            targets = qpus_json
+            targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) or (info["net"].get("nodename") != local_node and info["net"].get("mode") == "cloud")}
     
-    # Create QPU objects from the dictionary information + return them on a list
+    # create QPU objects from the dictionary information + return them on a list
     qpus = []
     i = 0
     for _, info in targets.items():
@@ -298,5 +297,9 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
         comm_endpoint = (info["net"]["global_ip"], info["net"]["comm_port"])
         qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint, comm_endpoint = comm_endpoint))
         i+=1
-    logger.debug(f"{len(qpus)} QPU objects were created.")
-    return qpus
+    if len(qpus) != 0:
+        logger.debug(f"{len(qpus)} QPU objects were created.")
+        return qpus
+    else:
+        logger.error(f"No QPUs where found with the characteristics provided: local={local}, family_name={family}.")
+        raise SystemExit

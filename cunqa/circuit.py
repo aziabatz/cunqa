@@ -66,8 +66,20 @@ class CunqaCircuit:
         return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
+    def info(self):
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "exec_type":"dynamic", "is_distributed":self.is_distributed, "is_parametric":self.is_parametric}
+
+
+    @property
     def num_clbits(self):
         return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
+
+
+    def from_instructions(self, instructions):
+        for instruction in instructions:
+            self._add_instruction(instruction)
+        return self
+
 
     def _add_instruction(self, instruction):
         """
@@ -1290,7 +1302,7 @@ class CunqaCircuit:
         else:
             new_name = name
 
-        self.classical_regs[new_name] = [(self.num_clbits + 1 + i) for i in range(number_clbits)]
+        self.classical_regs[new_name] = [(self.num_clbits + i) for i in range(number_clbits)]
 
         return new_name
 
@@ -1369,7 +1381,7 @@ def qc_to_json(qc: QuantumCircuit):
 
                 json_data["instructions"].append({"name":qc.data[i].name,
                                                 "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
-                                                "memory":[classical_registers[k][b] for k,b in zip(creg,bit)]
+                                                "clbits":[classical_registers[k][b] for k,b in zip(creg,bit)]
                                                 })
                     
 
@@ -1432,18 +1444,22 @@ def from_json_to_qc(circuit_dict):
 
         for instruction in instructions:
             if instruction['name'] != 'measure':
+                if 'params' in instruction:
+                    params = instruction['params']
+                else:
+                    params = []
                 inst = CircuitInstruction( 
                     operation = Instruction(name = instruction['name'],
                                             num_qubits = len(instruction['qubits']),
                                             num_clbits = 0,
-                                            params = instruction['params']
+                                            params = params
                                             ),
                     qubits = (Qubit(QuantumRegister(num_qubits, 'q'), q) for q in instruction['qubits']),
                     clbits = ()
                     )
                 qc.append(inst)
             elif instruction['name'] == 'measure':
-                bit = instruction['memory'][0]
+                bit = instruction['clbits'][0]
                 if bit in bits: # checking that the bit referenced in the instruction it actually belongs to a register
                     for k,v in classical_registers.items():
                         if bit in v:

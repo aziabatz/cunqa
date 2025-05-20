@@ -50,18 +50,18 @@ parser.add_argument("backend_path", type = str, help = "Path to Qmio calibration
 parser.add_argument("thermal_relaxation", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("readout_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("gate_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
-parser.add_argument("SLURM_JOB_ID", type = int, help = "SLURM_JOB_ID enviroment variable")
+parser.add_argument("family_name", type = str, help = "family_name for QPUs")
 
 args = parser.parse_args()
 
 # set defaults
 thermal_relaxation, readout_error, gate_error = True, False, False
 # read arguments
-if args.thermal_relaxation is 0:
+if args.thermal_relaxation == 0:
     thermal_relaxation = False
-if args.readout_error is 1:
+if args.readout_error == 1:
     readout_error = True
-if args.gate_error is 1:
+if args.gate_error == 1:
     gate_error = True
 
 if (args.backend_path == "last_calibrations"):
@@ -90,25 +90,23 @@ if gate_error:
 description = description + ", ".join(errors.split())+"."
 
 
+with open(args.backend_path, "r") as file:
+    noise_properties_json = json.load(file)
+
 backend_json = {
-    "backend":{
         "name": "FakeQmio", 
         "version": args.backend_path,
         "n_qubits": 32, 
         "url": "",
-        "is_simulator": True,
-        "conditional": True, 
-        "memory": True,
-        "max_shots": 1000000,
         "description": description,
         "coupling_map" : COUPLING_MAP,
         "basis_gates": BASIS_GATES,
         "custom_instructions": "",
-        "gates": []
-    },
-    "noise":noise_model_json
+        "gates": [],
+        "noise_model":noise_model_json,
+        "noise_properties":noise_properties_json
 }
 
 
-with open("{}/.cunqa/tmp_fakeqmio_backend_{}.json".format(STORE_PATH, args.SLURM_JOB_ID), 'w') as file:
+with open("{}/.cunqa/tmp_fakeqmio_backend_{}.json".format(STORE_PATH, args.family_name), 'w') as file:
     json.dump(backend_json, file)
