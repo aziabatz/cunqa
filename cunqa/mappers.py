@@ -13,7 +13,7 @@ import re
 
 
 
-def run_distributed(circuits, qpus: "list['QPU']", **run_args: Any):
+def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['QPU']", **run_args: Any):
     """
     Method to send circuits to serveral QPUs allowing classical communications among them. 
     
@@ -27,7 +27,7 @@ def run_distributed(circuits, qpus: "list['QPU']", **run_args: Any):
 
     Args:
     ---------
-    circuits (list[json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str]): circuits to be run.
+    circuits (list[dict, CunqaCircuit]): circuits to be run.
 
     qpus (list[<class 'cunqa.qpu.QPU'>]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
@@ -51,7 +51,7 @@ def run_distributed(circuits, qpus: "list['QPU']", **run_args: Any):
             raise SystemExit # User's level
         
         if isinstance(circuit, CunqaCircuit):
-            extended_cunqa_info = {"id":circuit._id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "exec_type":"dynamic", "is_distributed":circuit.is_distributed, "is_parametric":circuit.is_parametric}
+            extended_cunqa_info = {"id":circuit._id, "instructions":circuit.instructions, "num_qubits": circuit.num_qubits,"num_clbits": circuit.num_clbits,"classical_registers": circuit.classical_regs,"quantum_registers": circuit.quantum_regs, "exec_type":"dynamic", "is_distributed":circuit.is_distributed, "is_parametric":circuit.is_parametric, "sending_to":circuit.sending_to}
             circuit_jsons.append(extended_cunqa_info)
 
         elif isinstance(circuit, dict):
@@ -89,6 +89,8 @@ def run_distributed(circuits, qpus: "list['QPU']", **run_args: Any):
             if instr["name"] in remote_controlled_gates:
                 instr["qpus"] =  [correspondence[instr["circuits"][0]]]
                 instr.pop("circuits")
+        for i in range(len(circuit["sending_to"])):
+            circuit["sending_to"][i] = correspondence[circuit["sending_to"][i]]
     
     warn = False
     run_parameters = {}

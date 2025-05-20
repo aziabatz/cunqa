@@ -85,7 +85,7 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
                     executor->apply_parametric_gate(instruction_name, qubits, param);
                     break;
                 default:
-                    SPDLOG_LOGGER_ERROR(logger, "Invalid gate name."); 
+                    LOGGER_ERROR("Invalid gate name."); 
                     throw std::runtime_error("Invalid gate name.");
                     break;
             }

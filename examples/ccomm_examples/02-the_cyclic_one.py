@@ -45,7 +45,7 @@ def cyclic_ccommunication(n):
         circuits[f"cc_{i+1}"].measure(1,1)
 
 
-    distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=1024)
+    distr_jobs = run_distributed(list(circuits.values()), qpus_comm, shots=100)
 
     results_list = gather(distr_jobs)
     qdrop(family_0) #, family_1)

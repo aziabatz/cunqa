@@ -19,7 +19,7 @@ struct ClassicalChannel::Impl
         MPI_Comm_size(MPI_COMM_WORLD, &(mpi_size));
         MPI_Comm_rank(MPI_COMM_WORLD, &(mpi_rank));
     
-        SPDLOG_LOGGER_DEBUG(logger, "Communication channel with MPI configured.");
+        LOGGER_DEBUG("Communication channel with MPI configured.");
     }
     ~Impl() = default;
 
@@ -54,5 +54,9 @@ int ClassicalChannel::recv_measure(std::string& origin)
     return pimpl_->recv(origin);
 }
 
+void ClassicalChannel::set_connections(std::vector<std::string>& endpoints)
+{
+    LOGGER_DEBUG("MPI does not need to set connections.");
+}
 } // End of comm namespace
 } // End of cunqa namespace

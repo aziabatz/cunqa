@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
     int set_variable = setenv("CUNQA_INFO_PATH", info_path.c_str(), 1); // 1 = overwrite if exists
     if (set_variable != 0) {
-        SPDLOG_LOGGER_ERROR(logger, "Enviroment variable CUNQA_INFO_PATH impossible to set.");
+        LOGGER_ERROR("Enviroment variable CUNQA_INFO_PATH impossible to set.");
         return 1;
     }
 

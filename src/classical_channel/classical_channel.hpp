@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <memory>
 
 namespace cunqa {
@@ -12,8 +13,10 @@ public:
     ClassicalChannel();
     ~ClassicalChannel();
 
+    void set_classical_connections(std::vector<std::string>& endpoints);
     void send_measure(int& measurement, std::string& target);
     int recv_measure(std::string& origin);
+    
 
 private:
     struct Impl;

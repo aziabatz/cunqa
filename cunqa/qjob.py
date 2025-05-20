@@ -25,6 +25,7 @@ class QJob:
     _future: 'FutureWrapper' 
     _result: Optional['Result'] 
     _circuit_id: str 
+    _sending_to: "list[str]"
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit'], **run_parameters: Any):
         """
@@ -173,6 +174,10 @@ class QJob:
                 self.num_qubits = circuit["num_qubits"]
                 self.num_clbits = circuit["num_clbits"]
                 self._cregisters = circuit["classical_registers"]
+                if "sending_to" in circuit:
+                    self._sending_to = circuit["sending_to"]
+                else:
+                    self._sending_to = []
 
                 logger.debug("Translation to dict not necessary...")
 
@@ -196,6 +201,7 @@ class QJob:
                 self.num_clbits = circuit.num_clbits
                 self._cregisters = circuit.classical_regs
                 self._circuit_id = circuit._id
+                self._sending_to = circuit.sending_to
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -213,6 +219,7 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
                 self._cregisters = registers_dict(circuit)[1]
+                self._sending_to = []
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
@@ -283,7 +290,7 @@ class QJob:
             
             # instructions dict/string
             instructions = self._circuit
-            self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{} }}""".format(run_config, instructions, self._exec_type, self.num_qubits).replace("'", '"')
+            self._execution_config = """ {{"config":{}, "instructions":{}, "exec_type":"{}", "num_qubits":{}, "sending_to":{} }}""".format(run_config, instructions, self._exec_type, self.num_qubits, self._sending_to).replace("'", '"')
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)

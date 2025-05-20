@@ -33,22 +33,23 @@ class CunqaCircuit:
     *** Indicate supported gates ***
     """
     
-    _id: Optional[str]
+    _id: str
     is_parametric: bool 
     is_distributed: bool
     instructions: "list[dict]"
     quantum_regs: dict
     classical_regs: dict
+    sending_to: "list[str]"
 
 
     def __init__(self, num_qubits: int, num_clbits: Optional[int] = None, id: Optional[str] = None):
 
-        self._id = None 
         self.is_parametric = False
         self.is_distributed = False
         self.instructions = []
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
         self.classical_regs = {}
+        self.sending_to = []
 
         if not isinstance(num_qubits, int):
             logger.error(f"num_qubits must be an int, but a {type(num_qubits)} was provided [TypeError].")
@@ -873,10 +874,10 @@ class CunqaCircuit:
             raise SystemExit
         
         elif isinstance(target_circuit, str):
-            target_circuit = target_circuit
+            target_circuit_id = target_circuit
 
         elif isinstance(target_circuit, CunqaCircuit):
-            target_circuit = target_circuit._id
+            target_circuit_id = target_circuit._id
         else:
             logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
             raise SystemExit
@@ -885,8 +886,10 @@ class CunqaCircuit:
         self._add_instruction({
             "name": "measure_and_send",
             "qubits": flatten([list_control_qubit]),
-            "circuits": [target_circuit]
+            "circuits": [target_circuit_id]
         })
+
+        self.sending_to.append(target_circuit_id)
 
 
     def remote_c_if(self, gate: str, target_qubits: Union[int, "list[int]"], param: float, control_circuit: Optional[Union[str, 'CunqaCircuit']] = None)-> None:
