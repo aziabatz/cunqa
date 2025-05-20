@@ -13,7 +13,8 @@ public:
     virtual ~SimulatorStrategy() {};
 
     virtual inline std::string get_name() const = 0;
-    virtual JSON execute(const T& backend, const QuantumTask& circuit) const = 0;
+    virtual JSON execute(const T& backend, const QuantumTask& circuit) = 0;
+    virtual std::string _get_communication_endpoint() {return "";};
 };
 
 } // End of sim namespace

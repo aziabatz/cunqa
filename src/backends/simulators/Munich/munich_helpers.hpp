@@ -51,78 +51,78 @@ std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
             std::vector<double> params;
             std::vector<std::vector<std::vector<std::vector<double>>>> matrix;
 
-            switch (INSTRUCTIONS_MAP.at(gate_name))
+            switch (constants::INSTRUCTIONS_MAP.at(gate_name))
             {   
                 // Non-parametric 1 qubit gates
-                case ID:
-                case X:
-                case Y:
-                case Z:
-                case H:
-                case SX:
-                //case S:
-                //case SDG:
-                //case SXDG:
-                //case T:
-                //case TDG:
+                case constants::ID:
+                case constants::X:
+                case constants::Y:
+                case constants::Z:
+                case constants::H:
+                case constants::SX:
+                //case constants::S:
+                //case constants::SDG:
+                //case constants::SXDG:
+                //case constants::T:
+                //case constants::TDG:
                     qasm_circt += gate_name + " q["  + to_string(qubits[0]) + "];\n";
                     break;
                 // Parametric 1 qubit gates
-                //case U1:
-                case RX:
-                case RY:
-                case RZ:
+                //case constants::U1:
+                case constants::RX:
+                case constants::RY:
+                case constants::RZ:
                     params = instruction.at("params").get<std::vector<double>>();
                     qasm_circt += gate_name + "(" + std::to_string(params[0]) + ") q[" + to_string(qubits[0]) + "];\n";
                     break;
                 //UNITARY
-                case UNITARY:
+                case constants::UNITARY:
                     matrix = instruction.at("params").get<std::vector<std::vector<std::vector<std::vector<double>>>>>();
                     qasm_circt += gate_name + "(" + triple_vector_to_string(matrix[0]) + ") q[" + to_string(qubits[0]) + "];\n";
                     break;
                 // 2-Parametric 1 qubit gates
-                //case U2:
-                //case R:
+                //case constants::U2:
+                //case constants::R:
                 //    qasm_circt += gate_name + "(" + to_string(params[0]) + ", " + to_string(params[1]) + ") q[" + to_string(qubits[0]) + "];\n";
                 //    break;
                 // 3-Parametric 1 qubit gate
-                //case U3:
+                //case constants::U3:
                 //    qasm_circt += gate_name + "(" + to_string(params[0]) + ", " + to_string(params[1]) + ", " + to_string(params[2]) + ") q[" + to_string(qubits[0]) + "];\n";
                 //    break;
                 // Non-parametric 2 qubit gates
-                case CX:
-                case CY:
-                case CZ:
-                //case CSX:
-                //case SWAP:
-                case ECR:
+                case constants::CX:
+                case constants::CY:
+                case constants::CZ:
+                //case constants::CSX:
+                //case constants::SWAP:
+                case constants::ECR:
                     qasm_circt += gate_name + " q[" + to_string(qubits[0]) + "], q[" + to_string(qubits[1]) + "];\n";
                     break;
                 // Parametric 2 qubit gates
-                //case RXX:
-                //case CRX:
-                //case CRY:
-                //case CRZ:
-                //case CP:
+                //case constants::RXX:
+                //case constants::CRX:
+                //case constants::CRY:
+                //case constants::CRZ:
+                //case constants::CP:
                 //    qasm_circt += gate_name + "(" + to_string(params[0]) + ")" + " q[" + to_string(qubits[0]) + "], q[" + to_string(qubits[1]) + "];\n";
                 //    break;
                 // Non-parametric  3 qubit gates
-                //case CCX:
-                //case CSWAP:
+                //case constants::CCX:
+                //case constants::CSWAP:
                 //    qasm_circt += gate_name + " q[" + to_string(qubits[0]) + "], q[" + to_string(qubits[1]) + "], q[" + to_string(qubits[2]) + "];\n";
                 //    break;
                 // Measure, duh
-                case MEASURE:
+                case constants::MEASURE:
                     qasm_circt += "measure q[" + to_string(qubits[0]) + "] -> c[" + to_string(instruction.at("clbits")[0]) + "];\n";
                     break;
                 default:
                     LOGGER_ERROR("Error. Invalid gate name: {}", INSTRUCTIONS_MAP.at(gate_name));
                     break;
             }
-        }
+        } 
     } catch (const std::exception& e) {
         LOGGER_ERROR("Error translating a gate from JSON to QASM2.");
-    }
+    } 
         
     return qasm_circt;
 }

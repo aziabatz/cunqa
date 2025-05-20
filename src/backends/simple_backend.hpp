@@ -16,7 +16,7 @@ namespace cunqa {
 namespace sim {
 
 struct SimpleConfig {
-    std::string name = "SimpleSimulator";
+    std::string name = "SimpleBackend";
     std::string version = "0.0.1";
     int n_qubits = 32;
     std::string description = "Simple backend with no communications.";
@@ -79,6 +79,12 @@ public:
         const auto simulator_name = simulator_->get_name();
         config_json["simulator"] = simulator_name;
         return config_json;
+    }
+
+    std::string get_communication_endpoint() override
+    {
+        std::string endpoint = this->simulator_->_get_communication_endpoint();
+        return endpoint;
     }
 
 private:

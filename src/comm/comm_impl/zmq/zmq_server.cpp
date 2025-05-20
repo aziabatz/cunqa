@@ -66,6 +66,7 @@ Server::Server(const std::string& mode) :
     hostname{get_hostname()},
     nodename{get_nodename()},
     ip{get_IP_address(mode)},
+    global_ip{get_global_IP_address()},
     port{get_port()},
     pimpl_{std::make_unique<Impl>(ip, port)}
 { }

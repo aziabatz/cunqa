@@ -12,7 +12,7 @@
 namespace cunqa {
 namespace sim {
 
-JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) const
+JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task)
 {
     try {
         // TODO: Change the format with the free functions 

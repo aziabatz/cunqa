@@ -46,9 +46,22 @@ COUPLING_MAP = [
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
 parser.add_argument("backend_path", type = str, help = "Path to Qmio calibration file")
+parser.add_argument("thermal_relaxation", type = int, help = "Weather thermal relaxation is added to FakeQmio")
+parser.add_argument("readout_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
+parser.add_argument("gate_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("SLURM_JOB_ID", type = int, help = "SLURM_JOB_ID enviroment variable")
 
 args = parser.parse_args()
+
+# set defaults
+thermal_relaxation, readout_error, gate_error = True, False, False
+# read arguments
+if args.thermal_relaxation is 0:
+    thermal_relaxation = False
+if args.readout_error is 1:
+    readout_error = True
+if args.gate_error is 1:
+    gate_error = True
 
 if (args.backend_path == "last_calibrations"):
     jsonpath=os.getenv("QMIO_CALIBRATIONS",".")
@@ -56,12 +69,25 @@ if (args.backend_path == "last_calibrations"):
     files = glob.glob(files)
     calibration_file=max(files, key=os.path.getctime) 
     args.backend_path = calibration_file
-    fakeqmio = FakeQmio()
+    
+    fakeqmio = FakeQmio(None,thermal_relaxation, readout_error, gate_error)
 else:
-    fakeqmio = FakeQmio(calibration_file = args.backend_path)
+    fakeqmio = FakeQmio(args.backend_path,thermal_relaxation, readout_error, gate_error)
 
 noise_model = NoiseModel.from_backend(fakeqmio)
 noise_model_json = noise_model.to_dict(serializable = True)
+
+description = "FakeQmio backend with: "
+errors = ""
+if thermal_relaxation:
+    errors += " thermal_relaxation"
+if readout_error:
+    errors += " readout_error"
+if gate_error:
+    errors += " gate_error"
+
+description = description + ", ".join(errors.split())+"."
+
 
 backend_json = {
     "name": "FakeQmio", 

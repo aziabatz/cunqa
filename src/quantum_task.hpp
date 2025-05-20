@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-
 #include "utils/json.hpp"
 
 namespace cunqa {
@@ -11,6 +10,7 @@ class QuantumTask {
 public:
     JSON circuit;
     JSON config;
+    std::vector<std::string> sending_to;
 
     QuantumTask() : is_parametric_{false} {};
 

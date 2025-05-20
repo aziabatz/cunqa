@@ -22,7 +22,7 @@ namespace sim {
 
 AerSimpleSimulator::~AerSimpleSimulator() = default;
 
-JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) const 
+JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) 
 {
     try {
         //TODO: Maybe improve them to send several circuits at once

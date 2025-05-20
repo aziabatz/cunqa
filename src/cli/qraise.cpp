@@ -12,8 +12,9 @@
 #include "utils/qraise/utils_qraise.hpp"
 #include "utils/qraise/args_qraise.hpp"
 #include "utils/qraise/fakeqmio_conf_qraise.hpp"
+#include "utils/qraise/noise_model_conf_qraise.hpp"
 #include "utils/qraise/no_comm_conf_qraise.hpp"
-#include "utils/qraise/class_comm_conf_qraise.hpp"
+#include "utils/qraise/classical_comm_conf_qraise.hpp"
 #include "utils/qraise/quantum_comm_conf_qraise.hpp"
 
 #include "logger.hpp"
@@ -30,6 +31,11 @@ int main(int argc, char* argv[])
 
     const char* store = std::getenv("STORE");
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
+    int set_variable = setenv("CUNQA_INFO_PATH", info_path.c_str(), 1); // 1 = overwrite if exists
+    if (set_variable != 0) {
+        LOGGER_ERROR("Enviroment variable CUNQA_INFO_PATH impossible to set.");
+        return 1;
+    }
 
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     LOGGER_DEBUG("Temporal file qraise_sbatch_tmp.sbatch created.");
@@ -117,7 +123,7 @@ int main(int argc, char* argv[])
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
 
     //Checking duplicate family name
-    std::string family = std::any_cast<std::string>(args.family);
+    std::string family = std::any_cast<std::string>(args.family_name);
     if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
         LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
         std::system("rm qraise_sbatch_tmp.sbatch");
@@ -136,10 +142,23 @@ int main(int argc, char* argv[])
     if (args.fakeqmio.has_value()) {
         LOGGER_DEBUG("Fakeqmio provided as a FLAG");
         run_command = get_fakeqmio_run_command(args, mode);
+    
+    // } else if (args.properties.has_value()){
+    //     LOGGER_DEBUG("properties json path provided");
+    //     run_command = get_noise_model_run_command(args, mode);
+
+    } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+        LOGGER_ERROR("FakeQmio flags where provided but --fakeqmio was not included.");
+        return 0;
+
+    // } else if (!args.properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+    //     LOGGER_ERROR("properties flags where provided but --properties arg was not included.");
+    //     return 0;
+
     } else {
         if (args.classical_comm) {
             LOGGER_DEBUG("Classical communications");
-            run_command = get_class_comm_run_command(args, mode);
+            run_command = get_classical_comm_run_command(args, mode);
             if (run_command == "0") {
                 return 0;
             }
@@ -156,7 +175,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    LOGGER_DEBUG("Run command: ", run_command);
+    LOGGER_DEBUG("Run command: {}", run_command);
     sbatchFile << run_command;
 
     sbatchFile.close();

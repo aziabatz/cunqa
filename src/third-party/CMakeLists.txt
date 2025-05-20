@@ -32,6 +32,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(zmq)
 
+
+#FetchContent_Declare(
+#  cunqasimulator
+#  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cunqasimulator
+#)
+#FetchContent_MakeAvailable(cunqasimulator)
+
 # TODO: Change this to non global
 set(ZMQ_BINARY_DIR "${zmq_BINARY_DIR}"
     CACHE PATH "ZeroMQ binary directory from FetchContent")
