@@ -27,7 +27,9 @@ JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask
     try {
         //TODO: Maybe improve them to send several circuits at once
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
-        JSON circuit_json = aer_quantum_task.circuit;
+        JSON circuit_json = {
+            {"instructions", aer_quantum_task.circuit}
+        };
 
         LOGGER_DEBUG("Circuit {}.", circuit_json.dump(4));
 

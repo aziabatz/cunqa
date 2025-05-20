@@ -1381,6 +1381,11 @@ def _is_parametric(circuit):
             if instruction['name'] in parametric_gates:
                 return True
         return False
+    elif isinstance(circuit, list):
+        for instruction in circuit:
+            if instruction['name'] in parametric_gates:
+                return True
+        return False
     elif isinstance(circuit, CunqaCircuit):
         return circuit.is_parametric
     elif isinstance(circuit, str):

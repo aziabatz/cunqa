@@ -17,7 +17,7 @@ CunqaCCSimulator::~CunqaCCSimulator() = default;
 
 JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantumtask)
 {
-    std::vector<JSON> instructions = quantumtask.circuit.at("instructions").get<std::vector<JSON>>();
+    std::vector<JSON> instructions = quantumtask.circuit;
     JSON run_config = quantumtask.config;
     int shots = run_config.at("shots");
     std::string instruction_name;

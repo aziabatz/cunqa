@@ -145,13 +145,16 @@ class QJob:
                 logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
                 raise SystemExit # User's level
         
-        try:
-            logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
-            self._future = self._qclient.send_parameters(message)
+            try:
+                logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
+                self._future = self._qclient.send_parameters(message)
 
-        except Exception as error:
-            logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
-            raise SystemExit # User's level
+            except Exception as error:
+                logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
+                raise SystemExit # User's level
+        else:
+            logger.error(f"Ivalid parameter type, list was expected but {type(parameters)} was given. [{TypeError.__name__}].")
+            raise SystemExit # User's level            
         
         self._updated = False # We indicate that new results will come, in order to call server
 
@@ -236,7 +239,7 @@ class QJob:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-            self._circuit = {"instructions":circuit}
+            self._circuit = circuit
             
             
         except KeyError as error:
