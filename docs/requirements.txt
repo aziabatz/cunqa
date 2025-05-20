@@ -1,0 +1,10 @@
+
+sphinx>=5
+docutils==0.21.2
+sphinx-rtd-theme
+sphinx-autobuild
+myst-nb
+nbsphinx
+pypandoc
+lxml-html-clean #needed for nbsphinx functionalities, which I use to display jupyter notebooks
+sphinx-mdinclude

@@ -215,6 +215,37 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# Sphinx build artifacts
+_build/
+Thumbs.db
+.DS_Store
+*.doctree
+*.pickle
+*.inv
+*.mo
+*.pot
+*.log
+*.tmp
+*.bak
+*.swp
+*.pdf
+*.tex
+*.aux
+*.out
+*.toc
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.egg-info/
+generated/
+_autosummary/
+
 # Logging
 logs/
 

@@ -10,11 +10,9 @@ import re
 import os
 import shutil
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-
-os.environ['INFO_PATH'] = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/'
-os.environ['STORE'] = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/'
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -27,9 +25,9 @@ release = '0.1.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 
-extensions = ['sphinx.ext.githubpages',  'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', "nbsphinx", 'sphinx.ext.mathjax',] # 'myst_parser', 'sphinx_mdinclude', this ones were troublesome
+extensions = ['sphinx.ext.githubpages', 'sphinx.ext.doctest', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_mdinclude', "nbsphinx", 'sphinx.ext.mathjax'] # 'myst_parser', 'sphinx_mdinclude', this ones were troublesome
 
-autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.mappers', 'cunqa.logger', 'qmiotools', 'qiskit_aer', 'Pandoc']
+autodoc_mock_imports = ['os', 'json', 'JSONDecodeError', 'load', 'logger', 'qiskit', 'dateutil', 'glob','argparse','logging', 'numpy', 'cunqa.qclient', 'QClient', 'cunqa.logger', 'qmiotools', 'qiskit_aer', 'Pandoc']
 
 
 templates_path = ['_templates']
@@ -66,7 +64,7 @@ html_theme_options = {
     'version_selector': True,
     'language_selector': True,
     # Toc options
-    'collapse_navigation': True,
+    'collapse_navigation': False,
     'sticky_navigation': True,
     'navigation_depth': 4,
     'includehidden': True,

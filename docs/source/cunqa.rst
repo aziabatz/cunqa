@@ -10,9 +10,3 @@ CUNQA Submodules
    cunqa.transpile
    cunqa.circuit 
    cunqa.backend
-   
-   
-   
-
-   
-   

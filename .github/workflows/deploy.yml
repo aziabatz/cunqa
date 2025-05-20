@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - docs-dev  # or master, depending on your default branch
+      - software-redesign
 
 jobs:
   build:

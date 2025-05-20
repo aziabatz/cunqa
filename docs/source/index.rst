@@ -18,7 +18,7 @@ For documentation of individual objects and functions check :doc:`cunqa`. Illust
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
    modulesetup
