@@ -2,68 +2,38 @@
 
 #include <iostream>
 #include <fstream>
+#include <string_view>
 #include <memory>
-#include "comm_strat_def.h"
-#include "utils/constants.hpp"
-#include "logger/logger.hpp"
-#include "config/net_config.hpp"
-#include "future_wrapper.hpp"
-#include "logger/logger.hpp"
 
-using json = nlohmann::json;
-using namespace config;
+namespace cunqa {
+namespace comm {
 
-#if COMM_LIB == ASIO
-    #include "comm-strats/asio/asio_client.hpp"
-    using SelectedClient = AsioClient;
-#elif COMM_LIB == ZMQ
-    #include "comm-strats/zmq/zmq_client.hpp"
-    using SelectedClient = ZmqClient;
-#elif COMM_LIB == CROW
-    #include "comm-strats/crow_comm.hpp"
-    using SelectedClient = CrowClient;
-#else
-    #error "A valid library should be defined (ASIO, ZMQ o CROW) in COMM_LIB."
-#endif
+template <typename T>
+class FutureWrapper {
+public: 
+    FutureWrapper(T * client) : client_{client} {};
+    
+    inline std::string get() { return client_->recv_results(); };
+    inline bool valid() { return true; };
+private:
+    T * client_;
+};
 
 class Client {
-    std::unique_ptr<SelectedClient> comm_strat;
-    json qpus_json;
-
 public:
 
-    Client(const std::optional<std::string> &filepath) :
-        comm_strat{std::make_unique<SelectedClient>()} 
-    { 
-        std::string final_filepath;
-        if (filepath.has_value())
-            final_filepath = filepath.value();
-        else
-            final_filepath = std::getenv("STORE") + "/.api_simulator/qpus.json"s;
-        std::ifstream file(final_filepath);  
+    Client();
+    ~Client();
 
-        if (!file.is_open()) {
-            std::cerr << "Cannot open the JSON file\n";
-        }
+    void connect(const std::string& ip, const std::string& port);
+    FutureWrapper<Client> send_circuit(const std::string& circuit);
+    FutureWrapper<Client> send_parameters(const std::string& parameters);
+    std::string recv_results();
 
-        try {
-            file >> qpus_json;
-        } catch (const json::parse_error& e) {
-            std::cerr << "Error parsing the QClient info into JSON: " << e.what() << "\n";
-        }
-    }
-
-    void connect(const std::string& task_id, const std::string_view& net = INFINIBAND) {
-        try {
-            json server_ip_config_json = qpus_json.at(task_id).at("net");
-            auto server_ip_config = server_ip_config_json.template get<NetConfig>();
-            comm_strat->connect(server_ip_config);
-        } catch (const json::out_of_range& e){
-            SPDLOG_LOGGER_ERROR(logger, "No server has ID={}. Remember to set the servers with the command qraise.", task_id);
-        }
-    }
-
-    inline FutureWrapper send_circuit(const std::string& circuit) { return FutureWrapper(comm_strat->submit(circuit)); }
-
-    inline FutureWrapper send_parameters(const std::string& parameters) { return FutureWrapper(comm_strat->submit(parameters)); }
+private:
+    struct Impl;
+    std::unique_ptr<Impl> pimpl_;
 };
+
+} // End of comm namespace
+} // End of cunqa namespace

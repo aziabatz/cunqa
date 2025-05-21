@@ -1,3 +1,6 @@
+"""
+    Holds our wrapper for the qiskit transpiler and the TranspilerError class.
+"""
 from cunqa.backend import Backend
 from cunqa.circuit import from_json_to_qc, qc_to_json
 from cunqa.logger import logger
@@ -75,6 +78,7 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     
     # transpilation
     try:
+        #TODO: Revise the hardcoded args
         args = {
             "backend_name": configuration["name"],
             "backend_version": configuration["version"],
@@ -82,11 +86,11 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
             "basis_gates": configuration["basis_gates"],
             "gates":[], # might not work
             "local":False,
-            "simulator":configuration["is_simulator"],
-            "conditional":configuration["conditional"],
-            "open_pulse":False,# TODO: another simulator distinct from Aer might suppor open pulse.
-            "memory":configuration["memory"],
-            "max_shots":configuration["max_shots"],
+            "simulator":False if configuration["simulator"] == "QMIO" else True,
+            "conditional":True, 
+            "open_pulse":False, #TODO: another simulator distinct from Aer might suppor open pulse.
+            "memory":True,
+            "max_shots":100000,
             "coupling_map":configuration["coupling_map"]
         }
 

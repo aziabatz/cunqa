@@ -27,7 +27,13 @@ set(BUILD_SHARED ON             CACHE BOOL "Build shared library"   FORCE)
 set(BUILD_STATIC OFF            CACHE BOOL "Build static library"   FORCE)
 
 FetchContent_Declare(
-    libzmq
+    zmq
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libzmq
 )
-FetchContent_MakeAvailable(libzmq)
+FetchContent_MakeAvailable(zmq)
+
+# TODO: Change this to non global
+set(ZMQ_BINARY_DIR "${zmq_BINARY_DIR}"
+    CACHE PATH "ZeroMQ binary directory from FetchContent")
+set(ZMQ_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include"
+    CACHE PATH "ZeroMQ include directory")

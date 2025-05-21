@@ -1,3 +1,6 @@
+"""
+Holds a single class to determine QPU backends.
+"""
 
 class Backend():
     """

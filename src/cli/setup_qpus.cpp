@@ -1,65 +1,89 @@
-#include <nlohmann/json.hpp>
+
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
-#include <thread>
-#include <queue>
-#include <chrono>
-#include "qpu.hpp"
-#include "simulators/simulator.hpp"
-#include "config/qpu_config.hpp"
-#include "comm/server.hpp"
-#include "comm/client.hpp"
-#include "logger/logger.hpp"
+#include <string>
 
-using json = nlohmann::json;
+#include "qpu.hpp"
+#include "backends/simple_backend.hpp"
+#include "backends/simulators/AER/aer_simple_simulator.hpp"
+#include "backends/simulators/Munich/munich_simple_simulator.hpp"
+
+#include "utils/json.hpp"
+#include "utils/helpers/murmur_hash.hpp"
+#include "logger.hpp"
+
+using namespace std::string_literals;
+
+using namespace cunqa;
+using namespace cunqa::sim;
+
+template<typename Simulator, typename Config, typename BackendType>
+void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::string& family)
+{
+    JSON config_json = Config();
+    Config config = (backend_json.empty() ? config_json : backend_json);
+    LOGGER_DEBUG("Ready to create QPUs");
+    QPU qpu(std::make_unique<BackendType>(config, std::make_unique<Simulator>()), mode, family);
+    qpu.turn_ON();
+}
+
+std::string generate_FakeQMIO(JSON back_path_json)
+{
+    std::string command("python "s + std::getenv("HOME") + "/cunqa/fakeqmio.py "s + back_path_json.at("fakeqmio_path").get<std::string>() + " "s +  std::getenv("SLURM_JOB_ID"));
+    std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
+    return std::getenv("STORE") + "/.cunqa/tmp_fakeqmio_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
+}
 
 int main(int argc, char *argv[])
 {
-    SPDLOG_LOGGER_DEBUG(logger,"Setup QPUs arguments: argc={} argv= {} {}", argc, argv[1], argv[2]);
     std::string info_path(argv[1]);
-    std::string simulator(argv[2]);
-    std::string backend;
-    json backend_json;
+    std::string mode(argv[2]);
+    std::string communications(argv[3]);
+    std::string family(argv[4]);
+    std::string sim_arg(argv[5]);
 
-    json qpu_config_json = {};
-    try {
-        if (argc == 4) {
-            backend = std::string(argv[3]);
-            std::cout << backend << "\n";
-            backend_json = json::parse(backend);
-            if (backend_json.contains("fakeqmio_path")) {
-                std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/fakeqmio.py "s + backend_json.at("fakeqmio_path").get<std::string>() + " "s +  std::getenv("SLURM_JOB_ID"));
-                std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
-                std::string fq_path = std::getenv("STORE") + "/.api_simulator/tmp_fakeqmio_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
-                std::ifstream f(fq_path);
-                qpu_config_json = json::parse(f);
-            } else if (backend_json.contains("backend_path")) {
-                std::ifstream f(backend_json.at("backend_path").get<std::string>());
-                qpu_config_json = json::parse(f);
-            } else {
-                throw std::runtime_error(std::string("Format not correct. Must be {\"backend_path\" : \"path/to/backend/json\"} or {\"fakeqmio_path\" : \"path/to/qmio/calibration/json\"}"));
-            }
-            
-        } else  if (argc < 2)
-            SPDLOG_LOGGER_ERROR(logger, "Not a QPU configuration was given.");
+    auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
+                                     : JSON());
 
-        if(auto search = SIM_NAMES.find(simulator); search != SIM_NAMES.end()) {
-            if (search->second == SimType::Aer) {
-                config::QPUConfig<SimType::Aer> qpu_config{qpu_config_json, info_path};
-                QPU<SimType::Aer> qpu(qpu_config);
-                SPDLOG_LOGGER_DEBUG(logger, "Turning ON the QPUs with the AER simulator.");
-                qpu.turn_ON();
-            } else if (search->second == SimType::Munich) {
-                SPDLOG_LOGGER_DEBUG(logger, "QPU_config: {}", qpu_config_json["noise"].dump(4));
-                config::QPUConfig<SimType::Munich> qpu_config{qpu_config_json, info_path};
-                SPDLOG_LOGGER_DEBUG(logger, "QPU_config post qpu_config: {}", qpu_config.backend_config.noise_model.dump(4));
-                QPU<SimType::Munich> qpu(qpu_config);
-                SPDLOG_LOGGER_DEBUG(logger, "Turning ON the QPUs with the Munich simulator.");
-                qpu.turn_ON();
-            }  
-        } else
-            throw std::runtime_error(std::string("No simulator named ") + simulator);
-    } catch (const std::exception& e) {
-        SPDLOG_LOGGER_ERROR(logger, "Failed turning ON the QPUs because: \n\t{}", e.what());
+    JSON backend_json;
+    if (back_path_json.contains("fakeqmio_path")) {
+        std::ifstream f(generate_FakeQMIO(back_path_json));
+        backend_json = JSON::parse(f);
+    } else if (back_path_json.contains("backend_path")) {
+        std::ifstream f(back_path_json.at("backend_path").get<std::string>());
+        backend_json = JSON::parse(f);
     }
+
+    if (family == "default")
+        family = std::getenv("SLURM_JOB_ID");
+
+    switch(murmur::hash(communications)) {
+        case murmur::hash("no_comm"): 
+            switch(murmur::hash(sim_arg)) {
+                case murmur::hash("Aer"): 
+                    turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    break;
+                case murmur::hash("Munich"):
+                    turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    break;
+                default:
+                    LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
+                    return EXIT_FAILURE;
+            }
+        case murmur::hash("class_comm"): 
+            switch(murmur::hash(sim_arg)) {
+                case murmur::hash("Aer"): 
+                    //
+                case murmur::hash("Munich"):
+                    //
+                default:
+                    LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
+                    return EXIT_FAILURE;
+            }
+        default:
+            LOGGER_ERROR("No {} communication method available.", communications);
+            return EXIT_FAILURE;
+    }     
+    return EXIT_SUCCESS;
 }

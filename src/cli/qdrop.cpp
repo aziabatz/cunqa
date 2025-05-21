@@ -7,21 +7,28 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdexcept>
+#include <set>
+
 #include "argparse.hpp"
-#include "logger/logger.hpp"
+#include "logger.hpp"
+#include "utils/json.hpp"
+
 using namespace std::literals;
+
 struct MyArgs : public argparse::Args
 {
     std::optional<std::vector<uint32_t>>& ids = arg("Slurm IDs of the QPUs to be dropped.").multi_argument();
+    std::optional<std::string>& info_path     = kwarg("info_path", "PATH to the QPU information file.");
     bool &all                                 = flag("all", "All qraise jobs will be dropped.");
 };
+
 int isValidSlurmJobID(uint32_t jobID)
 {
     job_info_msg_t *jobInfoMsg = nullptr;
     slurm_init(NULL);
     int ret = slurm_load_job_user(&jobInfoMsg, static_cast<uint32_t>(getuid()), SHOW_LOCAL);
     if (ret != SLURM_SUCCESS) {
-        SPDLOG_LOGGER_ERROR(logger, "Could not retrieve the SLURM jobs. {}", slurm_strerror(ret));
+        LOGGER_ERROR("Could not retrieve the SLURM jobs. {}", slurm_strerror(ret));
         return false;
     }
     int found = 2;
@@ -45,7 +52,7 @@ void removeAllJobs(std::string& id_str)
 
     int ret = slurm_load_job_user(&jobInfoMsg, static_cast<uint32_t>(getuid()), SHOW_LOCAL);
     if (ret != SLURM_SUCCESS) {
-        SPDLOG_LOGGER_ERROR(logger, "Could not retrieve the SLURM jobs. {}", slurm_strerror(ret));
+        LOGGER_ERROR("Could not retrieve the SLURM jobs. {}", slurm_strerror(ret));
         return;
     } else {
         for (uint32_t i = 0; i < jobInfoMsg->record_count; ++i) {
@@ -63,7 +70,7 @@ void removeAllJobs(std::string& id_str)
 int main(int argc, char* argv[]) 
 {
     auto args = argparse::parse<MyArgs>(argc, argv);
-    std::string install_path = getenv("INSTALL_PATH");
+    std::string install_path = getenv("HOME");
     setenv("SLURM_CONF", (install_path + "/slurm.conf").c_str(), 1); 
     std::string id_str;
     std::string cmd;
@@ -76,6 +83,24 @@ int main(int argc, char* argv[])
             std::cerr << "\033[1;31m" << "Error: " << "\033[0m" << "No qraise jobs are currently running.\n";
             return -1;
         }
+    } else if (args.info_path.has_value()) {
+        std::ifstream info_path(args.info_path.value());
+        cunqa::JSON json_file;
+        std::set<std::string> unique_job_ids;
+
+        info_path >> json_file;
+
+        for (auto& k : json_file.items()) {
+            std::string key = k.key();
+            std::string job_id = key.substr(0, key.find('_'));
+            unique_job_ids.insert(job_id);
+
+        }
+
+        for (const auto& element : unique_job_ids) {
+            id_str += element + " ";
+        }
+
     } else if (!args.ids.has_value()) {
         std::cerr << "\033[1;31m" << "Error: " << "\033[0m" << "You must specify the IDs of the jobs to be removed or use the --all flag.\n";
         return -1;
@@ -84,7 +109,7 @@ int main(int argc, char* argv[])
             switch(isValidSlurmJobID(id)){
                 case 0:
                     id_str += std::to_string(id) + " ";
-                    SPDLOG_LOGGER_DEBUG(logger, "Removed QPUs from qraise job {}.", id);
+                    LOGGER_DEBUG("Removed QPUs from qraise job {}.", id);
                     break;
                 case 1:
                     std::cerr << "\033[1;33m" << "Warning: " << "\033[0m" << "You are removing a job different than qraise, use scancel if wou want to stop it.\n";

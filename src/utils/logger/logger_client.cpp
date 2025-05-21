@@ -1,4 +1,9 @@
 #include "logger.hpp"
+#include <string>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+
+using namespace std::literals;
 
 std::shared_ptr<spdlog::logger> logger;
 
@@ -8,7 +13,7 @@ __attribute__((constructor)) void initializeLogger() {
     console_sink->set_level(spdlog::level::warn);
 
     std::string store_path = std::getenv("STORE");
-    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(store_path + "/.api_simulator/logs/logging.log", 1024*1024, 5, false);
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(store_path + "/.cunqa/logs/logging.log", 1024*1024, 5, false);
     file_sink->set_level(spdlog::level::debug);
 
     spdlog::sinks_init_list sinks = { file_sink, console_sink };

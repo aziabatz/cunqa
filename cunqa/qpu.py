@@ -1,27 +1,31 @@
+"""
+    Contains classes related to the virtual QPUs.
+"""
+
 import os
-from json import JSONDecodeError, load
+from typing import  Union, Any
+
+from cunqa.qclient import QClient
+from cunqa.circuit import CunqaCircuit 
+from cunqa.backend import Backend
+from cunqa.qjob import QJob
+from cunqa.logger import logger
+from cunqa.transpile import transpiler, TranspilerError
+
 # path to access to json file holding information about the raised QPUs
 info_path = os.getenv("INFO_PATH")
 if info_path is None:
     STORE = os.getenv("STORE")
-    info_path = STORE+"/.api_simulator/qpus.json"
-# importamos api en C++
-from cunqa.qclient import QClient
-# importamos la clase Backend
-from cunqa.backend import Backend
-from cunqa.qjob import QJob
+    info_path = STORE+"/.cunqa/qpus.json"
 
 
-# importing logger
-from cunqa.logger import logger
-
-class QPU():
+class QPU:
     """
     Class to define a QPU.
     ----------------------
     """
     
-    def __init__(self, id=None, qclient=None, backend=None, port = None):
+    def __init__(self, id : int, qclient : QClient, backend : Backend, family : str, endpoint : tuple):
         """
         Initializes the QPU class.
 
@@ -34,62 +38,27 @@ class QPU():
             
         backend (<class 'backend.Backend'>): object that provides information about the QPU backend.
 
-        port (str): String refering to the port of the server to which the QPU corresponds.
+        endpoint (str): String refering to the endpoint of the server to which the QPU corresponds.
         """
         
-        if id == None:
-            logger.error(f"QPU id not provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif type(id) == int:
-            self.id = id
-
-        else:
-            logger.error(f"QPU id must be int, but {type(id)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-
-        if qclient == None:
-            logger.error(f"QPU client not assigned [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif isinstance(qclient, QClient):
-            self._qclient = qclient
-
-        else:
-            logger.error(f"QPU qclient must be <class 'python.qclient.QClient'>, but {type(qclient)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-
-
-        if backend == None:
-            logger.error(f"QPU backend not provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-            
-        elif isinstance(backend, Backend):
-            self.backend = backend
-
-        else:
-            logger.error(f"QPU backend must be <class 'backend.Backend'>, but {type(backend)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        if port == None:
-            logger.error(f"QPU client not assigned [{TypeError.__name__}].") # for staters we raise the same error as if qclient was not provided
-            raise SystemExit # User's level
-        
-        elif isinstance(port, str):
-            self._port = port
-
-        else:
-            logger.error(f"QClient port must be str, but {type(port)} was provided [{TypeError.__name__}].")
-            raise SystemExit # User's level
-        
-        # argument to track weather the QPU is connected. It will be connected at `run` method.
-        self.connected = False
+        self._id = id
+        self._backend = backend
+        self._connected = False
+        self._qclient = qclient
+        self._endpoint = endpoint
+        self._family = family
         
         logger.debug(f"Object for QPU {id} created correctly.")
 
+    @property
+    def id(self):
+        return self._id
+    
+    @property
+    def backend(self):
+        return self._backend
 
-    def run(self, circuit, transpile = False, initial_layout = None, opt_level = 1, **run_parameters):
+    def run(self, circuit: Union[dict, CunqaCircuit], transpile: bool = False, initial_layout: list[int] = None, opt_level: int = 1, **run_parameters: Any) -> QJob:
         """
         Class method to run a circuit in the QPU.
 
@@ -102,7 +71,7 @@ class QPU():
 
         Args:
         --------
-        circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPU.
+        circuit (json dict or <class 'qiskit.circuit.CunqaCircuit'>): circuit to be run in the QPU.
 
         transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -114,74 +83,27 @@ class QPU():
 
         Return:
         --------
-        <class 'qjob.Result'> object.
+        <class 'QJob'> object.
         """
+        if not self._connected:
+            ip, port = self._endpoint
+            self._qclient.connect(ip, port)
+            logger.debug(f"QClient connection stabished for QPU {self._id} to endpoint {ip}:{port}.")
 
-        if not self.connected:
-            self._qclient.connect(self._port)
-            logger.debug(f"QClient connection stabished for QPU {self.id} to port {self._port}.")
-        else:
-            logger.debug(f"QClient already connected for QPU {self.id} to port {self._port}.")
+        if transpile:
+            try:
+                circuit = transpiler(circuit, self._backend, initial_layout = initial_layout, opt_level = opt_level)
+                logger.debug("Transpilation done.")
+            except Exception as error:
+                logger.error(f"Transpilation failed [{type(error).__name__}].")
+                raise TranspilerError # I capture the error in QPU.run() when creating the job
 
         try:
-            qjob = QJob(self, circuit, transpile = transpile, initial_layout = initial_layout, opt_level = opt_level, **run_parameters)
+            qjob = QJob(self._qclient, self._backend, circuit, **run_parameters)
             qjob.submit()
-            logger.debug(f"Qjob submitted to QPU {self.id}.")
+            logger.debug(f"Qjob submitted to QPU {self._id}.")
         except Exception as error:
             logger.error(f"Error when submitting QJob [{type(error).__name__}].")
-            raise SystemExit # User's level
+            raise SystemExit
 
         return qjob
-    
-
-    
-
-
-
-def getQPUs(path = info_path):
-    """
-    Global function to get the QPU objects corresponding to the virtual QPUs raised.
-
-    Return:
-    ---------
-    List of QPU objects.
-    
-    """
-    try:
-        with open(path, "r") as qpus_json:
-            dumps = load(qpus_json)
-
-    except FileNotFoundError as error:
-        logger.error(f"No such file as {path} was found. Please provide a correct file path or check that evironment variables are correct [{type(error).__name__}].")
-        raise SystemExit # User's level
-
-    except TypeError as error:
-        logger.error(f"Path to qpus json file must be str, but {type(path)} was provided [{type(error).__name__}].")
-        raise SystemExit # User's level
-
-    except JSONDecodeError as error:
-        logger.error(f"File format not correct, must be json and follow the correct structure. Please check that {path} adeuqates to the format [{type(error).__name__}].")
-        raise SystemExit # User's level
-
-    except Exception as error:
-        logger.error(f"Some exception occurred [{type(error).__name__}].")
-        raise SystemExit # User's level
-    
-    logger.debug(f"File accessed correctly.")
-
-
-    
-    if len(dumps) != 0:
-        qpus = []
-        i = 0
-        for k, v in dumps.items():
-            client = QClient(path)
-            # client.connect(k)
-            qpus.append(  QPU(id = i, qclient = client, backend = Backend(v['backend']), port = k  )  ) # errors captured above
-            i+=1
-        logger.debug(f"{len(qpus)} QPU objects were created.")
-        return qpus
-    else:
-        logger.error(f"No QPUs were found, {path} is empty.")
-        raise SystemExit
-

@@ -1,17 +1,14 @@
+"""
+    Contains map-like callables for distribute circuits in virtual QPUS. Useful when working with evolutive optimizators.
+"""
 from cunqa.logger import logger
 from cunqa.qjob import gather
 from qiskit import QuantumCircuit
 from qiskit.exceptions import QiskitError
-from qiskit.qasm2 import QASM2Error
-from cunqa.circuit import from_json_to_qc
-from cunqa.qpu import QPU
-import numpy as np
-
-
 
 class QJobMapper:
     """
-    Class to map the function `QJob.upgrade_parameters()` to a list of QJobs.
+    Class to map the method `QJob.upgrade_parameters` to a list of QJobs.
     """
     def __init__(self, qjobs):
         """
@@ -42,7 +39,7 @@ class QJobMapper:
         qjobs_ = []
         for i, params in enumerate(population):
             qjob = self.qjobs[i]
-            logger.debug(f"Uptading params for QJob {qjob} in QPU {qjob._QPU.id}...")
+            logger.debug(f"Uptading params for QJob {qjob}...")
             qjob.upgrade_parameters(params.tolist())
             qjobs_.append(qjob)
 

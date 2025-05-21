@@ -16,7 +16,7 @@
 <br> 
 <br>
 
-# TABLE OF CONTENTS
+# Table of contents
   - [CLONE REPOSITORY](#clone-repository)
   - [INSTALLATION](#installation)
     - [QMIO](#qmio)
@@ -32,7 +32,7 @@
   - [ACKNOWLEDGEMENTS](#acknowledgements)
 
 
-## CLONE REPOSITORY
+## Clone repository
 It is important to say that, for ensuring a correct cloning of the repository, the SSH is the one preferred. In order to get this to work one has to do:
 
 ```console
@@ -51,11 +51,11 @@ git clone --recursive git@github.com:CESGA-Quantum-Spain/cunqa.git
 As a additional step, we encourage to run the *setup_submodules.sh* file, which removes some of the files unused in the submodules and makes the repository lighter:
 
 ```console
-cd cunqa/scripts
+cd scripts
 bash setup_submodules.sh
 ```
 
-## INSTALLATION 
+## Installation 
 ### QMIO
 #### Automatic installation
 The `scripts/configure.sh` file is prepared to bring an automatic installation of the **CUNQA** platform. The user only has to execute this file followed by the path to the desire installation folder: 
@@ -80,19 +80,7 @@ conda deactivate
 ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9
 ```
 
-3. Define the enviroment variable `INSTALL_PATH` as the **ABSOLUTE PATH** to the directory where **CUNQA** wants to be installed. 
-
-```console
-export INSTALL_PATH=<your/installation/path>
-```
-
-4. Afterwards, add the bin folder to `PATH` in order to correctly execute all the commands to use the platform.
-
-```console
-export PATH=$PATH:$INSTALL_PATH/bin
-```
-
-5. Once the previous steps are done, everything is set for the build/installation. There are two options: 
+3. Once the previous steps are done, everything is set for the build/installation. There are two options: 
     
 * **Standard way (slower)**
 ```console
@@ -107,9 +95,10 @@ cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
 cmake --install build/
 ```
+> [!IMPORTANT]
+> Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
 
-
-### FINISTERRAE III (FT3)
+### Finisterrae III (FT3)
 
 In the FT3, the installation is almost the same as in QMIO but with few exceptions. 
 
@@ -121,7 +110,7 @@ source configure.sh <your/installation/path>
 ``` 
 
 #### Manual installation
-In the case of a **manual installation**, the steps 1-4 are analogous to the shown above for QMIO:
+In the case of a **manual installation**, the steps are analogous to the shown above for QMIO:
 
 1. Conda deactivation:
 
@@ -135,37 +124,28 @@ conda deactivate
 ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake qiskit/1.2.4
 ```
 
-3. INSTALL_PATH:
+5. Again: configure, compile and install using CMake:
 
-```console
-export INSTALL_PATH=<your/installation/path>
-```
-
-4. Bin PATH:
-
-```console
-export PATH=$PATH:$INSTALL_PATH/bin
-```
-
-5. Instead of a simple `cmake -B build/` as in QMIO, the user has to add the `-DPYBIND_DIR` option with the path to the pybind11 cmake modules:
-    
 * **Standard way (slower)**
 ```console
-cmake -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+cmake -B build/ 
 cmake --build build/
 cmake --install build/
 ```
 
 * **Using [Ninja](https://ninja-build.org/) (faster)**
 ```console
-cmake -G Ninja -B build/ -DPYBIND_PATH=/opt/cesga/2022/software/Compiler/gcccore/system/pybind11/2.12.0/lib64/python3.9/site-packages/pybind11
+cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
 cmake --install build/
 ```
 
+> [!IMPORTANT]
+> Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
+
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
 
-## RUN YOUR FIRST DISTRIBUTED PROGRAM
+## Run your first distributed program
 
 Once **CUNQA** is installed, the basic workflow to use it is:
 1. Raise the desired QPUs with the command `qraise`.
@@ -178,7 +158,7 @@ Once **CUNQA** is installed, the basic workflow to use it is:
 > [!IMPORTANT] 
 > Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
-### 1. `qraise`command
+### 1. `qraise` command
 The `qraise` command raises as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
 ```console
 qraise --help
@@ -247,7 +227,7 @@ INSTALL_PATH = os.getenv("INSTALL_PATH")
 sys.path.insert(0, INSTALL_PATH)
 
 # Let's get the raised QPUs
-from cunqa.qpu import getQPUs
+from cunqa.qutils import getQPUs
 
 qpus  = getQPUs() # List of raised QPUs
 for q in qpus:
@@ -299,5 +279,4 @@ To drop all the raised QPUs, just execute:
 qdrop --all
 ```
 
-## ACKNOWLEDGEMENTS
-
+## Acknowledgements
