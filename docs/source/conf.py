@@ -4,9 +4,10 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import sys
+import os
 import shutil
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -21,8 +22,9 @@ author = 'Álvaro Carballido, Marta Losada, Jorge Vázquez, Daniel Expósito'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    "nbsphinx",
+    'nbsphinx',
     'sphinx_mdinclude',
+    'sphinx.ext.githubpages'
 ]
 
 # source_suffix = '.rst'
