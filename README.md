@@ -11,7 +11,7 @@
   <br> 
 </ul>
 
-<a href="https://www.cesga.es/"><img src="docs/source/_static/logo_cesga_blanco.png" alt="CESGA Logo" width="200" height="60"></a> 
+<a href="https://www.cesga.es/"><img src="docs/source/_static/logotipo_CESGA_negro.png" alt="CESGA Logo" width="200" height="60"></a> 
 <br> 
 <br>
 
