@@ -105,7 +105,7 @@ def setup(app):
         filename = code_file.stem # Get the filename without the extension
 
         # Create the Sphinx source file
-        source_file = dest_dir_rst / f'rst/{filename}.rst'
+        source_file = dest_dir_rst / f'{filename}.rst'
         with source_file.open('w') as f:
             f.write(f'{filename}\n')
             f.write('=' * len(filename) + '\n\n')
