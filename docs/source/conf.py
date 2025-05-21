@@ -109,6 +109,6 @@ def setup(app):
         with source_file.open('w') as f:
             f.write(f'{filename}\n')
             f.write('=' * len(filename) + '\n\n')
-            f.write('.. literalinclude:: code_examples/{filename}.py\n')
+            f.write(f'.. literalinclude:: _examples/rst/{filename}.py\n')
             f.write('   :language: python\n')
             f.write('   :linenos:\n')
