@@ -3,6 +3,7 @@ name: Deploy Sphinx Docs to GitHub Pages
 on:
   push:
     branches:
+      - 167-cunqa-package-info-not-showing-in-github-pages
       - main  # or master, depending on your default branch
 
 jobs:
