@@ -81,16 +81,17 @@ html_theme_options = {
     'titles_only': False
 }
 
-"""
 def setup(app):
-    #Copy jupyter notebooks to folder docs/examples so nbsphinx can read them for our gallery (these will be ignored to avoid duplication)
+    #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
     here = Path(__file__).resolve()
     project_root = here.parents[2]  # Goes from /docs/ to project root
     source_notebooks_dir = project_root / 'examples/jupyter'
+    source_py_dir = project_root / 'examples/python'
     dest_dir = here.parent / '_examples'  # This will be docs/examples
 
     dest_dir.mkdir(exist_ok=True)
 
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
-"""
+    for py_file in source_py_dir.glob('*.py'):
+        shutil.copy(py_file, dest_dir / py_file.name) 
