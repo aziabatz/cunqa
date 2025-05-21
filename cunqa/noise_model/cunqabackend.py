@@ -20,12 +20,12 @@ from qiskit.qobj.utils import MeasLevel
 
 class CunqaBackend(BackendV2):
 
-    def __init__(self, properties_json, backend_json=None, **kwargs):
+    def __init__(self, noise_properties_json, backend_json=None, **kwargs):
 
         super().__init__(self,name="cunqa", description="backend for cunqa", **kwargs)
 
-        # loading qubit properties and readout errors
-        qubits= properties_json["Qubits"]
+        # loading qubit noise_properties and readout errors
+        qubits= noise_properties_json["Qubits"]
 
         self._num_qubits = len(qubits)
         
@@ -36,7 +36,7 @@ class CunqaBackend(BackendV2):
             qubits_properties.append(QubitProperties(t1=q["T1 (s)"],t2=q["T2 (s)"],frequency=q["Drive Frequency (Hz)"]))
             readout_errors[(_get_qubit_index(k),)] = InstructionProperties(duration=q["Readout duration (s)"], error = 1-q["Readout fidelity(RB)"])
         
-        logger.debug(f"{self._num_qubits} qubits properties loaded from properties_json.")
+        logger.debug(f"{self._num_qubits} qubits properties loaded from noise_properties_json.")
 
 
         # creating target
@@ -54,19 +54,19 @@ class CunqaBackend(BackendV2):
         # loading single-qubit-gate errors
         single_qubit_gates = {}
 
-        for qubit,gates_dict in properties_json["Q1Gates"].items():
+        for qubit,gates_dict in noise_properties_json["Q1Gates"].items():
             for gate in gates_dict.keys():
                 try:
                     single_qubit_gates[gate]=(_get_gate(gate),{})
                 except ValueError:
                     logger.warning(f"Gate {gate} is not supported by Aer Simulator.")
-                    # because gate will be ignored, we delete it from properties_json
+                    # because gate will be ignored, we delete it from noise_properties_json
                     gates_dict.pop(gate)
 
         logger.debug(f"{len(single_qubit_gates)} single qubit gates where found: {single_qubit_gates}")
 
 
-        for qubit,gates_dict in properties_json["Q1Gates"].items():
+        for qubit,gates_dict in noise_properties_json["Q1Gates"].items():
             for gate, gate_properties in gates_dict.items():
                 try:
                     single_qubit_gates[gate][1][(_get_qubit_index(qubit),)]  = InstructionProperties(duration = gate_properties["Gate duration (s)"], error = 1- gate_properties["Fidelity(RB)"] )
@@ -74,12 +74,12 @@ class CunqaBackend(BackendV2):
                 except ValueError as error:
                     logger.warning(f"Qubit {qubit} does not have the right sintax [{type(error).__name__}].")
                     logger.warning("Instruction will be ignored.")
-                    # because gate will be ignored, we delete it from properties_json and single_qubit_gates dict
+                    # because gate will be ignored, we delete it from noise_properties_json and single_qubit_gates dict
                     gates_dict.pop(gate)
                     single_qubit_gates.pop(gate)
 
                 except Exception as error:
-                    logger.error(f"Some error occured while adding instruction for gate {gate} in qubit {qubit[2:-1]}: {error}.")
+                    logger.error(f"Some error occured while adding instruction for gate {gate} in qubit {qubit[2:-1]}: {error} [{type(error).__name__}].")
                     raise SystemExit # User's level
 
         
@@ -99,19 +99,19 @@ class CunqaBackend(BackendV2):
         # loading two-qubit-gate errors
         two_qubit_gates = {}
 
-        for qubits,gates_dict in properties_json["Q2Gates(RB)"].items():
+        for qubits,gates_dict in noise_properties_json["Q2Gates(RB)"].items():
             for gate in gates_dict.keys():
                 try:
                     two_qubit_gates[gate]=(_get_gate(gate),{})
                 except ValueError:
                     logger.warning(f"Gate {gate} is not supported by Aer Simulator.")
-                    # because gate will be ignored, we delete it from properties_json
+                    # because gate will be ignored, we delete it from noise_properties_json
                     gates_dict.pop(gate)
 
         logger.debug(f"{len(two_qubit_gates)} two qubit gates where found: {two_qubit_gates}")
 
 
-        for qubits,gates_dict in properties_json["Q2Gates(RB)"].items():
+        for qubits,gates_dict in noise_properties_json["Q2Gates(RB)"].items():
             for gate, gate_properties in gates_dict.items():
                 try:
                     if _get_qubits_indexes(qubits) != [gate_properties["Control"],gate_properties["Target"]]:
@@ -122,7 +122,7 @@ class CunqaBackend(BackendV2):
                 except ValueError as error:
                     logger.warning(f"Qubits {qubits} do not have the right sintax [{type(error).__name__}].")
                     logger.warning("Instruction will be ignored.")
-                    # because gate will be ignored, we delete it from properties_json and single_qubit_gates dict
+                    # because gate will be ignored, we delete it from noise_properties_json and single_qubit_gates dict
                     gates_dict.pop(gate)
                     two_qubit_gates.pop(gate)
 
@@ -139,7 +139,7 @@ class CunqaBackend(BackendV2):
             except TranspilerError as error:
                 logger.warning(f"Error adding instructions for gate {gate}: {error.message}.")
                 logger.warning("Instruction will be ignored.")
-                # because gate will be ignored, we delete it from properties_json
+                # because gate will be ignored, we delete it from noise_properties_json
         
         logger.debug("Added two qubit gates instructions to Target:")
         logger.debug(f"{two_qubit_gates}")
@@ -158,6 +158,14 @@ class CunqaBackend(BackendV2):
     def target(self):
         # Return the target object for the backend
         return self._target
+    
+    @property
+    def coupling_map_list(self):
+        return list(self.coupling_map)
+    
+    @property
+    def basis_gates(self):
+        return [gate for gate in self.target._gate_map.keys() if gate != "measure"]
 
     def run(self, run_input, **kwargs):
         # Implement the logic to execute a quantum circuit or schedule

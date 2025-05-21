@@ -18,7 +18,7 @@ struct MyArgs : public argparse::Args
     std::optional<std::vector<std::string>>& node_list = kwarg("node_list", "List of nodes where the QPUs will be deployed.").multi_argument(); 
     std::optional<int>& qpus_per_node    = kwarg("qpuN,qpus_per_node", "Number of qpus in each node.");
     std::optional<std::string>& backend  = kwarg("b,backend", "Path to the backend config file.");
-    std::optional<std::string>& properties  = kwarg("prop,properties", "Path to the properties json file.");
+    std::optional<std::string>& noise_properties  = kwarg("noise-prop,noise-properties", "Path to the noise properties json file, only supported for simulator Aer.");
     std::string& simulator               = kwarg("sim,simulator", "Simulator reponsible of running the simulations.").set_default("Aer");
     
     // fakeqmio kwarg and flags

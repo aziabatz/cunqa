@@ -44,7 +44,9 @@ class ColoredFormatter(logging.Formatter):
         return message
 
 logger = logging.getLogger('mi_logger_coloreado')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)  # Establece el nivel mínimo de log
+logger.propagate = False
+logger.handlers.clear()
 
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging.DEBUG)

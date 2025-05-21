@@ -2,11 +2,12 @@ import os, sys
 import numpy as np
 import random
 from collections import defaultdict
+from pathlib import Path
 
 # path to access c++ files
-installation_path = os.getenv("INSTALL_PATH")
-examples_path = '/mnt/netapp1/Store_CESGA/home/cesga/dexposito/repos/CUNQA/examples'
-sys.path.append(installation_path)
+sys.path.append(os.getenv("HOME"))
+
+examples_path: str = str(Path(__file__).resolve().parent.parent)
 
 from cunqa.logger import logger
 from cunqa.qutils import getQPUs, qraise, qdrop
@@ -30,7 +31,7 @@ def how_big_a_combination(k):
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs #
 family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-qpus_QPE  = getQPUs(family)
+qpus_QPE  = getQPUs(local = False, family = family)
 
 # Params for the gates in the Cut Bell Pair Factory #
 with open(examples_path + "/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
