@@ -1,6 +1,6 @@
 
-sphinx>=5
-docutils==0.21.2
+sphinx==8.2.3
+docutils
 sphinx-rtd-theme
 sphinx-autobuild
 myst-nb

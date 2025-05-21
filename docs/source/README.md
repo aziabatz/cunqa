@@ -16,7 +16,7 @@
 <br> 
 <br>
 
-# TABLE OF CONTENTS
+# Table of contents
   - [CLONE REPOSITORY](#clone-repository)
   - [INSTALLATION](#installation)
     - [QMIO](#qmio)
@@ -32,7 +32,7 @@
   - [ACKNOWLEDGEMENTS](#acknowledgements)
 
 
-## CLONE REPOSITORY
+## Clone repository
 It is important to say that, for ensuring a correct cloning of the repository, the SSH is the one preferred. In order to get this to work one has to do:
 
 ```console
@@ -55,7 +55,7 @@ cd scripts
 bash setup_submodules.sh
 ```
 
-## INSTALLATION 
+## Installation 
 ### QMIO
 #### Automatic installation
 The `scripts/configure.sh` file is prepared to bring an automatic installation of the **CUNQA** platform. The user only has to execute this file followed by the path to the desire installation folder: 
@@ -95,9 +95,10 @@ cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
 cmake --install build/
 ```
+> ❗ **Important:**
+> Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
 
-
-### FINISTERRAE III (FT3)
+### Finisterrae III (FT3)
 
 In the FT3, the installation is almost the same as in QMIO but with few exceptions. 
 
@@ -139,9 +140,12 @@ ninja -C build -j $(nproc)
 cmake --install build/
 ```
 
+> ❗ **Important:**
+> Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
+
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
 
-## RUN YOUR FIRST DISTRIBUTED PROGRAM
+## Run your first distributed program
 
 Once **CUNQA** is installed, the basic workflow to use it is:
 1. Raise the desired QPUs with the command `qraise`.
@@ -154,7 +158,7 @@ Once **CUNQA** is installed, the basic workflow to use it is:
 > ❗ **Important:**
 > Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
-### 1. `qraise`command
+### 1. `qraise` command
 The `qraise` command raises as many QPUs as desired. Each QPU can be configured by the user to have a personalized backend. There is a help FLAG with a quick guide of how this command works:
 ```console
 qraise --help
@@ -275,4 +279,4 @@ To drop all the raised QPUs, just execute:
 qdrop --all
 ```
 
-## ACKNOWLEDGEMENTS
+## Acknowledgements
