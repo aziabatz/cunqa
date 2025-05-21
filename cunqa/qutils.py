@@ -1,3 +1,4 @@
+""" Holds functions that manage virtual QPUs or provide information about them."""
 import os
 import sys
 from typing import Union
@@ -36,22 +37,21 @@ def qraise(n, time, *,
     Raises a QPU and returns its job_id.
 
     Args
-    -----------
-    n (int): number of QPUs to be raised.
-    time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
-    
-    fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
-    classical_comm (bool): if True the raised QPUs are communicated classically.
-    quantum_comm (bool): if True the raised QPUs have quantum communications.
-    simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
-    family (str): name to identify the group of QPUs raised on the specific call of the function.
-    mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
-    cores (str):  
-    mem_per_qpu (str):
-    n_nodes (str):
-    node_list (str):
-    qpus_per_node (str):
-    backend (str):
+        n (int): number of QPUs to be raised.
+        time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
+        
+        fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
+        classical_comm (bool): if True the raised QPUs are communicated classically.
+        quantum_comm (bool): if True the raised QPUs have quantum communications.
+        simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
+        family (str): name to identify the group of QPUs raised on the specific call of the function.
+        mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
+        cores (str):  number of cores for the SLURM job.
+        mem_per_qpu (str): memory to allocate for each QPU, format to use is  "xG".
+        n_nodes (str): number of nodes for the SLURM job.
+        node_list (str): option to select specifically on which nodes the simulation job should run.
+        qpus_per_node (str): sets the number of QPUs that should be raised on each requested node.
+        backend (str): path to a file containing backend information.
 
     """
 
@@ -93,8 +93,7 @@ def qdrop(*families: Union[tuple, str]):
     Drops the QPU families corresponding to the the entered QPU objects. By default, all raised QPUs will be dropped.
 
     Args
-    --------
-    qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
+        qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
     """
     
     #if no QPU is provided we drop all QPU slurm jobs
@@ -140,8 +139,7 @@ def nodeswithQPUs() -> list[set]:
     Global function to know what nodes of the computer host virtual QPUs.
 
     Return:
-    ---------
-    List of the corresponding node names.
+        List of the corresponding node names.
     """
     try:
         with open(info_path, "r") as f:
@@ -215,13 +213,11 @@ def getQPUs(local: bool = True, family: str = None) -> list[QPU]:
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 
     Args:
-    --------
-    local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
-    family (str): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
+        local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
+        family (str): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
 
     Return:
-    ---------
-    List of QPU objects.
+        List of QPU objects.
     
     """
 
