@@ -1,5 +1,5 @@
 """
-    Contains map-like callables for distribute circuits in virtual QPUS. Useful when working with evolutive optimizators.
+    Contains map-like callables to distribute circuits in virtual QPUS. Useful when working with evolutive optimizators.
 """
 from cunqa.logger import logger
 from cunqa.qjob import gather
@@ -15,8 +15,7 @@ class QJobMapper:
         Initializes the QJobMapper class.
 
         Args:
-        ---------
-        qjobs (list[<class 'qjob.QJob'>]): list of QJobs to be mapped.
+            qjobs (list[<class 'qjob.QJob'>]): list of QJobs to be mapped.
 
         """
         self.qjobs = qjobs
@@ -27,14 +26,12 @@ class QJobMapper:
         Callable method to map the function to the given QJobs.
 
         Args:
-        ---------
-        func (func): function to be mapped to the QJobs. It must take as argument the an object <class 'qjob.Result'>.
+            func (func): function to be mapped to the QJobs. It must take as argument the an object <class 'qjob.Result'>.
 
-        population (list[list]): population of vectors to be mapped to the QJobs.
+            population (list[list]): population of vectors to be mapped to the QJobs.
 
         Return:
-        ---------
-        List of results of the function applied to the QJobs for the given population.
+            List of results of the function applied to the QJobs for the given population.
         """
         qjobs_ = []
         for i, params in enumerate(population):
@@ -58,16 +55,15 @@ class QPUCircuitMapper:
         Initializes the QPUCircuitMapper class.
 
         Args:
-        ---------
-        qpus (list[<class 'qpu.QPU'>]): list of QPU objects.
+            qpus (list[<class 'qpu.QPU'>]): list of QPU objects.
 
-        circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPUs.
+            circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPUs.
 
-        transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
+            transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
-        initial_layout (list[int]): Initial position of virtual qubits on physical qubits for transpilation.
+            initial_layout (list[int]): Initial position of virtual qubits on physical qubits for transpilation.
 
-        **run_parameters : any other simulation instructions.
+            **run_parameters : any other simulation instructions.
 
         """
         self.qpus = qpus
@@ -90,14 +86,12 @@ class QPUCircuitMapper:
         Callable method to map the function to the QPUs.
 
         Args:
-        ---------
-        func (func): function to be mapped to the QPUs. It must take as argument the an object <class 'qjob.Result'>.
+            func (func): function to be mapped to the QPUs. It must take as argument the an object <class 'qjob.Result'>.
 
-        params (list[list]): population of vectors to be mapped to the circuits sent to the QPUs.
+            params (list[list]): population of vectors to be mapped to the circuits sent to the QPUs.
 
         Return:
-        ---------
-        List of the results of the function applied to the output of the circuits sent to the QPUs.
+            List of the results of the function applied to the output of the circuits sent to the QPUs.
         """
 
         qjobs = []

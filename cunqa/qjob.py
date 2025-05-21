@@ -37,18 +37,17 @@ class QJob:
 
 
         Args:
-        -----------
-        QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
+            QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-        circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
+            circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
 
-        transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
+            transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
-        initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
+            initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
 
-        opt_level (int): optimization level for transpilation, default set to 1.
+            opt_level (int): optimization level for transpilation, default set to 1.
 
-        **run_parameters : any other simulation instructions.
+            **run_parameters : any other simulation instructions.
 
         """
 
@@ -125,8 +124,7 @@ class QJob:
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
 
         Args:
-        -----------
-        parameters (list[float]): list of parameters to assign to the parametrized circuit.
+            parameters (list[float]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
@@ -268,12 +266,10 @@ def gather(qjobs) -> list[Result]:
         Function to get result of several QJob objects, it also takes one QJob object.
 
         Args:
-        ------
-        qjobs (list of QJob objects or QJob object)
+            qjobs (list of QJob objects or QJob object)
 
         Return:
-        -------
-        Result or list of results.
+            Result or list of results.
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
