@@ -22,8 +22,9 @@ author = 'Álvaro Carballido, Marta Losada, Jorge Vázquez, Daniel Expósito'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    "nbsphinx",
+    'nbsphinx',
     'sphinx_mdinclude',
+    'sphinx.ext.githubpages'
 ]
 
 # source_suffix = '.rst'
