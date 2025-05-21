@@ -153,7 +153,7 @@ class QJob:
                 raise SystemExit # User's level
         
             try:
-                logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
+                #logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
                 self._future = self._qclient.send_parameters(message)
 
             except Exception as error:

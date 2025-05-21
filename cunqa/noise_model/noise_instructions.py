@@ -1,8 +1,7 @@
 import os
 import sys
 
-installation_path = os.getenv("INSTALL_PATH")
-sys.path.append(installation_path)
+sys.path.append(os.getenv("HOME"))
 
 from cunqa.logger import logger
 import argparse

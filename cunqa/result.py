@@ -41,7 +41,7 @@ class Result:
         else:
             self._result = result
         
-        logger.debug("Results correctly loaded.")
+        #logger.debug("Results correctly loaded.")
 
 
     # TODO: Use length of counts to justify time_taken (ns) at the end of the line.

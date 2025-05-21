@@ -35,7 +35,7 @@ void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::s
 
 std::string generate_FakeQMIO(JSON back_path_json, std::string& family)
 {
-    std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/noise_model/fakeqmio.py "s
+    std::string command("python "s + std::getenv("HOME") + "/cunqa/noise_model/fakeqmio.py "s
                                    + back_path_json.at("fakeqmio_path").get<std::string>() + " "s
                                    + back_path_json.at("thermal_relaxation").get<std::string>() + " "s
                                    + back_path_json.at("readout_error").get<std::string>() + " "s
@@ -58,7 +58,7 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
         LOGGER_DEBUG("No backend_path provided, defining backend from noise_properties.");
         backend_path = "default";
     }
-    std::string command("python "s + std::getenv("INSTALL_PATH") + "/cunqa/noise_model/noise_instructions.py "s
+    std::string command("python "s + std::getenv("HOME") + "/cunqa/noise_model/noise_instructions.py "s
                                    + back_path_json.at("noise_properties_path").get<std::string>() + " "s
                                    + backend_path.c_str() + " "s
                                    + back_path_json.at("thermal_relaxation").get<std::string>() + " "s

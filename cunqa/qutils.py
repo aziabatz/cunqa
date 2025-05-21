@@ -8,14 +8,14 @@ from cunqa.backend import Backend
 from cunqa.logger import logger
 from cunqa.qpu import QPU
 
-# Adding pyhton folder path to detect modules
+# Adding python folder path to detect modules
 sys.path.append(os.getenv("HOME"))
 
 STORE: Optional[str] = os.getenv("STORE")
 if STORE is not None:
     INFO_PATH = STORE + "/.cunqa/qpus.json"
 else:
-    logger.error(f"Cannot find $INSTALL_PATH enviroment variable.")
+    logger.error(f"Cannot find $STORE enviroment variable.")
     raise SystemExit
 
 class QRaiseError(Exception):
@@ -175,7 +175,10 @@ def infoQPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]
         else:
             if local:
                 local_node = os.getenv("SLURMD_NODENAME")
-                logger.debug(f"User at node {local_node}.")
+                if local_node != None:
+                    logger.debug(f"User at node {local_node}.")
+                else:
+                    logger.debug(f"User at a login node.")
                 targets = [{qpu_id:info} for qpu_id,info in qpus_json.items() if (info["net"].get("node_name")==local_node) ]
             else:
                 targets =[{qpu_id:info} for qpu_id,info in qpus_json.items()]
@@ -237,7 +240,10 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
 
     # extract selected QPUs from qpu.json information 
     local_node = os.getenv("SLURMD_NODENAME")
-    logger.debug(f"User at node {local_node}.")
+    if local_node != None:
+        logger.debug(f"User at node {local_node}.")
+    else:
+        logger.debug(f"User at a login node.")
     if local:
         if family is not None:
             targets = {qpu_id:info for qpu_id, info in qpus_json.items() if (info["net"].get("nodename") == local_node) and (info.get("family") == family)}

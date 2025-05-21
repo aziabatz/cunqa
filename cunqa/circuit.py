@@ -85,8 +85,8 @@ class CunqaCircuit:
         return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
-    def info(self):
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "exec_type":"dynamic", "is_distributed":self.is_distributed, "is_parametric":self.is_parametric}
+    def info(self) -> dict:
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "is_parametric":self.is_parametric, "sending_to":self.sending_to}
 
 
     @property
@@ -167,10 +167,7 @@ class CunqaCircuit:
                     if not all([isinstance(q, int) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
-                    elif (instruction["name"] in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"][1:])):
-                        logger.error(f"qubits provided for instruction cannot be repeated.")
-                        raise ValueError
-                    elif (instruction["name"] not in SUPPORTED_GATES_DISTRIBUTED and len(set(instruction["qubits"])) != len(instruction["qubits"])):
+                    elif (len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
