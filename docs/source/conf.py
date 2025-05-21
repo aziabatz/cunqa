@@ -25,22 +25,10 @@ extensions = [
     'nbsphinx',
     'sphinx_mdinclude',
     'sphinx.ext.githubpages',
-    'nbsphinx_gallery',
 ]
 
 # source_suffix = '.rst'
 source_suffix = ['.rst', '.md']
-
-nbsphinx_gallery_conf = {
-    'pattern': '*.ipynb|*.py',
-    'ignore_pattern': '',
-    'filename_pattern': '',
-    'filename_suffix': '',
-    'subsection_order': ['*.ipynb', '*.py'],
-    'gallery_dirs': ['gallery'],
-    'thumbnail_size': (400, 280),
-    'examples_dirs': ['examples'],
-}
 
 autosummary_generate = True 
 autodoc_mock_imports = [
@@ -97,15 +85,30 @@ html_theme_options = {
 
 def setup(app):
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
-    here = Path(__file__).resolve()
-    project_root = here.parents[2]  # Goes from /docs/ to project root
+    here = Path(__file__).resolve() # CUNQA/docs/source/
+    project_root = here.parents[2]  # Goes from /docs/source to project root
     source_notebooks_dir = project_root / 'examples/jupyter'
     source_py_dir = project_root / 'examples/python'
-    dest_dir = here.parent / '_examples'  # This will be docs/examples
+    dest_dir = here.parent / '_examples'  # This will be docs/source/_examples
+    dest_dir_rst = dest_dir / 'rst'
 
-    dest_dir.mkdir(exist_ok=True)
+    dest_dir.mkdir(exist_ok=True) 
+    dest_dir_rst.mkdir(exist_ok=True)
 
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
     for py_file in source_py_dir.glob('*.py'):
         shutil.copy(py_file, dest_dir / py_file.name) 
+
+    # Automatically create files that include each of the .py examples
+    for code_file in dest_dir.glob('*.py'):
+        filename = code_file.stem # Get the filename without the extension
+
+        # Create the Sphinx source file
+        source_file = dest_dir_rst / f'rst/{filename}.rst'
+        with source_file.open('w') as f:
+            f.write(f'{filename}\n')
+            f.write('=' * len(filename) + '\n\n')
+            f.write('.. literalinclude:: code_examples/{filename}.py\n')
+            f.write('   :language: python\n')
+            f.write('   :linenos:\n')
