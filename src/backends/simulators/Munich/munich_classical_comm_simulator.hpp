@@ -127,12 +127,14 @@ public:
 };
     
 
+class MunichCCSimulator final : public SimulatorStrategy<SimpleBackend> {
+public:
+    MunichCCSimulator() = default;
+    ~MunichCCSimulator() = default;
 
-// Execution without communications and with qasm
-JSON execute(QuantumTask& quantum_task);
-
-// Dynamic execution (for classical communications)
-JSON execute(JSON& circuit, int& shots);
+    inline std::string get_name() const override {return "MunichSimulator";}
+    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) override;
+};
 
 
 

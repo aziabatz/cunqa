@@ -1,4 +1,4 @@
-#include "munich_ccomm_simulator.hpp"
+#include "munich_classical_comm_simulator.hpp"
 
 #include <chrono>
 #include <optional>
@@ -291,6 +291,11 @@ JSON execute(JSON& circuit, int& shots){
     
     return {};
 }
+
+JSON MunichCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& circuit)
+{
+    return {};
+} 
 
 
 } // End namespace sim

@@ -8,6 +8,7 @@
 #include "backends/simple_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
+#include "backends/simulators/Munich/munich_classical_comm_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_simple_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_classical_comm_simulator.hpp"
 
@@ -85,6 +86,10 @@ int main(int argc, char *argv[])
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Cunqa"): 
                     turn_ON_QPU<CunqaCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
+                    break;
+                case murmur::hash("Munich"): 
+                    turn_ON_QPU<MunichCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 default:
