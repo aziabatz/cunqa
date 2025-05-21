@@ -5,7 +5,7 @@ sphinx-rtd-theme
 sphinx-autobuild
 myst-nb
 nbsphinx
+nbsphinx-gallery
 pypandoc
 lxml-html-clean #needed for nbsphinx functionalities, which I use to display jupyter notebooks
 sphinx-mdinclude
-nbsphinx-gallery
