@@ -24,11 +24,23 @@ extensions = [
     'sphinx.ext.autosummary',
     'nbsphinx',
     'sphinx_mdinclude',
-    'sphinx.ext.githubpages'
+    'sphinx.ext.githubpages',
+    'nbsphinx_gallery',
 ]
 
 # source_suffix = '.rst'
 source_suffix = ['.rst', '.md']
+
+nbsphinx_gallery_conf = {
+    'pattern': '*.ipynb|*.py',
+    'ignore_pattern': '',
+    'filename_pattern': '',
+    'filename_suffix': '',
+    'subsection_order': ['*.ipynb', '*.py'],
+    'gallery_dirs': ['gallery'],
+    'thumbnail_size': (400, 280),
+    'examples_dirs': ['examples'],
+}
 
 autosummary_generate = True 
 autodoc_mock_imports = [
