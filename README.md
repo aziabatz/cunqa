@@ -11,8 +11,7 @@
   <br> 
 </ul>
 
-<a href="https://www.cesga.es/"><img src="docs/images/cesga_logo.png" alt="CESGA Logo" width="200" height="60"></a> 
-<a href="https://quantumspain-project.es/"><img src="docs/images/quantumspain_logo.png" alt="QuantumSpain Logo" width="220" height="45"></a>
+<a href="https://www.cesga.es/"><img src="docs/source/_static/logo_cesga_blanco.png" alt="CESGA Logo" width="200" height="60"></a> 
 <br> 
 <br>
 
