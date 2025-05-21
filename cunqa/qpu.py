@@ -98,6 +98,20 @@ class QPU:
         --------
         <class 'QJob'> object.
         """
+        # Disallow execution of distributed circuits
+        if isinstance(circuit, CunqaCircuit):
+            if circuit.is_distributed:
+                logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
+                raise SystemExit
+        elif isinstance(circuit, dict):
+            if 'is_distributed' in circuit and circuit["is_distributed"]:
+                logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
+                raise SystemExit
+        else:
+            logger.error(f"Circuit must be <class cunqa.circuit.CunqaCircuit> or dict, but {type(circuit)} was provided [{TypeError.__name__}]")
+            raise SystemExit
+
+        # Handle connection to QClient
         if not self._connected:
             ip, port = self._endpoint
             self._qclient.connect(ip, port)
