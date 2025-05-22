@@ -139,10 +139,9 @@ int main(int argc, char* argv[])
     } else {
         if (args.classical_comm) {
             LOGGER_DEBUG("Classical communications");
-            run_command = get_class_comm_run_command(args, mode);
-            if (run_command == "0") {
-                return 0;
-            }
+            LOGGER_ERROR("Classical communications are not implemented yet");
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return 0;
         } else if (args.quantum_comm) {
             LOGGER_ERROR("Quantum communications are not implemented yet");
             std::system("rm qraise_sbatch_tmp.sbatch");
