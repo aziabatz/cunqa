@@ -90,22 +90,22 @@ def setup(app):
     source_notebooks_dir = project_root / 'examples/jupyter'
     source_py_dir = project_root / 'examples/python'
     dest_dir = here.parent / '_examples'  # This will be docs/source/_examples
-    dest_dir_rst = dest_dir / 'rst'
+    dest_dir_2 = dest_dir / 'py_file_examples'
 
     dest_dir.mkdir(exist_ok=True) 
-    dest_dir_rst.mkdir(exist_ok=True)
+    dest_dir_2.mkdir(exist_ok=True)
 
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
     for py_file in source_py_dir.glob('*.py'):
-        shutil.copy(py_file, dest_dir / py_file.name) 
+        shutil.copy(py_file, dest_dir_2 / py_file.name) 
 
     # Automatically create files that include each of the .py examples
-    for code_file in dest_dir.glob('*.py'):
+    for code_file in dest_dir_2.glob('*.py'):
         filename = code_file.stem # Get the filename without the extension
 
         # Create the Sphinx source file
-        source_file = dest_dir_rst / f'{filename}.rst'
+        source_file = dest_dir_2 / f'{filename}.rst'
         with source_file.open('w') as f:
             f.write(f'{filename}\n')
             f.write('=' * len(filename) + '\n\n')
