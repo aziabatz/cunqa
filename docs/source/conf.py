@@ -9,6 +9,9 @@ import shutil
 from pathlib import Path
 sys.path.insert(0, os.path.abspath('../..'))
 
+
+os.environ['INFO_PATH'] = ''
+os.environ['STORE'] = ''
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
