@@ -7,7 +7,7 @@ import sys
 import os
 import shutil
 from pathlib import Path
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2])) #os.path.abspath('../..')
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -27,7 +27,6 @@ extensions = [
     'sphinx.ext.githubpages',
 ]
 
-# source_suffix = '.rst'
 source_suffix = ['.rst', '.md']
 
 autosummary_generate = True 
@@ -56,10 +55,12 @@ autodoc_mock_imports = [
 templates_path = ['_templates']
 exclude_patterns = []
 
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme' 
+pygments_style = 'sphinx'
 html_static_path = ['_static']
 html_css_files = [
     'table.css',
