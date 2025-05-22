@@ -7,7 +7,7 @@ import sys
 import os
 import shutil
 from pathlib import Path
-sys.path.insert(0, os.path.abspath('../../..'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -49,6 +49,8 @@ autodoc_mock_imports = [
     'qiskit_aer',
     'Pandoc',
     'cunqa.fakeqmio',
+    'subprocess',
+    'typing'
 ]
 
 
