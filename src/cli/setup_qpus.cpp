@@ -6,6 +6,7 @@
 
 #include "qpu.hpp"
 #include "backends/simple_backend.hpp"
+#include "backends/classical_comm_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_classical_comm_simulator.hpp"
@@ -125,11 +126,11 @@ int main(int argc, char *argv[])
         LOGGER_DEBUG("Raising QPU with classical communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Cunqa"): 
-                    turn_ON_QPU<CunqaCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    turn_ON_QPU<CunqaCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 case murmur::hash("Munich"): 
-                    turn_ON_QPU<MunichCCSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    turn_ON_QPU<MunichCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 default:

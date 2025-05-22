@@ -8,12 +8,15 @@ namespace cunqa {
 void QuantumTask::update_circuit(const std::string& quantum_task) 
 {
     auto quantum_task_json = JSON::parse(quantum_task);
-    std::vector<std::string> no_connections = {};
+    std::vector<std::string> no_communications = {};
+    int aux_is_distributed;
 
     if (quantum_task_json.contains("instructions") && quantum_task_json.contains("config")) {
         circuit = quantum_task_json.at("instructions");
         config = quantum_task_json.at("config");
-        sending_to = (quantum_task_json.contains("sending_to") ? quantum_task_json.at("sending_to").get<std::vector<std::string>>() : no_connections);
+        sending_to = (quantum_task_json.contains("sending_to") ? quantum_task_json.at("sending_to").get<std::vector<std::string>>() : no_communications);
+        is_distributed = ((quantum_task_json.contains("is_distributed")) ? quantum_task_json.at("is_distributed").get<bool>() : false);
+
     } else if (quantum_task_json.contains("params")) {
         update_params_(quantum_task_json.at("params"));
     } else

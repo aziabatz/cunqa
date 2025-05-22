@@ -31,6 +31,7 @@ class QJob:
     _result: Optional['Result'] 
     _circuit_id: str 
     _sending_to: "list[str]"
+    _is_distributed: bool
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit'], **run_parameters: Any):
         """
@@ -178,6 +179,10 @@ class QJob:
                     self._sending_to = circuit["sending_to"]
                 else:
                     self._sending_to = []
+                if "is_distributed" in  circuit:
+                    self._is_distributed = circuit["is_distributed"]
+                else:
+                    self._is_distributed = False
 
                 logger.debug("Translation to dict not necessary...")
 
@@ -193,9 +198,9 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = circuit.num_clbits
                 self._cregisters = circuit.classical_regs
-                logger.debug(self._cregisters)
                 self._circuit_id = circuit._id
                 self._sending_to = circuit.sending_to
+                self._is_distributed = circuit.is_distributed
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -209,7 +214,9 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
                 self._cregisters = registers_dict(circuit)[1]
+                # TODO: ¿self.circuit_id?
                 self._sending_to = []
+                self._is_distributed = False
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
@@ -222,8 +229,11 @@ class QJob:
                 qc_from_qasm = QuantumCircuit.from_qasm_str(circuit)
 
                 self.num_qubits = qc_from_qasm.num_qubits
-                self._cregisters = registers_dict(qc_from_qasm)[1]
                 self.num_clbits = sum(len(k) for k in self._cregisters.values())
+                self._cregisters = registers_dict(qc_from_qasm)[1]
+                # TODO: ¿self.circuit_id?
+                self._sending_to = []
+                self._is_distributed = False
 
                 logger.debug("Translating to dict from QASM2 string...")
 
@@ -272,8 +282,13 @@ class QJob:
             else:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
-            # instructions dict/string
-            self._execution_config = """ {{"config":{}, "instructions":{}, "num_qubits":{}, "sending_to":{} }}""".format(run_config, self._circuit, self.num_qubits, self._sending_to).replace("'", '"')
+            exec_config = {
+                "config":run_config, 
+                "instructions":self._circuit,
+                "sending_to":self._sending_to,
+                "is_distributed":self._is_distributed
+            }
+            self._execution_config = json.dumps(exec_config)
 
             logger.debug("QJob created.")
             logger.debug(self._execution_config)

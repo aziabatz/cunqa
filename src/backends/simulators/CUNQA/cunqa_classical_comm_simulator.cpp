@@ -1,4 +1,3 @@
-
 #include "cunqa_classical_comm_simulator.hpp"
 
 #include "src/instructions.hpp"
@@ -15,7 +14,7 @@ namespace sim {
 
 CunqaCCSimulator::~CunqaCCSimulator() = default;
 
-JSON CunqaCCSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantumtask)
+JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantumtask)
 {
     std::vector<std::string> connect_with = quantumtask.sending_to;
     this->classical_channel->set_classical_connections(connect_with);

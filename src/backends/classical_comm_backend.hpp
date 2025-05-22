@@ -14,11 +14,11 @@
 namespace cunqa {
 namespace sim {
 
-struct SimpleConfig {
-    std::string name = "SimpleBackend";
+struct ClassicalCommConfig {
+    std::string name = "ClassicalCommBackend";
     std::string version = "0.0.1";
     int n_qubits = 32;
-    std::string description = "Simple backend with no communications.";
+    std::string description = "Simple backend with classical communications.";
     std::vector<std::vector<int>> coupling_map;
     std::vector<std::string> basis_gates = constants::BASIS_GATES;
     std::string custom_instructions;
@@ -26,7 +26,7 @@ struct SimpleConfig {
     JSON noise_model;
     JSON noise_properties;
 
-    friend void from_json(const JSON& j, SimpleConfig &obj)
+    friend void from_json(const JSON& j, ClassicalCommConfig &obj)
     {
         j.at("name").get_to(obj.name);
         j.at("version").get_to(obj.version);
@@ -40,7 +40,7 @@ struct SimpleConfig {
         j.at("noise_properties").get_to(obj.noise_properties);
     }
 
-    friend void to_json(JSON& j, const SimpleConfig& obj)
+    friend void to_json(JSON& j, const ClassicalCommConfig& obj)
     {
         j = {   
             {"name", obj.name}, 
@@ -57,16 +57,16 @@ struct SimpleConfig {
     
 };
 
-class SimpleBackend final : public Backend {
+class ClassicalCommBackend final : public Backend {
 public:
-    SimpleConfig config;
+    ClassicalCommConfig config;
     
-    SimpleBackend(const SimpleConfig& config, std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator) : 
+    ClassicalCommBackend(const ClassicalCommConfig& config, std::unique_ptr<SimulatorStrategy<ClassicalCommBackend>> simulator): 
         config{config},
         simulator_{std::move(simulator)}
     { }
 
-    SimpleBackend(SimpleBackend& simple_backend) = default;
+    ClassicalCommBackend(ClassicalCommBackend& classical_comm_backend) = default;
 
     inline JSON execute(const QuantumTask& quantum_task) const override
     {
@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator_;
+    std::unique_ptr<SimulatorStrategy<ClassicalCommBackend>> simulator_;
 };
 
 } // End of sim namespace

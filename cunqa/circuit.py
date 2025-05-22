@@ -2,6 +2,7 @@
     Holds functions to transform between valid circuit formats and extract circuit information.
 """
 from cunqa.logger import logger
+
 import numpy as np
 import random
 import string
@@ -38,7 +39,7 @@ class CunqaCircuit:
     
     _id: str
     is_parametric: bool 
-    is_distributed: bool
+    is_distributed: bool 
     instructions: "list[dict]"
     quantum_regs: dict
     classical_regs: dict
@@ -86,7 +87,7 @@ class CunqaCircuit:
     
     @property
     def info(self) -> dict:
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "is_parametric":self.is_parametric, "sending_to":self.sending_to}
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "sending_to":self.sending_to}
 
 
     @property

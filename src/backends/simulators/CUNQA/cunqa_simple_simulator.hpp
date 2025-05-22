@@ -16,16 +16,12 @@ namespace sim {
 class CunqaSimpleSimulator final : public SimulatorStrategy<SimpleBackend>
 {
 public:
-    // Constructors
     CunqaSimpleSimulator() = default;
     ~CunqaSimpleSimulator() override;
 
-
-    // Methods
     inline std::string get_name() const override {return "CunqaSimulator";}
     JSON execute(const SimpleBackend& backend, const QuantumTask& quantumtask) override;
 
-    // Attributes
     std::unique_ptr<Executor> executor;
 };
 

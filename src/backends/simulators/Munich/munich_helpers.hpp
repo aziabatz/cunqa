@@ -8,7 +8,7 @@
 namespace cunqa {
 
 // Used in the quantum_task_to_Munich function for printing correctly the matrices of custom unitary gates
-std::string triple_vector_to_string(const std::vector<std::vector<std::vector<double>>>& data) {
+inline std::string triple_vector_to_string(const std::vector<std::vector<std::vector<double>>>& data) {
     std::ostringstream oss;
     oss << "[";
 
@@ -33,7 +33,7 @@ std::string triple_vector_to_string(const std::vector<std::vector<std::vector<do
 
 
 // Transfroms a quantum_task, which has config and circuit (these are the instructions) to an OpenQASM2 string
-std::string quantum_task_to_Munich(const QuantumTask& quantum_task) 
+inline std::string quantum_task_to_Munich(const QuantumTask& quantum_task) 
 { 
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON config_json = quantum_task.config;
