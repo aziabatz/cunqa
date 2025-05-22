@@ -7,7 +7,7 @@ import sys
 import os
 import shutil
 from pathlib import Path
-sys.path.insert(0,str(Path(__file__).resolve().parents[2])) #os.path.abspath('../..')
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -60,7 +60,7 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme' 
-pygments_style = 'sphinx'
+# pygments_style = 'sphinx'  this color scheme displays code blocks with a green background and lively colors
 html_static_path = ['_static']
 html_css_files = [
     'table.css',
