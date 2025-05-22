@@ -1,13 +1,20 @@
 Examples gallery
-==================
-Here you can peruse through some examples of CUNQA use that will help you get the hang of its workflow.
+====================================
+Click on the following thumbnails to peruse some jupyter notebooks showing how to use **CUNQA**. On other examples you can find simple examples of the **CUNQA** workflow.
 
 .. nbgallery::
    _examples/Multiple_circuits_execution.ipynb
    _examples/Optimizers_I_upgrading_parameters.ipynb
    _examples/Optimizers_II_mapping.ipynb
 
-   _examples/cloud_example.py
-   _example/example_qraise.py
-   _example/hpc_example.py
+.. toctree::
+   :maxdepth: 2
+   :caption: Other examples
+
+   _examples/py_file_examples/cloud_example
+   _examples/py_file_examples/example_qraise
+   _examples/py_file_examples/hpc_example
+
+
+
 
