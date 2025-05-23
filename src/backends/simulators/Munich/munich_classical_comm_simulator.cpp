@@ -26,6 +26,7 @@ JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const Quant
     } else {
         return this->distributed_execution_(backend, circuit);
     }   
+
 } 
 
 
@@ -94,7 +95,7 @@ JSON MunichCCSimulator::distributed_execution_(const ClassicalCommBackend& backe
     std::map<std::string, std::size_t> measurementCounter;
     JSON result_json;
     float time_taken;
-    int n_qubits = quantum_task.config.at("num_qubits").get<int>();
+    const std::size_t nQubits = quantum_task.config.at("num_qubits").get<std::size_t>();
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;
     int shots = quantum_task.config.at("shots").get<int>();
@@ -113,14 +114,14 @@ JSON MunichCCSimulator::distributed_execution_(const ClassicalCommBackend& backe
     std::unique_ptr<ClassicalCommQuantumComputation> cqc = std::make_unique<ClassicalCommQuantumComputation>(quantum_task);
     ClassicalCommCircuitSimulator CCcircsim(std::move(cqc));
 
-    const std::size_t nQubits = quantum_task.config.at("num_qubits").get<std::size_t>();
-
-    CCcircsim.CCinitializeSimulation(nQubits);
 
     std::map<std::size_t, bool> classicValues;
 
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
+
+        CCcircsim.CCinitializeSimulation(nQubits);
+
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name");
             qubits = instruction.at("qubits").get<std::vector<std::uint64_t>>();
@@ -257,7 +258,6 @@ JSON MunichCCSimulator::distributed_execution_(const ClassicalCommBackend& backe
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     char_measurement = CCcircsim.CCmeasure(qubits[0]);
                     measurement = char_measurement - '0';
-                    LOGGER_DEBUG("CHAR_MEASUREMENT: {}, MEASUREMENT: {}", char_measurement, std::to_string(measurement));
                     this->classical_channel->send_measure(measurement, endpoint[0]); 
                     break;
                 case cunqa::constants::REMOTE_C_IF_H:
@@ -359,11 +359,11 @@ JSON MunichCCSimulator::distributed_execution_(const ClassicalCommBackend& backe
             } // End switch
         } // End one shot
 
-        std::string resultString(n_qubits, '0');
-        
+        std::string resultString(nQubits, '0');
+
         // result is a map from the cbit index to the Boolean value
         for (const auto& [bitIndex, value] : classicValues) {
-        resultString[n_qubits - bitIndex - 1] = value ? '1' : '0';
+            resultString[nQubits - bitIndex - 1] = value ? '1' : '0';
         }
         measurementCounter[resultString]++;
     } // End all shots
