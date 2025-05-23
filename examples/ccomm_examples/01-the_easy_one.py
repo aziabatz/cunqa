@@ -14,6 +14,7 @@ family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = T
 qpus_QPE  = getQPUs(local=False, family = family)
 
 
+
 ########## Circuits to run ##########
 ########## First circuit ############
 cc_1 = CunqaCircuit(2, 2, id="First")
@@ -34,14 +35,14 @@ circs_QPE = [cc_1, cc_2]
 
 
 ########## Distributed run ##########
-distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=100) 
+distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=20) 
 
 ########## Collect the counts #######
 result_list = gather(distr_jobs)
 
 ########## Print the counts #######
-""" for result in result_list:
-    print(result) """
+for result in result_list:
+    print(result)
 
 ########## Drop the deployed QPUs #
 qdrop(family)
