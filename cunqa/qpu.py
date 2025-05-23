@@ -111,7 +111,8 @@ class QPU:
                     raise SystemExit
             else:
                 logger.error(f"Circuit must be <class cunqa.circuit.CunqaCircuit> or dict, but {type(circuit)} was provided [{TypeError.__name__}]")
-            raise SystemExit
+                raise SystemExit
+
 
         # Handle connection to QClient
         if not self._connected:
