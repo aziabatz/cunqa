@@ -11,7 +11,8 @@
   <br> 
 </ul>
 
-<a href="https://www.cesga.es/"><img src="docs/source/_static/logotipo_CESGA_negro.png" alt="CESGA Logo" width="200" height="60"></a> 
+<a href="https://www.cesga.es/"><img src="docs/images/cesga_logo.png" alt="CESGA Logo" width="200" height="60"></a> 
+<a href="https://quantumspain-project.es/"><img src="docs/images/quantumspain_logo.png" alt="QuantumSpain Logo" width="220" height="45"></a>
 <br> 
 <br>
 
@@ -40,7 +41,7 @@ ssh-add ~/.ssh/SSH_KEY
 ```
  
 Now, everything is set to get the source code. 
-> [!WARNING]
+> ⚠️ **Warning:**
 > In order to get all the submodules correctly loaded, please remember the `--recursive` option when cloning.
 
 ```console
@@ -94,7 +95,7 @@ cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
 cmake --install build/
 ```
-> [!IMPORTANT]
+> ❗ **Important:**
 > Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
 
 ### Finisterrae III (FT3)
@@ -139,7 +140,7 @@ ninja -C build -j $(nproc)
 cmake --install build/
 ```
 
-> [!IMPORTANT]
+> ❗ **Important:**
 > Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
@@ -154,7 +155,7 @@ Once **CUNQA** is installed, the basic workflow to use it is:
     - Execute the circuits on the QPUs.
     - Obtain the results.
 3. Drop the raised QPUs with the command `qdrop`.
-> [!IMPORTANT] 
+> ❗ **Important:**
 > Please, note that steps 1-4 of the [Installation section](#installation) have to be done every time **CUNQA** wants to be used.
 
 ### 1. `qraise` command
@@ -168,7 +169,7 @@ So, for instance, the command
 qraise -n 4 -t 01:20:30
 ``` 
 will raise four QPUs during at most 1 hour, 20 minutes and 30 seconds. The time format is `hh:mm:ss`.
-> [!NOTE]  
+> 📘 **Note:**
 > By default, all the QPUs will be raised with [AerSimulator](https://github.com/Qiskit/qiskit-aer) as the background simulator and IdealAer as the background backend. That is, a backend of 32 qubits, all connected and without noise.
 2. The simulator and the backend configuration can be set by the user through `qraise` FLAGs:
 
@@ -192,16 +193,16 @@ The personalized backend has to be a *json* file with the following structure:
 ```json
 {"backend":{"name": "BackendExample", "version": "0.0", "n_qubits": 32,"url": "", "is_simulator": true, "conditional": true, "memory": true, "max_shots": 1000000, "description": "", "basis_gates": [], "custom_instructions": "", "gates": [], "coupling_map": []}, "noise": {}}
 ```
-> [!NOTE]
+> 📘 **Note:**
 > The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
-> [!IMPORTANT]  
+> ❗ **Important:**
 > Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
 
 ### 2. Python Program Example
 Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
 
-> [!WARNING]
+> ⚠️ **Warning:**
 > To execute the following python example it is needed  to load the [Qiskit](https://github.com/Qiskit/qiskit) module:
 
 In QMIO:
@@ -222,7 +223,8 @@ import os
 import sys
 
 # Adding pyhton folder path to detect modules
-sys.path.append(os.getenv("HOME"))
+INSTALL_PATH = os.getenv("INSTALL_PATH")
+sys.path.insert(0, INSTALL_PATH)
 
 # Let's get the raised QPUs
 from cunqa.qutils import getQPUs
@@ -251,8 +253,8 @@ counts = result.get_counts()
 print(f"Counts: {counts}" )
 ```
 
-> [!NOTE] 
-> It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure: 
+> 📘 **Note:**
+> It is not mandatory to run a *QuantumCircuit* from Qiskit. The `.run` method also supports *OpenQASM 2.0* with the following structure:
 ```json
 {"instructions":"OPENQASM 2.0;\ninclude \"qelib1.inc\";\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];" , "num_qubits": 2, "num_clbits": 4, "quantum_registers": {"q": [0, 1]}, "classical_registers": {"c": [0, 1], "other_measure_name": [2], "meas": [3]}}
 

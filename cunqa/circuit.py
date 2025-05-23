@@ -24,7 +24,7 @@ SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_
 SUPPORTED_GATES_DISTRIBUTED = ["measure_and_send", "remote_c_if_unitary", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
 
 class CunqaCircuitError(Exception):
-    """Exception for error during circuit desing in CunqaCircuit."""
+    """Exception for error during circuit desing in ``CunqaCircuit``."""
     pass
 
 class CunqaCircuit:
@@ -420,7 +420,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied.
+        ``*qubits`` (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"swap",
@@ -433,7 +433,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied.
+        ``*qubits`` (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"ecr",
@@ -446,7 +446,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cx",
@@ -459,7 +459,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cy",
@@ -472,7 +472,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cz",
@@ -485,7 +485,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"csx",
@@ -500,7 +500,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccx",
@@ -513,7 +513,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccy",
@@ -526,7 +526,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccz",
@@ -539,7 +539,7 @@ class CunqaCircuit:
 
         Args:
         --------
-        *qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+        ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"cswap",
@@ -571,9 +571,9 @@ class CunqaCircuit:
 
         Args:
         --------
+        theta (float): angle.
+        phi (float): angle.
         qubit (int): qubit in which the gate is applied.
-
-        *params (float or int): parameters for the parametric gate.
         """
         self._add_instruction({
             "name":"u2",
@@ -587,9 +587,10 @@ class CunqaCircuit:
 
         Args:
         --------
+        theta (float): angle.
+        phi (float): angle.
+        lam (float): angle.
         qubit (int): qubit in which the gate is applied.
-
-        *params (float or int): parameters for the parametric gate.
         """
         self._add_instruction({
             "name":"u",
@@ -603,9 +604,10 @@ class CunqaCircuit:
 
         Args:
         --------
+        theta (float): angle.
+        phi (float): angle.
+        lam (float): angle.
         qubit (int): qubit in which the gate is applied.
-
-        *params (float or int): parameters for the parametric gate.
         """
         self._add_instruction({
             "name":"u3",
@@ -635,9 +637,9 @@ class CunqaCircuit:
 
         Args:
         --------
+        theta (float): angle.
+        phi (float): angle.
         qubit (int): qubit in which the gate is applied.
-
-        *params (float or int): parameter for the parametric gate.
         """
         self._add_instruction({
             "name":"r",
@@ -845,9 +847,10 @@ class CunqaCircuit:
 
         Args:
         --------
-        qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
-        *params (float or int): parameters for the parametric gate.
+        theta (float): angle.
+        phi (float): angle.
+        lam (float): angle.
+        ``*qubits`` (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cu3",
@@ -861,9 +864,11 @@ class CunqaCircuit:
 
         Args:
         --------
-        qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
-       *params (float or int): parameters for the parametric gate.
+        theta (float): angle.
+        phi (float): angle.
+        lam (float): angle.
+        gamma (float): angle.
+        ``*qubits`` (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cu",
@@ -881,7 +886,7 @@ class CunqaCircuit:
         -------
         matrix (list or <class 'numpy.ndarray'>): unitary operator in matrix form to be applied to the given qubits.
 
-        *qubits (int): qubits to which the unitary operator will be applied.
+        ``*qubits`` (int): qubits to which the unitary operator will be applied.
 
         """
         if isinstance(matrix, np.ndarray) and (matrix.shape[0] == matrix.shape[1]) and (matrix.shape[0]%2 == 0):
@@ -1049,10 +1054,18 @@ class CunqaCircuit:
 
         target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
 
+        target_qubit (int): qubit where the gate will be conditionally applied.
+
+        param (float or int): parameter in case the gate provided is parametric.
+
         """
 
-        self.is_distributed = True
-
+        if isinstance(gate, str):
+            name = "d_c_if_" + gate
+        else:
+            logger.error(f"gate specification must be str, but {type(gate)} was provided [TypeError].")
+            raise SystemExit
+        
         if isinstance(control_qubit, int):
             list_control_qubit = [control_qubit]
         else:
@@ -1182,7 +1195,7 @@ def qc_to_json(qc: QuantumCircuit) -> dict:
     # Actual translation
     try:
         
-        quantum_registers, classical_registers = registers_dict(qc)
+        quantum_registers, classical_registers = _registers_dict(qc)
         
         json_data = {
             "id": "",
