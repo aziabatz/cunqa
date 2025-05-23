@@ -1,6 +1,0 @@
---------
-README 
---------
-
-.. mdinclude:: ../../README.md 
-

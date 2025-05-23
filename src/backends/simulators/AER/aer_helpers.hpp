@@ -26,8 +26,6 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
                        std::regex("clbits"), "memory"))}
     };
 
-    LOGGER_DEBUG("Circuito ANTES: {}", new_circuit.dump(4));
-
     return QuantumTask(new_circuit, new_config);
 }
 
