@@ -1061,11 +1061,7 @@ class CunqaCircuit:
 
         """
 
-        if isinstance(gate, str):
-            name = "d_c_if_" + gate
-        else:
-            logger.error(f"gate specification must be str, but {type(gate)} was provided [TypeError].")
-            raise SystemExit
+        self.is_distributed = True
         
         if isinstance(control_qubit, int):
             list_control_qubit = [control_qubit]
@@ -1092,6 +1088,7 @@ class CunqaCircuit:
             "qubits": flatten([list_control_qubit]),
             "circuits": [target_circuit_id]
         })
+
 
         self.sending_to.append(target_circuit_id)
 
