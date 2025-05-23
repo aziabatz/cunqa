@@ -29,6 +29,7 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
     int measurement;
     JSON result;
     std::unordered_map<int, int> counts;
+    float time_taken;
 
     int n_qubits = quantumtask.config.at("num_qubits");
     if (executor != nullptr && (n_qubits == executor->n_qubits)) {
@@ -97,11 +98,11 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
 
     auto stop_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
-    double total_time = duration.count();
+    time_taken = duration.count();
 
     result = {
         {"counts", counts},
-        {"time_taken", total_time}
+        {"time_taken", time_taken}
     }; 
 
     counts.clear();

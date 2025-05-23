@@ -33,7 +33,7 @@ class QPU:
     _id: int 
     _qclient: 'QClient' 
     _backend: 'Backend' 
-    _family: str 
+    _family: str
     _endpoint: "tuple[str, int]" 
     _comm_endpoint: str 
     _connected: bool 

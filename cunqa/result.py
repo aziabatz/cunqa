@@ -160,7 +160,7 @@ def convert_counts(counts: dict, registers: dict) -> dict:
         for k,v in counts.items():
             if k.startswith('0x'): # converting to binary string and dividing in bit strings
                 new_counts[divide(format(int(k, 16), '0' + str(num_clbits) + 'b'), lengths)]= v
-            else: # just dividing the bit stings
+            else: # just dividing the bit strings
                 new_counts[divide(k, lengths)] = v
     elif isinstance(counts, list):
         for count in counts:
