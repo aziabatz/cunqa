@@ -44,7 +44,7 @@ class Result:
         #logger.debug("Results correctly loaded.")
 
 
-    # TODO: Use length of counts to justify time_taken (ns) at the end of the line.
+    # TODO: Use length of counts to justify time_taken (ms) at the end of the line.
     def __str__(self):
         RED = "\033[31m"
         YELLOW = "\033[33m"

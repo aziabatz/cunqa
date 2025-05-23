@@ -27,16 +27,16 @@ public:
 
     inline std::string get_name() const override {return "MunichSimulator";}
     JSON execute(const ClassicalCommBackend& backend, const QuantumTask& circuit) override;
-    std::string _get_communication_endpoint() override;
-
-    std::unique_ptr<comm::ClassicalChannel> classical_channel;
+    
 
 private:
     JSON usual_execution_(const ClassicalCommBackend& backend, const QuantumTask& quantum_task);
     JSON distributed_execution_(const ClassicalCommBackend& backend, const QuantumTask& quantum_task);
+    std::string get_communication_endpoint_() override;
+
+    std::unique_ptr<comm::ClassicalChannel> classical_channel;
+    
 };
-
-
 
 
 } // End namespace sim

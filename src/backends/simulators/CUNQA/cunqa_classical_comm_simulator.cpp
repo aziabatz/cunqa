@@ -148,7 +148,7 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
 
 }
 
-std::string CunqaCCSimulator::_get_communication_endpoint()
+std::string CunqaCCSimulator::get_communication_endpoint_()
 {
     std::string endpoint = this->classical_channel->endpoint;
     return endpoint;

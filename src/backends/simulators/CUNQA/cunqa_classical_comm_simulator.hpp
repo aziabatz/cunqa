@@ -29,7 +29,9 @@ public:
     // Methods
     inline std::string get_name() const override {return "CunqaSimulator";}
     JSON execute(const ClassicalCommBackend& backend, const QuantumTask& quantumtask) override; 
-    std::string _get_communication_endpoint() override;
+
+private:
+    std::string get_communication_endpoint_() override;
 
     // Attributes
     std::unique_ptr<Executor> executor;

@@ -84,7 +84,7 @@ public:
 
     std::string get_communication_endpoint() override
     {
-        std::string endpoint = this->simulator_->_get_communication_endpoint();
+        std::string endpoint = this->simulator_->get_communication_endpoint_();
         return endpoint;
     }
 

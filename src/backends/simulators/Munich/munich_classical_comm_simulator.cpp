@@ -14,9 +14,38 @@
 
 #include "utils/json.hpp"
 
+
+namespace {
+// Extension of qc::QuantumComputation for Distributed Classical Communications
+class ClassicalCommQuantumComputation : public qc::QuantumComputation
+{
+public:
+    // Constructors
+    ClassicalCommQuantumComputation() = default;
+    ClassicalCommQuantumComputation(const cunqa::QuantumTask& quantum_task) : qc::QuantumComputation(quantum_task.config.at("num_qubits").get<std::size_t>(), quantum_task.config.at("num_clbits").get<std::size_t>()) {}
+    
+};
+
+// Extension of CircuitSimulator for Distributed Classical Communications
+class ClassicalCommCircuitSimulator : public CircuitSimulator<dd::DDPackageConfig>
+{
+public:
+    // Constructors
+    ClassicalCommCircuitSimulator() = default;
+    ClassicalCommCircuitSimulator(std::unique_ptr<ClassicalCommQuantumComputation>&& qc_): CircuitSimulator(std::unique_ptr<ClassicalCommQuantumComputation>(std::move(qc_)))
+    {}
+
+    // Methods
+    void CCinitializeSimulation(std::size_t nQubits) { this->initializeSimulation(nQubits); }
+    void CCapplyOperationToState(std::unique_ptr<qc::Operation>& op) { this->applyOperationToState(op); }
+    char CCmeasure(dd::Qubit i) { return this->measure(i); }
+
+};
+} // End Anonymous namespace
+
+
 namespace cunqa {
 namespace sim {
-
 
 JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& circuit)
 {
@@ -29,42 +58,11 @@ JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const Quant
 } 
 
 
-std::string MunichCCSimulator::_get_communication_endpoint()
+std::string MunichCCSimulator::get_communication_endpoint_()
 {
     std::string endpoint = this->classical_channel->endpoint;
     return endpoint;
 }
-
-// Extension of qc::QuantumComputation for Distributed Classical Communications
-class ClassicalCommQuantumComputation : public qc::QuantumComputation
-{
-public:
-    // Constructors
-    ClassicalCommQuantumComputation() = default;
-    ClassicalCommQuantumComputation(const QuantumTask& quantum_task) : qc::QuantumComputation(quantum_task.config.at("num_qubits").get<std::size_t>(), quantum_task.config.at("num_clbits").get<std::size_t>()) {}
-    
-};
-
-
-// Extension of CircuitSimulator for Distributed Classical Communications
-class ClassicalCommCircuitSimulator : public CircuitSimulator<dd::DDPackageConfig>
-{
-public:
-    // Constructors
-    ClassicalCommCircuitSimulator() = default;
-    ClassicalCommCircuitSimulator(std::unique_ptr<ClassicalCommQuantumComputation>&& qc_): CircuitSimulator(std::unique_ptr<ClassicalCommQuantumComputation>(std::move(qc_)))
-    {}
-
-    // Methods
-    std::map<std::size_t, bool> CCsingleShot();
-
-    void CCinitializeSimulation(std::size_t nQubits) { this->initializeSimulation(nQubits); }
-
-    void CCapplyOperationToState(std::unique_ptr<qc::Operation>& op) { this->applyOperationToState(op); }
-
-    char CCmeasure(dd::Qubit i) { return this->measure(i); }
-
-};
 
 
 // Free functions
