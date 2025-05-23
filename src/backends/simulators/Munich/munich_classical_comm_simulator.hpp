@@ -49,6 +49,7 @@ public:
 };
 
 
+// Extension of CircuitSimulator for Distributed Classical Communications
 class ClassicalCommCircuitSimulator : public CircuitSimulator<dd::DDPackageConfig>
 {
 public:
@@ -60,21 +61,11 @@ public:
     // Methods
     std::map<std::size_t, bool> CCsingleShot();
 
-    void CCinitializeSimulation(std::size_t nQubits)
-    {
-        this->initializeSimulation(nQubits);
-    }
+    void CCinitializeSimulation(std::size_t nQubits) { this->initializeSimulation(nQubits); }
 
-    void CCapplyOperationToState(std::unique_ptr<qc::Operation>& op)
-    {
-        this->applyOperationToState(op);
-    }
+    void CCapplyOperationToState(std::unique_ptr<qc::Operation>& op) { this->applyOperationToState(op); }
 
-    char CCmeasure(dd::Qubit i) 
-    {
-        return this->measure(i);
-    }
-
+    char CCmeasure(dd::Qubit i) { return this->measure(i); }
 
 };
     
