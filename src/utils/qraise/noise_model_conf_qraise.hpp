@@ -18,23 +18,9 @@ std::string get_noise_model_run_command(auto& args, std::string& mode)
     int readout_error;
     int gate_error;
 
-    if (args.no_thermal_relaxation){
-        thermal_relaxation = 0;
-    }else{
-        thermal_relaxation = 1;
-    }
-
-    if (args.no_readout_error){
-        readout_error = 0;
-    }else{
-        readout_error = 1;
-    }
-
-    if (args.no_gate_error){
-        gate_error = 0;
-    }else{
-        gate_error = 1;
-    }
+    thermal_relaxation = args.no_thermal_relaxation ? 0 : 1;
+    readout_error = args.no_readout_error ? 0 : 1;
+    gate_error = args.no_gate_error ? 0 : 1; 
 
     noise_properties_path = std::any_cast<std::string>(args.noise_properties.value());
 
