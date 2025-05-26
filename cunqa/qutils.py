@@ -57,37 +57,48 @@ def qraise(n, time, *,
     backend (str): 
 
     """
-    try:
-        cmd = ["qraise", "-n", str(n), '-t', str(time)]
 
+    SLURMD_NODENAME = os.getenv("SLURMD_NODENAME")
+    if SLURMD_NODENAME == None:
+        command = f"qraise -n {n} -t {time}"
+    else: 
+        logger.warning("Be careful, you are deploying QPUs from an interactive session.")
+        HOSTNAME = os.getenv("HOSTNAME")
+        command = f"ssh {HOSTNAME} \"ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9 && cd bin && ./qraise -n {n} -t {time}"
+
+    try:
         # Add specified flags
         if fakeqmio:
-            cmd.append(f"--fakeqmio")
+            command = command + " --fakeqmio"
         if classical_comm:
-            cmd.append(f"--classical_comm")
+            command = command + " --classical_comm"
         if quantum_comm:
-            cmd.append(f"--quantum_comm")
+            command = command + " --quantum_comm"
         if simulator is not None:
-            cmd.append(f"--simulator={str(simulator)}")
+            command = command + f" --simulator={str(simulator)}"
         if family is not None:
-            cmd.append(f"--family={str(family)}")
+            command = command + f" --family={str(family)}"
         if cloud:
-            cmd.append(f"--cloud")
+            command = command + " --cloud"
         if cores is not None:
-            cmd.append(f"--cores={str(cores)}")
+            command = command + f" --cores={str(cores)}"
         if mem_per_qpu is not None:
-            cmd.append(f"--mem_per_qpu={str(mem_per_qpu)}")
+            command = command + f" --mem_per_qpu={str(mem_per_qpu)}"
         if n_nodes is not None:
-            cmd.append(f"--n_nodes={str(n_nodes)}")
+            command = command + f" --n_nodes={str(n_nodes)}"
         if node_list is not None:
-            cmd.append(f"--node_list={str(node_list)}")
+            command = command + f" --node_list={str(node_list)}"
         if qpus_per_node is not None:
-            cmd.append(f"--qpus_per_node={str(qpus_per_node)}")
+            command = command + f" --qpus_per_node={str(qpus_per_node)}"
         if backend is not None:
-            cmd.append(f"--backend={str(backend)}")
+            command = command + f" --backend={str(backend)}"
+
+        if SLURMD_NODENAME != None:
+            command = command + "\""
 
         old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
-        output = run(cmd, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
+        output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
+        logger.info(output)
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
         
         # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
