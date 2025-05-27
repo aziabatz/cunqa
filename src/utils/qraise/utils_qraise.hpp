@@ -2,6 +2,7 @@
 
 #include <string>
 #include <regex>
+#include <fstream>
 
 #include "utils/json.hpp"
 #include "logger.hpp"
@@ -37,17 +38,33 @@ int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
 bool exists_family_name(std::string& family, std::string& info_path)
 {
     std::ifstream file(info_path);
-    if (!file.is_open()) {
+    if (!file) {
         return false;
     } else {
         cunqa::JSON qpus_json;
-        file >> qpus_json;
-        for (auto& [key, value] : qpus_json.items()) {
-            if (value["family"] == family) {
-                return true;
-            } 
+        try {
+            file >> qpus_json;
+            for (auto& [key, value] : qpus_json.items()) {
+                if (value["family"] == family) {
+                    return true;
+                } 
+            }
+            return false;
+        } catch (const std::exception& e) {
+            LOGGER_DEBUG("The qpus.json file was completely empty. An empty json will be written on it.");
+            file.close();
+            std::ofstream out(info_path);
+            if (!out) {
+                LOGGER_DEBUG("Impossible to open the empty qpus.json file to write on it. It will be deleted and created again");
+                std::remove(info_path.c_str());
+                out.open(info_path);
+                return false;  
+            }
+            out << "{ }";  
+            out.close();
+
+            return false;
         }
-        return false;
     }
 }
 
