@@ -99,7 +99,7 @@ def qraise(n, time, *,
         old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)
-        job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted batch job 136285') and selects the number
+        job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted sbatch job 136285') and selects the number
         
         # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
         while True:

@@ -97,7 +97,7 @@ JSON CunqaSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTa
     }
 
     auto stop_time = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop_time - start_time);
+    std::chrono::duration<float> duration = stop_time - start_time;
     time_taken = duration.count();
 
     result = {
