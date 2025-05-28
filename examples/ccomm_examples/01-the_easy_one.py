@@ -10,7 +10,7 @@ from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
-family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = True)
+family = qraise(2,"00:10:00", simulator="Aer", classical_comm=True, cloud = True)
 qpus_QPE  = getQPUs(local=False, family = family)
 
 

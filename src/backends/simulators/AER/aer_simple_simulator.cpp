@@ -2,13 +2,9 @@
 #include <string>
 #include <optional>
 
-#include "simulators/circuit_executor.hpp"
-#include "framework/config.hpp"
-#include "noise/noise_model.hpp"
-#include "framework/circuit.hpp"
-#include "controllers/controller_execute.hpp"
-#include "framework/results/result.hpp"
 #include "controllers/aer_controller.hpp"
+#include "controllers/controller_execute.hpp"
+#include "framework/circuit.hpp"
 
 #include "aer_helpers.hpp"
 #include "aer_simple_simulator.hpp"

@@ -16,8 +16,8 @@ std::string get_classical_comm_run_command(auto& args, std::string& mode)
     std::string backend_path;
     std::string backend;
 
-    if (std::any_cast<std::string>(args.simulator) != "Cunqa" && std::any_cast<std::string>(args.simulator) != "Munich") {
-        LOGGER_ERROR("Classical communications only are available under \"Cunqa\" and \"Munich\" simulators, but the following simulator was provided: {}", std::any_cast<std::string>(args.simulator));
+    if (std::any_cast<std::string>(args.simulator) != "Cunqa" && std::any_cast<std::string>(args.simulator) != "Munich" && std::any_cast<std::string>(args.simulator) != "Aer") {
+        LOGGER_ERROR("Classical communications only are available under \"Cunqa\", \"Munich\" and \"Aer\" simulators, but the following simulator was provided: {}", std::any_cast<std::string>(args.simulator));
         std::system("rm qraise_sbatch_tmp.sbatch");
         return "0";
     } 

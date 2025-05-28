@@ -47,13 +47,13 @@ public:
 namespace cunqa {
 namespace sim {
 
-JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& circuit)
+JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
 {
     LOGGER_DEBUG("We are in the execute() method.");
-    if (!circuit.is_distributed) {
-        return this->usual_execution_(backend, circuit);
+    if (!quantum_task.is_distributed) {
+        return this->usual_execution_(backend, quantum_task);
     } else {
-        return this->distributed_execution_(backend, circuit);
+        return this->distributed_execution_(backend, quantum_task);
     }   
 } 
 
@@ -65,7 +65,6 @@ std::string MunichCCSimulator::get_communication_endpoint_()
 }
 
 
-// Free functions
 JSON MunichCCSimulator::usual_execution_(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
 {
     try {

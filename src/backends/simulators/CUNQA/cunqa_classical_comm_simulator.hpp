@@ -23,7 +23,7 @@ public:
     {
         LOGGER_DEBUG("CunqaCCSimulator instantiated.");
     }
-    ~CunqaCCSimulator() override;
+    ~CunqaCCSimulator() = default;
 
 
     // Methods
