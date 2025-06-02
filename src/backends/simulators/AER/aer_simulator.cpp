@@ -129,11 +129,8 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
-                    LOGGER_DEBUG("Beggining case measure.");
                     measurement = state->apply_measure(qubits);
-                    LOGGER_DEBUG("Measure applied.");
                     classicValues[qubits[0]] = (measurement == 1);
-                    LOGGER_DEBUG("classicValues updated.");
                     break;
                 case constants::ID:
                     break;
@@ -167,25 +164,46 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
                     // TODO
                     break;
                 case constants::C_IF_H:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_h(qubits[1]);
+                    }
                     break;
                 case constants::C_IF_X:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcx({qubits[1]});
+                    }
                     break;
                 case constants::C_IF_Y:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcy({qubits[1]});
+                    }
                     break;
                 case constants::C_IF_Z:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcz({qubits[1]});
+                    }
                     break;
                 case constants::C_IF_CX:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcx({qubits[1], qubits[2]});
+                    }
                     break;
                 case constants::C_IF_CY:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcy({qubits[1], qubits[2]});
+                    }
                     break;
                 case constants::C_IF_CZ:
-                    // TODO
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcz({qubits[1], qubits[2]});
+                    }
                     break;
                 case constants::C_IF_ECR:
                     // TODO
@@ -215,34 +233,37 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
                     state->apply_mcrz(qubits, params[0]);
                     break;
                 case constants::C_IF_RX:
-                    // TODO
+                    params = instruction.at("params").get<std::vector<double>>();
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcrx({qubits[1]}, params[0]);
+                    }
                     break;
                 case constants::C_IF_RY:
-                    // TODO
+                    params = instruction.at("params").get<std::vector<double>>();
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcry({qubits[1]}, params[0]);
+                    }
                     break;
                 case constants::C_IF_RZ:
-                    // TODO
+                    params = instruction.at("params").get<std::vector<double>>();
+                    measurement = state->apply_measure({qubits[0]});
+                    if (measurement == 1) {
+                        state->apply_mcrz({qubits[1]}, params[0]);
+                    }
                     break;
                 case constants::MEASURE_AND_SEND:
-                    LOGGER_DEBUG("Beggining case MEASURE_AND_SEND.");
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    LOGGER_DEBUG("endpoint ready (in measure_and_send).");
                     measurement = state->apply_measure(qubits);
-                    LOGGER_DEBUG("measure applied (in measure and send).");
-                    measurement_as_int = static_cast<int>(measurement);                    LOGGER_DEBUG("measure converted to int.");
+                    measurement_as_int = static_cast<int>(measurement);
                     classical_channel->send_measure(measurement_as_int, endpoint[0]); 
-                    LOGGER_DEBUG("Measure sent.");
                     break;
                 case constants::REMOTE_C_IF_X:
-                    LOGGER_DEBUG("Beggining case REMOTE_C_IF_X.");
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    LOGGER_DEBUG("endpoint ready (in remote_c_if_x).");
                     measurement = classical_channel->recv_measure(endpoint[0]); 
-                    LOGGER_DEBUG("measurement receives.");
                     if (measurement == 1) {
-                        LOGGER_DEBUG("1 was received.");
                         state->apply_mcx(qubits);
-                        LOGGER_DEBUG("mcx applied.");
                     }
                     break;
                 case constants::REMOTE_C_IF_Y:
