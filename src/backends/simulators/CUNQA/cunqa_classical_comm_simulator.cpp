@@ -12,20 +12,17 @@
 namespace cunqa {
 namespace sim {
 
-CunqaCCSimulator::~CunqaCCSimulator() = default;
-
-JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantumtask)
+JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
 {
-    std::vector<std::string> connect_with = quantumtask.sending_to;
+    std::vector<std::string> connect_with = quantum_task.sending_to;
     this->classical_channel->set_classical_connections(connect_with);
 
-    std::vector<JSON> instructions = quantumtask.circuit;
-    JSON run_config = quantumtask.config;
+    std::vector<JSON> instructions = quantum_task.circuit;
+    JSON run_config = quantum_task.config;
     int shots = run_config.at("shots");
     std::string instruction_name;
     std::vector<int> qubits;
-    std::vector<std::string> origin_endpoint;
-    std::vector<std::string> target_endpoint;
+    std::vector<std::string> endpoint;
     std::vector<double> param;
     Matrix matrix;
     int measurement;
@@ -33,7 +30,7 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
     std::unordered_map<int, int> counts;
     float time_taken;
 
-    int n_qubits = quantumtask.config.at("num_qubits");
+    int n_qubits = quantum_task.config.at("num_qubits");
     if (executor != nullptr && (n_qubits == executor->n_qubits)) {
         LOGGER_DEBUG("Cunqa executor already configured with {} qubits.", std::to_string(n_qubits));
     } else {
@@ -46,7 +43,6 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name").get<std::string>();
             qubits = instruction.at("qubits").get<std::vector<int>>();
-            LOGGER_DEBUG("Instruction name {} and qubits {} well read", instruction_name, std::to_string(qubits[0]));
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
@@ -89,11 +85,9 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
                     executor->apply_parametric_gate(instruction_name, qubits, param);
                     break;
                 case constants::MEASURE_AND_SEND:
-                    target_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     measurement = executor->apply_measure(qubits); 
-                    LOGGER_DEBUG("Trying to send to {}", target_endpoint[0]);
-                    classical_channel->send_measure(measurement, target_endpoint[0]); 
-                    LOGGER_DEBUG("Measurement sent to {}", target_endpoint[0]);
+                    classical_channel->send_measure(measurement, endpoint[0]); 
                     break;
                 case constants::REMOTE_C_IF_H:
                 case constants::REMOTE_C_IF_X:
@@ -103,10 +97,8 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
                 case constants::REMOTE_C_IF_CY:
                 case constants::REMOTE_C_IF_CZ:
                 case constants::REMOTE_C_IF_ECR:
-                    origin_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    LOGGER_DEBUG("Origin endpoint: {}", origin_endpoint[0]);
-                    measurement = classical_channel->recv_measure(origin_endpoint[0]); 
-                    LOGGER_DEBUG("Measurement received from {}", origin_endpoint[0]);
+                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         executor->apply_gate(constants::CORRESPONDENCE_REMOTE_GATE_MAP.at(instruction_name), qubits);
                     }
@@ -114,11 +106,9 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
                 case constants::REMOTE_C_IF_RX:
                 case constants::REMOTE_C_IF_RY:
                 case constants::REMOTE_C_IF_RZ:
-                    origin_endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    LOGGER_DEBUG("Origin endpoint: {}", origin_endpoint[0]);
+                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     param = instruction.at("params").get<std::vector<double>>();
-                    measurement = classical_channel->recv_measure(origin_endpoint[0]); 
-                    LOGGER_DEBUG("Measurement received from {}", origin_endpoint[0]);
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         executor->apply_gate(constants::CORRESPONDENCE_REMOTE_GATE_MAP.at(instruction_name), qubits);
                     }

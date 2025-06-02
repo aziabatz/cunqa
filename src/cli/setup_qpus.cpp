@@ -8,6 +8,7 @@
 #include "backends/simple_backend.hpp"
 #include "backends/classical_comm_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
+#include "backends/simulators/AER/aer_classical_comm_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_classical_comm_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_simple_simulator.hpp"
@@ -132,6 +133,10 @@ int main(int argc, char *argv[])
                 case murmur::hash("Munich"): 
                     turn_ON_QPU<MunichCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
+                    break;
+                case murmur::hash("Aer"): 
+                    turn_ON_QPU<AerCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with AerCCSimulator.");
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
