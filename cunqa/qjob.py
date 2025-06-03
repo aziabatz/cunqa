@@ -9,7 +9,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
 
-from cunqa.circuit import qc_to_json,CunqaCircuit
+from cunqa.circuit import qc_to_json,CunqaCircuit, _registers_dict
 from cunqa.logger import logger
 from cunqa.backend import Backend
 from cunqa.result import Result
@@ -183,7 +183,7 @@ class QJob:
 
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
-                self._cregisters = registers_dict(circuit)[1]
+                self._cregisters = _registers_dict(circuit)[1]
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
@@ -196,7 +196,7 @@ class QJob:
                 qc_from_qasm = QuantumCircuit.from_qasm_str(circuit)
 
                 self.num_qubits = qc_from_qasm.num_qubits
-                self._cregisters = registers_dict(qc_from_qasm)[1]
+                self._cregisters = _registers_dict(qc_from_qasm)[1]
                 self.num_clbits = sum(len(k) for k in self._cregisters.values())
 
                 logger.debug("Translating to dict from QASM2 string...")
