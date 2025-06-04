@@ -28,6 +28,7 @@ extensions = [
     'nbsphinx',
     'sphinx_mdinclude',
     'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon'
 ]
 
 source_suffix = ['.rst', '.md']
@@ -53,7 +54,8 @@ autodoc_mock_imports = [
     'Pandoc',
     'cunqa.fakeqmio',
     'subprocess',
-    'typing'
+    'typing',
+    'insert'
 ]
 
 
