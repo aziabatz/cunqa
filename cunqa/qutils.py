@@ -3,6 +3,7 @@ import sys
 from typing import Union, Optional
 from subprocess import run
 from json import load
+import json
 from cunqa.qclient import QClient  # importamos api en C++
 from cunqa.backend import Backend
 from cunqa.logger import logger
@@ -21,6 +22,23 @@ else:
 class QRaiseError(Exception):
     """Exception for errors during qraise slurm command"""
     pass
+
+def are_qpus_raised(family: Optional[str] = None) -> bool:
+    last_modification = os.stat(INFO_PATH).st_mtime 
+    while True:
+        if last_modification != os.stat(INFO_PATH).st_mtime: 
+            last_modification = os.stat(INFO_PATH).st_mtime
+            if family == None:
+                return True
+            else:
+                with open(INFO_PATH, "r") as qpus_json:
+                    data = json.load(qpus_json)
+                    for value in data.values():
+                        if value["family"] == family:
+                            return True
+                        
+    
+
 
 def qraise(n, time, *, 
            classical_comm = False, 

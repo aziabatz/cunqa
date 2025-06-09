@@ -1216,45 +1216,43 @@ def qc_to_json(qc: QuantumCircuit) -> Tuple[dict, bool]:
             "quantum_registers":quantum_registers,
             "classical_registers":classical_registers
         }
-        for i in range(len(qc.data)):
-            if qc.data[i].name == "barrier":
+        for instruction in qc.data:
+            qreg = [r._register.name for r in instruction.qubits]
+            qubit = [q._index for q in instruction.qubits]
+            
+            creg = [r._register.name for r in instruction.clbits]
+            bit = [b._index for b in instruction.clbits]
+
+            if instruction.name == "barrier":
                 pass
-            elif qc.data[i].name == "unitary":
-                qreg = [r._register.name for r in qc.data[i].qubits]
-                qubit = [q._index for q in qc.data[i].qubits]
+            elif instruction.name == "unitary":
 
-                json_data["instructions"].append({"name":qc.data[i].name, 
-                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
-                                                "params":[[list(map(lambda z: [z.real, z.imag], row)) for row in qc.data[i].params[0].tolist()]] #only difference, it ensures that the matrix appears as a list, and converts a+bj to (a,b)
+                json_data["instructions"].append({"name":instruction.name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg, qubit)],
+                                                "params":[[list(map(lambda z: [z.real, z.imag], row)) for row in instruction.params[0].tolist()]] #only difference, it ensures that the matrix appears as a list, and converts a+bj to (a,b)
                                                 })
-            elif qc.data[i].name != "measure":
-                qreg = [r._register.name for r in qc.data[i].qubits]
-                qubit = [q._index for q in qc.data[i].qubits]
+            elif instruction.name != "measure":
 
-                if (qc.data[i].operation._condition != None):
+                if (instruction.operation._condition != None):
                     is_dynamic = True
-                    json_data["instructions"].append({"name":qc.data[i].name, 
-                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
-                                                "params":qc.data[i].params,
-                                                "conditional_reg":[qc.data[i].operation._condition[0]._index]
+                    json_data["instructions"].append({"name":instruction.name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg, qubit)],
+                                                "params":instruction.params,
+                                                "conditional_reg":[instruction.operation._condition[0]._index]
                                                 })
                 else:
-                    json_data["instructions"].append({"name":qc.data[i].name, 
-                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
-                                                "params":qc.data[i].params
+                    json_data["instructions"].append({"name":instruction.name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg, qubit)],
+                                                "params":instruction.params
                                                 })
             else:
-                qreg = [r._register.name for r in qc.data[i].qubits]
-                qubit = [q._index for q in qc.data[i].qubits]
-                
-                clreg_name = [r._register.name for r in qc.data[i].clbits]
-                bit = [b._index for b in qc.data[i].clbits]
+                clreg_name = [r._register.name for r in instruction.clbits]
                 clreg = []
                 if clreg_name[0] != 'meas':
                     clreg = bit
 
-                json_data["instructions"].append({"name":qc.data[i].name,
-                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
+                json_data["instructions"].append({"name":instruction.name,
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg, qubit)],
                                                 "clbits":[classical_registers[k][b] for k,b in zip(clreg_name, bit)],
                                                 "clreg":[classical_registers[k][b] for k,b in zip(clreg_name, clreg)]
                                                 })
