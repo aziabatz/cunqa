@@ -111,9 +111,7 @@ class QPU:
                 if 'is_distributed' in circuit and circuit["is_distributed"]:
                     logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
                     raise SystemExit
-            else:
-                logger.error(f"Circuit must be a dict, a <class cunqa.circuit.CunqaCircuit> or a <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circuit)} was provided [{TypeError.__name__}]")
-                raise SystemExit
+
 
 
         # Handle connection to QClient
