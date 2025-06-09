@@ -21,7 +21,7 @@ SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz"
 SUPPORTED_GATES_PARAMETRIC_2 = ["u2", "r"]
 SUPPORTED_GATES_PARAMETRIC_3 = ["u", "u3", "cu3"]
 SUPPORTED_GATES_PARAMETRIC_4 = ["cu"]
-SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz"]
+SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "c_if_ecr"]
 SUPPORTED_GATES_DISTRIBUTED = ["measure_and_send", "remote_c_if_unitary", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
 
 class CunqaCircuitError(Exception):
@@ -40,6 +40,7 @@ class CunqaCircuit:
     _id: str
     is_parametric: bool 
     is_distributed: bool 
+    is_dynamic: bool
     instructions: "list[dict]"
     quantum_regs: dict
     classical_regs: dict
@@ -50,6 +51,7 @@ class CunqaCircuit:
 
         self.is_parametric = False
         self.is_distributed = False
+        self.is_dynamic = False
         self.instructions = []
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
         self.classical_regs = {}
@@ -87,7 +89,7 @@ class CunqaCircuit:
     
     @property
     def info(self) -> dict:
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "sending_to":self.sending_to}
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
 
 
     @property
@@ -927,7 +929,8 @@ class CunqaCircuit:
             self._add_instruction({
                 "name":"measure",
                 "qubits":[q],
-                "clbits":[c]
+                "clbits":[c],
+                "clreg":[]
             })
 
     def measure_all(self) -> None:
@@ -943,7 +946,8 @@ class CunqaCircuit:
             self._add_instruction({
                 "name":"measure",
                 "qubits":[q],
-                "clbits":[self.classical_regs[new_clreg][q]]
+                "clbits":[self.classical_regs[new_clreg][q]],
+                "clreg":[]
             })
 
 
@@ -963,6 +967,8 @@ class CunqaCircuit:
 
         param (float or int): parameter for the case parametric gate is provided.
         """
+
+        self.is_dynamic = True
         
         if isinstance(gate, str):
             name = "c_if_" + gate
@@ -997,9 +1003,11 @@ class CunqaCircuit:
 
             matrix = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
 
+            self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_control_qubit, list_target_qubit]),
+                "qubits": flatten([list_target_qubit, list_control_qubit]),
+                "registers":flatten([list_control_qubit]),
                 "params":[matrix]
             })
             # we have to exit here
@@ -1032,9 +1040,11 @@ class CunqaCircuit:
         
         if name in SUPPORTED_GATES_CONDITIONAL:
 
+            self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_control_qubit, list_target_qubit]),
+                "qubits": flatten([list_target_qubit, list_control_qubit]),
+                "registers":flatten([list_control_qubit]),
                 "params":list_param
             })
 
@@ -1060,7 +1070,7 @@ class CunqaCircuit:
         param (float or int): parameter in case the gate provided is parametric.
 
         """
-
+        self.is_dynamic = True
         self.is_distributed = True
         
         if isinstance(control_qubit, int):
@@ -1110,6 +1120,7 @@ class CunqaCircuit:
         target_qubit (int): qubit where the gate will be conditionally applied.       
         """
 
+        self.is_dynamic = True
         self.is_distributed = True
 
         if isinstance(gate, str):
@@ -1168,7 +1179,7 @@ def flatten(lists: "list[list]"):
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
-def qc_to_json(qc: QuantumCircuit) -> dict:
+def qc_to_json(qc: QuantumCircuit) -> Tuple[dict, bool]:
     """
     Transforms a QuantumCircuit to json dict.
 
@@ -1180,6 +1191,7 @@ def qc_to_json(qc: QuantumCircuit) -> dict:
     ---------
     Json dict with the circuit information.
     """
+    is_dynamic = False
     # Check validity of the provided quantum circuit
     if isinstance(qc, dict):
         logger.warning(f"Circuit provided is already a dict.")
@@ -1216,11 +1228,18 @@ def qc_to_json(qc: QuantumCircuit) -> dict:
                                                 "params":[[list(map(lambda z: [z.real, z.imag], row)) for row in qc.data[i].params[0].tolist()]] #only difference, it ensures that the matrix appears as a list, and converts a+bj to (a,b)
                                                 })
             elif qc.data[i].name != "measure":
-
                 qreg = [r._register.name for r in qc.data[i].qubits]
                 qubit = [q._index for q in qc.data[i].qubits]
 
-                json_data["instructions"].append({"name":qc.data[i].name, 
+                if (qc.data[i].operation._condition != None):
+                    is_dynamic = True
+                    json_data["instructions"].append({"name":qc.data[i].name, 
+                                                "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
+                                                "params":qc.data[i].params,
+                                                "conditional_reg":[qc.data[i].operation._condition[0]._index]
+                                                })
+                else:
+                    json_data["instructions"].append({"name":qc.data[i].name, 
                                                 "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
                                                 "params":qc.data[i].params
                                                 })
@@ -1228,16 +1247,20 @@ def qc_to_json(qc: QuantumCircuit) -> dict:
                 qreg = [r._register.name for r in qc.data[i].qubits]
                 qubit = [q._index for q in qc.data[i].qubits]
                 
-                creg = [r._register.name for r in qc.data[i].clbits]
+                clreg_name = [r._register.name for r in qc.data[i].clbits]
                 bit = [b._index for b in qc.data[i].clbits]
+                clreg = []
+                if clreg_name[0] != 'meas':
+                    clreg = bit
 
                 json_data["instructions"].append({"name":qc.data[i].name,
                                                 "qubits":[quantum_registers[k][q] for k,q in zip(qreg,qubit)],
-                                                "clbits":[classical_registers[k][b] for k,b in zip(creg,bit)]
+                                                "clbits":[classical_registers[k][b] for k,b in zip(clreg_name, bit)],
+                                                "clreg":[classical_registers[k][b] for k,b in zip(clreg_name, clreg)]
                                                 })
                     
 
-        return json_data
+        return json_data, is_dynamic 
     
     except Exception as error:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
@@ -1346,7 +1369,7 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
         raise error
 
 
-def registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
+def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     """
     Extracts the number of classical and quantum registers from a QuantumCircuit.
 

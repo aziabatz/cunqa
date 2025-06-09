@@ -64,11 +64,11 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
             raise SystemExit # User's level
     
     #check wether there are enough qpus and create an allocation dict that for every circuit id has the info of the QPU to which it will be sent
-    if len(circuit_jsons)>len(qpus):
+    if len(circuit_jsons) > len(qpus):
         logger.error(f"There are not enough QPUs: {len(circuit_jsons)} circuits were given, but only {len(qpus)} QPUs [{ValueError.__name__}].")
         raise SystemExit # User's level
     else:
-        if len(circuit_jsons)<len(qpus):
+        if len(circuit_jsons) < len(qpus):
             logger.warning("More QPUs provided than the number of circuits. Last QPUs will remain unused.")
         for circuit, qpu in zip(circuit_jsons, qpus):
             correspondence[circuit["id"]] = qpu._comm_endpoint

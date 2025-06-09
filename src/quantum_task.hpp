@@ -11,9 +11,9 @@ public:
     JSON circuit;
     JSON config;
     std::vector<std::string> sending_to;
-    bool is_distributed;
+    bool is_dynamic;
 
-    QuantumTask() : is_distributed{false} {};
+    QuantumTask() : is_dynamic{false} {};
 
     QuantumTask(const JSON& circuit, const JSON& config): circuit(circuit), config(config) { };
 
