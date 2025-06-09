@@ -1,3 +1,4 @@
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -117,11 +118,13 @@ inline std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
                     break;
                 default:
                     LOGGER_ERROR("Error. Invalid gate name: {}", constants::INSTRUCTIONS_MAP.at(gate_name));
+                    throw std::runtime_error("QASM format is not correct"); 
                     break;
             }
         } 
     } catch (const std::exception& e) {
         LOGGER_ERROR("Error translating a gate from JSON to QASM2.");
+        throw;
     } 
         
     return qasm_circt;

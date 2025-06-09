@@ -13,6 +13,7 @@
 #include "controllers/state_controller.hpp"
 #include "aer_helpers.hpp"
 
+#include "classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
 #include "logger.hpp"
@@ -31,8 +32,6 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
         //TODO: Maybe improve them to send several circuits at once
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
         JSON circuit_json = aer_quantum_task.circuit;
-
-        LOGGER_DEBUG("Circuit {}.", circuit_json.dump(4));
 
         Circuit circuit(circuit_json);
         std::vector<std::shared_ptr<Circuit>> circuits;
@@ -58,39 +57,16 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
     return {};
 }
 
-// Simple AerSimulator
-AerSimpleSimulator::~AerSimpleSimulator() = default;
-
-JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) 
+template <class BackendType>
+JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
-    return usual_execution_<SimpleBackend>(backend, quantum_task);
-}
-
-// Distributed AerSimulator
-JSON AerCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
-{
-    if (!quantum_task.is_distributed) {
-        return usual_execution_<ClassicalCommBackend>(backend, quantum_task);
-    } else {
-        return this->distributed_execution_(backend, quantum_task);
-    } 
-
-}
-
-std::string AerCCSimulator::get_communication_endpoint_()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
-}
-
-
-// Method for distributed execution
-JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
-{
-    LOGGER_DEBUG("Starting distributed_execution_.");
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    this->classical_channel->set_classical_connections(connect_with);
-    LOGGER_DEBUG("Classical channel ready.");
+    LOGGER_DEBUG("Starting dynamic_execution_ on Aer.");
+    // Add the classical channel
+    if (classical_channel) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->set_classical_connections(connect_with);
+        LOGGER_DEBUG("Classical channel ready.");
+    }
 
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;
@@ -98,6 +74,8 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
     int shots = run_config.at("shots");
     std::string instruction_name;
     std::vector<uint_t> qubits;
+    std::vector<std::uint64_t> clreg;
+    std::vector<std::uint64_t> conditional_reg;
     std::vector<std::string> endpoint;
     std::vector<double> params;
     uint_t measurement;
@@ -106,15 +84,14 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
     JSON result;
     float time_taken;
 
-    LOGGER_DEBUG("Needed variables set.");
-
     std::map<std::size_t, bool> classicValues; // To mimic the way Munich counts
+    std::map<std::size_t, bool> classicRegister;
     AER::AerState *state = new AER::AerState();
     state->configure("method", "statevector");
     state->configure("device", "CPU");
     state->configure("precision", "double");
     
-    LOGGER_DEBUG("Proper AER variables set.");
+    LOGGER_DEBUG("AER variables ready.");
 
     auto start_time = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
@@ -125,133 +102,179 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name").get<std::string>();
             qubits = instruction.at("qubits").get<std::vector<uint_t>>();
-            LOGGER_DEBUG("Before switch.");
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
+                    clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
                     measurement = state->apply_measure(qubits);
                     classicValues[qubits[0]] = (measurement == 1);
+                    if (!clreg.empty()) {
+                        classicRegister[clreg[0]] = (measurement == 1);
+                    }
                     break;
                 case constants::ID:
                     break;
                 case constants::X:
-                    state->apply_mcx(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcx(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcx(qubits);
+                        }
+                    }
                     break;
                 case constants::Y:
-                    state->apply_mcy(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcy(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcy(qubits);
+                        }
+                    }
                     break;
                 case constants::Z:
-                    state->apply_mcz(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcz(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcz(qubits);
+                        }
+                    }
                     break;
                 case constants::H:
-                    LOGGER_DEBUG("Beggining case H.");
-                    state->apply_h(qubits[0]);
-                    LOGGER_DEBUG("End case H.");
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_h(qubits[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_h(qubits[0]);
+                        }
+                    }
                     break;
                 case constants::SX:
-                    state->apply_mcsx(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcsx(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcsx(qubits);
+                        }
+                    }
                     break;
                 case constants::CX:
-                    state->apply_mcx(qubits);;
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcx(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcx(qubits);
+                        }
+                    }
                     break;
                 case constants::CY:
-                    state->apply_mcy(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcy(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcy(qubits);
+                        }
+                    }
                     break;
                 case constants::CZ:
-                    state->apply_mcz(qubits);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcz(qubits);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcz(qubits);
+                        }
+                    }
                     break;
                 case constants::ECR:
                     // TODO
                     break;
-                case constants::C_IF_H:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_h(qubits[1]);
-                    }
-                    break;
-                case constants::C_IF_X:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcx({qubits[1]});
-                    }
-                    break;
-                case constants::C_IF_Y:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcy({qubits[1]});
-                    }
-                    break;
-                case constants::C_IF_Z:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcz({qubits[1]});
-                    }
-                    break;
-                case constants::C_IF_CX:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcx({qubits[1], qubits[2]});
-                    }
-                    break;
-                case constants::C_IF_CY:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcy({qubits[1], qubits[2]});
-                    }
-                    break;
-                case constants::C_IF_CZ:
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcz({qubits[1], qubits[2]});
-                    }
-                    break;
-                case constants::C_IF_ECR:
-                    // TODO
-                    break;
                 case constants::RX:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcrx(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcrx(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcrx(qubits, params[0]);
+                        }
+                    }
                     break;
                 case constants::RY:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcry(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcry(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcry(qubits, params[0]);
+                        }
+                    }
                     break;
                 case constants::RZ:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcrz(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcrz(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcrz(qubits, params[0]);
+                        }
+                    }
                     break;
                 case constants::CRX:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcrx(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcrx(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcrx(qubits, params[0]);
+                        }
+                    }
                     break;
                 case constants::CRY:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcry(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcry(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcry(qubits, params[0]);
+                        }
+                    }
                     break;
                 case constants::CRZ:
                     params = instruction.at("params").get<std::vector<double>>();
-                    state->apply_mcrz(qubits, params[0]);
+                    if (!instruction.contains("conditional_reg")) {
+                        state->apply_mcrz(qubits, params[0]);
+                    } else {
+                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            state->apply_mcrz(qubits, params[0]);
+                        }
+                    }
                     break;
+                case constants::C_IF_H:
+                case constants::C_IF_X:
+                case constants::C_IF_Y:
+                case constants::C_IF_Z:
+                case constants::C_IF_CX:
+                case constants::C_IF_CY:
+                case constants::C_IF_CZ:
+                case constants::C_IF_ECR:
                 case constants::C_IF_RX:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcrx({qubits[1]}, params[0]);
-                    }
-                    break;
                 case constants::C_IF_RY:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcry({qubits[1]}, params[0]);
-                    }
-                    break;
                 case constants::C_IF_RZ:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = state->apply_measure({qubits[0]});
-                    if (measurement == 1) {
-                        state->apply_mcrz({qubits[1]}, params[0]);
-                    }
+                    // //TODO: Look how Aer natively applies C_IFs operations
                     break;
                 case constants::MEASURE_AND_SEND:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
@@ -353,6 +376,7 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
         }
         measurementCounter[resultString]++;
 
+        classicRegister.clear();
         state->clear();
     } // End all shots
 
@@ -366,6 +390,34 @@ JSON AerCCSimulator::distributed_execution_(const ClassicalCommBackend& backend,
     }; 
 
     return result;
+}
+
+// Simple AerSimulator
+AerSimpleSimulator::~AerSimpleSimulator() = default;
+
+JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task) 
+{
+    if (!quantum_task.is_dynamic) {
+        return usual_execution_<SimpleBackend>(backend, quantum_task);
+    } else {
+        return dynamic_execution_<SimpleBackend>(backend, quantum_task);
+    } 
+}
+
+// Distributed AerSimulator
+JSON AerCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
+{
+    if (!quantum_task.is_dynamic) {
+        return usual_execution_<ClassicalCommBackend>(backend, quantum_task);
+    } else {
+        return dynamic_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
+    } 
+}
+
+std::string AerCCSimulator::get_communication_endpoint_()
+{
+    std::string endpoint = this->classical_channel->endpoint;
+    return endpoint;
 }
 
 

@@ -29,11 +29,13 @@ qc = {
     },
     {
         "name": "measure",
-        "qubits": [0]
+        "qubits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
-        "qubits": [1]
+        "qubits": [1], 
+        "clreg":[]
     }
     ],
     "is_distributed": False,
@@ -62,11 +64,13 @@ qc_param = {
     },
     {
         "name": "measure",
-        "qubits": [0]
+        "qubits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
-        "qubits": [1]
+        "qubits": [1], 
+        "clreg":[]
     }
     ],
     "is_distributed": False,
