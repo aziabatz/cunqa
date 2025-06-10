@@ -31,6 +31,7 @@ int main(int argc, char* argv[])
 
     const char* store = std::getenv("STORE");
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
+    std::string comm_path = std::string(store) + "/.cunqa/communications.json";
 
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     LOGGER_DEBUG("Temporal file qraise_sbatch_tmp.sbatch created.");
@@ -116,6 +117,7 @@ int main(int argc, char* argv[])
 
     sbatchFile << "BINARIES_DIR=" << std::getenv("STORE") << "/.cunqa\n";
     sbatchFile << "export INFO_PATH=" << info_path + "\n";
+    sbatchFile << "export COMM_PATH=" << comm_path + "\n";
 
     //Checking duplicate family name
     std::string family = std::any_cast<std::string>(args.family_name);

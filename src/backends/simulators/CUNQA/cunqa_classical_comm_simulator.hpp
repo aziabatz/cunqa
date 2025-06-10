@@ -13,16 +13,13 @@ namespace sim {
 class CunqaCCSimulator final : public SimulatorStrategy<ClassicalCommBackend>
 {
 public:
-    CunqaCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
-    {}
+    CunqaCCSimulator();
     ~CunqaCCSimulator() = default;
 
     inline std::string get_name() const override {return "CunqaSimulator";}
     JSON execute(const ClassicalCommBackend& backend, const QuantumTask& quantumtask) override; 
 
 private:
-    std::string get_communication_endpoint_() override;
-
     std::unique_ptr<comm::ClassicalChannel> classical_channel;
 };
 

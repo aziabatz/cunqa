@@ -71,7 +71,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         if len(circuit_jsons) < len(qpus):
             logger.warning("More QPUs provided than the number of circuits. Last QPUs will remain unused.")
         for circuit, qpu in zip(circuit_jsons, qpus):
-            correspondence[circuit["id"]] = qpu._comm_endpoint
+            correspondence[circuit["id"]] = qpu._id
         
 
     #Check wether the QPUs are valid

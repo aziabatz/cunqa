@@ -37,10 +37,9 @@ class QPU:
     _backend: 'Backend' 
     _family: str
     _endpoint: "tuple[str, int]" 
-    _comm_endpoint: str 
     _connected: bool 
     
-    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]", comm_endpoint: str):
+    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]"):
         """
         Initializes the QPU class.
 
@@ -61,7 +60,6 @@ class QPU:
         self._backend = backend
         self._family = family
         self._endpoint = endpoint
-        self._comm_endpoint = comm_endpoint
         self._connected = False
         
         logger.debug(f"Object for QPU {id} created correctly.")

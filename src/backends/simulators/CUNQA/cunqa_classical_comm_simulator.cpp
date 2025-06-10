@@ -1,10 +1,24 @@
 #include "cunqa_classical_comm_simulator.hpp"
 #include "cunqa_executors.hpp"
 
-#include "utils/json.hpp"
+
+using namespace std::string_literals;
+namespace {
+    const auto store = getenv("STORE");
+    const std::string filepath = store + "/.cunqa/communications.json"s;
+}
 
 namespace cunqa {
 namespace sim {
+
+CunqaCCSimulator::CunqaCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
+{
+    JSON communications_endpoint = 
+    {
+        {"communications_endpoint", classical_channel->endpoint}
+    };
+    write_on_file(communications_endpoint, filepath);
+}
 
 JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
 {
@@ -12,11 +26,6 @@ JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const Quantu
     return cunqa_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
 }
 
-std::string CunqaCCSimulator::get_communication_endpoint_()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
-}
 
 } // End namespace sim
 } // End namespace cunqa

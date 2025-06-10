@@ -11,16 +11,16 @@ public:
     JSON circuit;
     JSON config;
     std::vector<std::string> sending_to;
-    bool is_dynamic;
+    bool is_dynamic = false; // C_IF gates
+    bool is_distributed = false; // Classical Communications
 
-    QuantumTask() : is_dynamic{false} {};
+    QuantumTask() = default;
 
-    QuantumTask(const JSON& circuit, const JSON& config): circuit(circuit), config(config) { };
+    QuantumTask(const JSON& circuit, const JSON& config): circuit(circuit), config(config) {};
 
     void update_circuit(const std::string& quantum_task);
 
 private:
-
     
     void update_params_(const std::vector<double> params);
 };

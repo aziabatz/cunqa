@@ -14,7 +14,6 @@ public:
 
     virtual inline std::string get_name() const = 0;
     virtual JSON execute(const T& backend, const QuantumTask& circuit) = 0;
-    virtual std::string get_communication_endpoint_() {return "";}
 };
 
 } // End of sim namespace
