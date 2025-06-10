@@ -18,11 +18,25 @@
 #include "utils/constants.hpp"
 #include "logger.hpp"
 
+using namespace std::string_literals;
+namespace {
+    const auto store = getenv("STORE");
+    const std::string filepath = store + "/.cunqa/communications.json"s;
+}
 
 using namespace AER;
 
 namespace cunqa {
 namespace sim {
+
+AerCCSimulator::AerCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
+{
+    JSON communications_endpoint = 
+    {
+        {"communications_endpoint", classical_channel->endpoint}
+    };
+    write_on_file(communications_endpoint, filepath);
+};
 
 // Free function used in both simple and distributed case
 template <class BackendType>
@@ -412,12 +426,6 @@ JSON AerCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumT
     } else {
         return dynamic_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
     } 
-}
-
-std::string AerCCSimulator::get_communication_endpoint_()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
 }
 
 

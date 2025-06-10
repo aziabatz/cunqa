@@ -285,13 +285,10 @@ def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     
     # create QPU objects from the dictionary information + return them on a list
     qpus = []
-    i = 0
-    for _, info in targets.items():
+    for id, info in targets.items():
         client = QClient()
         endpoint = (info["net"]["ip"], info["net"]["port"])
-        comm_endpoint = info["communications_endpoint"]
-        qpus.append(QPU(id = i, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint, comm_endpoint = comm_endpoint))
-        i+=1
+        qpus.append(QPU(id = id, qclient = client, backend = Backend(info['backend']), family = info["family"], endpoint = endpoint))
     if len(qpus) != 0:
         logger.debug(f"{len(qpus)} QPU objects were created.")
         return qpus

@@ -21,7 +21,7 @@ namespace sim {
 
 class MunichCCSimulator final : public SimulatorStrategy<ClassicalCommBackend> {
 public:
-    MunichCCSimulator(): classical_channel(std::make_unique<comm::ClassicalChannel>()) {};
+    MunichCCSimulator();
     ~MunichCCSimulator() = default;
 
     inline std::string get_name() const override {return "MunichSimulator";}
@@ -29,7 +29,6 @@ public:
     
 
 private:
-    std::string get_communication_endpoint_() override;
 
     std::unique_ptr<comm::ClassicalChannel> classical_channel;
     

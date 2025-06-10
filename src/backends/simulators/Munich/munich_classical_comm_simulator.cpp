@@ -7,11 +7,25 @@
 
 #include "quantum_task.hpp"
 #include "backends/simulators/simulator_strategy.hpp"
-#include "utils/json.hpp"
 
+
+using namespace std::string_literals;
+namespace {
+    const auto store = getenv("STORE");
+    const std::string filepath = store + "/.cunqa/communications.json"s;
+}
 
 namespace cunqa {
 namespace sim {
+
+MunichCCSimulator::MunichCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>()) 
+{
+    JSON communications_endpoint = 
+    {
+        {"communications_endpoint", classical_channel->endpoint}
+    };
+    write_on_file(communications_endpoint, filepath);
+}
 
 JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
 {
@@ -21,12 +35,6 @@ JSON MunichCCSimulator::execute(const ClassicalCommBackend& backend, const Quant
     } else {
         return dynamic_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
     }   
-}
-
-std::string MunichCCSimulator::get_communication_endpoint_()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
 }
 
 } // End namespace sim

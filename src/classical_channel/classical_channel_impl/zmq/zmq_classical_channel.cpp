@@ -107,10 +107,10 @@ int ClassicalChannel::recv_measure(std::string& origin)
     return pimpl_->recv(origin);
 }
 
-void ClassicalChannel::set_classical_connections(std::vector<std::string>& endpoints)
+void ClassicalChannel::set_classical_connections(std::vector<std::string>& qpus_id)
 {
     LOGGER_DEBUG("Setting connections on classical channel.");
-    pimpl_->set_connections(endpoints);
+    pimpl_->set_connections(qpus_id);
 }
 
 

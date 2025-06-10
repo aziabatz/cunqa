@@ -11,7 +11,7 @@ namespace sim {
 
 class AerCCSimulator final : public SimulatorStrategy<ClassicalCommBackend> {
 public:
-    AerCCSimulator(): classical_channel(std::make_unique<comm::ClassicalChannel>()) {};
+    AerCCSimulator();
     ~AerCCSimulator() = default;
 
     inline std::string get_name() const override {return "AerSimulator";}
@@ -19,11 +19,7 @@ public:
     
 
 private:
-    JSON distributed_execution_(const ClassicalCommBackend& backend, const QuantumTask& quantum_task);
-    std::string get_communication_endpoint_() override;
-
     std::unique_ptr<comm::ClassicalChannel> classical_channel;
-    
 };
 
 
