@@ -33,13 +33,13 @@ std::string get_classical_comm_run_command(auto& args, std::string& mode)
     }
 
     #ifdef USE_MPI_BTW_QPU
-    run_command =  "srun --mpi=pmix --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " +  subcommand;
+    run_command =  "srun --mpi=pmix --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " +  subcommand;
     LOGGER_DEBUG("Run command with MPI comm: {}", run_command);
     #endif
 
     #ifdef USE_ZMQ_BTW_QPU
     int num_ports = args.n_qpus * 2;
-    run_command =  "srun --resv-ports=" + std::to_string(num_ports) + " --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " +  subcommand;
+    run_command =  "srun --resv-ports=" + std::to_string(num_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " +  subcommand;
     LOGGER_DEBUG("Run command with ZMQ comm: {}", run_command);
     #endif
 

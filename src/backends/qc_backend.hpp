@@ -14,11 +14,11 @@
 namespace cunqa {
 namespace sim {
 
-struct ClassicalCommConfig {
-    std::string name = "ClassicalCommBackend";
+struct QCConfig {
+    std::string name = "QCBackend";
     std::string version = "0.0.1";
     int n_qubits = 32;
-    std::string description = "Simple backend with classical communications.";
+    std::string description = "Backend with quantum communications.";
     std::vector<std::vector<int>> coupling_map;
     std::vector<std::string> basis_gates = constants::BASIS_GATES;
     std::string custom_instructions;
@@ -26,7 +26,7 @@ struct ClassicalCommConfig {
     JSON noise_model;
     JSON noise_properties;
 
-    friend void from_json(const JSON& j, ClassicalCommConfig &obj)
+    friend void from_json(const JSON& j, QCConfig &obj)
     {
         j.at("name").get_to(obj.name);
         j.at("version").get_to(obj.version);
@@ -40,7 +40,7 @@ struct ClassicalCommConfig {
         j.at("noise_properties").get_to(obj.noise_properties);
     }
 
-    friend void to_json(JSON& j, const ClassicalCommConfig& obj)
+    friend void to_json(JSON& j, const QCConfig& obj)
     {
         j = {   
             {"name", obj.name}, 
@@ -57,16 +57,16 @@ struct ClassicalCommConfig {
     
 };
 
-class ClassicalCommBackend final : public Backend {
+class QCBackend final : public Backend {
 public:
-    ClassicalCommConfig config;
+    QCConfig config;
     
-    ClassicalCommBackend(const ClassicalCommConfig& config, std::unique_ptr<SimulatorStrategy<ClassicalCommBackend>> simulator): 
+    QCBackend(const QCConfig& config, std::unique_ptr<SimulatorStrategy<QCBackend>> simulator): 
         config{config},
         simulator_{std::move(simulator)}
     { }
 
-    ClassicalCommBackend(ClassicalCommBackend& classical_comm_backend) = default;
+    QCBackend(QCBackend& cc_backend) = default;
 
     inline JSON execute(const QuantumTask& quantum_task) const override
     {
@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    std::unique_ptr<SimulatorStrategy<ClassicalCommBackend>> simulator_;
+    std::unique_ptr<SimulatorStrategy<QCBackend>> simulator_;
 };
 
 } // End of sim namespace

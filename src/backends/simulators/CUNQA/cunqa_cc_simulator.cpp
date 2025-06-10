@@ -1,4 +1,4 @@
-#include "cunqa_classical_comm_simulator.hpp"
+#include "cunqa_cc_simulator.hpp"
 
 #include "src/instructions.hpp"
 #include "src/result_cunqasim.hpp"
@@ -14,10 +14,10 @@ namespace sim {
 
 CunqaCCSimulator::~CunqaCCSimulator() = default;
 
-JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantumtask)
+JSON CunqaCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantumtask)
 {
     std::vector<std::string> connect_with = quantumtask.sending_to;
-    this->classical_channel->set_classical_connections(connect_with);
+    this->classical_channel->connect(connect_with);
 
     std::vector<JSON> instructions = quantumtask.circuit;
     JSON run_config = quantumtask.config;

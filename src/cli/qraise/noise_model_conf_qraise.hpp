@@ -44,7 +44,7 @@ std::string get_noise_model_run_command(auto& args, std::string& mode)
                + R"(","gate_error":")" +  std::to_string(gate_error)+ R"("})" ;
 
     subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " Aer \'" + noise_properties + "\'" + "\n";
-    run_command =  "srun --task-epilog=$BINARIES_DIR/epilog.sh setup_qpus $INFO_PATH " + subcommand;
+    run_command =  "srun --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " + subcommand;
     LOGGER_DEBUG("Qraise noisy CunqaBackend. \n");
     LOGGER_DEBUG("Run command: {}", run_command);
 

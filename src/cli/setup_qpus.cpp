@@ -6,12 +6,12 @@
 
 #include "qpu.hpp"
 #include "backends/simple_backend.hpp"
-#include "backends/classical_comm_backend.hpp"
+#include "backends/cc_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
-#include "backends/simulators/Munich/munich_classical_comm_simulator.hpp"
+#include "backends/simulators/Munich/munich_cc_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_simple_simulator.hpp"
-#include "backends/simulators/CUNQA/cunqa_classical_comm_simulator.hpp"
+#include "backends/simulators/CUNQA/cunqa_cc_simulator.hpp"
 
 #include "utils/json.hpp"
 #include "utils/helpers/murmur_hash.hpp"
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 
     switch(murmur::hash(communications)) {
         case murmur::hash("no_comm"): 
-        LOGGER_DEBUG("Raising QPU without communications.");
+            LOGGER_DEBUG("Raising QPU without communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Aer"): 
                     turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
@@ -122,24 +122,35 @@ int main(int argc, char *argv[])
                     LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
-        case murmur::hash("classical_comm"): 
-        LOGGER_DEBUG("Raising QPU with classical communications.");
+        case murmur::hash("cc"): 
+            LOGGER_DEBUG("Raising QPU with classical communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Cunqa"): 
-                    turn_ON_QPU<CunqaCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
+                    turn_ON_QPU<CunqaCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 case murmur::hash("Munich"): 
-                    turn_ON_QPU<MunichCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
+                    turn_ON_QPU<MunichCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
+        case murmur::hash("quantum_comm"):
+            LOGGER_DEBUG("Raising QPU with quantum communications.");
+            switch(murmur::hash(sim_arg)) {
+                case murmur::hash("Munich"): 
+                    turn_ON_QPU<MunichQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
+                    break;
+                default:
+                    LOGGER_ERROR("Simulator {} do not support quantum communication simulation or does not exist.", sim_arg);
+                    return EXIT_FAILURE;
+            }
         default:
             LOGGER_ERROR("No {} communication method available.", communications);
             return EXIT_FAILURE;
-    }     
+    }
     return EXIT_SUCCESS;
 }

@@ -9,20 +9,23 @@ namespace comm {
 
 class ClassicalChannel {
 public:
+    std::string endpoint;
 
     ClassicalChannel();
     ~ClassicalChannel();
 
-    void set_classical_connections(std::vector<std::string>& endpoints);
-    void send_measure(int& measurement, std::string& target);
-    int recv_measure(std::string& origin);
-    
+    void connect(const std::string& endpoint);
+    void connect(const std::vector<std::string>& endpoints);
 
+    void send_info(const std::string& data, const std::string& target);
+    std::string recv_info(const std::string& origin);
+
+    void send_measure(const int& measurement, const std::string& target);
+    int recv_measure(const std::string& origin);
+    
 private:
     struct Impl;
     std::unique_ptr<Impl> pimpl_;
-public:
-    std::string endpoint;
 };  
 
 } // End of comm namespace

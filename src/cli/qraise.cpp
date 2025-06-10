@@ -9,50 +9,35 @@
 #include "argparse.hpp"
 
 #include "utils/constants.hpp"
-#include "utils/qraise/utils_qraise.hpp"
-#include "utils/qraise/args_qraise.hpp"
-#include "utils/qraise/fakeqmio_conf_qraise.hpp"
-#include "utils/qraise/noise_model_conf_qraise.hpp"
-#include "utils/qraise/no_comm_conf_qraise.hpp"
-#include "utils/qraise/classical_comm_conf_qraise.hpp"
-#include "utils/qraise/quantum_comm_conf_qraise.hpp"
+#include "qraise/utils_qraise.hpp"
+#include "qraise/args_qraise.hpp"
+#include "qraise/fakeqmio_conf_qraise.hpp"
+#include "qraise/noise_model_conf_qraise.hpp"
+#include "qraise/simple_conf_qraise.hpp"
+#include "qraise/cc_conf_qraise.hpp"
+#include "qraise/qc_conf_qraise.hpp"
 
 #include "logger.hpp"
 
 using namespace std::literals;
 
-int main(int argc, char* argv[]) 
+namespace {
+
+void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args) 
 {
-    srand((unsigned int)time(NULL));
-    int intSEED = rand() % 1000;
-    std::string SEED = std::to_string(intSEED);
-
-    auto args = argparse::parse<MyArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
-
-    const char* store = std::getenv("STORE");
-    std::string info_path = std::string(store) + "/.cunqa/qpus.json";
-    int set_variable = setenv("CUNQA_INFO_PATH", info_path.c_str(), 1); // 1 = overwrite if exists
-    if (set_variable != 0) {
-        LOGGER_ERROR("Enviroment variable CUNQA_INFO_PATH impossible to set.");
-        return 1;
-    }
-
-    std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-    LOGGER_DEBUG("Temporal file qraise_sbatch_tmp.sbatch created.");
-    std::string run_command;
-
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
-    sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
+    int tasks = args.quantum_comm ? args.n_qpus + 1 : args.n_qpus;
+    sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
     sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
 
     if (args.qpus_per_node.has_value()) {
         if (args.n_qpus < args.qpus_per_node) {
-            std::cerr << "\033[1;31m" << "Error: " << "Less qpus than selected qpus_per_node.\n";
-            std::cerr << "Number of QPUs: " << args.n_qpus << " QPUs per node: " << args.qpus_per_node.value() << "\n";
-            std::cerr << "Aborted." << "\033[0m \n";
+            LOGGER_ERROR("Less qpus than selected qpus_per_node.");
+            LOGGER_ERROR("\tNumber of QPUs: {}\n\t QPUs per node: {}", args.n_qpus, args.qpus_per_node.value());
+            LOGGER_ERROR("Aborted.");
             std::system("rm qraise_sbatch_tmp.sbatch");
             return 1;
         } else {
@@ -62,10 +47,9 @@ int main(int argc, char* argv[])
 
     if (args.node_list.has_value()) {
         if (args.number_of_nodes.value() != args.node_list.value().size()) {
-            std::cerr << "\033[1;31m" << "Error: " << "Different number of node names than total nodes.\n";
-            std::cerr << "Number of nodes: " << args.number_of_nodes.value() << " Number of node names: " << args.node_list.value().size() << "\n";
-            std::cerr << "Aborted." << "\033[0m \n";
-            std::system("rm qraise_sbatch_tmp.sbatch");
+            LOGGER_ERROR("Different number of node names than total nodes.");
+            LOGGER_ERROR("\tNumber of nodes: {}\n\t Number of node names: {}", args.number_of_nodes.value(), args.node_list.value().size());
+            LOGGER_ERROR("Aborted.");
             return 1;
         } else {
             sbatchFile << "#SBATCH --nodelist=";
@@ -113,32 +97,24 @@ int main(int argc, char* argv[])
     }
 
     sbatchFile << "#SBATCH --output=qraise_%j\n";
+}
+
+void write_env_variables(std::ofstream& sbatchFile)
+{
+    const char* store = std::getenv("STORE");
 
     sbatchFile << "\n";
     sbatchFile << "if [ ! -d \"$STORE/.cunqa\" ]; then\n";
     sbatchFile << "mkdir $STORE/.cunqa\n";
     sbatchFile << "fi\n";
 
-    sbatchFile << "BINARIES_DIR=" << std::getenv("STORE") << "/.cunqa\n";
-    sbatchFile << "export INFO_PATH=" << info_path + "\n";
+    sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
+    sbatchFile << "INFO_PATH=" << store << "/.cunqa/qpus.json\n";
+}
 
-    //Checking duplicate family name
-    std::string family = std::any_cast<std::string>(args.family_name);
-    if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
-        LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
-        std::system("rm qraise_sbatch_tmp.sbatch");
-        return 0;
-    }
-
-    //Get mode: hpc or cloud
-    std::string mode;
-    if(args.cloud) {
-        mode = "cloud";
-    } else {
-        mode = "hpc";
-    }
-
-    //Get srun command
+void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
+{
+    std::string run_command;
     if (args.fakeqmio.has_value()) {
         LOGGER_DEBUG("Fakeqmio provided as a FLAG");
         if (args.simulator == "Munich" or args.simulator == "Cunqa"){
@@ -162,34 +138,48 @@ int main(int argc, char* argv[])
         return 0;
 
     } else {
-        if (args.classical_comm) {
+        if (args.cc) {
             LOGGER_DEBUG("Classical communications");
-            run_command = get_classical_comm_run_command(args, mode);
-            if (run_command == "0") {
-                return 0;
-            }
+            run_command = get_cc_run_command(args, mode);
         } else if (args.quantum_comm) {
-            LOGGER_ERROR("Quantum communications are not implemented yet");
-            std::system("rm qraise_sbatch_tmp.sbatch");
-            return 0;
+            LOGGER_DEBUG("Quantum communications");
+            run_command = get_qc_run_command(args, mode);
         } else {
             LOGGER_DEBUG("No communications");
-            run_command = get_no_comm_run_command(args, mode);
-            if (run_command == "0") {
-                return 0;
-            }
+            run_command = get_simple_run_command(args, mode);
         }
     }
 
     LOGGER_DEBUG("Run command: {}", run_command);
     sbatchFile << run_command;
+}
 
+}
+
+
+int main(int argc, char* argv[]) 
+{
+    auto args = argparse::parse<CunqaArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
+
+    // Setting and checking mode and family name, respectively
+    std::string mode = args.cloud ? "cloud" : "hpc";
+    std::string family = args.family_name;
+    if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
+        LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
+        std::system("rm qraise_sbatch_tmp.sbatch");
+        return 0;
+    }
+
+    // Writing the sbatch file
+    std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
+    write_sbatch_header(sbatchFile, args);
+    write_env_variables(sbatchFile);
+    write_run_command(sbatchFile, args);
     sbatchFile.close();
 
+    // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");
-
-    LOGGER_DEBUG("Sbatch launched and qraise_sbatch_tmp.sbatch removed.");
 
     return 0;
 }

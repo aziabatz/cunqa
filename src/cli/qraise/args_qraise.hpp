@@ -7,7 +7,7 @@
 
 using namespace std::literals;
 
-struct MyArgs : public argparse::Args 
+struct CunqaArgs : public argparse::Args 
 {
     //int& node = kwarg("node", "Specific node to raise the qpus."); //Álvaro 
     int& n_qpus                          = kwarg("n,num_qpus", "Number of QPUs to be raised.");

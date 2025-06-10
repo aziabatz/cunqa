@@ -10,7 +10,8 @@
 namespace cunqa {
 
 [[deprecated("Unused because iterference with MPI for classical/quantum communications")]] 
-void write_MPI(JSON local_data, const std::string &filename) {
+void write_MPI(JSON local_data, const std::string &filename) 
+{
     try {
         int world_rank, world_size;
         MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
@@ -80,7 +81,8 @@ void write_MPI(JSON local_data, const std::string &filename) {
     }
 }
 
-void write_on_file(JSON local_data, const std::string &filename) {
+void write_on_file(JSON local_data, const std::string &filename) 
+{
     try {
         int file = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
         if (file == -1) {

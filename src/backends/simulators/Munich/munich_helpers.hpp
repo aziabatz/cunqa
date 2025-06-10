@@ -126,4 +126,5 @@ inline std::string quantum_task_to_Munich(const QuantumTask& quantum_task)
         
     return qasm_circt;
 }
+
 } // End of cunqa namespace

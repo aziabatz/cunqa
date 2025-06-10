@@ -15,23 +15,19 @@ namespace comm {
 
 struct ClassicalChannel::Impl
 {
-    std::unique_ptr<zmq::context_t> zmq_context;
-    std::unordered_map<std::string, zmq::socket_t> zmq_connected_clients;
+    zmq::context_t zmq_context;
+    std::unordered_map<std::string, zmq::socket_t> zmq_sockets;
     zmq::socket_t zmq_comm_server;
     std::string zmq_endpoint;
-    std::unordered_map<std::string, std::queue<int>> message_queue;
+    std::unordered_map<std::string, std::queue<std::string>> message_queue;
 
     Impl()
     {
-        //Context
-        zmq::context_t aux_context;
-        zmq_context = std::make_unique<zmq::context_t>(std::move(aux_context));
-
         //Endpoint part
         zmq_endpoint = get_my_endpoint();
 
         //Server part
-        zmq::socket_t qpu_server_socket_(*zmq_context, zmq::socket_type::router);
+        zmq::socket_t qpu_server_socket_(zmq_context, zmq::socket_type::router);
         qpu_server_socket_.bind(zmq_endpoint);
         zmq_comm_server = std::move(qpu_server_socket_);
 
@@ -39,79 +35,80 @@ struct ClassicalChannel::Impl
     }
     ~Impl() = default;
 
-    void send(int& measurement, std::string& target)
+
+    void connect(const std::string& endpoint)
     {
-        // Client part
-        if (zmq_connected_clients.find(target) == zmq_connected_clients.end()) {
-            LOGGER_ERROR("No connections was established with endpoint {}.", target);
-            throw std::runtime_error("Error with endpoint connection.");
+        if (zmq_sockets.find(endpoint) == zmq_sockets.end()) {
+            zmq::socket_t tmp_client_socket(zmq_context, zmq::socket_type::dealer);
+            tmp_client_socket.setsockopt(ZMQ_IDENTITY, zmq_endpoint.c_str(), zmq_endpoint.size());
+            zmq_sockets[endpoint] = std::move(tmp_client_socket);
+            zmq_sockets[endpoint].(endpoint);
         }
-        zmq::message_t message(sizeof(int));
-        std::memcpy(message.data(), &measurement, sizeof(int));
-        zmq_connected_clients[target].send(message);
     }
 
-    int recv(std::string& origin)
+    void send(const std::string& data, const std::string& target) 
     {
-        int measurement;
+        if (zmq_sockets.find(target) == zmq_sockets.end()) {
+            LOGGER_ERROR("No connections were established with endpoint {}.", target);
+            throw std::runtime_error("Error with endpoint connection.");
+        }
+        zmq::message_t message(data.begin(), data.end());
+        zmq_sockets[target].send(message, zmq::send_flags::none);
+    }
+    
+    std::string recv(const std::string& origin)
+    {
         if (!message_queue[origin].empty()) {
-            measurement = message_queue[origin].front();
+            std::string stored_data = message_queue[origin].front();
             message_queue[origin].pop();
-            return measurement;
+            return stored_data;
         } else {
             while (true) {
-                zmq::message_t client_id;
+                zmq::message_t id;
                 zmq::message_t message;
 
                 zmq_comm_server.recv(client_id, zmq::recv_flags::none);
                 zmq_comm_server.recv(message, zmq::recv_flags::none);
-                std::string client_id_str(static_cast<char*>(client_id.data()), client_id.size());
-                std::memcpy(&measurement, message.data(), sizeof(int));
+                std::string id_str(static_cast<char*>(id.data()), id.size());
+                std::string data(static_cast<char*>(id.data()), id.size());
                 
-                if (client_id_str == origin) {
-                    return measurement;
+                if (id_str == origin) {
+                    return data;
                 } else {
-                    this->message_queue[client_id_str].push(measurement);
+                    this->message_queue[client_id_str].push(data);
                 }
             }
         }
     }
-
-    void set_connections(std::vector<std::string>& endpoints)
-    {
-        for (auto& endpoint : endpoints) {
-            if (zmq_connected_clients.find(endpoint) == zmq_connected_clients.end()) {
-                zmq::socket_t tmp_client_socket(*zmq_context, zmq::socket_type::dealer);
-                tmp_client_socket.setsockopt(ZMQ_IDENTITY, zmq_endpoint.c_str(), zmq_endpoint.size());
-                zmq_connected_clients[endpoint] = std::move(tmp_client_socket);
-                zmq_connected_clients[endpoint].connect(endpoint);
-            }
-        }
-        LOGGER_DEBUG("ZMQ client sockets instanciated.");
-    }
 };
 
 
-ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()}, endpoint{pimpl_->zmq_endpoint}
-{}
-
+ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()} { endpoint = pimpl_->zmq_endpoint; }
 ClassicalChannel::~ClassicalChannel() = default;
 
-void ClassicalChannel::send_measure(int& measurement, std::string& target)
+//--------------------------------------------------
+// Functions to stablish the other devices connected
+//--------------------------------------------------
+void ClassicalChannel::connect(const std::string& endpoint) { pimpl_->connect(endpoint); }
+
+void ClassicalChannel::connect(const std::vector<std::string>& endpoints) 
 {
-    pimpl_->send(measurement, target);
+    for (const auto& endpoints: endpoint) {
+        pimpl_->connect(endpoint);
+    }
 }
 
-int ClassicalChannel::recv_measure(std::string& origin)
-{
-    return pimpl_->recv(origin);
-}
+//------------------------------------------------------------------------------------
+// Send and recv functions for arbitrary info (such as a whole circuit or an endpoint)
+//------------------------------------------------------------------------------------
+void ClassicalChannel::send_info(const std::string& data, const std::string& target) { pimpl_->send(data, target); }
+std::string ClassicalChannel::recv_info(const std::string& origin) { return pimpl_->recv(origin); }
 
-void ClassicalChannel::set_classical_connections(std::vector<std::string>& endpoints)
-{
-    LOGGER_DEBUG("Setting connections on classical channel.");
-    pimpl_->set_connections(endpoints);
-}
+//-----------------------------------------
+// Send and recv functions for measurements
+//-----------------------------------------
+void ClassicalChannel::send_measure(const int& measurement, const std::string& target) { pimpl_->send(std::to_string(data), target); }
+int ClassicalChannel::recv_measure(const std::string& origin) { return std::stoi(pimpl_->recv(origin)); }
 
 
 } // End of comm namespace
