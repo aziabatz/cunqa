@@ -86,6 +86,18 @@ struct ClassicalChannel::Impl
 ClassicalChannel::ClassicalChannel() : pimpl_{std::make_unique<Impl>()} { endpoint = pimpl_->zmq_endpoint; }
 ClassicalChannel::~ClassicalChannel() = default;
 
+void ClassicalChannel::publish() 
+{
+    const std::string store = getenv("STORE");
+    const std::string filepath = store + "/.cunqa/communications.json"s;
+    JSON communications_endpoint = 
+    {
+        {"communications_endpoint", pimpl_->endpoint}
+    };
+    write_on_file(communications_endpoint, filepath);
+}
+
+
 //--------------------------------------------------
 // Functions to stablish the other devices connected
 //--------------------------------------------------

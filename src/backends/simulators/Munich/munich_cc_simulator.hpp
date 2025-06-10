@@ -24,16 +24,14 @@ namespace sim {
 
 class MunichCCSimulator final : public SimulatorStrategy<CCBackend> {
 public:
-    MunichCCSimulator(): classical_channel(std::make_unique<comm::ClassicalChannel>()) {};
+    MunichCCSimulator();
     ~MunichCCSimulator() = default;
 
     inline std::string get_name() const override {return "MunichSimulator";}
     JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
-    std::string _get_communication_endpoint() override;
-
-    std::unique_ptr<comm::ClassicalChannel> classical_channel;
 
 private:
+    comm::ClassicalChannel classical_channel;
     JSON usual_execution_(const CCBackend& backend, const QuantumTask& quantum_task);
     JSON distributed_execution_(const CCBackend& backend, const QuantumTask& quantum_task);
 };

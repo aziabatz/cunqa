@@ -1,8 +1,13 @@
 
 #include "circuit_simulator_adapter.hpp"
+#include "munich_executors.hpp"
+#include "munich_helpers.hpp"
 
-namespace cunqa {
-namespace sim {
+#include <chrono>
+#include <optional>
+
+#include "quantum_task.hpp"
+#include "backends/simulators/simulator_strategy.hpp"
 
 std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t shots)
 {

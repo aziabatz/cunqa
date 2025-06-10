@@ -44,15 +44,13 @@ class Result:
         #logger.debug("Results correctly loaded.")
 
 
-    # TODO: Use length of counts to justify time_taken (ns) at the end of the line.
+    # TODO: Use length of counts to justify time_taken (ms) at the end of the line.
     def __str__(self):
         RED = "\033[31m"
         YELLOW = "\033[33m"
         RESET = "\033[0m"   
         GREEN = "\033[32m"
-        displace = int(len(self._id) + len("{'{'}counts: ") + len(str(self.counts)) -4 - len("time_taken: ") - len(str(float(self.time_taken)/1e3)) )
-        time_taken_str = "time_taken: "
-        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t {time_taken_str:>{displace}.{11}} {GREEN}{float(self.time_taken)/1e3} ms{RESET}{'}'}\n"
+        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken: {GREEN}{float(self.time_taken)/1e3} ms{RESET}{'}'}\n"
 
 
     @property
@@ -162,7 +160,7 @@ def convert_counts(counts: dict, registers: dict) -> dict:
         for k,v in counts.items():
             if k.startswith('0x'): # converting to binary string and dividing in bit strings
                 new_counts[divide(format(int(k, 16), '0' + str(num_clbits) + 'b'), lengths)]= v
-            else: # just dividing the bit stings
+            else: # just dividing the bit strings
                 new_counts[divide(k, lengths)] = v
     elif isinstance(counts, list):
         for count in counts:

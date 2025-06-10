@@ -9,7 +9,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
 
-from cunqa.circuit import qc_to_json, registers_dict, _is_parametric, CunqaCircuit
+from cunqa.circuit import qc_to_json, _registers_dict, _is_parametric, CunqaCircuit
 from cunqa.logger import logger
 from cunqa.backend import Backend
 from cunqa.result import Result
@@ -28,12 +28,13 @@ class QJob:
     qclient: 'QClient' 
     _updated: bool
     _future: 'FutureWrapper' 
-    _result: Optional['Result'] 
+    _result: Optional['Result']
     _circuit_id: str 
     _sending_to: "list[str]"
-    _is_distributed: bool
+    _is_dynamic: bool
+    _is_distributed:bool
 
-    def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit'], **run_parameters: Any):
+    def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
         Initializes the QJob class.
 
@@ -179,9 +180,13 @@ class QJob:
                     self._sending_to = circuit["sending_to"]
                 else:
                     self._sending_to = []
-                if "is_distributed" in  circuit:
+                if "is_distributed" in circuit:
                     self._is_distributed = circuit["is_distributed"]
+                    self._is_dynamic = True
+                elif "is_dynamic" in  circuit:
+                    self._is_dynamic = circuit["is_dynamic"]
                 else:
+                    self._is_dynamic = False
                     self._is_distributed = False
 
                 logger.debug("Translation to dict not necessary...")
@@ -200,6 +205,7 @@ class QJob:
                 self._cregisters = circuit.classical_regs
                 self._circuit_id = circuit._id
                 self._sending_to = circuit.sending_to
+                self._is_dynamic = circuit.is_dynamic
                 self._is_distributed = circuit.is_distributed
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
@@ -213,14 +219,16 @@ class QJob:
 
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
-                self._cregisters = registers_dict(circuit)[1]
+                self._cregisters = _registers_dict(circuit)[1]
                 # TODO: ¿self.circuit_id?
                 self._sending_to = []
-                self._is_distributed = False
-
+                
                 logger.debug("Translating to dict from QuantumCircuit...")
 
-                instructions = qc_to_json(circuit)['instructions']
+                circuit_json, is_dynamic = qc_to_json(circuit)
+                instructions = circuit_json['instructions']
+                self._is_dynamic = is_dynamic
+                self._is_distributed = False
 
             elif isinstance(circuit, str):
 
@@ -230,14 +238,16 @@ class QJob:
 
                 self.num_qubits = qc_from_qasm.num_qubits
                 self.num_clbits = sum(len(k) for k in self._cregisters.values())
-                self._cregisters = registers_dict(qc_from_qasm)[1]
+                self._cregisters = _registers_dict(qc_from_qasm)[1]
                 # TODO: ¿self.circuit_id?
                 self._sending_to = []
-                self._is_distributed = False
 
                 logger.debug("Translating to dict from QASM2 string...")
 
-                instructions = qc_to_json(qc_from_qasm)['instructions']
+                circuit_json, is_dynamic = qc_to_json(circuit)
+                instructions = circuit_json['instructions']
+                self._is_dynamic = is_dynamic
+                self._is_distributed = False
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
@@ -282,10 +292,12 @@ class QJob:
             else:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
+            logger.debug("Before exec_config")
             exec_config = {
                 "config":run_config, 
                 "instructions":self._circuit,
                 "sending_to":self._sending_to,
+                "is_dynamic":self._is_dynamic,
                 "is_distributed":self._is_distributed
             }
             self._execution_config = json.dumps(exec_config)

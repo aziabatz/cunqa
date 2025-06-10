@@ -18,38 +18,12 @@
 
 #include "utils/json.hpp"
 
-namespace{
-
-void endpoint_to_file(const std::string& endpoint) 
-{
-    const char* store = std::getenv("STORE");
-    std::string filename = std::string(store) + "/endpoints_" + std::getenv("SLURM_JOB_ID");
-    int file = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
-    if (file == -1) {
-        std::cerr << "Error al abrir el archivo" << std::endl;
-        return;
-    }
-    flock(file, LOCK_EX);
-
-    std::string current_data;
-    std::ofstream out(filename, std::ios::app);
-    out << endpoint << "\n";
-    out.close();
-
-    flock(file, LOCK_UN);
-    close(file);
-}
-
-}
-
-
 namespace cunqa {
 namespace sim {
 
 MunichQCSimulator::MunichQCSimulator(): 
-    classical_channel(std::make_unique<comm::ClassicalChannel>()) 
 { 
-    endpoint_to_file(classical_channel.endpoint);
+    classical_channel.publish();
     classical_channel.recv_endpoint("executor");
 };
 

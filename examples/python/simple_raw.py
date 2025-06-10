@@ -5,9 +5,13 @@ import random
 
 from qiskit import QuantumCircuit
 
+sys.path.append(os.getenv("HOME"))
 from cunqa.qutils import getQPUs
 
+
+
 qc = {
+    "id":"quantumcircuit",
     "instructions": [
     {
         "name":"h",
@@ -25,13 +29,16 @@ qc = {
     },
     {
         "name": "measure",
-        "qubits": [0]
+        "qubits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
-        "qubits": [1]
+        "qubits": [1], 
+        "clreg":[]
     }
     ],
+    "is_distributed": False,
     "num_qubits": 2,
     "num_clbits": 2,
     "classical_registers": {
@@ -39,12 +46,12 @@ qc = {
             0,
             1
         ]
-    },
-    "exec_type":"dynamic"
+    }
 }
 
 
 qc_param = {
+    "id":"parametricquantumcircuit",
     "instructions": [
     {
         "name":"h",
@@ -57,13 +64,16 @@ qc_param = {
     },
     {
         "name": "measure",
-        "qubits": [0]
+        "qubits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
-        "qubits": [1]
+        "qubits": [1], 
+        "clreg":[]
     }
     ],
+    "is_distributed": False,
     "num_qubits": 2,
     "num_clbits": 2,
     "classical_registers": {
@@ -71,8 +81,7 @@ qc_param = {
             0,
             1
         ]
-    },
-    "exec_type":"dynamic"
+    }
 }
 
 
@@ -84,15 +93,15 @@ for q in qpus:
 
 qpu0 = qpus[-1]
 
-job = qpu0.run(qc, shots=19)
-print(job.result().get_counts())
+job = qpu0.run(qc_param, shots=19)
+print(job.result.counts)
 
 
 # Upgrade parameters
-""" for _ in range(10):
+for _ in range(10):
     new_params = [random.uniform(0.0, 6.283185)]
     print("Parameter: ", new_params[0])
-    param_job = job.upgrade_parameters(new_params)
-    print("Counts: ", param_job.result().get_counts()) """
+    job.upgrade_parameters(new_params)
+    print("Counts: ", job.result.counts)
 
 

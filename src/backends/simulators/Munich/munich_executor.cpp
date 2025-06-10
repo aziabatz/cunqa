@@ -13,7 +13,7 @@ namespace cunqa {
 namespace sim {
 
 void MunichExecutor(const int& n_qpus)
-
+{
     const char* store = std::getenv("STORE");
     std::string filename = std::string(store) + "/endpoints_" + std::getenv("SLURM_JOB_ID");
 

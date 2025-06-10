@@ -30,7 +30,7 @@ def how_big_a_combination(k):
 
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs #
-family = qraise(2,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = True)
 qpus_QPE  = getQPUs(local = False, family = family)
 
 # Params for the gates in the Cut Bell Pair Factory #
@@ -137,7 +137,7 @@ for _ in range(shots): # Each shot uses a different circuit of the linear combin
 
 YELLOW = "\033[33m"
 RESET = "\033[0m"
-print(f"{YELLOW}Alice:{RESET} {dict(Alice_counts)}\n {YELLOW}Bobby:{RESET} {dict(Bob_counts)}")
+print(f"{YELLOW}Alice:{RESET} {dict(Alice_counts)}\n{YELLOW}Bobby:{RESET} {dict(Bob_counts)}")
 
 # Drop the deployed QPUs #
 qdrop(family)

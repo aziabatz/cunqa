@@ -4,6 +4,9 @@
 
 import os
 from typing import  Union, Any, Optional
+import inspect
+
+from qiskit import QuantumCircuit
 
 from cunqa.qclient import QClient
 from cunqa.circuit import CunqaCircuit 
@@ -32,12 +35,11 @@ class QPU:
     _id: int 
     _qclient: 'QClient' 
     _backend: 'Backend' 
-    _family: str 
+    _family: str
     _endpoint: "tuple[str, int]" 
-    _comm_endpoint: str 
     _connected: bool 
     
-    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]", comm_endpoint: str):
+    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]"):
         """
         Initializes the QPU class.
 
@@ -58,7 +60,6 @@ class QPU:
         self._backend = backend
         self._family = family
         self._endpoint = endpoint
-        self._comm_endpoint = comm_endpoint
         self._connected = False
         
         logger.debug(f"Object for QPU {id} created correctly.")
@@ -71,7 +72,7 @@ class QPU:
     def backend(self) -> Backend:
         return self._backend
 
-    def run(self, circuit: Union[dict, 'CunqaCircuit'], transpile: bool = False, initial_layout: Optional["list[int]"] = None, opt_level: int = 1, **run_parameters: Any) -> 'QJob':
+    def run(self, circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], transpile: bool = False, initial_layout: Optional["list[int]"] = None, opt_level: int = 1, **run_parameters: Any) -> 'QJob':
         """
         Class method to run a circuit in the QPU.
 
@@ -99,17 +100,17 @@ class QPU:
         <class 'QJob'> object.
         """
         # Disallow execution of distributed circuits
-        if isinstance(circuit, CunqaCircuit):
-            if circuit.is_distributed:
-                logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
-                raise SystemExit
-        elif isinstance(circuit, dict):
-            if 'is_distributed' in circuit and circuit["is_distributed"]:
-                logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
-                raise SystemExit
-        else:
-            logger.error(f"Circuit must be <class cunqa.circuit.CunqaCircuit> or dict, but {type(circuit)} was provided [{TypeError.__name__}]")
-            raise SystemExit
+        if inspect.stack()[1].function != "run_distributed": # Checks if the run() is called from run_distributed()
+            if isinstance(circuit, CunqaCircuit):
+                if circuit.is_distributed:
+                    logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
+                    raise SystemExit
+            elif isinstance(circuit, dict):
+                if 'is_distributed' in circuit and circuit["is_distributed"]:
+                    logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
+                    raise SystemExit
+
+
 
         # Handle connection to QClient
         if not self._connected:

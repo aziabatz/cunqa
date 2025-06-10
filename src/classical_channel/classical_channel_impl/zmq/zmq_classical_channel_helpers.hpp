@@ -52,30 +52,6 @@ std::string get_my_endpoint()
     return endpoint;
 }
 
-std::vector<std::string> get_others_endpoints(std::string& my_endpoint)
-{
-    std::vector<std::string> others_endpoints;
-
-    std::string cunqa_info_path = std::getenv("CUNQA_INFO_PATH");
-    
-    std::ifstream qpus_json_file(cunqa_info_path);
-    if (!qpus_json_file) {
-        LOGGER_ERROR("Impossible to read the file {}", cunqa_info_path);
-        return {};
-    }
-
-    JSON qpus_json;
-    qpus_json_file >> qpus_json; 
-
-    for (auto& item : qpus_json) {
-        std::string aux_endpoint =  item.at("communications_endpoint").get<std::string>();
-        if (aux_endpoint != my_endpoint) {
-            others_endpoints.push_back(aux_endpoint);
-        }
-    }
-
-    return others_endpoints;
-}
 
 } // End of comm namespace
 } // End of cunqa namespace

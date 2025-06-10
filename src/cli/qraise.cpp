@@ -110,6 +110,8 @@ void write_env_variables(std::ofstream& sbatchFile)
 
     sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
     sbatchFile << "INFO_PATH=" << store << "/.cunqa/qpus.json\n";
+    sbatchFile << "COMM_PATH=" << store << "/.cunqa/communications.json\n";
+    
 }
 
 void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)

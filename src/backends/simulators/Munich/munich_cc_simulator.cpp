@@ -11,6 +11,10 @@
 namespace cunqa {
 namespace sim {
 
+MunichCCSimulator::MunichCCSimulator()
+{
+    classical_channel.publish();
+};
 
 JSON MunichCCSimulator::execute(const CCBackend& backend, const QuantumTask& circuit)
 {
@@ -20,13 +24,6 @@ JSON MunichCCSimulator::execute(const CCBackend& backend, const QuantumTask& cir
     } else {
         return this->distributed_execution_(backend, circuit);
     }   
-} 
-
-
-std::string MunichCCSimulator::_get_communication_endpoint()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
 }
 
 } // End namespace sim

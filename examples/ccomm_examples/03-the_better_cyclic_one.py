@@ -16,7 +16,7 @@ def mod(n, m):
 
 def cyclic_ccommunication(n):
     # Raise and get QPUs
-    family = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
+    family = qraise(n,"00:10:00", simulator="Munich", classical_comm=True, cloud = True)
     os.system('sleep 5')
     qpus_comm = getQPUs(local = False, family = family)
 

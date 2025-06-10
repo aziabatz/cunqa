@@ -3,12 +3,13 @@ import sys
 import json
 import time
 
+sys.path.append(os.getenv("HOME"))
 from cunqa.qutils import getQPUs
 
 qpus = getQPUs(local=False)
 print("QPUs disponibles:")
 for q in qpus:
-    print(f"QPU {q.id}, backend: {q.backend.name}, endpoint: {q.endpoint}")
+    print(f"QPU {q.id}, backend: {q.backend.name}")
 
 qpu0 = qpus[0]
 qpu1 = qpus[1]
@@ -24,26 +25,30 @@ d_qc_0_zmq = {
         "qubits":[0],
     },
     {
-        "name":"remote_c_if_x",
-        "qubits":[0,0],
-        "circuits":["carballido", "losada"]
+        "name":"measure_and_send",
+        "qubits":[0],
+        "circuits":["losada"]
     },
     {
-        "name":"remote_c_if_x",
-        "qubits":[0,0],
-        "circuits":["carballido", "exposito"]
+        "name":"measure_and_send",
+        "qubits":[1],
+        "circuits":["exposito"]
     },
     {
         "name": "measure",
         "qubits": [0],
-        "clbits":[0]
+        "clbits":[0], 
+        "clreg":[]
     },
     {
         "name": "measure",
         "qubits": [1],
-        "clbits": [1]
+        "clbits": [1],
+        "clreg":[]
     }
     ],
+    "is_distributed": True,
+    "sending_to":["losada", "exposito"],
     "num_qubits": 2,
     "num_clbits": 2,
     "classical_registers": {
@@ -51,9 +56,7 @@ d_qc_0_zmq = {
             0,
             1
         ]
-    },
-    "exec_type":"dynamic",
-    "is_distributed": True
+    }
 }
 
 d_qc_1_zmq = {
@@ -61,8 +64,8 @@ d_qc_1_zmq = {
     "instructions": [
     {
         "name":"remote_c_if_x",
-        "qubits":[1,0,-1],
-        "circuits":["carballido", "losada"]
+        "qubits":[1],
+        "circuits":["carballido"]
     },
     {
         "name":"h",
@@ -72,14 +75,18 @@ d_qc_1_zmq = {
     {
         "name": "measure",
         "qubits": [0],
-        "clbits": [0]
+        "clbits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
         "qubits": [1],
-        "clbits": [1]
+        "clbits": [1], 
+        "clreg":[]
     }
     ],
+    "is_distributed": True,
+    "sending_to":[],
     "num_qubits": 2,
     "num_clbits": 2,
     "classical_registers": {
@@ -87,9 +94,7 @@ d_qc_1_zmq = {
             0,
             1
         ]
-    },
-    "exec_type":"dynamic",
-    "is_distributed": True
+    }
 }
 
 d_qc_2_zmq = {
@@ -102,20 +107,24 @@ d_qc_2_zmq = {
     },
     {
         "name":"remote_c_if_x",
-        "qubits":[0,0],
-        "circuits":["carballido", "exposito"]
+        "qubits":[0],
+        "circuits":["carballido"]
     },
     {
         "name": "measure",
         "qubits": [0],
-        "clbits": [0]
+        "clbits": [0], 
+        "clreg":[]
     },
     {
         "name": "measure",
         "qubits": [1],
-        "clbits": [1]
+        "clbits": [1], 
+        "clreg":[]
     }
     ],
+    "is_distributed": True,
+    "sending_to":[],
     "num_qubits": 2,
     "num_clbits": 2,
     "classical_registers": {
@@ -123,9 +132,7 @@ d_qc_2_zmq = {
             0,
             1
         ]
-    },
-    "exec_type":"dynamic",
-    "is_distributed": True
+    }
 }
 
 # print(d_qc_0_zmq)
@@ -137,11 +144,11 @@ d_qc_2_zmq = {
 
 from cunqa.mappers import run_distributed
 
-job0, job1, job2 = run_distributed([d_qc_0_zmq, d_qc_1_zmq, d_qc_2_zmq], qpus[:3], shots = 1)
+job0, job1, job2 = run_distributed([d_qc_0_zmq, d_qc_1_zmq, d_qc_2_zmq], qpus[:3], shots = 10)
 
-print("Result QPU0", job0.result().get_counts())
-print("Result QPU1", job1.result().get_counts())
-print("Result QPU2", job2.result().get_counts())
+print("Result QPU0", job0.result.counts)
+print("Result QPU1", job1.result.counts)
+print("Result QPU2", job2.result.counts)
 
 
 

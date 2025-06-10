@@ -14,6 +14,8 @@ public:
     ClassicalChannel();
     ~ClassicalChannel();
 
+    void publish();
+
     void connect(const std::string& endpoint, const std::string& id = "");
     void connect(const std::vector<std::string>& endpoints);
 
