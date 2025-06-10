@@ -39,7 +39,6 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
 
     std::map<std::size_t, bool> classicValues;
 
-    auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name");

@@ -1,6 +1,7 @@
 
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
+#include "quantum_computation_adapter.hpp"
 
 namespace cunqa {
 namespace sim {

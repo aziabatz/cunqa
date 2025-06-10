@@ -47,11 +47,11 @@ namespace cunqa {
 namespace sim {
 
 MunichQCSimulator::MunichQCSimulator(): 
-        classical_channel(std::make_unique<comm::ClassicalChannel>()) 
-    { 
-        endpoint_to_file(classical_channel.endpoint);
-        classical_channel.recv_endpoint("executor");
-    };
+    classical_channel(std::make_unique<comm::ClassicalChannel>()) 
+{ 
+    endpoint_to_file(classical_channel.endpoint);
+    classical_channel.recv_endpoint("executor");
+};
 
 
 JSON MunichQCSimulator::execute(const QCBackend& backend, const QuantumTask& circuit)

@@ -18,8 +18,7 @@ public:
     QuantumTask(const JSON& circuit, const JSON& config): circuit(circuit), config(config) { };
 
     void update_circuit(const std::string& quantum_task);
-    std::string to_string()
-
+    
 private:
     
     void update_params_(const std::vector<double> params);
