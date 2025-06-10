@@ -18,6 +18,10 @@
 
 #include "logger.hpp"
 
+namespace {
+    const int CORES_PER_NODE = 64; // For both QMIO and FT3
+}
+
 using namespace std::literals;
 
 int main(int argc, char* argv[]) 
@@ -40,7 +44,9 @@ int main(int argc, char* argv[])
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
     sbatchFile << "#SBATCH --ntasks=" << args.n_qpus << "\n";
-    sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
+    int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
+    sbatchFile << "#SBATCH -N " << n_nodes << "\n";
+    
 
     if (args.qpus_per_node.has_value()) {
         if (args.n_qpus < args.qpus_per_node) {
