@@ -7,10 +7,11 @@
 #include "qpu.hpp"
 #include "backends/simple_backend.hpp"
 #include "backends/cc_backend.hpp"
-#include "backends/simulators/AER/aer_simple_simulator.hpp"
-#include "backends/simulators/AER/aer_classical_comm_simulator.hpp"
+//#include "backends/simulators/AER/aer_simple_simulator.hpp"
+//#include "backends/simulators/AER/aer_classical_comm_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
-#include "backends/simulators/Munich/munich_cc_simulator.hpp"
+//#include "backends/simulators/Munich/munich_cc_simulator.hpp"
+#include "backends/simulators/Munich/munich_qc_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_simple_simulator.hpp"
 #include "backends/simulators/CUNQA/cunqa_cc_simulator.hpp"
 
@@ -108,15 +109,15 @@ int main(int argc, char *argv[])
             LOGGER_DEBUG("Raising QPU without communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Aer"): 
-                    turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<AerSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with AerSimpleSimulator.");
                     break;
                 case murmur::hash("Munich"):
-                    turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<MunichSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with MunichSimpleSimulator.");
                     break;
                 case murmur::hash("Cunqa"):
-                    turn_ON_QPU<CunqaSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<CunqaSimpleSimulator, SimpleConfig, SimpleBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaSimpleSimulator.");
                     break;
                 default:
@@ -127,22 +128,22 @@ int main(int argc, char *argv[])
             LOGGER_DEBUG("Raising QPU with classical communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Cunqa"): 
-                    turn_ON_QPU<CunqaCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<CunqaCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 case murmur::hash("Munich"): 
-                    turn_ON_QPU<MunichCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<MunichCCSimulator, CCConfig, CCBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with CunqaCCSimulator.");
                     break;
                 case murmur::hash("Aer"): 
-                    turn_ON_QPU<AerCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
+                    //turn_ON_QPU<AerCCSimulator, ClassicalCommConfig, ClassicalCommBackend>(backend_json, mode, family);
                     LOGGER_DEBUG("QPU turned on with AerCCSimulator.");
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
-        case murmur::hash("quantum_comm"):
+        case murmur::hash("qc"):
             LOGGER_DEBUG("Raising QPU with quantum communications.");
             switch(murmur::hash(sim_arg)) {
                 case murmur::hash("Munich"): 

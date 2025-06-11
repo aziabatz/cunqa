@@ -30,8 +30,8 @@ struct CunqaArgs : public argparse::Args
     std::string& family_name             = kwarg("fam,family_name", "Name that identifies which QPUs were raised together.").set_default("default");
     //bool& hpc                          = flag("hpc", "Default HPC mode. The user can connect with the local node QPUs.");
     bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
-    bool& classical_comm                 = flag("classical_comm", "Enable classical communications.");
-    bool& quantum_comm                   = flag("quantum_comm", "Enable quantum communications.");
+    bool& cc                             = flag("classical_comm", "Enable classical communications.");
+    bool& qc                             = flag("quantum_comm", "Enable quantum communications.");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turning on the required QPUs.\n" << std::endl;

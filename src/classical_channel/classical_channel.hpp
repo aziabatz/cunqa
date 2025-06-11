@@ -12,6 +12,7 @@ public:
     std::string endpoint;
 
     ClassicalChannel();
+    ClassicalChannel(const std::string& id);
     ~ClassicalChannel();
 
     void publish();

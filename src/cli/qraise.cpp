@@ -29,7 +29,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
-    int tasks = args.quantum_comm ? args.n_qpus + 1 : args.n_qpus;
+    int tasks = args.qc ? args.n_qpus + 1 : args.n_qpus;
     sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
     sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
 
@@ -39,7 +39,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
             LOGGER_ERROR("\tNumber of QPUs: {}\n\t QPUs per node: {}", args.n_qpus, args.qpus_per_node.value());
             LOGGER_ERROR("Aborted.");
             std::system("rm qraise_sbatch_tmp.sbatch");
-            return 1;
+            return;
         } else {
             sbatchFile << "#SBATCH --ntasks-per-node=" << args.qpus_per_node.value() << "\n";
         }
@@ -50,7 +50,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
             LOGGER_ERROR("Different number of node names than total nodes.");
             LOGGER_ERROR("\tNumber of nodes: {}\n\t Number of node names: {}", args.number_of_nodes.value(), args.node_list.value().size());
             LOGGER_ERROR("Aborted.");
-            return 1;
+            return;
         } else {
             sbatchFile << "#SBATCH --nodelist=";
             int comma = 0;
@@ -71,29 +71,29 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
         sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
     } else {
         LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
-        return -1;
+        return;
     }
 
     if (check_time_format(args.time))
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
     else {
         LOGGER_ERROR("Time format is incorrect, must be: xx:xx:xx.");
-        return -1;
+        return;
     }
 
     if (!check_simulator_name(args.simulator)){
         LOGGER_ERROR("Incorrect simulator name ({}).", args.simulator);
-        return -1;
+        return;
     }
 
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
 
     if (memory_specs == 1) {
         LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
-        return -1;
+        return;
     } else if (memory_specs == 2) {
         LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-qpu or increase the cores-per-qpu. Max mem-per-cpu = 4");
-        return -1;
+        return;
     }
 
     sbatchFile << "#SBATCH --output=qraise_%j\n";
@@ -114,7 +114,7 @@ void write_env_variables(std::ofstream& sbatchFile)
     
 }
 
-void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
+void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const std::string& mode)
 {
     std::string run_command;
     if (args.fakeqmio.has_value()) {
@@ -133,17 +133,17 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
 
     } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         LOGGER_ERROR("FakeQmio flags where provided but --fakeqmio was not included.");
-        return 0;
+        return;
 
     } else if (!args.noise_properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         LOGGER_ERROR("noise_properties flags where provided but --noise_properties arg was not included.");
-        return 0;
+        return;
 
     } else {
         if (args.cc) {
             LOGGER_DEBUG("Classical communications");
             run_command = get_cc_run_command(args, mode);
-        } else if (args.quantum_comm) {
+        } else if (args.qc) {
             LOGGER_DEBUG("Quantum communications");
             run_command = get_qc_run_command(args, mode);
         } else {
@@ -162,6 +162,8 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
 int main(int argc, char* argv[]) 
 {
     auto args = argparse::parse<CunqaArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
+    const char* store = std::getenv("STORE");
+    std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
     // Setting and checking mode and family name, respectively
     std::string mode = args.cloud ? "cloud" : "hpc";
@@ -176,7 +178,7 @@ int main(int argc, char* argv[])
     std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
     write_sbatch_header(sbatchFile, args);
     write_env_variables(sbatchFile);
-    write_run_command(sbatchFile, args);
+    write_run_command(sbatchFile, args, mode);
     sbatchFile.close();
 
     // Executing and deleting the file

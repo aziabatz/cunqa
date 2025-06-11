@@ -3,9 +3,11 @@
 #include "classical_channel.hpp"
 
 namespace cunqa {
+namespace sim {
+
 class MunichExecutor {
 public:
-    MunichExecutor(const int& n_qpus);
+    MunichExecutor();
     ~MunichExecutor() = default;
 
     void run();
@@ -13,4 +15,6 @@ private:
     comm::ClassicalChannel classical_channel;
     std::vector<std::string> qpu_ids;
 };
-}
+
+} // End of sim namespace
+} // End of cunqa namespace

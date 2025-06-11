@@ -3,14 +3,8 @@
 #include <chrono>
 #include <optional>
 
-#include "CircuitSimulator.hpp"
-#include "StochasticNoiseSimulator.hpp"
-#include "ir/QuantumComputation.hpp"
-#include "ir/operations/Operation.hpp"
-#include "Definitions.hpp"
-
 #include "quantum_task.hpp"
-#include "backends/cc_backend.hpp"
+#include "backends/qc_backend.hpp"
 #include "backends/simulators/simulator_strategy.hpp"
 #include "classical_channel.hpp"
 
@@ -27,7 +21,6 @@ public:
 
     inline std::string get_name() const override {return "MunichQCSimulator";}
     JSON execute(const QCBackend& backend, const QuantumTask& circuit) override;
-    std::string _get_communication_endpoint() override;
 
 private:
     comm::ClassicalChannel classical_channel;

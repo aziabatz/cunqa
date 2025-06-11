@@ -12,6 +12,13 @@
 
 namespace cunqa {
 
+std::string to_string(const QuantumTask& data)
+{
+    if (data.circuit.empty())
+        return "";
+    return data.config.dump(4) + data.circuit.dump(4); 
+}
+
 void QuantumTask::update_circuit(const std::string& quantum_task) 
 {
     auto quantum_task_json = JSON::parse(quantum_task);

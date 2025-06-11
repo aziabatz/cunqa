@@ -1,42 +1,24 @@
-#include "munich_cc_simulator.hpp"
-
-#include <chrono>
-#include <optional>
-#include <iostream>
-#include <fstream>
-#include <sys/file.h>
-#include <unistd.h>
-
-#include "utils/constants.hpp"
-#include "CircuitSimulator.hpp"
-#include "StochasticNoiseSimulator.hpp"
-#include "ir/QuantumComputation.hpp"
-
-#include "quantum_task.hpp"
-#include "backends/simulators/simulator_strategy.hpp"
-#include "munich_helpers.hpp"
-
-#include "utils/json.hpp"
+#include "munich_qc_simulator.hpp"
 
 namespace cunqa {
 namespace sim {
 
-MunichQCSimulator::MunichQCSimulator(): 
+MunichQCSimulator::MunichQCSimulator()
 { 
     classical_channel.publish();
-    classical_channel.recv_endpoint("executor");
+    auto executor_endpoint = classical_channel.recv_info("executor");
+    classical_channel.connect(executor_endpoint, "executor");
 };
 
 
 JSON MunichQCSimulator::execute(const QCBackend& backend, const QuantumTask& circuit)
 {
-    this->classical_channel->send_info(to_string(circuit));
-}
+    classical_channel.send_info(to_string(circuit), "executor");
+    auto results = classical_channel.recv_info("executor");
 
-std::string MunichQCSimulator::_get_communication_endpoint()
-{
-    std::string endpoint = this->classical_channel->endpoint;
-    return endpoint;
+    if (results == "prueba")
+        return {{"prueba", "OK"}};
+    return JSON();
 }
 
 } // End namespace sim

@@ -25,11 +25,6 @@ private:
     void update_params_(const std::vector<double> params);
 };
 
-std::string to_string(const QuantumTask& data)
-{
-    if (data.circuit.empty())
-        return "";
-    return data.config.dump(4) + data.circuit.dump(4); 
-}
+std::string to_string(const QuantumTask& data);
 
 } // End of cunqa namespace

@@ -8,7 +8,7 @@
 #include "logger.hpp"
 #include "args_qraise.hpp"
 
-std::string get_noise_model_run_command(auto& args, std::string& mode)
+std::string get_noise_model_run_command(const CunqaArgs& args, const std::string& mode)
 {
     std::string run_command;
     std::string subcommand;
