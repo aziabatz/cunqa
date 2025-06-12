@@ -69,12 +69,13 @@ struct ClassicalChannel::Impl
             while (true) {
                 zmq::message_t id;
                 zmq::message_t message;
-
+                
                 zmq_comm_server.recv(id, zmq::recv_flags::none);
                 zmq_comm_server.recv(message, zmq::recv_flags::none);
                 std::string id_str(static_cast<char*>(id.data()), id.size());
-                std::string data(static_cast<char*>(id.data()), id.size());
-                
+                std::string data(static_cast<char*>(message.data()), message.size());
+                LOGGER_DEBUG("ID: {} ENDPOINT: {}", id_str, data);
+
                 if (id_str == origin) {
                     return data;
                 } else {

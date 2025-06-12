@@ -7,12 +7,14 @@ MunichQCSimulator::MunichQCSimulator()
 { 
     classical_channel.publish();
     auto executor_endpoint = classical_channel.recv_info("executor");
+    LOGGER_DEBUG("Executor endpoint received: {}", executor_endpoint);
     classical_channel.connect(executor_endpoint, "executor");
 };
 
 
 JSON MunichQCSimulator::execute(const QCBackend& backend, const QuantumTask& circuit)
 {
+    LOGGER_DEBUG("Sending the circuit: {}", to_string(circuit));
     classical_channel.send_info(to_string(circuit), "executor");
     auto results = classical_channel.recv_info("executor");
 

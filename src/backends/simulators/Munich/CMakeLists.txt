@@ -14,9 +14,9 @@
 add_library(munich_qc_simulator "${CMAKE_CURRENT_SOURCE_DIR}/munich_qc_simulator.cpp")
 target_include_directories(munich_qc_simulator PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
                                                             "${CMAKE_SOURCE_DIR}/src/classical_channel")
-target_link_libraries(munich_qc_simulator PUBLIC json quantum_task classical_channel)
+target_link_libraries(munich_qc_simulator PUBLIC json quantum_task classical_channel logger_executor)
 
 add_library(munich_executor "${CMAKE_CURRENT_SOURCE_DIR}/munich_executor.cpp")
 target_include_directories(munich_executor PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
                                                             "${CMAKE_SOURCE_DIR}/src/classical_channel")
-target_link_libraries(munich_executor PUBLIC json quantum_task classical_channel)
+target_link_libraries(munich_executor PUBLIC json quantum_task classical_channel logger_executor)

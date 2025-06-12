@@ -32,7 +32,7 @@ install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # EXECUTOR executable
 add_executable(setup_executor setup_executor.cpp)
-target_link_libraries(setup_executor PRIVATE munich_executor)
+target_link_libraries(setup_executor PRIVATE munich_executor logger_executor)
 target_include_directories(setup_executor PRIVATE "${CMAKE_SOURCE_DIR}/src")
 install(TARGETS setup_executor DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

@@ -15,30 +15,9 @@ using namespace std::string_literals;
 
 using namespace cunqa::sim;
 
-void publish_endpoint(const std::string& endpoint, const std::string& tmp_fifo)
-{
-    auto fd = open(tmp_fifo.c_str(), O_WRONLY);
-    if (fd < 0) {
-        LOGGER_ERROR("Error happened creating the FIFO to publish the executor endpoint: {}", strerror(errno));
-        return;
-    }
-
-    ssize_t bytes = write(fd, endpoint.c_str(), endpoint.size());
-    if (bytes < 0) {
-        LOGGER_ERROR("Error writing the FIFO to publish the executor endpoint: {}", strerror(errno));
-        close(fd);
-        return;
-    }
-
-    LOGGER_DEBUG("Publish executor endpoint: {}", endpoint);
-
-    close(fd);
-}
-
 int main(int argc, char *argv[])
 {
-    std::string sim_arg(argv[1]);
-    std::string family_name(argv[2]);
+    std::string sim_arg(argv[1]); 
 
     switch(murmur::hash(sim_arg)) {
         case murmur::hash("Aer"): 

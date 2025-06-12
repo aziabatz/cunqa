@@ -1,5 +1,7 @@
 #include <fstream>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 //#include "munich_adapters/circuit_simulator_adapter.hpp"
 //#include "munich_adapters/quantum_computation_adapter.hpp"
@@ -12,7 +14,7 @@
 namespace cunqa {
 namespace sim {
 
-MunichExecutor::MunichExecutor()
+MunichExecutor::MunichExecutor() : classical_channel{"executor"}
 {
     std::string filename = std::string(std::getenv("STORE")) + "/.cunqa/communications.json";
     std::ifstream in(filename);
@@ -27,12 +29,19 @@ MunichExecutor::MunichExecutor()
         in >> j;
     in.close();
 
+    LOGGER_DEBUG("JSON of communications: \n{}", j.dump(4));
+
     std::string job_id = std::getenv("SLURM_JOB_ID");
+
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 
     for (const auto& [key, value]: j.items()) {
         if (key.rfind(job_id, 0) == 0) {
-            qpu_ids.push_back(value["communications_endpoint"]);
-            classical_channel.connect(value["communications_endpoint"], "executor");
+            auto qpu_endpoint = value["communications_endpoint"].get<std::string>();
+            qpu_ids.push_back(qpu_endpoint);
+            classical_channel.connect(qpu_endpoint);
+            LOGGER_DEBUG("Sending my endpoint: {} to {}", classical_channel.endpoint, qpu_endpoint);
+            classical_channel.send_info(classical_channel.endpoint, qpu_endpoint);
         }
     }
 }
@@ -49,7 +58,7 @@ void MunichExecutor::run()
             if(message != "") {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);
-                quantum_tasks.push_back(QuantumTask(quantum_task_json.at(0), quantum_task_json.at(1)));
+                quantum_tasks.push_back(QuantumTask(quantum_task_json["instructions"], quantum_task_json["config"]));
             }
         }
 
