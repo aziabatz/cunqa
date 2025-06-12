@@ -114,6 +114,10 @@ def qraise(n, time, *,
         if SLURMD_NODENAME != None:
             command = command + "\""
 
+        if not os.path.exists(INFO_PATH):
+           with open(INFO_PATH, "w") as file:
+                file.write("{}")
+
         old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)

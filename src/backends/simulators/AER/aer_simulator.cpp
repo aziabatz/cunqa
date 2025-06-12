@@ -16,7 +16,6 @@
 #include "classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
-#include "logger.hpp"
 
 using namespace std::string_literals;
 namespace {

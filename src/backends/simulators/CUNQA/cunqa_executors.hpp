@@ -9,6 +9,7 @@
 #include "quantum_task.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
+#include "cunqa_helpers.hpp"
 #include "logger.hpp"
 
 namespace cunqa {
@@ -156,7 +157,7 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
     time_taken = duration.count();
 
     result = {
-        {"counts", counts},
+        {"counts", convert_standard_results_cunqa(counts, n_qubits)},
         {"time_taken", time_taken}
     }; 
 

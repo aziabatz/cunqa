@@ -15,6 +15,7 @@
 #include "classical_channel.hpp"
 #include "utils/json.hpp"
 
+#include "logger.hpp"
 
 namespace cunqa {
 namespace sim {
