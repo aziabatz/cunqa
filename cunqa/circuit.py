@@ -62,7 +62,7 @@ class CunqaCircuit:
             raise SystemExit
         
         if id is None:
-            self._id = "cunqacircuit_" + generate_id()
+            self._id = "CunqaCircuit_" + generate_id()
         elif isinstance(id, str):
             self._id = id
         else:

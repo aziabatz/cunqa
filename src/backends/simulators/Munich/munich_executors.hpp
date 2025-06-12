@@ -12,6 +12,8 @@
 #include "classical_channel.hpp"
 #include "utils/json.hpp"
 
+#include "logger.hpp"
+
 
 namespace {
 // Extension of qc::QuantumComputation for Dynamic execution
@@ -56,6 +58,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
         JSON result_json;
         JSON noise_model_json = backend.config.noise_model;
         float time_taken;
+        int n_qubits = quantum_task.config.at("num_qubits");
 
         if (!noise_model_json.empty()){
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
@@ -69,7 +72,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
             time_taken = duration.count();
             
             if (!result.empty())
-                return {{"counts", JSON(result)}, {"time_taken", time_taken}};
+                return {{"counts", result}, {"time_taken", time_taken}};
             throw std::runtime_error("QASM format is not correct."); 
         } else {
             CircuitSimulator sim(std::move(mqt_circuit));
@@ -81,7 +84,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
             time_taken = duration.count();
             
             if (!result.empty())
-                return {{"counts", JSON(result)}, {"time_taken", time_taken}};
+                return {{"counts", result}, {"time_taken", time_taken}};
             throw std::runtime_error("QASM format is not correct."); 
         }        
     } catch (const std::exception& e) {
@@ -105,6 +108,7 @@ inline JSON dynamic_execution_(const BackendType& backend, const QuantumTask& qu
     std::map<std::string, std::size_t> measurementCounter;
     JSON result_json;
     float time_taken;
+    int n_qubits = quantum_task.config.at("num_qubits");
     const std::size_t nQubits = quantum_task.config.at("num_qubits").get<std::size_t>();
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;
@@ -478,8 +482,9 @@ inline JSON dynamic_execution_(const BackendType& backend, const QuantumTask& qu
     std::chrono::duration<float> duration = end - start;
     time_taken = duration.count();
     
+    JSON measurementCounterJson = measurementCounter;
     result_json = {
-        {"counts", measurementCounter},
+        {"counts", measurementCounterJson},
         {"time_taken", time_taken}
     }; 
     return result_json;

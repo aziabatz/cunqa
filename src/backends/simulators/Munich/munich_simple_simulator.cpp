@@ -9,8 +9,6 @@
 #include "StochasticNoiseSimulator.hpp"
 #include "ir/QuantumComputation.hpp"
 
-#include "logger.hpp"
-
 namespace cunqa {
 namespace sim {
 
