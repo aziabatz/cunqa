@@ -6,7 +6,97 @@
 #include "quantum_task.hpp"
 #include "utils/json.hpp"
 
+#include "logger.hpp"
+
 namespace cunqa {
+
+// Translate bits from hexadecimal to plain decimal
+inline std::string HexBitToBinary(char c)
+{
+	switch (c)
+	{
+	case '0':
+		return "0000";
+	case '1':
+		return "0001";
+
+	case '2':
+		return "0010";
+
+	case '3':
+		return "0011";
+
+	case '4':
+		return "0100";
+
+	case '5':
+		return "0101";
+
+	case '6':
+		return "0110";
+
+	case '7':
+		return "0111";
+
+	case '8':
+		return "1000";
+
+	case '9':
+		return "1001";
+
+	case 'A':
+	case 'a':
+		return "1010";
+
+	case 'B':
+	case 'b':
+		return "1011";
+
+	case 'C':
+	case 'c':
+		return "1100";
+
+	case 'D':
+	case 'd':
+		return "1101";
+
+	case 'E':
+	case 'e':
+		return "1110";
+
+	case 'F':
+	case 'f':
+		return "1111";
+	default:
+		return "-1";
+	}
+}
+
+inline JSON convert_standard_results_munich(const JSON& res, const int& num_qubits) 
+{
+    JSON modified_res = res; 
+    std::vector<std::string> keys_to_erase; 
+
+    for (const auto& [key, inner] : res.items()) {
+        std::string binary_string = "";
+        LOGGER_DEBUG("Mira manín, la key de Munich {}", key);
+        for (int i = 2; i < key.length(); i++) // Stars at 2 to skip "0x"
+        {   
+            binary_string += HexBitToBinary(key[i]);
+        }
+        std::string trunc_bitstring(binary_string.rbegin(), binary_string.rbegin() + num_qubits); // Truncate out any unwanted zeros coming from the first hex character
+
+        modified_res[trunc_bitstring] = inner; 
+        keys_to_erase.push_back(key); 
+    }
+
+    // Erase the keys after the iteration
+    for (const auto& key : keys_to_erase) {
+        modified_res.erase(key);
+    }
+
+    return modified_res; 
+}
 
 // Used in the quantum_task_to_Munich function for printing correctly the matrices of custom unitary gates
 inline std::string triple_vector_to_string(const std::vector<std::vector<std::vector<double>>>& data) {

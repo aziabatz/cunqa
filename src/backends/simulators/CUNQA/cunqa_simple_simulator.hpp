@@ -5,6 +5,8 @@
 #include "backends/simulators/simulator_strategy.hpp"
 #include "utils/json.hpp"
 
+#include "logger.hpp"
+
 namespace cunqa {
 namespace sim {
 

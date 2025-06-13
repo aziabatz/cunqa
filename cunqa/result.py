@@ -70,7 +70,7 @@ class Result:
                 logger.error(f"Some error occured with counts.")
                 raise ResultError
             
-            counts = convert_counts(counts, self._registers)   
+            #counts = convert_counts(counts, self._registers)   #TODO
 
         except Exception as error:
             logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
@@ -155,14 +155,11 @@ def convert_counts(counts: dict, registers: dict) -> dict:
         logger.error(f"Error when converting `counts` strings.")
         raise ResultError # I capture this error in QJob.result()
 
-    new_counts = {}
     if isinstance(counts, dict):
+        res_counts = {}
         for k,v in counts.items():
-            if k.startswith('0x'): # converting to binary string and dividing in bit strings
-                new_counts[divide(format(int(k, 16), '0' + str(num_clbits) + 'b'), lengths)]= v
-            else: # just dividing the bit strings
-                new_counts[divide(k, lengths)] = v
-    elif isinstance(counts, list):
-        for count in counts:
-            new_counts[divide(format(count[0], '0' + str(num_clbits) + 'b')[::-1], lengths)] = count[1] 
-    return new_counts
+            res_counts[divide(k, lengths)] = v
+    else:
+        logger.error(f"Counts should be dict, but {type(counts)} was provided.")
+        raise ResultError # I capture this error in QJob.result()
+    return res_counts
