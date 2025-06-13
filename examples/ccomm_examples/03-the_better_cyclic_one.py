@@ -26,7 +26,7 @@ def cyclic_ccommunication(n):
     
     # Create first circuit that quickstarts the loop
     circuits = {}
-    circuits["cc_0"]=CunqaCircuit(1,1, id= f"cc_0")
+    circuits["cc_0"]=CunqaCircuit(1, 1, id= f"cc_0")
     circuits["cc_0"].h(0)
     circuits["cc_0"].rz(np.pi/6, 0)
     circuits["cc_0"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{1}") 
@@ -39,7 +39,7 @@ def cyclic_ccommunication(n):
     
     # For loop that creates the rest of the circuits and executes the communication instructions
     for i in range(n-1):
-        circuits[f"cc_{i+1}"]=CunqaCircuit(1,1, id= f"cc_{i+1}")
+        circuits[f"cc_{i+1}"]=CunqaCircuit(1, 1, id= f"cc_{i+1}")
         circuits[f"cc_{i+1}"].remote_c_if("x", target_qubits = 0, param=None, control_circuit = f"cc_{i}")
         back_2 = mod(i-1,n)
         back_3 = mod(i-2,n)

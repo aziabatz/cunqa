@@ -59,7 +59,6 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         
         if isinstance(circuit, CunqaCircuit):
             info_circuit_copy = copy.deepcopy(circuit.info) # To modify the info without modifying the attribute info of the circuit
-            print(info_circuit_copy)
             circuit_jsons.append(info_circuit_copy)
 
         elif isinstance(circuit, dict):
@@ -93,7 +92,6 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     
     #translate circuit ids in comm instruction to qpu endpoints
     for circuit in circuit_jsons:
-        print(circuit)
         for instr in circuit["instructions"]:
             if instr["name"] in remote_controlled_gates:
                 instr["qpus"] =  [correspondence[instr["circuits"][0]]]

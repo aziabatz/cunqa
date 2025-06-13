@@ -17,7 +17,7 @@ qpus_QPE  = getQPUs(local=False, family = family)
 
 ########## Circuits to run ##########
 ########## First circuit ############
-cc_1 = CunqaCircuit(2, 2, id="First")
+cc_1 = CunqaCircuit(10, 2, id="First")
 cc_1.h(0)
 cc_1.measure_and_send(control_qubit = 0, target_circuit = "Second")
 cc_1.measure(0,0)

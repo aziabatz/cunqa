@@ -11,6 +11,7 @@
 
 #include "classical_channel.hpp"
 #include "utils/json.hpp"
+#include "utils/helpers/reverse_bitstring.hpp"
 
 #include "logger.hpp"
 
@@ -61,6 +62,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
         int n_qubits = quantum_task.config.at("num_qubits");
 
         if (!noise_model_json.empty()){
+            LOGGER_DEBUG("Noise model execution");
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
                 StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, quantum_task.config["seed"], "APD", noise_model_json["noise_prob"],
                                             noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
@@ -71,10 +73,14 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
             std::chrono::duration<float> duration = end - start;
             time_taken = duration.count();
             
-            if (!result.empty())
+            if (!result.empty()) {
+                LOGGER_DEBUG("Result non empty");
+                reverse_bitstring_keys_json(result);
                 return {{"counts", result}, {"time_taken", time_taken}};
+            }
             throw std::runtime_error("QASM format is not correct."); 
         } else {
+            LOGGER_DEBUG("Noiseless execution");
             CircuitSimulator sim(std::move(mqt_circuit));
             
             auto start = std::chrono::high_resolution_clock::now();
@@ -83,8 +89,11 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
             std::chrono::duration<float> duration = end - start;
             time_taken = duration.count();
             
-            if (!result.empty())
+            if (!result.empty()) {
+                LOGGER_DEBUG("Result non empty");
+                reverse_bitstring_keys_json(result);
                 return {{"counts", result}, {"time_taken", time_taken}};
+            }
             throw std::runtime_error("QASM format is not correct."); 
         }        
     } catch (const std::exception& e) {
@@ -482,9 +491,9 @@ inline JSON dynamic_execution_(const BackendType& backend, const QuantumTask& qu
     std::chrono::duration<float> duration = end - start;
     time_taken = duration.count();
     
-    JSON measurementCounterJson = measurementCounter;
+    reverse_bitstring_keys_json(measurementCounter);
     result_json = {
-        {"counts", measurementCounterJson},
+        {"counts", measurementCounter},
         {"time_taken", time_taken}
     }; 
     return result_json;

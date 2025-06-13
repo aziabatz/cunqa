@@ -26,9 +26,8 @@ inline JSON convert_standard_results_cunqa(const std::unordered_map<int, int>& r
         std::string binary_string = binary_key.to_string();
 
         std::string trunc_bitstring(binary_string.rbegin(), binary_string.rbegin() + num_qubits); // Drop the padding by truncating to the last characters
-        std::reverse(trunc_bitstring.begin(), trunc_bitstring.end());
-        std::string reversed_str(trunc_bitstring.begin(),trunc_bitstring.end());
-        modified_res.emplace(reversed_str, value); 
+        
+        modified_res.emplace(trunc_bitstring, value); 
         keys_to_erase.push_back(std::to_string(key)); 
     }
 
