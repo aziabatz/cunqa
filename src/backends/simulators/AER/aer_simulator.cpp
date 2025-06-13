@@ -16,6 +16,7 @@
 #include "classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
+#include "utils/helpers/reverse_bitstring.hpp"
 
 using namespace std::string_literals;
 namespace {
@@ -44,6 +45,7 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
     try {
         //TODO: Maybe improve them to send several circuits at once
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
+        int n_qubits = quantum_task.config.at("num_qubits");
         JSON circuit_json = aer_quantum_task.circuit;
 
         Circuit circuit(circuit_json);
@@ -61,7 +63,12 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
 
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
 
-        return result.to_json();
+        JSON result_json = result.to_json();
+        LOGGER_DEBUG("RESULT_JSON: {}", result_json.dump());
+        convert_standard_results_Aer(result_json, n_qubits);
+
+        return result_json;
+
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.
         LOGGER_ERROR("Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
@@ -396,7 +403,8 @@ JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_t
     auto stop_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = stop_time - start_time;
     time_taken = duration.count();
-
+    
+    reverse_bitstring_keys_json(measurementCounter);
     result = {
         {"counts", measurementCounter},
         {"time_taken", time_taken}

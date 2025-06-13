@@ -13,6 +13,7 @@ family = qraise(2, "00:10:00", simulator = "Munich", cloud = True)
 qpus  = getQPUs(local = False, family = family)
 
 qc = CunqaCircuit(18)
+qc.h(7)
 qc.h(0)
 qc.cx(0, 1)
 qc.measure_all()
