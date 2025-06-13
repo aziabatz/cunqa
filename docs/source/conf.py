@@ -53,7 +53,8 @@ autodoc_mock_imports = [
     'Pandoc',
     'cunqa.fakeqmio',
     'subprocess',
-    'typing'
+    'typing',
+    'copy'
 ]
 
 
