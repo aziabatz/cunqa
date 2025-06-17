@@ -74,7 +74,6 @@ struct ClassicalChannel::Impl
                 zmq_comm_server.recv(message, zmq::recv_flags::none);
                 std::string id_str(static_cast<char*>(id.data()), id.size());
                 std::string data(static_cast<char*>(message.data()), message.size());
-                LOGGER_DEBUG("ID: {} ENDPOINT: {}", id_str, data);
 
                 if (id_str == origin) {
                     return data;
@@ -126,7 +125,7 @@ void ClassicalChannel::connect(const std::string& endpoint, const std::string& i
 // which do not care for ids, its ok for them to use only the endpoints
 void ClassicalChannel::connect(const std::vector<std::string>& endpoints) 
 {
-    for (const auto& endpoints: endpoint) {
+    for (const auto& endpoint : endpoints) {
         pimpl_->connect(endpoint);
     }
 }

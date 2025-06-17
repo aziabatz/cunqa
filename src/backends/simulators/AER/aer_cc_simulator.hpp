@@ -11,17 +11,17 @@
 namespace cunqa {
 namespace sim {
 
-class AerCCSimulator final : public SimulatorStrategy<ClassicalCommBackend> {
+class AerCCSimulator final : public SimulatorStrategy<CCBackend> {
 public:
     AerCCSimulator();
     ~AerCCSimulator() = default;
 
     inline std::string get_name() const override {return "AerSimulator";}
-    JSON execute(const ClassicalCommBackend& backend, const QuantumTask& circuit) override;
+    JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
     
 
 private:
-    std::unique_ptr<comm::ClassicalChannel> classical_channel;
+    comm::ClassicalChannel classical_channel;
 };
 
 

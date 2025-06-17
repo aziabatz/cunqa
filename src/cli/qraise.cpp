@@ -109,8 +109,8 @@ void write_env_variables(std::ofstream& sbatchFile)
     sbatchFile << "fi\n";
 
     sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
-    sbatchFile << "INFO_PATH=" << store << "/.cunqa/qpus.json\n";
-    sbatchFile << "COMM_PATH=" << store << "/.cunqa/communications.json\n";
+    sbatchFile << "export INFO_PATH=" << store << "/.cunqa/qpus.json\n";
+    sbatchFile << "export COMM_PATH=" << store << "/.cunqa/communications.json\n";
     
 }
 
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
 
     // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
-    //std::system("rm qraise_sbatch_tmp.sbatch");
+    std::system("rm qraise_sbatch_tmp.sbatch");
 
     return 0;
 }

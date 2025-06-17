@@ -1,5 +1,5 @@
 #include "aer_simple_simulator.hpp"
-#include "aer_classical_comm_simulator.hpp"
+#include "aer_cc_simulator.hpp"
 
 #include <chrono>
 
@@ -29,13 +29,9 @@ using namespace AER;
 namespace cunqa {
 namespace sim {
 
-AerCCSimulator::AerCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
+AerCCSimulator::AerCCSimulator() : classical_channel()
 {
-    JSON communications_endpoint = 
-    {
-        {"communications_endpoint", classical_channel->endpoint}
-    };
-    write_on_file(communications_endpoint, filepath);
+    classical_channel.publish();
 };
 
 // Free function used in both simple and distributed case
@@ -81,12 +77,6 @@ template <class BackendType>
 JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
     LOGGER_DEBUG("Starting dynamic_execution_ on Aer.");
-    // Add the classical channel
-    if (classical_channel) {
-        std::vector<std::string> connect_with = quantum_task.sending_to;
-        classical_channel->set_classical_connections(connect_with);
-        LOGGER_DEBUG("Classical channel ready.");
-    }
 
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;
@@ -426,16 +416,19 @@ JSON AerSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask
 }
 
 // Distributed AerSimulator
-JSON AerCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
+JSON AerCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {
+    // Add the classical channel
+    std::vector<std::string> connect_with = quantum_task.sending_to;
+    classical_channel.connect(connect_with);
+    LOGGER_DEBUG("Classical channel ready.");
+
     if (!quantum_task.is_dynamic) {
-        return usual_execution_<ClassicalCommBackend>(backend, quantum_task);
+        return usual_execution_<CCBackend>(backend, quantum_task);
     } else {
-        return dynamic_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
+        return dynamic_execution_<CCBackend>(backend, quantum_task, &classical_channel);
     } 
 }
-
-
 
 
 

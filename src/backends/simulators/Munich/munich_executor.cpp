@@ -3,8 +3,8 @@
 #include <thread>
 #include <chrono>
 
-//#include "munich_adapters/circuit_simulator_adapter.hpp"
-//#include "munich_adapters/quantum_computation_adapter.hpp"
+#include "munich_adapters/circuit_simulator_adapter.hpp"
+#include "munich_adapters/quantum_computation_adapter.hpp"
 #include "quantum_task.hpp"
 #include "munich_executor.hpp"
 
@@ -62,15 +62,15 @@ void MunichExecutor::run()
             }
         }
 
-        //auto qc = std::make_unique<QuantumComputationAdapter>(quantum_tasks);
-        //CircuitSimulatorAdapter simulator(std::move(qc));
+        auto qc = std::make_unique<QuantumComputationAdapter>(quantum_tasks);
+        CircuitSimulatorAdapter simulator(std::move(qc));
 
         // TODO: Mirar como hacer lo de los shots
-        //auto start = std::chrono::high_resolution_clock::now();
-        //auto result = simulator.simulate(1024);
-        //auto end = std::chrono::high_resolution_clock::now();
-        //std::chrono::duration<float> duration = end - start;
-        //time_taken = duration.count();
+        auto start = std::chrono::high_resolution_clock::now();
+        auto result = simulator.simulate(1024);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> duration = end - start;
+        float time_taken = duration.count();
         
         // TODO: transformar los circuitos 
         std::string result_str = "prueba";

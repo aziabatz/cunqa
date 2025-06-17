@@ -1,4 +1,4 @@
-#include "cunqa_classical_comm_simulator.hpp"
+#include "cunqa_cc_simulator.hpp"
 #include "cunqa_executors.hpp"
 
 
@@ -11,19 +11,19 @@ namespace {
 namespace cunqa {
 namespace sim {
 
-CunqaCCSimulator::CunqaCCSimulator() : classical_channel(std::make_unique<comm::ClassicalChannel>())
+CunqaCCSimulator::CunqaCCSimulator() : classical_channel()
 {
-    JSON communications_endpoint = 
-    {
-        {"communications_endpoint", classical_channel->endpoint}
-    };
-    write_on_file(communications_endpoint, filepath);
+    classical_channel.publish();
 }
 
-JSON CunqaCCSimulator::execute(const ClassicalCommBackend& backend, const QuantumTask& quantum_task)
+JSON CunqaCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {
     LOGGER_DEBUG("We are in the execute() method of CCCunqa.");
-    return cunqa_execution_<ClassicalCommBackend>(backend, quantum_task, this->classical_channel.get());
+    // Add the classical channel
+    std::vector<std::string> connect_with = quantum_task.sending_to;
+    classical_channel.connect(connect_with);
+    
+    return cunqa_execution_<CCBackend>(backend, quantum_task, &classical_channel);
 }
 
 

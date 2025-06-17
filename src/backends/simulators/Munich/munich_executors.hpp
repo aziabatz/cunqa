@@ -111,7 +111,7 @@ inline JSON dynamic_execution_(const BackendType& backend, const QuantumTask& qu
     // Add the classical channel
     if (classical_channel) {
         std::vector<std::string> connect_with = quantum_task.sending_to;
-        classical_channel->set_classical_connections(connect_with);
+        classical_channel->connect(connect_with);
     }
 
     std::map<std::string, std::size_t> measurementCounter;
