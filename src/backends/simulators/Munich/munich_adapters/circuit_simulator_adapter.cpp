@@ -9,6 +9,9 @@
 #include "quantum_task.hpp"
 #include "backends/simulators/simulator_strategy.hpp"
 
+namespace cunqa {
+namespace sim {
+
 std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t shots)
 {
     LOGGER_DEBUG("Munich distributed execution");
@@ -20,7 +23,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
     JSON result_json;
     float time_taken;
     int n_qubits = quantum_task.config.at("num_qubits").get<int>();
-    std::vector<JSON> instructions = quantum_task.circuit;
+    std::vector<JSON> instructions = quantum_task.circuit;  
     JSON run_config = quantum_task.config;
     int shots = quantum_task.config.at("shots").get<int>();
     std::string instruction_name;
