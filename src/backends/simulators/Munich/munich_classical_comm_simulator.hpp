@@ -20,13 +20,13 @@
 namespace cunqa {
 namespace sim {
 
-class MunichCCSimulator final : public SimulatorStrategy<ClassicalCommBackend> {
+class MunichCCSimulator final : public SimulatorStrategy<CCBackend> {
 public:
     MunichCCSimulator();
     ~MunichCCSimulator() = default;
 
     inline std::string get_name() const override {return "MunichSimulator";}
-    JSON execute(const ClassicalCommBackend& backend, const QuantumTask& circuit) override;
+    JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
     
 
 private:

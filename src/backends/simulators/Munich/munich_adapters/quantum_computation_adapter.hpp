@@ -1,3 +1,6 @@
+#pragma once 
+
+#include "quantum_task.hpp"
 
 #include "ir/QuantumComputation.hpp"
 
@@ -23,8 +26,10 @@ public:
         }
         qc::QuantumComputation(num_qubits, num_clbits);
     }
-private:
+
     std::vector<QuantumTask> quantum_tasks;
+private:
+    
 };
 
 } // End of sim namespace

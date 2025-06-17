@@ -24,9 +24,6 @@ public:
 
 private:
     comm::ClassicalChannel classical_channel;
-
-    JSON usual_execution_(const QCBackend& backend, const QuantumTask& quantum_task);
-    JSON distributed_execution_(const QCBackend& backend, const QuantumTask& quantum_task);
 };
 
 } // End namespace sim

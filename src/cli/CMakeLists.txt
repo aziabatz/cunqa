@@ -22,10 +22,9 @@ endif()
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 
-                                         #aer_simple_simulator 
-                                         #munich_simple_simulator munich_cc_simulator 
-                                         munich_qc_simulator 
-                                         #cunqa_simple_simulator cunqa_cc_sim
+                                         aer_simulator
+                                         munich_simple_simulator munich_cc_simulator munich_qc_simulator 
+                                         cunqa_simple_simulator cunqa_cc_simulator
                                          )
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src")
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")

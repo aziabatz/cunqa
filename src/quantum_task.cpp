@@ -31,8 +31,6 @@ void QuantumTask::update_circuit(const std::string& quantum_task)
         is_dynamic = ((quantum_task_json.contains("is_dynamic")) ? quantum_task_json.at("is_dynamic").get<bool>() : false);
         is_distributed = ((quantum_task_json.contains("is_distributed")) ? quantum_task_json.at("is_distributed").get<bool>() : false);
 
-        LOGGER_DEBUG("After quantum task keys");
-
         if (is_distributed) {
             LOGGER_DEBUG("is_distributed");
             const char* STORE = std::getenv("STORE");

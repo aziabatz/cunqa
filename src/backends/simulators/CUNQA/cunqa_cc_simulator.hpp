@@ -21,7 +21,7 @@ public:
     JSON execute(const CCBackend& backend, const QuantumTask& quantumtask) override; 
 
 private:
-    std::unique_ptr<comm::ClassicalChannel> classical_channel;
+    comm::ClassicalChannel classical_channel;
 };
 
 } // End namespace sim

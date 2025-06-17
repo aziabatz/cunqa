@@ -8,24 +8,26 @@
 
 #include "quantum_task.hpp"
 #include "backends/simulators/simulator_strategy.hpp"
+#include "utils/helpers/reverse_bitstring.hpp"
 
 namespace cunqa {
 namespace sim {
 
-std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t shots)
+JSON CircuitSimulatorAdapter::simulate(std::size_t shots, std::unique_ptr<comm::ClassicalChannel> classical_channel)
+
 {
     LOGGER_DEBUG("Munich distributed execution");
     // Set the classical channel
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    this->classical_channel->connect(connect_with);
-
+ 
+    //TODO
+    QuantumComputationAdapter* qca = static_cast<QuantumComputationAdapter*>( qc.get() );
+    QuantumTask quantum_task = qca->quantum_tasks[0];
     std::map<std::string, std::size_t> measurementCounter;
     JSON result_json;
     float time_taken;
     int n_qubits = quantum_task.config.at("num_qubits").get<int>();
     std::vector<JSON> instructions = quantum_task.circuit;  
     JSON run_config = quantum_task.config;
-    int shots = quantum_task.config.at("shots").get<int>();
     std::string instruction_name;
     std::vector<int> clbits;
     std::vector<std::uint64_t> qubits;
@@ -47,6 +49,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
 
     std::map<std::size_t, bool> classicValues;
 
+    auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
         for (auto& instruction : instructions) {
             instruction_name = instruction.at("name");
@@ -184,12 +187,11 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                     char_measurement = CCcircsim.measureAdapter(qubits[0]);
                     measurement = char_measurement - '0';
-                    LOGGER_DEBUG("CHAR_MEASUREMENT: {}, MEASUREMENT: {}", char_measurement, std::to_string(measurement));
-                    this->classical_channel->send_measure(measurement, endpoint[0]); 
+                    classical_channel->send_measure(measurement, endpoint[0]); 
                     break;
                 case cunqa::constants::REMOTE_C_IF_H:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::H);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -197,7 +199,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_X:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::X);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -205,7 +207,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_Y:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::Y);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -213,7 +215,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_Z:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::Z);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -222,7 +224,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                 case cunqa::constants::REMOTE_C_IF_RX:
                     params = instruction.at("params").get<std::vector<double>>();
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RX, params);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -231,7 +233,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                 case cunqa::constants::REMOTE_C_IF_RY:
                     params = instruction.at("params").get<std::vector<double>>();
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RY, params);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -240,7 +242,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                 case cunqa::constants::REMOTE_C_IF_RZ:
                     params = instruction.at("params").get<std::vector<double>>();
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RZ, params);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -248,7 +250,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_CX:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         pControl = std::make_unique<qc::Control>(qubits[0]);
                         std_op = std::make_unique<qc::StandardOperation>(*pControl, qubits[1], qc::OpType::X);
@@ -257,7 +259,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_CY:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         pControl = std::make_unique<qc::Control>(qubits[0]);
                         std_op = std::make_unique<qc::StandardOperation>(*pControl, qubits[1], qc::OpType::Y);
@@ -266,7 +268,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_CZ:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         pControl = std::make_unique<qc::Control>(qubits[0]);
                         std_op = std::make_unique<qc::StandardOperation>(*pControl, qubits[1], qc::OpType::Z);
@@ -275,7 +277,7 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
                     break;
                 case cunqa::constants::REMOTE_C_IF_ECR:
                     endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = this->classical_channel->recv_measure(endpoint[0]); 
+                    measurement = classical_channel->recv_measure(endpoint[0]); 
                     if (measurement == 1) {
                         std_op = std::make_unique<qc::StandardOperation>(qubits[1], qc::OpType::ECR);
                         CCcircsim.applyOperationToStateAdapter(std_op);
@@ -294,16 +296,19 @@ std::map<std::string, std::size_t> CircuitSimulatorAdapter::simulate(std::size_t
         }
         measurementCounter[resultString]++;
     } // End all shots
+    LOGGER_DEBUG("End of all shots");
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = end - start;
     time_taken = duration.count();
-    
+
+    reverse_bitstring_keys_json(measurementCounter);
     result_json = {
         {"counts", measurementCounter},
         {"time_taken", time_taken}
     }; 
+
     return result_json;
-}
+} 
 
 } // End of sim namespace
 } // End of cunqa namespace
