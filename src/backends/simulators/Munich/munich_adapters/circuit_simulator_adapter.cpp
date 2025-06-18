@@ -26,7 +26,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, std::unique_ptr<comm::
     JSON result_json;
     float time_taken;
     int n_qubits = quantum_task.config.at("num_qubits").get<int>();
-    std::vector<JSON> instructions = quantum_task.circuit;
+    std::vector<JSON> instructions = quantum_task.circuit;  
     JSON run_config = quantum_task.config;
     std::string instruction_name;
     std::vector<int> clbits;

@@ -33,14 +33,11 @@ MunichExecutor::MunichExecutor() : classical_channel{"executor"}
 
     std::string job_id = std::getenv("SLURM_JOB_ID");
 
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-
     for (const auto& [key, value]: j.items()) {
         if (key.rfind(job_id, 0) == 0) {
             auto qpu_endpoint = value["communications_endpoint"].get<std::string>();
             qpu_ids.push_back(qpu_endpoint);
             classical_channel.connect(qpu_endpoint);
-            LOGGER_DEBUG("Sending my endpoint: {} to {}", classical_channel.endpoint, qpu_endpoint);
             classical_channel.send_info(classical_channel.endpoint, qpu_endpoint);
         }
     }
