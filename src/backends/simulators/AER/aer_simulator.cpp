@@ -42,6 +42,7 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
         //TODO: Maybe improve them to send several circuits at once
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
         int n_qubits = quantum_task.config.at("num_qubits");
+        int n_clbits = quantum_task.config.at("num_clbits");
         JSON circuit_json = aer_quantum_task.circuit;
 
         Circuit circuit(circuit_json);
@@ -60,8 +61,7 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
 
         JSON result_json = result.to_json();
-        LOGGER_DEBUG("RESULT_JSON: {}", result_json.dump());
-        convert_standard_results_Aer(result_json, n_qubits);
+        convert_standard_results_Aer(result_json, n_clbits);
 
         return result_json;
 
