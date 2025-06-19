@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <optional>
 
 #include "quantum_task.hpp"
 #include "classical_channel.hpp"
@@ -25,7 +24,7 @@ public:
     JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
 
 
-    std::unique_ptr<comm::ClassicalChannel> classical_channel;
+    comm::ClassicalChannel classical_channel;
 private:
     
 };

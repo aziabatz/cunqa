@@ -29,7 +29,7 @@ using namespace AER;
 namespace cunqa {
 namespace sim {
 
-AerCCSimulator::AerCCSimulator() : classical_channel()
+AerCCSimulator::AerCCSimulator()
 {
     classical_channel.publish();
 };
@@ -77,6 +77,11 @@ template <class BackendType>
 JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
     LOGGER_DEBUG("Starting dynamic_execution_ on Aer.");
+    // Connect to the classical communications endpoints
+    if (classical_channel) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with);
+    }
 
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;

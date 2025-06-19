@@ -1,10 +1,10 @@
-
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "quantum_computation_adapter.hpp"
 #include "classical_channel.hpp"
 
 #include "utils/json.hpp"
+
 
 namespace cunqa {
 namespace sim {
@@ -35,7 +35,7 @@ public:
         return this->measure(i);
     }
 
-    JSON simulate(std::size_t shots, std::unique_ptr<comm::ClassicalChannel> classical_channel = nullptr); // TODO: override
+    JSON simulate(std::size_t shots, comm::ClassicalChannel* classical_channel = nullptr); // TODO: override?
 };
 
 } // End of sim namespace

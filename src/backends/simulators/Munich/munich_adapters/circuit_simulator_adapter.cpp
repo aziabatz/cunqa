@@ -3,7 +3,6 @@
 #include "munich_helpers.hpp"
 
 #include <chrono>
-#include <optional>
 
 #include "quantum_task.hpp"
 #include "backends/simulators/simulator_strategy.hpp"
@@ -95,7 +94,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
 namespace cunqa {
 namespace sim {
 
-JSON CircuitSimulatorAdapter::simulate(std::size_t shots, std::unique_ptr<comm::ClassicalChannel> classical_channel)
+JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel* classical_channel)
 
 {
     // TODO
@@ -103,7 +102,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, std::unique_ptr<comm::
     QuantumTask quantum_task = qca->quantum_tasks[0];
 
      LOGGER_DEBUG("Starting dynamic_execution_ on Munich.");
-    // Add the classical channel
+    // Connect to the classical communications endpoints
     if (classical_channel) {
         std::vector<std::string> connect_with = quantum_task.sending_to;
         classical_channel->connect(connect_with);

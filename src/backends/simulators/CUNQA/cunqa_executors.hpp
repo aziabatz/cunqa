@@ -17,7 +17,12 @@ namespace cunqa {
 template <class BackendType>
 inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
-    LOGGER_DEBUG("Starting dynamic_execution_ on Cunqa.");
+    LOGGER_DEBUG("Starting cunqa_execution_.");
+    // Connect to the classical communications endpoints
+    if (classical_channel) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with);
+    }
     
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;

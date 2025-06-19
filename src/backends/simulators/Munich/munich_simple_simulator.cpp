@@ -5,7 +5,6 @@
 #include "munich_helpers.hpp"
 
 #include <chrono>
-#include <optional>
 
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
