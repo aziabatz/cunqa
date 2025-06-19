@@ -1,5 +1,7 @@
 #include "munich_simple_simulator.hpp"
-#include "munich_executors.hpp"
+#include "munich_adapters/circuit_simulator_adapter.hpp"
+#include "munich_adapters/quantum_computation_adapter.hpp"
+
 #include "munich_helpers.hpp"
 
 #include <chrono>
@@ -15,11 +17,9 @@ namespace sim {
 JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumTask& quantum_task)
 {
     LOGGER_DEBUG("We are in the execute() method of SimpleMunich.");
-    if (!quantum_task.is_dynamic) {
-        return usual_execution_<SimpleBackend>(backend, quantum_task);
-    } else {
-        return dynamic_execution_<SimpleBackend>(backend, quantum_task);
-    }   
+    auto p_quantum_computation = std::make_unique<QuantumComputationAdapter>(quantum_task);
+    CircuitSimulatorAdapter circsim(std::move(p_quantum_computation));
+    return circsim.simulate(quantum_task.config.at("shots").get<std::size_t>());
 } 
 
 
