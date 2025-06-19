@@ -10,20 +10,20 @@
 
 namespace {
 
-void applyGate(const cunqa::JSON& instruction, cunqa::sim::CircuitSimulatorAdapter& circsim, std::unique_ptr<qc::StandardOperation>&& std_op, std::map<std::size_t, bool>& classicRegister, std::map<std::size_t, bool>& remoteClassicRegister)
+void applyGate(cunqa::sim::CircuitSimulatorAdapter& csa, const cunqa::JSON& instruction, std::unique_ptr<qc::StandardOperation>&& std_op, std::map<std::size_t, bool>& classicRegister, std::map<std::size_t, bool>& remoteClassicRegister)
 { 
     if (instruction.contains("conditional_reg")) {
         auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
         if (classicRegister[conditional_reg[0]]) {
-            circsim.applyOperationToStateAdapter(std::move(std_op));
+            csa.applyOperationToStateAdapter(std::move(std_op));
         }
     } else if (instruction.contains("remote_conditional_reg")) {
         auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
         if (remoteClassicRegister[conditional_reg[0]]) {
-            circsim.applyOperationToStateAdapter(std::move(std_op));
+            csa.applyOperationToStateAdapter(std::move(std_op));
         }
     } else {
-        circsim.applyOperationToStateAdapter(std::move(std_op));
+        csa.applyOperationToStateAdapter(std::move(std_op));
     }
 }
 
@@ -98,8 +98,8 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
 
 {
     // TODO
-    QuantumComputationAdapter* qca = static_cast<QuantumComputationAdapter*>( qc.get() );
-    QuantumTask quantum_task = qca->quantum_tasks[0];
+    auto p_qca = static_cast<QuantumComputationAdapter*>(qc.get());
+    QuantumTask quantum_task = p_qca->quantum_tasks[0];
 
      LOGGER_DEBUG("Starting dynamic_execution_ on Munich.");
     // Connect to the classical communications endpoints
@@ -119,10 +119,6 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
     std::vector<std::uint64_t> registers;
     //qc::ClassicalRegister clreg; 
 
-    std::unique_ptr<QuantumComputationAdapter> cqc = std::make_unique<QuantumComputationAdapter>(quantum_task);
-    CircuitSimulatorAdapter circsim(std::move(cqc));
-
-
     std::map<std::size_t, bool> classicValues;
     std::map<std::size_t, bool> classicRegister;
     std::map<std::size_t, bool> remoteClassicRegister;
@@ -132,7 +128,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {
 
-        circsim.initializeSimulationAdapter(nQubits);
+        initializeSimulationAdapter(nQubits);
 
         for (auto& instruction : instructions) {
             qubits = instruction.at("qubits").get<std::vector<std::uint64_t>>();
@@ -142,7 +138,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                 case cunqa::constants::MEASURE:
                 {
                     auto clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
-                    char char_measurement = circsim.measureAdapter(qubits[0]);
+                    char char_measurement = measureAdapter(qubits[0]);
                     classicValues[qubits[0]] = (char_measurement == '1');
                     if (!clreg.empty()) {
                         classicRegister[clreg[0]] = (char_measurement == '1');
@@ -152,73 +148,73 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                 case cunqa::constants::X:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::X);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::Y:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::Y);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::Z:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::Z);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::H:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::H);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::SX:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::SX);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::RX:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RX, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::RY:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RY, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::RZ:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::RZ, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CX:
                 {
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::X);
-                   applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                   applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CY:
                 {
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::Y);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CZ:
                 {
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::Z);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CRX:
@@ -226,7 +222,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::RX, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CRY:
@@ -234,7 +230,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::RY, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CRZ:
@@ -242,20 +238,20 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                     auto params = instruction.at("params").get<std::vector<double>>();
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::RZ, params);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::ECR:
                 {
                     auto std_op = std::make_unique<qc::StandardOperation>(qubits[0], qc::OpType::ECR);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::CECR:
                 {
                     auto p_control = std::make_unique<qc::Control>(qubits[0]);
                     auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1], qc::OpType::ECR);
-                    applyGate(instruction, circsim, std::move(std_op), classicRegister, remoteClassicRegister);
+                    applyGate(*this, instruction, std::move(std_op), classicRegister, remoteClassicRegister);
                     break;
                 }
                 case cunqa::constants::C_IF_H:
@@ -275,7 +271,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
                 case cunqa::constants::MEASURE_AND_SEND:
                 {
                     auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    char char_measurement = circsim.measureAdapter(qubits[0]);
+                    char char_measurement = measureAdapter(qubits[0]);
                     int measurement = char_measurement - '0';
                     classical_channel->send_measure(measurement, endpoint[0]); 
                     break;

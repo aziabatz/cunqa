@@ -23,12 +23,12 @@ JSON MunichCCSimulator::execute(const CCBackend& backend, const QuantumTask& qua
     classical_channel.connect(connect_with);
     LOGGER_DEBUG("Connected");
 
-    auto p_quantum_computation = std::make_unique<QuantumComputationAdapter>(quantum_task);
+    auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     LOGGER_DEBUG("QuantumComputationAdapter ready");
-    CircuitSimulatorAdapter circuit_simulator_adapter(std::move(p_quantum_computation));
+    CircuitSimulatorAdapter csa(std::move(p_qca));
     LOGGER_DEBUG("CircuitSimulatorAdapter ready");
 
-    return circuit_simulator_adapter.simulate(quantum_task.config.at("shots").get<std::size_t>(), &classical_channel);
+    return csa.simulate(quantum_task.config.at("shots").get<std::size_t>(), &classical_channel);
 }
 
 } // End namespace sim
