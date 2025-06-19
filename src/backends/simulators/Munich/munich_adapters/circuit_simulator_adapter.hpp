@@ -25,7 +25,7 @@ public:
         this->initializeSimulation(nQubits);
     }
 
-    inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>& op)
+    inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op)
     {
         this->applyOperationToState(op);
     }

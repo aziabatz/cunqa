@@ -40,6 +40,7 @@ enum INSTRUCTIONS {
     C_IF_CZ,
     C_IF_ECR,
     MEASURE_AND_SEND,
+    RECV,
     REMOTE_C_IF_X,
     REMOTE_C_IF_Y,
     REMOTE_C_IF_Z,
@@ -102,6 +103,7 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 
     // SEND CLASSICAL QUBIT
     {"measure_and_send", MEASURE_AND_SEND},
+    {"recv", RECV},
 
     // REMOTE CONTROLLED GATES
     {"remote_c_if_x", REMOTE_C_IF_X},

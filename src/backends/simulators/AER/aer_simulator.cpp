@@ -84,18 +84,14 @@ JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_t
     int shots = run_config.at("shots");
     std::string instruction_name;
     std::vector<uint_t> qubits;
-    std::vector<std::uint64_t> clreg;
-    std::vector<std::uint64_t> conditional_reg;
-    std::vector<std::string> endpoint;
-    std::vector<double> params;
-    uint_t measurement;
-    int measurement_as_int;
     std::map<std::string, std::size_t> measurementCounter;
     JSON result;
     float time_taken;
 
     std::map<std::size_t, bool> classicValues; // To mimic the way Munich counts
     std::map<std::size_t, bool> classicRegister;
+    std::map<std::size_t, bool> remoteClassicRegister;
+
     AER::AerState *state = new AER::AerState();
     state->configure("method", "statevector");
     state->configure("device", "CPU");
@@ -115,164 +111,264 @@ JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_t
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
-                    clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
-                    measurement = state->apply_measure(qubits);
+                {
+                    auto clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
+                    std::size_t measurement = state->apply_measure(qubits);
                     classicValues[qubits[0]] = (measurement == 1);
                     if (!clreg.empty()) {
                         classicRegister[clreg[0]] = (measurement == 1);
                     }
                     break;
+                }
                 case constants::ID:
                     break;
                 case constants::X:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcx(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcx(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcx(qubits);
+                        }
+                    } else {
+                        state->apply_mcx(qubits);
                     }
                     break;
+                }
                 case constants::Y:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcy(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcy(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcy(qubits);
+                        }
+                    } else {
+                        state->apply_mcy(qubits);
                     }
                     break;
+                }
                 case constants::Z:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcz(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcz(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcz(qubits);
+                        }
+                    } else {
+                        state->apply_mcz(qubits);
                     }
                     break;
+                }
                 case constants::H:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_h(qubits[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_h(qubits[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_h(qubits[0]);
+                        }
+                    } else {
+                        state->apply_h(qubits[0]);
                     }
                     break;
+                }
                 case constants::SX:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcsx(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcsx(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcsx(qubits);
+                        }
+                    } else {
+                        state->apply_mcsx(qubits);
                     }
                     break;
+                }
                 case constants::CX:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcx(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcx(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcx(qubits);
+                        }
+                    } else {
+                        state->apply_mcx(qubits);
                     }
                     break;
+                }
                 case constants::CY:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcy(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcy(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcy(qubits);
+                        }
+                    } else {
+                        state->apply_mcy(qubits);
                     }
                     break;
+                }
                 case constants::CZ:
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcz(qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcz(qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcz(qubits);
+                        }
+                    } else {
+                        state->apply_mcz(qubits);
                     }
                     break;
+                }
                 case constants::ECR:
                     // TODO
                     break;
                 case constants::RX:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcrx(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcrx(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcrx(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcrx(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::RY:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcry(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcry(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcry(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcry(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::RZ:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcrz(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcrz(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcrz(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcrz(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::CRX:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcrx(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcrx(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcrx(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcrx(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::CRY:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcry(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcry(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcry(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcry(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::CRZ:
-                    params = instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
-                        state->apply_mcrz(qubits, params[0]);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    auto params = instruction.at("params").get<std::vector<double>>();
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             state->apply_mcrz(qubits, params[0]);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            state->apply_mcrz(qubits, params[0]);
+                        }
+                    } else {
+                        state->apply_mcrz(qubits, params[0]);
                     }
                     break;
+                }
                 case constants::C_IF_H:
                 case constants::C_IF_X:
                 case constants::C_IF_Y:
@@ -287,92 +383,21 @@ JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_t
                     // //TODO: Look how Aer natively applies C_IFs operations
                     break;
                 case constants::MEASURE_AND_SEND:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = state->apply_measure(qubits);
-                    measurement_as_int = static_cast<int>(measurement);
+                {
+                    auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    uint_t measurement = state->apply_measure(qubits);
+                    int measurement_as_int = static_cast<int>(measurement);
                     classical_channel->send_measure(measurement_as_int, endpoint[0]); 
                     break;
-                case constants::REMOTE_C_IF_X:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcx(qubits);
-                    }
+                }
+                case cunqa::constants::RECV:
+                {
+                    auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                    int measurement = classical_channel->recv_measure(endpoint[0]);
+                    remoteClassicRegister[conditional_reg[0]] = (measurement == 1);
                     break;
-                case constants::REMOTE_C_IF_Y:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcy(qubits);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_Z:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcz(qubits);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_H:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_h(qubits[0]);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_CX:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcx(qubits);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_CY:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcy(qubits);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_CZ:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcz(qubits);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_ECR:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        // TODO
-                    }
-                    break;
-                case constants::REMOTE_C_IF_RX:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcrx(qubits, params[0]);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_RY:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        state->apply_mcry(qubits, params[0]);
-                    }
-                    break;
-                case constants::REMOTE_C_IF_RZ:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    params = instruction.at("params").get<std::vector<double>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    LOGGER_DEBUG("Measurement received from {}", endpoint[0]);
-                    if (measurement == 1) {
-                        state->apply_mcrz(qubits, params[0]);
-                    }
-                    break;  
+                }
                 default:
                     LOGGER_ERROR("Invalid gate name."); 
                     throw std::runtime_error("Invalid gate name.");
@@ -387,6 +412,7 @@ JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_t
         measurementCounter[resultString]++;
 
         classicRegister.clear();
+        remoteClassicRegister.clear();
         state->clear();
     } // End all shots
 
