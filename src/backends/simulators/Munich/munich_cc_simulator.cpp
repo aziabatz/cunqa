@@ -1,39 +1,34 @@
-#include <chrono>
-#include <optional>
-
-#include "StochasticNoiseSimulator.hpp"
-
 #include "munich_cc_simulator.hpp"
 #include "munich_adapters/circuit_simulator_adapter.hpp"
 #include "munich_adapters/quantum_computation_adapter.hpp"
+
+#include <chrono>
+
+#include "StochasticNoiseSimulator.hpp"
 
 #include "utils/constants.hpp"
 
 namespace cunqa {
 namespace sim {
 
-MunichCCSimulator::MunichCCSimulator() : classical_channel{std::make_unique<comm::ClassicalChannel>()}
+MunichCCSimulator::MunichCCSimulator()
 {
-    classical_channel->publish();
+    classical_channel.publish();
 };
 
-JSON MunichCCSimulator::execute(const CCBackend& backend, const QuantumTask& circuit)
+JSON MunichCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {
     LOGGER_DEBUG("MunichCCSimulator::execute()");
-    std::vector<std::string> connect_with = circuit.sending_to;
-    classical_channel->connect(connect_with);
+    std::vector<std::string> connect_with = quantum_task.sending_to;
+    classical_channel.connect(connect_with);
     LOGGER_DEBUG("Connected");
 
-    std::size_t shots = circuit.config.at("shots").get<std::size_t>();
-
-    std::unique_ptr<QuantumComputationAdapter> quantum_computation = std::make_unique<QuantumComputationAdapter>(circuit);
+    auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     LOGGER_DEBUG("QuantumComputationAdapter ready");
-    CircuitSimulatorAdapter circuit_simulator(std::move(quantum_computation));
+    CircuitSimulatorAdapter csa(std::move(p_qca));
     LOGGER_DEBUG("CircuitSimulatorAdapter ready");
 
-    JSON result = circuit_simulator.simulate(shots, std::move(classical_channel));
-    LOGGER_DEBUG("Result: {}", result.dump());
-    return result;
+    return csa.simulate(quantum_task.config.at("shots").get<std::size_t>(), &classical_channel);
 }
 
 } // End namespace sim

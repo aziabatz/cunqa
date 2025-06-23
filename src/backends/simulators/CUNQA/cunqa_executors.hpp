@@ -17,21 +17,21 @@ namespace cunqa {
 template <class BackendType>
 inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
-    LOGGER_DEBUG("Starting dynamic_execution_ on Cunqa.");
+    LOGGER_DEBUG("Starting cunqa_execution_.");
+    // Connect to the classical communications endpoints
+    if (classical_channel) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with);
+    }
     
     std::vector<JSON> instructions = quantum_task.circuit;
     JSON run_config = quantum_task.config;
     int shots = run_config.at("shots");
     std::string instruction_name;
     std::vector<int> qubits;
-    std::vector<std::uint64_t> clreg;
-    std::vector<std::uint64_t> conditional_reg;
-    std::vector<std::string> endpoint;
-    std::vector<double> param;
-    Matrix matrix;
-    int measurement;
     JSON result;
     std::map<std::size_t, bool> classicRegister;
+    std::map<std::size_t, bool> remoteClassicRegister;
     std::unordered_map<int, int> counts;
     float time_taken;
 
@@ -47,16 +47,20 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
             switch (constants::INSTRUCTIONS_MAP.at(instruction_name))
             {
                 case constants::MEASURE:
-                    clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
-                    measurement = executor.apply_measure(qubits);
+                {
+                    auto clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
+                    int measurement = executor.apply_measure(qubits);
                     if (!clreg.empty()) {
                         classicRegister[clreg[0]] = (measurement == 1);
                     }
                     break;
+                }
                 case constants::UNITARY:
-                    matrix = instruction.at("params").get<Matrix>();
+                {
+                    auto matrix = instruction.at("params").get<Matrix>();
                     executor.apply_unitary(matrix, qubits);
                     break;
+                }
                 case constants::ID:
                 case constants::X:
                 case constants::Y:
@@ -67,15 +71,22 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                 case constants::CY:
                 case constants::CZ:
                 case constants::ECR:
-                    if (!instruction.contains("conditional_reg")) {
-                        executor.apply_gate(instruction_name, qubits);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                {
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             executor.apply_gate(instruction_name, qubits);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            executor.apply_gate(instruction_name, qubits);
+                        }
+                    } else {
+                        executor.apply_gate(instruction_name, qubits);
                     }
                     break;
+                }
                 case constants::C_IF_H:
                 case constants::C_IF_X:
                 case constants::C_IF_Y:
@@ -95,45 +106,38 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                 case constants::CRX:
                 case constants::CRY:
                 case constants::CRZ:
-                    param =  instruction.at("params").get<std::vector<double>>();
+                {
+                    auto param =  instruction.at("params").get<std::vector<double>>();
                     if (!instruction.contains("conditional_reg")) {
-                        executor.apply_parametric_gate(instruction_name, qubits, param);
-                    } else {
-                        conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             executor.apply_parametric_gate(instruction_name, qubits, param);
                         }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            executor.apply_parametric_gate(instruction_name, qubits, param);
+                        }
+                    } else {
+                        executor.apply_parametric_gate(instruction_name, qubits, param);
                     }
                     break;
+                }
                 case constants::MEASURE_AND_SEND:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = executor.apply_measure(qubits); 
+                {
+                    auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    int measurement = executor.apply_measure(qubits); 
                     classical_channel->send_measure(measurement, endpoint[0]); 
                     break;
-                case constants::REMOTE_C_IF_H:
-                case constants::REMOTE_C_IF_X:
-                case constants::REMOTE_C_IF_Y:
-                case constants::REMOTE_C_IF_Z:
-                case constants::REMOTE_C_IF_CX:
-                case constants::REMOTE_C_IF_CY:
-                case constants::REMOTE_C_IF_CZ:
-                case constants::REMOTE_C_IF_ECR:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        executor.apply_gate(constants::CORRESPONDENCE_REMOTE_GATE_MAP.at(instruction_name), qubits);
-                    }
+                }
+                case constants::RECV:
+                {
+                    auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
+                    auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                    int measurement = classical_channel->recv_measure(endpoint[0]); 
+                    remoteClassicRegister[conditional_reg[0]] = (measurement == 1);
                     break;
-                case constants::REMOTE_C_IF_RX:
-                case constants::REMOTE_C_IF_RY:
-                case constants::REMOTE_C_IF_RZ:
-                    endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                    param = instruction.at("params").get<std::vector<double>>();
-                    measurement = classical_channel->recv_measure(endpoint[0]); 
-                    if (measurement == 1) {
-                        executor.apply_gate(constants::CORRESPONDENCE_REMOTE_GATE_MAP.at(instruction_name), qubits);
-                    }
-                    break;  
+                }
                 default:
                     LOGGER_ERROR("Invalid gate name."); 
                     throw std::runtime_error("Invalid gate name.");
@@ -144,6 +148,7 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
         counts[position]++;
 
         classicRegister.clear();
+        remoteClassicRegister.clear();
         executor.restart_statevector();
     } // End all shots
 

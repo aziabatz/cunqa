@@ -1,4 +1,3 @@
-
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
 #include "quantum_computation_adapter.hpp"
@@ -6,14 +5,13 @@
 
 #include "utils/json.hpp"
 
+
 namespace cunqa {
 namespace sim {
 
 class CircuitSimulatorAdapter : public CircuitSimulator<dd::DDPackageConfig>
 {
 public:
-
-    //QuantumComputationAdapter qca_;
 
     // Constructors
     CircuitSimulatorAdapter() = default;
@@ -25,7 +23,7 @@ public:
         this->initializeSimulation(nQubits);
     }
 
-    inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>& op)
+    inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op)
     {
         this->applyOperationToState(op);
     }
@@ -35,7 +33,7 @@ public:
         return this->measure(i);
     }
 
-    JSON simulate(std::size_t shots, std::unique_ptr<comm::ClassicalChannel> classical_channel = nullptr); // TODO: override
+    JSON simulate(std::size_t shots, comm::ClassicalChannel* classical_channel = nullptr); // TODO: override?
 };
 
 } // End of sim namespace

@@ -15,6 +15,7 @@ qpu0 = qpus[0]
 qpu1 = qpus[1]
 qpu2 = qpus[2]
 
+# TODO: remote_c_if_GATE is no longer an instruction
 d_qc_0_zmq = {
     "id": "carballido",
     "instructions": [

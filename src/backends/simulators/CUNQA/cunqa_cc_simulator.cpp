@@ -11,7 +11,7 @@ namespace {
 namespace cunqa {
 namespace sim {
 
-CunqaCCSimulator::CunqaCCSimulator() : classical_channel()
+CunqaCCSimulator::CunqaCCSimulator()
 {
     classical_channel.publish();
 }
@@ -19,10 +19,6 @@ CunqaCCSimulator::CunqaCCSimulator() : classical_channel()
 JSON CunqaCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {
     LOGGER_DEBUG("We are in the execute() method of CCCunqa.");
-    // Add the classical channel
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    classical_channel.connect(connect_with);
-    
     return cunqa_execution_<CCBackend>(backend, quantum_task, &classical_channel);
 }
 

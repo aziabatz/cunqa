@@ -48,7 +48,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     distributed_qjobs = []
     circuit_jsons = []
 
-    remote_controlled_gates = ["measure_and_send", "remote_c_if_h", "remote_c_if_x","remote_c_if_y","remote_c_if_z","remote_c_if_rx","remote_c_if_ry","remote_c_if_rz","remote_c_if_cx","remote_c_if_cy","remote_c_if_cz", "remote_c_if_ecr"]
+    remote_controlled_gates = ["measure_and_send", "recv"]
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons

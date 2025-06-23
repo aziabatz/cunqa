@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <optional>
 
 #include "quantum_task.hpp"
 #include "backends/qc_backend.hpp"
