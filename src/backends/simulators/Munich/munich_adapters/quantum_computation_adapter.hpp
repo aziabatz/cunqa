@@ -28,8 +28,6 @@ public:
     }
 
     std::vector<QuantumTask> quantum_tasks;
-private:
-    
 };
 
 } // End of sim namespace

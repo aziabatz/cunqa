@@ -277,7 +277,7 @@ class QJob:
         try:
             # config dict
             run_config = {
-                "shots":1024, 
+                "shots": 1024, 
                 "method":"statevector", 
                 "num_clbits": self.num_clbits, 
                 "num_qubits": self.num_qubits, 
@@ -294,11 +294,12 @@ class QJob:
             
             logger.debug("Before exec_config")
             exec_config = {
-                "config":run_config, 
-                "instructions":self._circuit,
-                "sending_to":self._sending_to,
-                "is_dynamic":self._is_dynamic,
-                "is_distributed":self._is_distributed
+                "id": self._circuit_id,
+                "config": run_config, 
+                "instructions": self._circuit,
+                "sending_to": self._sending_to,
+                "is_dynamic": self._is_dynamic,
+                "is_distributed": self._is_distributed
             }
             self._execution_config = json.dumps(exec_config)
 

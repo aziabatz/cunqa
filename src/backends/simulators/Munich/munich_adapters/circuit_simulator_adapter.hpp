@@ -20,20 +20,26 @@ public:
 
     inline void initializeSimulationAdapter(std::size_t nQubits)
     {
-        this->initializeSimulation(nQubits);
+        initializeSimulation(nQubits);
     }
 
     inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op)
     {
-        this->applyOperationToState(op);
+        applyOperationToState(op);
     }
 
     inline char measureAdapter(dd::Qubit i) 
     {
-        return this->measure(i);
+        return measure(i);
     }
 
     JSON simulate(std::size_t shots, comm::ClassicalChannel* classical_channel = nullptr); // TODO: override?
+
+private:
+
+    void apply_gate_(const JSON& instruction, std::unique_ptr<qc::StandardOperation>&& std_op, std::map<std::size_t, bool>& classic_reg, std::map<std::size_t, bool>& r_classic_reg);
+    std::string execute_shot_(comm::ClassicalChannel* classical_channel, const std::vector<QuantumTask>& quantum_tasks);
+    
 };
 
 } // End of sim namespace

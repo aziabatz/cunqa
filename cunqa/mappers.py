@@ -98,7 +98,8 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
                 instr.pop("circuits")
         for i in range(len(circuit["sending_to"])):
             circuit["sending_to"][i] = correspondence[circuit["sending_to"][i]]
-    
+        circuit["id"] = correspondence[circuit["id"]]
+
     warn = False
     run_parameters = {}
     for k,v in run_args.items():

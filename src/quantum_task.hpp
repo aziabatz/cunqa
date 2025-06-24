@@ -13,6 +13,7 @@ public:
     std::vector<std::string> sending_to;
     bool is_dynamic = false; // C_IF gates
     bool is_distributed = false; // Classical Communications
+    std::string id;
 
     QuantumTask() = default;
 
