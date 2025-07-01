@@ -5,6 +5,7 @@
 
 std::string circuit = R"(
 {
+    "id": "circuito1",
     "config": {
         "shots": 1024,
         "method": "statevector",
@@ -23,12 +24,12 @@ std::string circuit = R"(
     {
         "name": "measure",
         "qubits": [0],
-        "memory": [0]
+        "clreg": [0]
     },
     {
         "name": "measure",
         "qubits": [1],
-        "memory": [1]
+        "clreg": [1]
     }
     ]
 }
@@ -55,15 +56,16 @@ cunqa::JSON read_file(const std::string& filename)
 
 int main(int argc, char *argv[ ])
 {
-    
     const auto store = getenv("STORE");
     const std::string filepath = store + "/.cunqa/qpus.json"s;
     cunqa::JSON qpus = read_file(filepath);
 
     std::cout << "Aqui\n";
-    std::vector<Client> clients(2);
+    std::vector<Client> clients(3);
     int i=0;
+    std::cout << "Aqui\n";
     for (const auto& qpu: qpus) {
+        std::cout << i << "\n";
         clients[i].connect(qpu.at("net").at("ip"), qpu.at("net").at("port"));
         clients[i].send_circuit(circuit);
         i++;

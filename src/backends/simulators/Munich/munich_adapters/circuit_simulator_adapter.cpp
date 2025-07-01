@@ -100,7 +100,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
     JSON result_json = {
         {"counts", meas_counter},
         {"time_taken", time_taken}
-    }; 
+    };
     return result_json;
 }
 
