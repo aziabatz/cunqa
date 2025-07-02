@@ -88,6 +88,7 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
         classical_channel->connect(connect_with);
     }
 
+    LOGGER_DEBUG("Vamos a ejecutar los shots.");
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {  
         meas_counter[execute_shot_(classical_channel, p_qca->quantum_tasks)]++;

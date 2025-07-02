@@ -21,7 +21,7 @@ std::string to_string(const QuantumTask& data)
 
 void QuantumTask::update_circuit(const std::string& quantum_task) 
 {
-    auto quantum_task_json = JSON::parse(quantum_task);
+    auto quantum_task_json = quantum_task == "" ? JSON() : JSON::parse(quantum_task);
     std::vector<std::string> no_communications = {};
 
     if (quantum_task_json.contains("instructions") && quantum_task_json.contains("config")) {
@@ -61,10 +61,8 @@ void QuantumTask::update_circuit(const std::string& quantum_task)
             }
         }
 
-    } else if (quantum_task_json.contains("params")) {
+    } else if (quantum_task_json.contains("params"))
         update_params_(quantum_task_json.at("params"));
-    } else
-        throw std::runtime_error("Incorrect format of the circuit.");
 }
 
     

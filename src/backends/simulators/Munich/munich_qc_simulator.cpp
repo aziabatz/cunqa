@@ -15,12 +15,16 @@ MunichQCSimulator::MunichQCSimulator()
 };
 
 
-JSON MunichQCSimulator::execute(const QCBackend& backend, const QuantumTask& circuit)
+JSON MunichQCSimulator::execute(const QCBackend& backend, const QuantumTask& quantum_task)
 {
-    LOGGER_DEBUG("Sending the circuit: {}", to_string(circuit));
-    classical_channel.send_info(to_string(circuit), "executor");
-    auto results = classical_channel.recv_info("executor");
-    return JSON::parse(results);
+    auto circuit = to_string(quantum_task);
+    classical_channel.send_info(circuit, "executor");
+    if (circuit != "") {
+        auto results = classical_channel.recv_info("executor");
+        return JSON::parse(results);
+    }
+    return JSON();
+        
 }
 
 } // End namespace sim

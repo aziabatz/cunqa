@@ -23,7 +23,6 @@ struct Client::Impl {
     {
         try {
             socket_.connect("tcp://" + ip + ":" + port);
-            std::cout << "Aqui\n";
             LOGGER_DEBUG("Client successfully connected to server at {}:{}.", ip, port);
         } catch (const zmq::error_t& e) {
             LOGGER_ERROR("Unable to connect to endpoint {}:{}. Error: {}", ip, port, e.what());

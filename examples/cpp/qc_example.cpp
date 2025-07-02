@@ -3,14 +3,14 @@
 #include "comm/client.hpp"
 #include <string>
 
-std::string circuit = R"(
+std::string circuit1 = R"(
 {
     "id": "circuito1",
     "config": {
         "shots": 1024,
         "method": "statevector",
         "num_clbits": 2,
-        "num_qubits": 2
+        "num_qubits": 3
     },
     "instructions": [
     {
@@ -22,6 +22,10 @@ std::string circuit = R"(
         "qubits": [0, 1]
     },
     {
+        "name": "qrecv",
+        "qubits": [2]
+    },
+    {
         "name": "measure",
         "qubits": [0],
         "clreg": [0]
@@ -30,6 +34,42 @@ std::string circuit = R"(
         "name": "measure",
         "qubits": [1],
         "clreg": [1]
+    }
+    ]
+}
+)";
+
+std::string circuit2 = R"(
+{
+    "id": "circuito2",
+    "config": {
+        "shots": 1024,
+        "method": "statevector",
+        "num_clbits": 2,
+        "num_qubits": 3
+    },
+    "instructions": [
+    {
+        "name": "h",
+        "qubits": [1]
+    },
+    {
+        "name": "cx",
+        "qubits": [1, 2]
+    },
+    {
+        "name": "qrecv",
+        "qubits": [0]
+    },
+    {
+        "name": "measure",
+        "qubits": [1],
+        "clreg": [1]
+    },
+    {
+        "name": "measure",
+        "qubits": [2],
+        "clreg": [2]
     }
     ]
 }
@@ -60,20 +100,17 @@ int main(int argc, char *argv[ ])
     const std::string filepath = store + "/.cunqa/qpus.json"s;
     cunqa::JSON qpus = read_file(filepath);
 
-    std::cout << "Aqui\n";
     std::vector<Client> clients(3);
+    std::vector<std::string> circuits{circuit1, circuit2, std::string()};
     int i=0;
-    std::cout << "Aqui\n";
     for (const auto& qpu: qpus) {
-        std::cout << i << "\n";
         clients[i].connect(qpu.at("net").at("ip"), qpu.at("net").at("port"));
-        clients[i].send_circuit(circuit);
+        clients[i].send_circuit(circuits[i]);
         i++;
     }
-    std::cout << "Aqui\n";
-    for (auto& client: clients) {
-        std::cout << client.recv_results() << "\n";
-    }  
+
+    std::cout << clients[0].recv_results() << "\n";
+    std::cout << clients[1].recv_results() << "\n";
     
     return 0;
 }

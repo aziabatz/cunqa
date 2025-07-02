@@ -49,7 +49,6 @@ void QPU::compute_result_()
                 
                 quantum_task_.update_circuit(message);
                 auto result = backend->execute(quantum_task_);
-                LOGGER_DEBUG("RESULT: {}", result.dump());
                 server->send_result(result.dump());
 
             } catch(const comm::ServerException& e) {

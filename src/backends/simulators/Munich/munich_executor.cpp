@@ -62,20 +62,19 @@ void MunichExecutor::run()
         auto qc = std::make_unique<QuantumComputationAdapter>(quantum_tasks);
         CircuitSimulatorAdapter simulator(std::move(qc));
 
-        // TODO: Mirar como hacer lo de los shots
         auto start = std::chrono::high_resolution_clock::now();
         auto result = simulator.simulate(1024);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> duration = end - start;
-        LOGGER_DEBUG("Se llegó aquí y se tardó en simular: {}.", result.dump());
         float time_taken = duration.count();
         
         // TODO: transformar los circuitos 
         std::string result_str = result.dump();
 
-        for(const auto& qpu: qpus_working){
+        for(const auto& qpu: qpus_working) {
             classical_channel.send_info(result_str, qpu);
         }
+
 
         qpus_working.clear();
         quantum_tasks.clear();
