@@ -88,7 +88,6 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
         classical_channel->connect(connect_with);
     }
 
-    LOGGER_DEBUG("Vamos a ejecutar los shots.");
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++) {  
         meas_counter[execute_shot_(classical_channel, p_qca->quantum_tasks)]++;
@@ -141,19 +140,23 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
     std::unordered_map<std::string, bool> blocked;
     std::vector<int> zero_qubit;
     int n_qubits = 0;
-    
+    int end_string = 1;
+
     for (auto &quantum_task : quantum_tasks) {
         zero_qubit.push_back(n_qubits);
         its.push_back(quantum_task.circuit.begin());
         ends.push_back(quantum_task.circuit.end());
         n_qubits += quantum_task.config.at("num_qubits").get<int>();
         blocked[quantum_task.id] = false;
-        LOGGER_DEBUG("Quantum task ID: {}", quantum_task.id);
         finished.push_back(false);
     }
 
-    if (size(quantum_tasks) > 1)
+    std::string resultString(n_qubits, '0');
+
+    if (size(quantum_tasks) > 1) {
         n_qubits += 2;
+        end_string += 1;
+    }
 
     initializeSimulationAdapter(n_qubits);
 
@@ -174,6 +177,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
             auto& instruction = *its[i];
             qubits = instruction.at("qubits").get<std::vector<int>>();
+            LOGGER_DEBUG("GATE: {}", instruction.at("name").get<std::string>());
             switch (constants::INSTRUCTIONS_MAP.at(instruction.at("name")))
             {
                 case constants::MEASURE:
@@ -357,7 +361,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                     //Desbloquear el QRECV
                     blocked[instruction.at("circuit")] = false;
                     generate_entanglement_(n_qubits);
-                    LOGGER_DEBUG("Se aplica todo el qsend y se desbloquea {}", instruction.at("circuit").get<std::string>());
                     break;
                 }
                 case constants::QRECV:
@@ -404,13 +407,12 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
     } // End one shot
 
-    LOGGER_DEBUG("Se acabó");
-    std::string resultString(n_qubits - 2, '0');
-
     // result is a map from the cbit index to the Boolean value
     for (const auto& [bitIndex, value] : classic_values) {
-        resultString[n_qubits - bitIndex - 2] = value ? '1' : '0';
+        resultString[n_qubits - bitIndex - end_string] = value ? '1' : '0';
     }
+
+    LOGGER_DEBUG("RESULTADO: {}", resultString);
     return resultString;
 }
 
