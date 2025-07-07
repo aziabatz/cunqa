@@ -16,8 +16,10 @@ std::string to_string(const QuantumTask& data)
 {
     if (data.circuit.empty())
         return "";
-    return "{\"config\": " + data.config.dump() + ",\n\"instructions\": " + data.circuit.dump() + "}\n"; 
+    return "{\"id\": \"" + data.id + "\",\n\"config\": " + data.config.dump() + ",\n\"instructions\": " + data.circuit.dump() + "}\n"; 
 }
+
+QuantumTask::QuantumTask(const std::string& quantum_task) { update_circuit(quantum_task); }
 
 void QuantumTask::update_circuit(const std::string& quantum_task) 
 {

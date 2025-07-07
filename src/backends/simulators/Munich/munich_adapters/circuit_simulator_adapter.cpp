@@ -121,10 +121,23 @@ void CircuitSimulatorAdapter::apply_gate_(const JSON& instruction, std::unique_p
         applyOperationToStateAdapter(std::move(std_op));
 }
 
+void CircuitSimulatorAdapter::generate_entanglement_(const int& n_qubits)
+{
+    // Apply H to the first entanglement qubit
+    auto std_op1 = std::make_unique<qc::StandardOperation>(n_qubits - 2, qc::OpType::H);
+    applyOperationToStateAdapter(std::move(std_op1));
+
+    // Apply a CX to the second one to generate an ent pair
+    qc::Control control(n_qubits - 2);
+    auto std_op2 = std::make_unique<qc::StandardOperation>(control, n_qubits - 1, qc::OpType::X);
+    applyOperationToStateAdapter(std::move(std_op2));
+}
+
 std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* classical_channel, const std::vector<QuantumTask>& quantum_tasks)
 {
     std::vector<JSON::const_iterator> its;
     std::vector<JSON::const_iterator> ends;
+    std::vector<bool> finished;
     std::unordered_map<std::string, bool> blocked;
     std::vector<int> zero_qubit;
     int n_qubits = 0;
@@ -135,20 +148,28 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
         ends.push_back(quantum_task.circuit.end());
         n_qubits += quantum_task.config.at("num_qubits").get<int>();
         blocked[quantum_task.id] = false;
+        LOGGER_DEBUG("Quantum task ID: {}", quantum_task.id);
+        finished.push_back(false);
     }
 
+    if (size(quantum_tasks) > 1)
+        n_qubits += 2;
+
     initializeSimulationAdapter(n_qubits);
+
+    generate_entanglement_(n_qubits);
 
     std::vector<int> qubits;
     std::map<std::size_t, bool> classic_values;
     std::map<std::size_t, bool> classic_reg;
     std::map<std::size_t, bool> r_classic_reg;
+    std::unordered_map<std::string, std::queue<int>> qc_meas; 
 
     bool ended = false;
     while (!ended) {
         ended = true;
         for (size_t i = 0; i < its.size(); ++i) {
-            if(its[i] == ends[i] || blocked[quantum_tasks[i].id])
+            if(finished[i] || blocked[quantum_tasks[i].id])
                 continue;
 
             auto& instruction = *its[i];
@@ -216,10 +237,17 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
+                case constants::SWAP:
+                {
+                    qc::Targets targets(qubits[0] + zero_qubit[i], qubits[1] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
+                    apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
+                    break;
+                }
                 case constants::CX:
                 {
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::X);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::X);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
@@ -306,32 +334,82 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                 }
                 case constants::QSEND:
                 {
-                    //auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    //auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::X);
-                    //apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
-                    const auto example_qubit = qubits[0] + zero_qubit[i];
-                    LOGGER_DEBUG("Sending qubit: {} to QPU {}", example_qubit, 0);
+                    // CX to the entangled pair
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op1 = std::make_unique<qc::StandardOperation>(control, n_qubits - 2, qc::OpType::X);
+                    apply_gate_(instruction, std::move(std_op1), classic_reg, r_classic_reg);
+                    
+                    // H to the sent qubit
+                    auto std_op2 = std::make_unique<qc::StandardOperation>(qubits[0] + zero_qubit[i], qc::OpType::H);
+                    apply_gate_(instruction, std::move(std_op2), classic_reg, r_classic_reg);
+
+                    int result = measureAdapter(qubits[0] + zero_qubit[i]) - '0';
+
+                    qc_meas[quantum_tasks[i].id].push(result);
+                    qc_meas[quantum_tasks[i].id].push(measureAdapter(n_qubits - 2) - '0');
+
+                    // We reset to 0 the qubit sent
+                    if(result) {
+                        auto std_op3 = std::make_unique<qc::StandardOperation>(qubits[0] + zero_qubit[i], qc::OpType::X);
+                        apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
+                    }
+
+                    //Desbloquear el QRECV
+                    blocked[instruction.at("circuit")] = false;
+                    generate_entanglement_(n_qubits);
+                    LOGGER_DEBUG("Se aplica todo el qsend y se desbloquea {}", instruction.at("circuit").get<std::string>());
                     break;
                 }
                 case constants::QRECV:
                 {
-                    const auto example_qubit = qubits[0] + zero_qubit[i];
-                    LOGGER_DEBUG("Receiving qubit: {} from QPU {}", example_qubit, 0);
+                    if (!qc_meas.contains(instruction.at("circuit")))
+                    {
+                        blocked[quantum_tasks[i].id] = true;
+                        continue;
+                    }
+                    
+                    // Receive the measurements from the sender
+                    int meas1 = qc_meas[instruction.at("circuit")].front();
+                    qc_meas[instruction.at("circuit")].pop();
+                    int meas2 = qc_meas[instruction.at("circuit")].front();
+                    qc_meas[instruction.at("circuit")].pop();
+ 
+                    // Apply, conditioned to the measurement, the X and Z gates
+                    if (meas1) {
+                        auto std_op1 = std::make_unique<qc::StandardOperation>(n_qubits - 1, qc::OpType::X);
+                        apply_gate_(instruction, std::move(std_op1), classic_reg, r_classic_reg);
+                    }
+                    if (meas2) {
+                        auto std_op2 = std::make_unique<qc::StandardOperation>(n_qubits - 1, qc::OpType::Z);
+                        apply_gate_(instruction, std::move(std_op2), classic_reg, r_classic_reg);
+                    }
+
+                    // Swap the value to the desired qubit
+                    qc::Targets targets = {n_qubits - 1, qubits[0] + zero_qubit[i]};
+                    auto std_op3 = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
+                    apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
                     break;
                 }
                 default:
                     std::cerr << "Instruction not suported!" << "\n";
             } // End switch
+            
             ++its[i];
-            ended = its[i] != ends[i] ? false : ended;
+            if (its[i] != ends[i])
+                ended = false;
+            else
+                finished[i] = true;
+            
         }
+
     } // End one shot
 
-    std::string resultString(n_qubits, '0');
+    LOGGER_DEBUG("Se acabó");
+    std::string resultString(n_qubits - 2, '0');
 
     // result is a map from the cbit index to the Boolean value
     for (const auto& [bitIndex, value] : classic_values) {
-        resultString[n_qubits - bitIndex - 1] = value ? '1' : '0';
+        resultString[n_qubits - bitIndex - 2] = value ? '1' : '0';
     }
     return resultString;
 }

@@ -16,7 +16,7 @@ public:
     std::string id;
 
     QuantumTask() = default;
-
+    QuantumTask(const std::string& quantum_task);
     QuantumTask(const JSON& circuit, const JSON& config): circuit(circuit), config(config) {};
 
     void update_circuit(const std::string& quantum_task);

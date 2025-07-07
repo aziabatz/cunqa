@@ -20,7 +20,6 @@ MunichExecutor::MunichExecutor() : classical_channel{"executor"}
     std::ifstream in(filename);
 
     if (!in.is_open()) {
-        LOGGER_ERROR("Could not open the file: {}", filename);
         throw std::runtime_error("Error opening the communications file.");
     }
 
@@ -28,8 +27,6 @@ MunichExecutor::MunichExecutor() : classical_channel{"executor"}
     if (in.peek() != std::ifstream::traits_type::eof())
         in >> j;
     in.close();
-
-    LOGGER_DEBUG("JSON of communications: \n{}", j.dump(4));
 
     std::string job_id = std::getenv("SLURM_JOB_ID");
 
@@ -55,7 +52,8 @@ void MunichExecutor::run()
             if(message != "") {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);
-                quantum_tasks.push_back(QuantumTask(quantum_task_json["instructions"], quantum_task_json["config"]));
+                
+                quantum_tasks.push_back(QuantumTask(message));
             }
         }
 
@@ -68,13 +66,12 @@ void MunichExecutor::run()
         std::chrono::duration<float> duration = end - start;
         float time_taken = duration.count();
         
-        // TODO: transformar los circuitos 
+        // TODO: transformar los circuitos
         std::string result_str = result.dump();
 
         for(const auto& qpu: qpus_working) {
             classical_channel.send_info(result_str, qpu);
         }
-
 
         qpus_working.clear();
         quantum_tasks.clear();

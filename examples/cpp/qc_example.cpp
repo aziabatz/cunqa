@@ -9,8 +9,8 @@ std::string circuit1 = R"(
     "config": {
         "shots": 1024,
         "method": "statevector",
-        "num_clbits": 2,
-        "num_qubits": 3
+        "num_clbits": 0,
+        "num_qubits": 1
     },
     "instructions": [
     {
@@ -18,22 +18,9 @@ std::string circuit1 = R"(
         "qubits": [0]
     },
     {
-        "name": "cx",
-        "qubits": [0, 1]
-    },
-    {
-        "name": "qrecv",
-        "qubits": [2]
-    },
-    {
-        "name": "measure",
+        "name": "qsend",
         "qubits": [0],
-        "clreg": [0]
-    },
-    {
-        "name": "measure",
-        "qubits": [1],
-        "clreg": [1]
+        "circuit": "circuito2"
     }
     ]
 }
@@ -46,30 +33,27 @@ std::string circuit2 = R"(
         "shots": 1024,
         "method": "statevector",
         "num_clbits": 2,
-        "num_qubits": 3
+        "num_qubits": 2
     },
     "instructions": [
     {
-        "name": "h",
-        "qubits": [1]
+        "name": "qrecv",
+        "qubits": [0],
+        "circuit": "circuito1"
     },
     {
         "name": "cx",
-        "qubits": [1, 2]
+        "qubits": [0, 1]
     },
     {
-        "name": "qrecv",
-        "qubits": [0]
+        "name": "measure",
+        "qubits": [0],
+        "clreg": [0]
     },
     {
         "name": "measure",
         "qubits": [1],
         "clreg": [1]
-    },
-    {
-        "name": "measure",
-        "qubits": [2],
-        "clreg": [2]
     }
     ]
 }

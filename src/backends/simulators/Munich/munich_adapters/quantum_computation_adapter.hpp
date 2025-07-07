@@ -32,7 +32,7 @@ private:
         for(const auto& quantum_task: quantum_tasks) {
             num_qubits += quantum_task.config.at("num_qubits").get<std::size_t>();
         }
-        return num_qubits;
+        return num_qubits + 2;
     }
 
     std::size_t get_num_clbits_(const std::vector<QuantumTask>& quantum_tasks) 
