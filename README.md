@@ -11,7 +11,14 @@
   <br> 
 </ul>
 
-<a href="https://www.cesga.es/"><img src="docs/source/_static/logotipo_CESGA_negro.png" alt="CESGA Logo" width="200" height="60"></a> 
+<a href="https://www.cesga.es/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cesga_blanco.png" width="250" height="60">
+    <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logotipo_CESGA_negro.png" width="200" height="60">
+    <img alt="CESGA Logo" src="docs/source/_static/logotipo_CESGA_negro.png" width="200" height="60">
+  </picture>
+</a> 
+
 <br> 
 <br>
 

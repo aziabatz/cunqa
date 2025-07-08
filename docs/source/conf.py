@@ -55,7 +55,8 @@ autodoc_mock_imports = [
     'cunqa.fakeqmio',
     'subprocess',
     'typing',
-    'insert'
+    'insert',
+    'copy'
 ]
 
 

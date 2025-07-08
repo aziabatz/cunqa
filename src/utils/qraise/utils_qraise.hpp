@@ -3,6 +3,7 @@
 #include <string>
 #include <regex>
 #include <fstream>
+#include <cmath>
 
 #include "utils/json.hpp"
 #include "logger.hpp"
@@ -68,10 +69,22 @@ bool exists_family_name(std::string& family, std::string& info_path)
     }
 }
 
-bool check_simulator_name(std::string& sim_name){
+bool check_simulator_name(std::string& sim_name)
+{
     if (sim_name == "Cunqa" || sim_name == "Munich" || sim_name == "Aer") {  // Add new valid simulators to the check here
         return true;
     } else {
         return false;
+    }
+}
+
+int number_of_nodes(int& number_of_qpus, int& cores_per_qpu, int& number_of_nodes, const int& cores_per_node)
+{
+    if (number_of_qpus * cores_per_qpu < number_of_nodes * cores_per_node) {
+        return number_of_nodes;
+    } else {
+        float aprox_number_of_nodes = ((float)number_of_qpus * (float)cores_per_qpu)/(float)cores_per_node;
+        return static_cast<int>(std::ceil(aprox_number_of_nodes));
+
     }
 }
