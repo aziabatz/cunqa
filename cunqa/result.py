@@ -1,4 +1,4 @@
-"""Contains the Result class, which deals with the output of QJobs using any simulator and the ResultError."""
+"""Contains the Result class, which deals with the output of QJobs using any simulator."""
 from cunqa.logger import logger
 
 class ResultError(Exception):
