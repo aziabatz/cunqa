@@ -20,7 +20,7 @@ std::string circuit1 = R"(
     {
         "name": "qsend",
         "qubits": [0],
-        "circuit": "circuito2"
+        "qpus": ["circuito2"]
     }
     ]
 }
@@ -39,7 +39,7 @@ std::string circuit2 = R"(
     {
         "name": "qrecv",
         "qubits": [0],
-        "circuit": "circuito1"
+        "qpus": ["circuito1"]
     },
     {
         "name": "cx",

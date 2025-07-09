@@ -14,7 +14,7 @@ def generate_id(size=4):
 
 
 
-SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send"]
+SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "recv", "qsend", "qrecv"]
 SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
 SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
@@ -38,7 +38,7 @@ class CunqaCircuit:
     
     _id: str
     is_parametric: bool 
-    is_distributed: bool 
+    has_cc: bool 
     is_dynamic: bool
     instructions: "list[dict]"
     quantum_regs: dict
@@ -49,7 +49,7 @@ class CunqaCircuit:
     def __init__(self, num_qubits: int, num_clbits: Optional[int] = None, id: Optional[str] = None):
 
         self.is_parametric = False
-        self.is_distributed = False
+        self.has_cc = False
         self.is_dynamic = False
         self.instructions = []
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
@@ -88,7 +88,7 @@ class CunqaCircuit:
     
     @property
     def info(self) -> dict:
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "is_distributed":self.is_distributed, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "has_cc":self.has_cc, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
 
 
     @property
@@ -1066,14 +1066,9 @@ class CunqaCircuit:
         control_qubit (int): control qubit from self.
 
         target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
-
-        target_qubit (int): qubit where the gate will be conditionally applied.
-
-        param (float or int): parameter in case the gate provided is parametric.
-
         """
         self.is_dynamic = True
-        self.is_distributed = True
+        self.has_cc = True
         
         if isinstance(control_qubit, int):
             list_control_qubit = [control_qubit]
@@ -1103,6 +1098,84 @@ class CunqaCircuit:
 
 
         self.sending_to.append(target_circuit_id)
+    
+    def qsend(self, sent_qubit: Optional[int] = None, target_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+        """
+        Class method to send a qubit from the current circuit to a remote one.
+        
+        Args:
+        -------
+
+        sent_qubit (int): control qubit from self.
+
+        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
+        """
+        self.is_dynamic = True
+        
+        if isinstance(sent_qubit, int):
+            list_control_qubit = [sent_qubit]
+        else:
+            logger.error(f"control qubit must be int, but {type(sent_qubit)} was provided [TypeError].")
+            raise SystemExit
+
+        if target_circuit is None:
+            logger.error("target_circuit not provided.")
+            raise SystemExit
+        
+        elif isinstance(target_circuit, str):
+            target_circuit_id = target_circuit
+
+        elif isinstance(target_circuit, CunqaCircuit):
+            target_circuit_id = target_circuit._id
+        else:
+            logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            raise SystemExit
+        
+
+        self._add_instruction({
+            "name": "qsend",
+            "qubits": flatten([list_control_qubit]),
+            "circuits": [target_circuit_id]
+        })
+
+    def qrecv(self, recv_qubit: Optional[int] = None, target_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+        """
+        Class method to send a qubit from the current circuit to a remote one.
+        
+        Args:
+        -------
+
+        sent_qubit (int): control qubit from self.
+
+        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
+        """
+        self.is_dynamic = True
+        
+        if isinstance(recv_qubit, int):
+            list_control_qubit = [recv_qubit]
+        else:
+            logger.error(f"control qubit must be int, but {type(recv_qubit)} was provided [TypeError].")
+            raise SystemExit
+
+        if target_circuit is None:
+            logger.error("target_circuit not provided.")
+            raise SystemExit
+        
+        elif isinstance(target_circuit, str):
+            target_circuit_id = target_circuit
+
+        elif isinstance(target_circuit, CunqaCircuit):
+            target_circuit_id = target_circuit._id
+        else:
+            logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            raise SystemExit
+        
+
+        self._add_instruction({
+            "name": "qrecv",
+            "qubits": flatten([list_control_qubit]),
+            "circuits": [target_circuit_id]
+        })
 
     def remote_c_if(self, gate: str, target_qubits: Union[int, "list[int]"], param: float, control_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
         """
@@ -1122,7 +1195,7 @@ class CunqaCircuit:
         """
 
         self.is_dynamic = True
-        self.is_distributed = True
+        self.has_cc = True
         
         if isinstance(target_qubits, int):
             target_qubits = [target_qubits]

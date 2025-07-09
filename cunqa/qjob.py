@@ -32,7 +32,7 @@ class QJob:
     _circuit_id: str 
     _sending_to: "list[str]"
     _is_dynamic: bool
-    _is_distributed:bool
+    _has_cc:bool
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
@@ -180,14 +180,14 @@ class QJob:
                     self._sending_to = circuit["sending_to"]
                 else:
                     self._sending_to = []
-                if "is_distributed" in circuit:
-                    self._is_distributed = circuit["is_distributed"]
+                if "has_cc" in circuit:
+                    self._has_cc = circuit["has_cc"]
                     self._is_dynamic = True
                 elif "is_dynamic" in  circuit:
                     self._is_dynamic = circuit["is_dynamic"]
                 else:
                     self._is_dynamic = False
-                    self._is_distributed = False
+                    self._has_cc = False
 
                 logger.debug("Translation to dict not necessary...")
 
@@ -206,7 +206,7 @@ class QJob:
                 self._circuit_id = circuit._id
                 self._sending_to = circuit.sending_to
                 self._is_dynamic = circuit.is_dynamic
-                self._is_distributed = circuit.is_distributed
+                self._has_cc = circuit.has_cc
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -228,7 +228,7 @@ class QJob:
                 circuit_json, is_dynamic = qc_to_json(circuit)
                 instructions = circuit_json['instructions']
                 self._is_dynamic = is_dynamic
-                self._is_distributed = False
+                self._has_cc = False
 
             elif isinstance(circuit, str):
 
@@ -247,7 +247,7 @@ class QJob:
                 circuit_json, is_dynamic = qc_to_json(circuit)
                 instructions = circuit_json['instructions']
                 self._is_dynamic = is_dynamic
-                self._is_distributed = False
+                self._has_cc = False
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
@@ -299,7 +299,7 @@ class QJob:
                 "instructions": self._circuit,
                 "sending_to": self._sending_to,
                 "is_dynamic": self._is_dynamic,
-                "is_distributed": self._is_distributed
+                "has_cc": self._has_cc
             }
             self._execution_config = json.dumps(exec_config)
 

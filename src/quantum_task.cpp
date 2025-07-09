@@ -31,11 +31,10 @@ void QuantumTask::update_circuit(const std::string& quantum_task)
         config = quantum_task_json.at("config").get<JSON>();
         sending_to = (quantum_task_json.contains("sending_to") ? quantum_task_json.at("sending_to").get<std::vector<std::string>>() : no_communications);
         is_dynamic = ((quantum_task_json.contains("is_dynamic")) ? quantum_task_json.at("is_dynamic").get<bool>() : false);
-        is_distributed = ((quantum_task_json.contains("is_distributed")) ? quantum_task_json.at("is_distributed").get<bool>() : false);
+        has_cc = ((quantum_task_json.contains("has_cc")) ? quantum_task_json.at("has_cc").get<bool>() : false);
         id = quantum_task_json.at("id");
 
-        if (is_distributed) {
-            LOGGER_DEBUG("is_distributed");
+        if (has_cc) {
             const char* STORE = std::getenv("STORE");
             std::string filepath = std::string(STORE) + "/.cunqa/communications.json";
             std::ifstream communications_file(filepath); 

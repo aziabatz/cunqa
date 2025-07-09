@@ -139,24 +139,25 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
     std::vector<bool> finished;
     std::unordered_map<std::string, bool> blocked;
     std::vector<int> zero_qubit;
+    std::vector<int> zero_clbit;
     int n_qubits = 0;
-    int end_string = 1;
+    int n_clbits = 0;
 
     for (auto &quantum_task : quantum_tasks) {
         zero_qubit.push_back(n_qubits);
+        zero_clbit.push_back(n_clbits);
         its.push_back(quantum_task.circuit.begin());
         ends.push_back(quantum_task.circuit.end());
         n_qubits += quantum_task.config.at("num_qubits").get<int>();
+        n_clbits += quantum_task.config.at("num_clbits").get<int>();
         blocked[quantum_task.id] = false;
         finished.push_back(false);
     }
 
-    std::string resultString(n_qubits, '0');
+    std::string resultString(n_clbits, '0');
 
-    if (size(quantum_tasks) > 1) {
+    if (size(quantum_tasks) > 1)
         n_qubits += 2;
-        end_string += 1;
-    }
 
     initializeSimulationAdapter(n_qubits);
 
@@ -359,23 +360,23 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                     }
 
                     //Desbloquear el QRECV
-                    blocked[instruction.at("circuit")] = false;
+                    blocked[instruction.at("qpus")[0]] = false;
                     generate_entanglement_(n_qubits);
                     break;
                 }
                 case constants::QRECV:
                 {
-                    if (!qc_meas.contains(instruction.at("circuit")))
+                    if (!qc_meas.contains(instruction.at("qpus")[0]))
                     {
                         blocked[quantum_tasks[i].id] = true;
                         continue;
                     }
-                    
+
                     // Receive the measurements from the sender
-                    int meas1 = qc_meas[instruction.at("circuit")].front();
-                    qc_meas[instruction.at("circuit")].pop();
-                    int meas2 = qc_meas[instruction.at("circuit")].front();
-                    qc_meas[instruction.at("circuit")].pop();
+                    int meas1 = qc_meas[instruction.at("qpus")[0]].front();
+                    qc_meas[instruction.at("qpus")[0]].pop();
+                    int meas2 = qc_meas[instruction.at("qpus")[0]].front();
+                    qc_meas[instruction.at("qpus")[0]].pop();
  
                     // Apply, conditioned to the measurement, the X and Z gates
                     if (meas1) {
@@ -388,7 +389,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                     }
 
                     // Swap the value to the desired qubit
-                    qc::Targets targets = {n_qubits - 1, qubits[0] + zero_qubit[i]};
+                    qc::Targets targets = {static_cast<unsigned int>(n_qubits - 1), static_cast<unsigned int>(qubits[0] + zero_qubit[i])};
                     auto std_op3 = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
                     apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
                     break;
@@ -409,7 +410,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
     // result is a map from the cbit index to the Boolean value
     for (const auto& [bitIndex, value] : classic_values) {
-        resultString[n_qubits - bitIndex - end_string] = value ? '1' : '0';
+        resultString[n_clbits - bitIndex] = value ? '1' : '0';
     }
 
     LOGGER_DEBUG("RESULTADO: {}", resultString);

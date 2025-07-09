@@ -48,12 +48,12 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     distributed_qjobs = []
     circuit_jsons = []
 
-    remote_controlled_gates = ["measure_and_send", "recv"]
+    remote_controlled_gates = ["measure_and_send", "recv", "qsend", "qrecv"]
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons
     for circuit in circuits:
-        if (isinstance(circuit, CunqaCircuit) and not circuit.is_distributed):
+        if (isinstance(circuit, CunqaCircuit) and not circuit.has_cc):
             logger.error(f"Circuits to run must be distributed.")
             raise SystemExit # User's level
         
@@ -78,7 +78,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
             correspondence[circuit["id"]] = qpu._id
         
 
-    #Check wether the QPUs are valid
+    #Check whether the QPUs are valid
     if not all(qpu._family == qpus[0]._family for qpu in qpus):
         logger.debug(f"QPUs of different families were provided.")
         if not all(re.match(r"^tcp://", qpu._comm_endpoint) for qpu in qpus):
@@ -236,7 +236,7 @@ class QPUCircuitMapper:
             return [func(result) for result in results]
 
         
-        except  QiskitError as error:
+        except QiskitError as error:
             logger.error(f"Error while assigning parameters to QuantumCircuit, please check they have the correct size [{type(error).__name__}]: {error}.")
             raise SystemExit # User's level
         
