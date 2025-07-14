@@ -9,7 +9,7 @@ from qiskit import QuantumCircuit
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
 
-from cunqa.circuit import qc_to_json, _registers_dict, _is_parametric, CunqaCircuit
+from cunqa.circuit import qc_to_json,CunqaCircuit, _registers_dict
 from cunqa.logger import logger
 from cunqa.backend import Backend
 from cunqa.result import Result
@@ -47,18 +47,17 @@ class QJob:
 
 
         Args:
-        -----------
-        QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
+            QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-        circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
+            circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
 
-        transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
+            transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
-        initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
+            initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
 
-        opt_level (int): optimization level for transpilation, default set to 1.
+            opt_level (int): optimization level for transpilation, default set to 1.
 
-        **run_parameters : any other simulation instructions.
+            **run_parameters : any other simulation instructions.
 
         """
 
@@ -138,8 +137,7 @@ class QJob:
         Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
 
         Args:
-        -----------
-        parameters (list[float]): list of parameters to assign to the parametrized circuit.
+            parameters (list[float]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
@@ -220,9 +218,7 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
                 self._cregisters = _registers_dict(circuit)[1]
-                # TODO: ¿self.circuit_id?
-                self._sending_to = []
-                
+
                 logger.debug("Translating to dict from QuantumCircuit...")
 
                 circuit_json, is_dynamic = qc_to_json(circuit)
@@ -237,6 +233,7 @@ class QJob:
                 qc_from_qasm = QuantumCircuit.from_qasm_str(circuit)
 
                 self.num_qubits = qc_from_qasm.num_qubits
+                self._cregisters = _registers_dict(qc_from_qasm)[1]
                 self.num_clbits = sum(len(k) for k in self._cregisters.values())
                 self._cregisters = _registers_dict(qc_from_qasm)[1]
                 # TODO: ¿self.circuit_id?
@@ -321,12 +318,10 @@ def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"
         Function to get result of several QJob objects, it also takes one QJob object.
 
         Args:
-        ------
-        qjobs (QJob object or list of QJob objects)
+            qjobs (list of QJob objects or QJob object)
 
         Return:
-        ------- 
-        Result or list of results.
+            Result or list of results.
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
@@ -341,4 +336,3 @@ def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"
     else:
         logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")
         raise SystemError # User's level
-    

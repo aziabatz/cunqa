@@ -19,6 +19,10 @@
 
 #include "logger.hpp"
 
+namespace {
+    const int CORES_PER_NODE = 64; // For both QMIO and FT3
+}
+
 using namespace std::literals;
 
 namespace {
@@ -31,7 +35,9 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
     int tasks = args.qc ? args.n_qpus + 1 : args.n_qpus;
     sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
-    sbatchFile << "#SBATCH -N " << args.number_of_nodes.value() << "\n";
+    int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
+    sbatchFile << "#SBATCH -N " << n_nodes << "\n";
+    
 
     if (args.qpus_per_node.has_value()) {
         if (args.n_qpus < args.qpus_per_node) {
