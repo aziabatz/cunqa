@@ -108,7 +108,7 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                 case constants::CRZ:
                 {
                     auto param =  instruction.at("params").get<std::vector<double>>();
-                    if (!instruction.contains("conditional_reg")) {
+                    if (instruction.contains("conditional_reg")) {
                         auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
                         if (classicRegister[conditional_reg[0]]) {
                             executor.apply_parametric_gate(instruction_name, qubits, param);
