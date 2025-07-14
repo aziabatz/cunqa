@@ -1,6 +1,5 @@
 #pragma once
 
-#include "src/instructions.hpp"
 #include "src/result_cunqasim.hpp"
 #include "src/executor.hpp"
 #include "src/utils/types_cunqasim.hpp"
@@ -58,7 +57,7 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                 case constants::UNITARY:
                 {
                     auto matrix = instruction.at("params").get<Matrix>();
-                    executor.apply_unitary(matrix, qubits);
+                    executor.apply_unitary("custom", matrix, qubits);
                     break;
                 }
                 case constants::ID:
@@ -80,6 +79,7 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                     } else if (instruction.contains("remote_conditional_reg")) {
                         auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
                         if (remoteClassicRegister[conditional_reg[0]]) {
+                            LOGGER_DEBUG("Entramos aquí a aplicar la puerta: {} {}", instruction.at("name").get<std::string>(), qubits[0]);
                             executor.apply_gate(instruction_name, qubits);
                         }
                     } else {
@@ -145,6 +145,8 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
             }
         } // End one shot
         int position = executor.get_nonzero_position();
+        if(n_qubits == 2)
+            LOGGER_DEBUG("MEDIDA: {}", position);
         counts[position]++;
 
         classicRegister.clear();

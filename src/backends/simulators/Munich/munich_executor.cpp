@@ -61,7 +61,7 @@ void MunichExecutor::run()
         CircuitSimulatorAdapter simulator(std::move(qc));
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = simulator.simulate(1024);
+        auto result = simulator.simulate(1);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> duration = end - start;
         float time_taken = duration.count();

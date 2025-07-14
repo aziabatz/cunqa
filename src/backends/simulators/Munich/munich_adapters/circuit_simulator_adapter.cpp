@@ -12,21 +12,18 @@
 
 using namespace cunqa;
 
-/*
-template <class BackendType>
-inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_task)
+
+JSON usual_execution_(const QuantumTask& quantum_task)
 {
     try {
         // TODO: Change the format with the free functions 
         std::string circuit = quantum_task_to_Munich(quantum_task);
-        LOGGER_DEBUG("OpenQASM circuit: {}", circuit);
         auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
-        JSON result_json;
-        JSON noise_model_json = backend.config.noise_model;
         float time_taken;
         int n_qubits = quantum_task.config.at("num_qubits");
 
+        /*JSON noise_model_json = backend.config.noise_model;
         if (!noise_model_json.empty()){
             LOGGER_DEBUG("Noise model execution");
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
@@ -45,8 +42,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
                 return {{"counts", result}, {"time_taken", time_taken}};
             }
             throw std::runtime_error("QASM format is not correct."); 
-        } else {
-            LOGGER_DEBUG("Noiseless execution");
+        } else { */
             CircuitSimulator sim(std::move(mqt_circuit));
             
             auto start = std::chrono::high_resolution_clock::now();
@@ -61,7 +57,7 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
                 return {{"counts", result}, {"time_taken", time_taken}};
             }
             throw std::runtime_error("QASM format is not correct."); 
-        }        
+        //}        
     } catch (const std::exception& e) {
         // TODO: specify the circuit format in the docs.
         LOGGER_ERROR("Error executing the circuit in the Munich simulator.");
@@ -70,16 +66,17 @@ inline JSON usual_execution_(const BackendType& backend, const QuantumTask& quan
     return {};
 }
 
-
-*/
-
 namespace cunqa {
 namespace sim {
 
 JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel* classical_channel)
 {
-    // TODO
+
+    // TODO: Avoid the static casting?
     auto p_qca = static_cast<QuantumComputationAdapter*>(qc.get());
+
+    //if (p_qca->quantum_tasks.size() == 1 && !p_qca->quantum_tasks[0].is_dynamic)
+    //    return usual_execution_(p_qca->quantum_tasks[0]);
     
     std::map<std::string, std::size_t> meas_counter;
 
@@ -89,9 +86,11 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < shots; i++) {  
+    for (int i = 0; i < shots; i++) {
+        LOGGER_DEBUG("Shot {}", i);  
         meas_counter[execute_shot_(classical_channel, p_qca->quantum_tasks)]++;
     } // End all shots
+
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = end - start;
     float time_taken = duration.count();
@@ -155,13 +154,10 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
     }
 
     std::string resultString(n_clbits, '0');
-
     if (size(quantum_tasks) > 1)
         n_qubits += 2;
 
     initializeSimulationAdapter(n_qubits);
-
-    generate_entanglement_(n_qubits);
 
     std::vector<int> qubits;
     std::map<std::size_t, bool> classic_values;
@@ -178,7 +174,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
             auto& instruction = *its[i];
             qubits = instruction.at("qubits").get<std::vector<int>>();
-            LOGGER_DEBUG("GATE: {}", instruction.at("name").get<std::string>());
             switch (constants::INSTRUCTIONS_MAP.at(instruction.at("name")))
             {
                 case constants::MEASURE:
@@ -189,6 +184,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                     if (!clreg.empty()) {
                         classic_reg[clreg[0]] = (char_measurement == '1');
                     }
+                    LOGGER_DEBUG("Measurement({}): {}", qubits[0] + zero_qubit[i], char_measurement);
                     break;
                 }
                 case constants::X:
@@ -244,7 +240,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                 }
                 case constants::SWAP:
                 {
-                    qc::Targets targets(qubits[0] + zero_qubit[i], qubits[1] + zero_qubit[i]);
+                    qc::Targets targets = {static_cast<unsigned int>(n_qubits - 1), static_cast<unsigned int>(qubits[0] + zero_qubit[i])};
                     auto std_op = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
@@ -258,39 +254,39 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                 }
                 case constants::CY:
                 {
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::Y);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::Y);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
                 case constants::CZ:
                 {
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::Z);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::Z);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
                 case constants::CRX:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::RX, params);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::RX, params);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
                 case constants::CRY:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::RY, params);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::RY, params);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
                 case constants::CRZ:
                 {
                     auto params = instruction.at("params").get<std::vector<double>>();
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::RZ, params);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::RZ, params);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
@@ -302,8 +298,8 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                 }
                 case constants::CECR:
                 {
-                    auto p_control = std::make_unique<qc::Control>(qubits[0] + zero_qubit[i]);
-                    auto std_op = std::make_unique<qc::StandardOperation>(*p_control, qubits[1] + zero_qubit[i], qc::OpType::ECR);
+                    qc::Control control(qubits[0] + zero_qubit[i]);
+                    auto std_op = std::make_unique<qc::StandardOperation>(control, qubits[1] + zero_qubit[i], qc::OpType::ECR);
                     apply_gate_(instruction, std::move(std_op), classic_reg, r_classic_reg);
                     break;
                 }
@@ -339,6 +335,8 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
                 }
                 case constants::QSEND:
                 {
+                    generate_entanglement_(n_qubits);
+
                     // CX to the entangled pair
                     qc::Control control(qubits[0] + zero_qubit[i]);
                     auto std_op1 = std::make_unique<qc::StandardOperation>(control, n_qubits - 2, qc::OpType::X);
@@ -361,7 +359,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
                     //Desbloquear el QRECV
                     blocked[instruction.at("qpus")[0]] = false;
-                    generate_entanglement_(n_qubits);
                     break;
                 }
                 case constants::QRECV:
@@ -410,10 +407,9 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel* class
 
     // result is a map from the cbit index to the Boolean value
     for (const auto& [bitIndex, value] : classic_values) {
-        resultString[n_clbits - bitIndex] = value ? '1' : '0';
+        resultString[n_clbits - bitIndex - 1] = value ? '1' : '0';
     }
 
-    LOGGER_DEBUG("RESULTADO: {}", resultString);
     return resultString;
 }
 

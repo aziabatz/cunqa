@@ -52,11 +52,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons
-    for circuit in circuits:
-        if (isinstance(circuit, CunqaCircuit) and not circuit.has_cc):
-            logger.error(f"Circuits to run must be distributed.")
-            raise SystemExit # User's level
-        
+    for circuit in circuits:   
         if isinstance(circuit, CunqaCircuit):
             info_circuit_copy = copy.deepcopy(circuit.info) # To modify the info without modifying the attribute info of the circuit
             circuit_jsons.append(info_circuit_copy)
