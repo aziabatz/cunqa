@@ -1,21 +1,20 @@
 import os
 import sys
+import glob
 
-sys.path.append(os.getenv("HOME"))
+installation_path = os.getenv("HOME")+"/cunqa/"
+sys.path.append(installation_path)
 
-from cunqa.logger import logger
+from logger import logger
 import argparse
 import json
 from jsonschema import validate, ValidationError
 
 from qiskit_aer.noise import NoiseModel
 
-schema_noise_properties = installation_path + "/cunqa/noise_model/json_schema/calibrations_schema.json"
-schema_backend = installation_path + "/cunqa/noise_model/json_schema/backend_schema.json"
+schema_noise_properties = installation_path + "noise_model/json_schema/calibrations_schema.json"
+schema_backend = installation_path + "noise_model/json_schema/backend_schema.json"
 
-# constructing NoiseModel from calibrations using qmiotools
-from qmiotools.integrations.qiskitqmio import FakeQmio 
-from qiskit_aer.noise import NoiseModel
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
@@ -26,6 +25,8 @@ parser.add_argument("thermal_relaxation", type = int, help = "Weather thermal re
 parser.add_argument("readout_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("gate_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("family_name", type = str, help = "family_name for QPUs")
+parser.add_argument("fakeqmio", type = bool, help = "FakeQmio noise properties provided")
+
 
 args = parser.parse_args()
 
@@ -34,8 +35,28 @@ args = parser.parse_args()
 with open(schema_noise_properties, "r") as file:
     schema_noise_properties = json.load(file)
 
-with open(args.noise_properties_path, "r") as file:
-    noise_properties_json = json.load(file)
+
+if args.noise_properties_path == "Qmio_last_calibrations" and args.fakeqmio:
+
+    # fakeqmio with default calibrations
+
+    fakeqmio = True
+
+    jsonpath=os.getenv("QMIO_CALIBRATIONS",".")
+    files=jsonpath+"/????_??_??__??_??_??.json"
+    files = glob.glob(files)
+    calibration_file=max(files, key=os.path.getctime)
+
+    with open(calibration_file, "r") as file:
+        noise_properties_json = json.load(file)
+else:
+
+    # personalized noise model + fakeqmio with non default calibrations
+
+    fakeqmio = args.fakeqmio
+
+    with open(args.noise_properties_path, "r") as file:
+        noise_properties_json = json.load(file)
 
 try:
     validate(instance=noise_properties_json, schema=schema_noise_properties)
@@ -83,16 +104,16 @@ backend = CunqaBackend(noise_properties_json = noise_properties_json)
 from qiskit_aer.noise import NoiseModel
 
 noise_model = NoiseModel.from_backend(
-        backend, thermal_relaxation=True,
+        backend, thermal_relaxation=thermal_relaxation,
         temperature=True,
-        gate_error=True,
-        readout_error=True)
+        gate_error=gate_error,
+        readout_error=readout_error)
 
 noise_model_json = noise_model_json = noise_model.to_dict(serializable = True)
 
 
 
-description = "CunqaBackend with: "
+description = "CunqaBackend with: " if not fakeqmio else "FakeQmio with: "
 errors = ""
 if thermal_relaxation:
     errors += " thermal_relaxation"
@@ -106,8 +127,8 @@ description = description + ", ".join(errors.split())+"."
 if args.backend_path == "default": # we have not read the backend_json and checked it, we generate it using CunqaBackend
 
     backend_json = {
-            "name": f"CunqaBackend_{args.family_name}", 
-            "version": args.backend_path,
+            "name": f"CunqaBackend_{args.family_name}" if not fakeqmio else f"FakeQmio_{args.family_name}", 
+            "version": args.noise_properties_path if args.noise_properties_path != "Qmio_last_calibrations" else calibration_file,
             "n_qubits": backend.num_qubits, 
             "description": description,
             "coupling_map" : backend.coupling_map_list,
@@ -129,7 +150,11 @@ STORE_PATH = os.getenv("STORE")
 
 logger.debug(f"Created noisy backend: {description}")
 
+SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
 
-with open("{}/.cunqa/tmp_noisy_backend_{}.json".format(STORE_PATH, args.family_name), 'w') as file:
+tmp_file = "{}/.cunqa/tmp_noisy_backend_{}.json".format(STORE_PATH, SLURM_JOB_ID)
+
+os.makedirs(os.path.dirname(tmp_file), exist_ok=True)
+
+with open(tmp_file, 'w') as file:
     json.dump(backend_json, file)
-
