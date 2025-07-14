@@ -1,9 +1,10 @@
 import os, sys
+import numpy as np
 
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa import getQPUs
+from cunqa import getQPUs, gather
 from cunqa.circuit import CunqaCircuit
 
 
@@ -18,15 +19,32 @@ qpus  = getQPUs(local=False)
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}, simulator: {q.backend.simulator}, version: {q.backend.version}.")
 
-qc = CunqaCircuit(2, 2)
-qc.h(0)
-qc.cx(0, 1)
+qc = CunqaCircuit(2)
+# Parámetros
+theta1 = np.pi / 4
+theta2 = np.pi / 3
+theta3 = 2 * np.pi / 3
+
+# 1) RY en qubit 0
+qc.ry(theta1, 0)
+
+# 2) Control invertido para |0>_0
+qc.x(0)
+qc.cry(theta2, 0, 1)
+qc.x(0)
+
 qc.measure_all()
 
-qpu = qpus[0]
-qjob = qpu.run(qc, shots = 1000)# non-blocking call
+qjobs = []
+for _ in range(1000):
+    for qpu in qpus: 
+        qjobs.append(qpu.run(qc, transpile=False, shots = 1))
 
-counts = qjob.result.counts
-time = qjob.time_taken
+results = gather(qjobs)
 
-print(f"Result: \n{counts}\n Time taken: {time} s.")
+import statistics
+tiempo_medio = statistics.mean([result.time_taken for result in results])
+print(f"Tiempo medio empleado: {tiempo_medio}")
+
+# Dinamic execution mean time: 0.04063898839652538
+# Usual execution mean time: 0.00011611848566147576

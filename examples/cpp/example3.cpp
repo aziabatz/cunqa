@@ -11,7 +11,6 @@ std::string circuit = R"(
         "num_qubits": 2
     },
     "instructions": [
-    {
         "name": "h",
         "qubits": [0]
     },
