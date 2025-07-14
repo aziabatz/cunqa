@@ -1399,8 +1399,6 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
         logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
         raise error
 
-def _registers_dict(qc):
-
 def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     """
     Extracts the number of classical and quantum registers from a QuantumCircuit.
