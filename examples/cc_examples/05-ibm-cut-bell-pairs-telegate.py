@@ -31,7 +31,7 @@ def how_big_a_combination(k):
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs #
 family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = True)
-qpus_QPE  = getQPUs(local = False, family = family)
+qpus  = getQPUs(local = False, family = family)
 
 # Params for the gates in the Cut Bell Pair Factory #
 with open(examples_path + "/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
@@ -106,8 +106,8 @@ Bob.measure(2,2)
 
 
 
-circs_QPE = [Alice, Bob]
-distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=1) # create the jobs to store the circuits for upgrade_parameters,
+circs = [Alice, Bob]
+distr_jobs = run_distributed(circs, qpus, shots=1) # create the jobs to store the circuits for upgrade_parameters,
                                                            # but the results of this first submission will be discarded.
 
 ########## Circuit combination for successful circuit cutting ##########
