@@ -11,7 +11,7 @@ from cunqa.qjob import gather
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
 family = qraise(2, "00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-qpus_QPE  = getQPUs(local=False, family = family)
+qpus  = getQPUs(local=False, family = family)
 
 
 
@@ -31,11 +31,11 @@ cc_2.measure(1,1)
 
 
 ########## List of circuits #########
-circs_QPE = [cc_1, cc_2]
+circs = [cc_1, cc_2]
 
 
 ########## Distributed run ##########
-distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=20) 
+distr_jobs = run_distributed(circs, qpus, shots=20) 
 
 ########## Collect the counts #######
 result_list = gather(distr_jobs)
