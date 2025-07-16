@@ -22,7 +22,6 @@ public:
     void update_circuit(const std::string& quantum_task);
     
 private:
-    
     void update_params_(const std::vector<double> params);
 };
 

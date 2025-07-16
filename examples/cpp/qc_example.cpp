@@ -78,7 +78,7 @@ cunqa::JSON read_file(const std::string& filename)
 }
 
 
-int main(int argc, char *argv[ ])
+int main()
 {
     const auto store = getenv("STORE");
     const std::string filepath = store + "/.cunqa/qpus.json"s;

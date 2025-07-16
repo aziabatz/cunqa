@@ -1,7 +1,5 @@
 #pragma once
 
-#define USE_ZMQ_BTW_QPU
-
 #include "argparse.hpp"
 #include "utils/constants.hpp"
 #include "args_qraise.hpp"

@@ -19,7 +19,9 @@ public:
     ~MunichQCSimulator() = default;
 
     inline std::string get_name() const override {return "MunichQCSimulator";}
-    JSON execute(const QCBackend& backend, const QuantumTask& circuit) override;
+
+    // TODO: The [[maybe_unused]] annotation is a temporary approach while CunqaSimulator does not take into account the backend info
+    JSON execute([[maybe_unused]] const QCBackend& backend, const QuantumTask& circuit) override;
 
 private:
     comm::ClassicalChannel classical_channel;

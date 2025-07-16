@@ -42,7 +42,6 @@ void QuantumTask::update_circuit(const std::string& quantum_task)
 
             JSON communications;
             communications_file >> communications;
-            LOGGER_DEBUG("qpus json well read");
 
             for (auto& instruction : circuit) {
                 std::string name = instruction.at("name").get<std::string>();
@@ -76,11 +75,7 @@ void QuantumTask::update_params_(const std::vector<double> params)
         int counter = 0;
         
         for (auto& instruction : circuit){
-
             std::string name = instruction.at("name");
-            
-            
-            // TODO: Look at the instructions constants and how to work with them
             switch(cunqa::constants::INSTRUCTIONS_MAP.at(name)){
                 case cunqa::constants::MEASURE:
                 case cunqa::constants::ID:

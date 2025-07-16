@@ -34,7 +34,7 @@ family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = T
 qpus  = getQPUs(local = False, family = family)
 
 # Params for the gates in the Cut Bell Pair Factory #
-with open(examples_path + "/ccomm_examples/two_qpd_bell_pairs_param_values.txt") as fin:
+with open(examples_path + "/cc_examples/two_qpd_bell_pairs_param_values.txt") as fin:
     params2 = [[float(val) for val in line.replace("\n","").split(" ")] for line in fin.readlines()]
 z = params2[0] # This one doesn't matter, it will be overwritten afterwards
 

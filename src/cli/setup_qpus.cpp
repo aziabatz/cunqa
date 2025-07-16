@@ -124,6 +124,7 @@ int main(int argc, char *argv[])
                     LOGGER_ERROR("Simulator {} do not support simple simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
+            break;
         case murmur::hash("cc"): 
             LOGGER_DEBUG("Raising QPU with classical communications.");
             switch(murmur::hash(sim_arg)) {
@@ -143,6 +144,7 @@ int main(int argc, char *argv[])
                     LOGGER_ERROR("Simulator {} do not support classical communication simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
+            break;
         case murmur::hash("qc"):
             LOGGER_DEBUG("Raising QPU with quantum communications.");
             switch(murmur::hash(sim_arg)) {
@@ -154,6 +156,7 @@ int main(int argc, char *argv[])
                     LOGGER_ERROR("Simulator {} do not support quantum communication simulation or does not exist.", sim_arg);
                     return EXIT_FAILURE;
             }
+            break;
         default:
             LOGGER_ERROR("No {} communication method available.", communications);
             return EXIT_FAILURE;
