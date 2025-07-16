@@ -50,8 +50,8 @@ struct SimpleConfig {
             {"coupling_map", obj.coupling_map},
             {"basis_gates", obj.basis_gates}, 
             {"custom_instructions", obj.custom_instructions},
-            {"gates", obj.gates},
-            {"noise_properties", obj.noise_properties}
+            {"gates", obj.gates}
+            // removed noise_properties and noise_model keys because this function is thought to be only used for writting in qpus.json
         };
     }
     

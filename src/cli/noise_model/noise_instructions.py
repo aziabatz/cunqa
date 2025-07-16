@@ -25,7 +25,7 @@ parser.add_argument("thermal_relaxation", type = int, help = "Weather thermal re
 parser.add_argument("readout_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("gate_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("family_name", type = str, help = "family_name for QPUs")
-parser.add_argument("fakeqmio", type = bool, help = "FakeQmio noise properties provided")
+parser.add_argument("fakeqmio", type = int, help = "FakeQmio noise properties provided")
 
 
 args = parser.parse_args()
@@ -36,11 +36,9 @@ with open(schema_noise_properties, "r") as file:
     schema_noise_properties = json.load(file)
 
 
-if args.noise_properties_path == "Qmio_last_calibrations" and args.fakeqmio:
+if args.noise_properties_path == "last_calibrations":
 
     # fakeqmio with default calibrations
-
-    fakeqmio = True
 
     jsonpath=os.getenv("QMIO_CALIBRATIONS",".")
     files=jsonpath+"/????_??_??__??_??_??.json"
@@ -51,9 +49,7 @@ if args.noise_properties_path == "Qmio_last_calibrations" and args.fakeqmio:
         noise_properties_json = json.load(file)
 else:
 
-    # personalized noise model + fakeqmio with non default calibrations
-
-    fakeqmio = args.fakeqmio
+    # personalized noise model or fakeqmio with non default calibrations
 
     with open(args.noise_properties_path, "r") as file:
         noise_properties_json = json.load(file)
@@ -113,7 +109,7 @@ noise_model_json = noise_model_json = noise_model.to_dict(serializable = True)
 
 
 
-description = "CunqaBackend with: " if not fakeqmio else "FakeQmio with: "
+description = "CunqaBackend with: " if not args.fakeqmio else "FakeQmio with: "
 errors = ""
 if thermal_relaxation:
     errors += " thermal_relaxation"
@@ -127,8 +123,8 @@ description = description + ", ".join(errors.split())+"."
 if args.backend_path == "default": # we have not read the backend_json and checked it, we generate it using CunqaBackend
 
     backend_json = {
-            "name": f"CunqaBackend_{args.family_name}" if not fakeqmio else f"FakeQmio_{args.family_name}", 
-            "version": args.noise_properties_path if args.noise_properties_path != "Qmio_last_calibrations" else calibration_file,
+            "name": f"CunqaBackend_{args.family_name}" if not args.fakeqmio else f"FakeQmio_{args.family_name}", 
+            "version": args.noise_properties_path if args.noise_properties_path != "last_calibrations" else calibration_file,
             "n_qubits": backend.num_qubits, 
             "description": description,
             "coupling_map" : backend.coupling_map_list,
