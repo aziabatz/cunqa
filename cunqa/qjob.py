@@ -218,6 +218,7 @@ class QJob:
                 self.num_qubits = circuit.num_qubits
                 self.num_clbits = sum([c.size for c in circuit.cregs])
                 self._cregisters = _registers_dict(circuit)[1]
+                self._sending_to = []
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 

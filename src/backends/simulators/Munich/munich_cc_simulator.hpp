@@ -11,7 +11,6 @@
 
 #include "utils/json.hpp"
 
-
 namespace cunqa {
 namespace sim {
 
@@ -21,12 +20,12 @@ public:
     ~MunichCCSimulator() = default;
 
     inline std::string get_name() const override {return "MunichSimulator";}
-    JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
 
+    // TODO: The [[maybe_unused]] annotation is a temporary approach while CunqaSimulator does not take into account the backend info
+    JSON execute([[maybe_unused]] const CCBackend& backend, const QuantumTask& circuit) override;
 
-    comm::ClassicalChannel classical_channel;
 private:
-    
+    comm::ClassicalChannel classical_channel;
 };
 
 } // End namespace sim

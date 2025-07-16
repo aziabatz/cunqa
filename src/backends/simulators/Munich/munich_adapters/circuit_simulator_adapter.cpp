@@ -21,7 +21,7 @@ JSON usual_execution_(const QuantumTask& quantum_task)
         auto mqt_circuit = std::make_unique<qc::QuantumComputation>(std::move(qc::QuantumComputation::fromQASM(circuit)));
 
         float time_taken;
-        int n_qubits = quantum_task.config.at("num_qubits");
+        //int n_qubits = quantum_task.config.at("num_qubits");
 
         /*JSON noise_model_json = backend.config.noise_model;
         if (!noise_model_json.empty()){
@@ -86,8 +86,8 @@ JSON CircuitSimulatorAdapter::simulate(std::size_t shots, comm::ClassicalChannel
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < shots; i++) {
-        LOGGER_DEBUG("Shot {}", i);  
+    for (std::size_t i = 0; i < shots; i++) {
+        LOGGER_DEBUG("Shot {}", i);
         meas_counter[execute_shot_(classical_channel, p_qca->quantum_tasks)]++;
     } // End all shots
 

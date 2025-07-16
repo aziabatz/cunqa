@@ -17,7 +17,13 @@ using namespace cunqa::sim;
 
 int main(int argc, char *argv[])
 {
-    std::string sim_arg(argv[1]); 
+    std::string sim_arg;
+    if (argc == 2)
+        sim_arg = argv[1]; 
+    else {
+        LOGGER_ERROR("Passing incorrect number of arguments.");
+        return EXIT_FAILURE;
+    }
 
     switch(murmur::hash(sim_arg)) {
         case murmur::hash("Aer"): 

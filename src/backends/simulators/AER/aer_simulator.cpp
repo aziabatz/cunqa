@@ -41,7 +41,6 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
     try {
         //TODO: Maybe improve them to send several circuits at once
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
-        int n_qubits = quantum_task.config.at("num_qubits");
         int n_clbits = quantum_task.config.at("num_clbits");
         JSON circuit_json = aer_quantum_task.circuit;
 
@@ -74,7 +73,7 @@ JSON usual_execution_(const BackendType& backend, const QuantumTask& quantum_tas
 }
 
 template <class BackendType>
-JSON dynamic_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
+JSON dynamic_execution_([[maybe_unused]] const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
     LOGGER_DEBUG("Starting dynamic_execution_ on Aer.");
     // Connect to the classical communications endpoints
