@@ -1,3 +1,7 @@
+# save your flags
+set(_old_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+
 include(FetchContent)
 
 set(SPDLOG_SYSTEM_INCLUDES OFF   CACHE BOOL "Disable libsodium"      FORCE)
@@ -32,8 +36,17 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(zmq)
 
+
+FetchContent_Declare(
+  cunqasimulator
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cunqasimulator
+)
+FetchContent_MakeAvailable(cunqasimulator)
+
 # TODO: Change this to non global
 set(ZMQ_BINARY_DIR "${zmq_BINARY_DIR}"
     CACHE PATH "ZeroMQ binary directory from FetchContent")
 set(ZMQ_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include"
     CACHE PATH "ZeroMQ include directory")
+
+set(CMAKE_CXX_FLAGS "${_old_CXX_FLAGS}")

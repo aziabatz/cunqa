@@ -6,6 +6,8 @@
 
 #include "utils/json.hpp"
 
+#include "logger.hpp"
+
 namespace cunqa {
 namespace sim {
 
@@ -14,8 +16,10 @@ public:
     MunichSimpleSimulator() = default;
     ~MunichSimpleSimulator() = default;
 
-    inline std::string get_name() const override { return "SimpleMunich"; }
-    JSON execute(const SimpleBackend& backend, const QuantumTask& circuit) const override;
+    inline std::string get_name() const override {return "MunichSimulator";}
+    
+    // TODO: The [[maybe_unused]] annotation is a temporary approach while CunqaSimulator does not take into account the backend info
+    JSON execute([[maybe_unused]] const SimpleBackend& backend, const QuantumTask& circuit) override;
 };
 
 } // End of sim namespace

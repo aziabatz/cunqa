@@ -1,6 +1,6 @@
 #pragma once
 
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_WARN
 
 #include <memory>
 #include <spdlog/spdlog.h>
