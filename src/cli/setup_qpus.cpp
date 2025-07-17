@@ -59,7 +59,7 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
                                    
 
     LOGGER_DEBUG("Command: {}", command);
-    std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
+    std::system(("ml load qmio/hpc gcc/12.3.0 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
     try {
         // Try to open the generated noisy backend file to check if it exists and is readable
         std::ifstream infile(std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json");

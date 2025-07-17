@@ -44,8 +44,8 @@ if args.noise_properties_path == "last_calibrations":
 
     # fakeqmio with default calibrations
 
-    jsonpath=os.getenv("QMIO_CALIBRATIONS",".")
-    files=jsonpath+"/????_??_??__??_??_??.json"
+    jsonpath = "/opt/cesga/qmio/hpc/calibrations"
+    files = jsonpath + "/????_??_??__??_??_??.json"
     files = glob.glob(files)
     calibration_file=max(files, key=os.path.getctime)
 
