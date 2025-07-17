@@ -16,8 +16,8 @@ from jsonschema import validate, ValidationError
 
 from qiskit_aer.noise import NoiseModel
 
-schema_noise_properties = os.getenv("STORE") + "/.cunqa/noise_model/json_schema/calibrations_schema.json"
-schema_backend = os.getenv("STORE") + "/.cunqa/noise_model/json_schema/backend_schema.json"
+schema_noise_properties = os.getenv("STORE") + "/.cunqa/json_schema/calibrations_schema.json"
+schema_backend = os.getenv("STORE") + "/.cunqa/json_schema/backend_schema.json"
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 

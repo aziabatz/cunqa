@@ -8,21 +8,12 @@ sys.path.append(installation_path)
 from cunqa.logger import logger
 
 from qiskit.providers import BackendV2
-from qiskit.providers import QubitProperties, BackendV2, Provider, Options, Job
-from qiskit.providers import JobStatus, JobV1  
-from qiskit.providers.models.backendstatus import BackendStatus
-from qiskit.circuit.gate import Instruction
+from qiskit.providers import QubitProperties, BackendV2, Options
 from qiskit.circuit.library import ECRGate, IGate, Measure, RZXGate, RZGate, SXGate,ECRGate, XGate
-from qiskit.circuit import Delay
 from qiskit.transpiler import Target, InstructionProperties, TranspilerError
 from qiskit.circuit.library import UGate, CXGate, Measure
-from qiskit.circuit import Parameter, QuantumCircuit, ClassicalRegister
-from qiskit.pulse import Schedule, ScheduleBlock
-from qiskit.result.models import ExperimentResult, ExperimentResultData
-from qiskit.result import Result, Counts  
-from qiskit.qobj import QobjExperimentHeader
-from qiskit import qasm2, qasm3, transpile
-from qiskit.qobj.utils import MeasLevel
+from qiskit.circuit import Parameter
+
 
 
 class CunqaBackend(BackendV2):
