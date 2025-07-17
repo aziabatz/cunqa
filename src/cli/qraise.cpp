@@ -11,7 +11,6 @@
 #include "utils/constants.hpp"
 #include "qraise/utils_qraise.hpp"
 #include "qraise/args_qraise.hpp"
-#include "qraise/fakeqmio_conf_qraise.hpp"
 #include "qraise/noise_model_conf_qraise.hpp"
 #include "qraise/simple_conf_qraise.hpp"
 #include "qraise/cc_conf_qraise.hpp"
@@ -138,6 +137,7 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const s
         }
 
         run_command = get_noise_model_run_command(args, mode);
+
 
     } else if ((!args.noise_properties.has_value() || !args.fakeqmio.has_value()) && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         LOGGER_ERROR("noise_properties flags where provided but --noise_properties nor --fakeqmio args were not included.");

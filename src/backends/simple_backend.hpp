@@ -25,6 +25,7 @@ struct SimpleConfig {
     std::vector<std::string> gates;
     JSON noise_model;
     JSON noise_properties;
+    std::string noise_path = "";
 
     friend void from_json(const JSON& j, SimpleConfig &obj)
     {
@@ -38,6 +39,7 @@ struct SimpleConfig {
         j.at("gates").get_to(obj.gates);
         j.at("noise_model").get_to(obj.noise_model);
         j.at("noise_properties").get_to(obj.noise_properties);
+        j.at("noise_path").get_to(obj.noise_path);
     }
 
     friend void to_json(JSON& j, const SimpleConfig& obj)
@@ -50,7 +52,8 @@ struct SimpleConfig {
             {"coupling_map", obj.coupling_map},
             {"basis_gates", obj.basis_gates}, 
             {"custom_instructions", obj.custom_instructions},
-            {"gates", obj.gates}
+            {"gates", obj.gates},
+            {"noise", obj.noise_path}
             // removed noise_properties and noise_model keys because this function is thought to be only used for writting in qpus.json
         };
     }

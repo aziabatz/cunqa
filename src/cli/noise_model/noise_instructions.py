@@ -2,19 +2,22 @@ import os
 import sys
 import glob
 
-installation_path = os.getenv("HOME")+"/cunqa/"
+installation_path = os.getenv("HOME")
+STORE_PATH = os.getenv("STORE")
+SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
 sys.path.append(installation_path)
 
-from logger import logger
+from cunqabackend import CunqaBackend
+from cunqa.logger import logger
+
 import argparse
 import json
 from jsonschema import validate, ValidationError
 
 from qiskit_aer.noise import NoiseModel
 
-schema_noise_properties = installation_path + "noise_model/json_schema/calibrations_schema.json"
-schema_backend = installation_path + "noise_model/json_schema/backend_schema.json"
-
+schema_noise_properties = os.getenv("STORE") + "/.cunqa/noise_model/json_schema/calibrations_schema.json"
+schema_backend = os.getenv("STORE") + "/.cunqa/noise_model/json_schema/backend_schema.json"
 
 parser = argparse.ArgumentParser(description="FakeQmio from calibrations")
 
@@ -26,6 +29,7 @@ parser.add_argument("readout_error", type = int, help = "Weather thermal relaxat
 parser.add_argument("gate_error", type = int, help = "Weather thermal relaxation is added to FakeQmio")
 parser.add_argument("family_name", type = str, help = "family_name for QPUs")
 parser.add_argument("fakeqmio", type = int, help = "FakeQmio noise properties provided")
+
 
 
 args = parser.parse_args()
@@ -86,27 +90,43 @@ if args.backend_path != "default":
 thermal_relaxation, readout_error, gate_error = True, False, False
 # read arguments
 if args.thermal_relaxation == 0:
+    logger.debug("thermal_relaxation = False")
     thermal_relaxation = False
+else:
+    logger.debug("thermal_relaxation = True")
+    
 if args.readout_error == 1:
     readout_error = True
+    logger.debug("readout_error = True")
+else:
+    logger.debug("readout_error = False")
+
 if args.gate_error == 1:
     gate_error = True
+    logger.debug("gate_error = True")
+else:
+    logger.debug("gate_error = False")
 
 
-from cunqabackend import CunqaBackend
+if args.fakeqmio:
+    logger.debug(f"FakeQmio noise properties provided.")
+
 
 backend = CunqaBackend(noise_properties_json = noise_properties_json)
 
-from qiskit_aer.noise import NoiseModel
+try:
+    noise_model = NoiseModel.from_backend(
+            backend, thermal_relaxation=thermal_relaxation,
+            temperature=True,
+            gate_error=gate_error,
+            readout_error=readout_error)
+    
+    noise_model_json = noise_model_json = noise_model.to_dict(serializable = True)
 
-noise_model = NoiseModel.from_backend(
-        backend, thermal_relaxation=thermal_relaxation,
-        temperature=True,
-        gate_error=gate_error,
-        readout_error=readout_error)
-
-noise_model_json = noise_model_json = noise_model.to_dict(serializable = True)
-
+    
+except Exception as error:
+    logger.error(f"Error while generating noise model: {error}")
+    raise SystemExit
 
 
 description = "CunqaBackend with: " if not args.fakeqmio else "FakeQmio with: "
@@ -120,11 +140,13 @@ if gate_error:
 
 description = description + ", ".join(errors.split())+"."
 
+tmp_file = "{}/.cunqa/tmp_noisy_backend_{}.json".format(STORE_PATH, SLURM_JOB_ID)
+
 if args.backend_path == "default": # we have not read the backend_json and checked it, we generate it using CunqaBackend
 
     backend_json = {
             "name": f"CunqaBackend_{args.family_name}" if not args.fakeqmio else f"FakeQmio_{args.family_name}", 
-            "version": args.noise_properties_path if args.noise_properties_path != "last_calibrations" else calibration_file,
+            "version": "",
             "n_qubits": backend.num_qubits, 
             "description": description,
             "coupling_map" : backend.coupling_map_list,
@@ -132,23 +154,27 @@ if args.backend_path == "default": # we have not read the backend_json and check
             "custom_instructions": "",
             "gates": [],
             "noise_model":noise_model_json,
-            "noise_properties":noise_properties_json
+            "noise_properties":noise_properties_json,
+            "noise_path": tmp_file
     }
 
 else:
     backend_json = {
-        "backend":args.backend_json["backend"],
+        "name": args.backend_json["name"], 
+        "version": args.backend_json["version"],
+        "n_qubits": args.backend_json["n_qubits"], 
+        "description": args.backend_json["description"],
+        "coupling_map" : args.backend_json["coupling_map"],
+        "basis_gates": args.backend_json["basis_gates"],
+        "custom_instructions": args.backend_json["custom_instructions"],
+        "gates": args.backend_json["gates"],
         "noise_model":noise_model_json,
-        "noise_properties":noise_properties_json
+        "noise_properties":noise_properties_json,
+        "noise_path": tmp_file
     }
 
-STORE_PATH = os.getenv("STORE")
 
 logger.debug(f"Created noisy backend: {description}")
-
-SLURM_JOB_ID = os.getenv("SLURM_JOB_ID")
-
-tmp_file = "{}/.cunqa/tmp_noisy_backend_{}.json".format(STORE_PATH, SLURM_JOB_ID)
 
 os.makedirs(os.path.dirname(tmp_file), exist_ok=True)
 

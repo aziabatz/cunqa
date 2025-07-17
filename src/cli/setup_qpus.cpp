@@ -48,7 +48,7 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
         LOGGER_DEBUG("No backend_path provided, defining backend from noise_properties.");
         backend_path = "default";
     }
-    std::string command("python "s + std::getenv("HOME") + "/cunqa/noise_model/noise_instructions.py "s
+    std::string command("python "s + std::getenv("STORE") + "/.cunqa/noise_model/noise_instructions.py "s
                                    + back_path_json.at("noise_properties_path").get<std::string>() + " "s
                                    + backend_path.c_str() + " "s
                                    + back_path_json.at("thermal_relaxation").get<std::string>() + " "s
@@ -60,7 +60,17 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
 
     LOGGER_DEBUG("Command: {}", command);
     std::system(("ml load qmio/hpc gcc/12.3.0 qmio-tools/0.2.0-python-3.9.9 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
-    return std::getenv("STORE") + "/.cunqa/tmp_noisy_backend_"s + family.c_str() + ".json"s;
+    try {
+        // Try to open the generated noisy backend file to check if it exists and is readable
+        std::ifstream infile(std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json");
+        if (!infile.good()) {
+            throw std::runtime_error("Failed to open noise model JSON file.");
+        }
+    } catch (const std::exception& e) {
+        LOGGER_ERROR("Exception in generate_noise_instructions: {}", e.what());
+        throw;
+    }
+    return std::getenv("STORE") + "/.cunqa/tmp_noisy_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
 }
 
 int main(int argc, char *argv[])
@@ -70,6 +80,9 @@ int main(int argc, char *argv[])
     std::string communications(argv[3]);
     std::string family(argv[4]);
     std::string sim_arg(argv[5]);
+
+    if (family == "default")
+        family = std::getenv("SLURM_JOB_ID");
 
     auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
                                      : JSON());
@@ -85,8 +98,6 @@ int main(int argc, char *argv[])
         LOGGER_DEBUG("No backend_path nor noise_properties_path were provided.");
     }
 
-    if (family == "default")
-        family = std::getenv("SLURM_JOB_ID");
 
     switch(murmur::hash(communications)) {
         case murmur::hash("no_comm"): 
