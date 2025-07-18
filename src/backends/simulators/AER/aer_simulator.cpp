@@ -13,7 +13,7 @@
 #include "controllers/state_controller.hpp"
 #include "aer_helpers.hpp"
 
-#include "classical_channel.hpp"
+#include "classical_channel/classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
 #include "utils/helpers/reverse_bitstring.hpp"

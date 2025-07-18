@@ -151,6 +151,7 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const s
             run_command = get_cc_run_command(args, mode);
         } else if (args.qc) {
             LOGGER_DEBUG("Quantum communications");
+            std::cout << "Aquí se llega.\n";
             run_command = get_qc_run_command(args, mode);
         } else {
             LOGGER_DEBUG("No communications");
@@ -187,6 +188,7 @@ int main(int argc, char* argv[])
     write_run_command(sbatchFile, args, mode);
     sbatchFile.close();
 
+    
     // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");

@@ -1,3 +1,11 @@
+option(USE_MPI_BTW_QPU "Using the MPI library for communication between QPUs" OFF)
+option(USE_ZMQ_BTW_QPU "Using the ZMQ library for communication between QPUs" OFF)
+
+# Set default if both are OFF
+if(NOT USE_MPI_BTW_QPU AND NOT USE_ZMQ_BTW_QPU)
+    set(USE_ZMQ_BTW_QPU ON CACHE BOOL "Using ZMQ by default" FORCE)
+endif()
+
 add_subdirectory(third-party)
 add_subdirectory(classical_channel)
 add_subdirectory(backends)

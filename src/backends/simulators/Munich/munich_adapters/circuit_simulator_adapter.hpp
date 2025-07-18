@@ -1,10 +1,10 @@
 #include "CircuitSimulator.hpp"
 #include "StochasticNoiseSimulator.hpp"
+
 #include "quantum_computation_adapter.hpp"
-#include "classical_channel.hpp"
+#include "classical_channel/classical_channel.hpp"
 
 #include "utils/json.hpp"
-
 
 namespace cunqa {
 namespace sim {

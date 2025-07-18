@@ -1,7 +1,4 @@
 #include "munich_qc_simulator.hpp"
-#include "munich_adapters/circuit_simulator_adapter.hpp"
-#include "munich_adapters/quantum_computation_adapter.hpp"
-
 
 namespace cunqa {
 namespace sim {
