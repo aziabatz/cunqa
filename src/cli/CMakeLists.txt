@@ -20,12 +20,6 @@ target_link_libraries(qdrop PRIVATE logger_client SLURM::SLURM json)
 install(TARGETS qdrop DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "$ENV{STORE}/.cunqa")
 
-if("$ENV{LMOD_SYSTEM_NAME}" STREQUAL "QMIO")
-    install(FILES "slurm_qmio.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}" RENAME "slurm.conf")
-else()
-    install(FILES "slurm_ft3.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}" RENAME "slurm.conf")
-endif()
-
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 
