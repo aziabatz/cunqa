@@ -18,7 +18,6 @@ public:
 
     inline std::string get_name() const override {return "AerSimulator";}
     JSON execute(const CCBackend& backend, const QuantumTask& circuit) override;
-    
 
 private:
     comm::ClassicalChannel classical_channel;

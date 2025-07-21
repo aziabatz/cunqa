@@ -23,7 +23,7 @@ install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "$ENV{STORE
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 
-                                         aer_simulator
+                                         aer_simple_simulator aer_cc_simulator
                                          munich_simple_simulator munich_cc_simulator munich_qc_simulator 
                                          cunqa_simple_simulator cunqa_cc_simulator)
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src")
