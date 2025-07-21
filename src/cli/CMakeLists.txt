@@ -37,7 +37,7 @@ install(TARGETS setup_executor DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # QINFO executable
 add_executable(qinfo qinfo.cpp)
-target_link_libraries(qinfo PRIVATE json)
+target_link_libraries(qinfo PRIVATE json logger_client)
 target_include_directories(qinfo PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 install(TARGETS qinfo DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

@@ -13,10 +13,11 @@ add_subdirectory(utils)
 add_subdirectory(comm)
 
 add_library(quantum_task quantum_task.cpp)
-target_link_libraries(quantum_task PUBLIC json)
+target_link_libraries(quantum_task PUBLIC json
+                                   PRIVATE logger_qpu)
 
 add_library(qpu qpu.cpp)
 target_link_libraries(qpu PUBLIC server 
-                          PRIVATE json quantum_task)
+                          PRIVATE json quantum_task logger_qpu)
 
 add_subdirectory(cli)

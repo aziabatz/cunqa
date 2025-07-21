@@ -3,6 +3,7 @@
 
 #include "quantum_computation_adapter.hpp"
 #include "classical_channel/classical_channel.hpp"
+#include "backends/simple_backend.hpp"
 
 #include "utils/json.hpp"
 
@@ -23,8 +24,8 @@ public:
     inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op) { applyOperationToState(op); }
     inline char measureAdapter(dd::Qubit i) { return measure(i); }
 
-    JSON simulate(std::size_t shots, comm::ClassicalChannel* classical_channel = nullptr); // TODO: override?
-
+    JSON simulate(SimpleBackend backend, comm::ClassicalChannel* classical_channel = nullptr);
+    JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 private:
 
     void apply_gate_(const JSON& instruction, std::unique_ptr<qc::StandardOperation>&& std_op, std::map<std::size_t, bool>& classic_reg, std::map<std::size_t, bool>& r_classic_reg);
