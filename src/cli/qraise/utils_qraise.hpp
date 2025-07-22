@@ -24,15 +24,12 @@ bool check_mem_format(const int& mem)
 int check_memory_specs(const int& mem_per_qpu, const int& cores_per_qpu)
 {
     int mem_per_cpu = mem_per_qpu/cores_per_qpu;
-    const char* system_var = std::getenv("LMOD_SYSTEM_NAME");
+    auto system_var = std::getenv("LMOD_SYSTEM_NAME");
     if ((std::string(system_var) == "QMIO" && mem_per_cpu > 15)) {
         return 1;
     } else if ((std::string(system_var) == "FT3" && mem_per_cpu > 4)){
         return 2;
     }
-
-    LOGGER_DEBUG("Correct memory per core.");
-
     return 0;
 }
 

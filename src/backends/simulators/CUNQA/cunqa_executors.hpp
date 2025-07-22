@@ -4,11 +4,12 @@
 #include "src/executor.hpp"
 #include "src/utils/types_cunqasim.hpp"
 
-#include "classical_channel.hpp"
 #include "quantum_task.hpp"
+#include "classical_channel/classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
 #include "cunqa_helpers.hpp"
+
 #include "logger.hpp"
 
 namespace cunqa {
@@ -50,7 +51,7 @@ inline JSON cunqa_execution_(const QuantumTask& quantum_task, comm::ClassicalCha
                     int measurement = executor.apply_measure(qubits);
                     if (!clreg.empty()) {
                         classicRegister[clreg[0]] = (measurement == 1);
-                    }
+                    }   
                     break;
                 }
                 case constants::UNITARY:

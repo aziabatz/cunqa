@@ -9,7 +9,7 @@ endif()
 # Adding C++20 standard as required
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 message(STATUS "C++ version ${CXX_STANDARD} configured.")
 message(STATUS "${CMAKE_VERSION}")
 if(${CMAKE_VERSION} VERSION_EQUAL "3.27.6")
@@ -18,8 +18,11 @@ endif()
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 # Set INSTALL paths
-message(STATUS "Install location will be: $ENV{HOME}")
-set(CMAKE_INSTALL_PREFIX "$ENV{HOME}")
+# TODO: I put this if 
+if(NOT DEFINED CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
+    set(CMAKE_INSTALL_PREFIX "$ENV{HOME}" CACHE PATH "Install prefix" FORCE)
+endif()
+message(STATUS "Install location will be: ${CMAKE_INSTALL_PREFIX}")
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_PREFIX}/lib64")
 set(CMAKE_INSTALL_BINDIR "bin")
 
@@ -46,27 +49,6 @@ find_package(LAPACK REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/utils/logger" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
-
-# Selecting communication library for classical communications between QPUs
-option(USE_MPI_BTW_QPU "Using the MPI library for communication between QPUs" OFF)
-option(USE_ZMQ_BTW_QPU "Using the ZMQ library for communication between QPUs" OFF)
-
-# Set default if both are OFF
-if(NOT USE_MPI_BTW_QPU AND NOT USE_ZMQ_BTW_QPU)
-    set(USE_ZMQ_BTW_QPU ON CACHE BOOL "Using ZMQ by default" FORCE)
-endif()
-
-if(USE_MPI_BTW_QPU)
-    add_compile_definitions(USE_MPI_BTW_QPU)
-    message(STATUS "COMMUNICATIONS BETWEEN QPUS WITH MPI.")
-elseif(USE_ZMQ_BTW_QPU)
-    add_compile_definitions(USE_ZMQ_BTW_QPU)
-    message(STATUS "COMMUNICATIONS BETWEEN QPUS WITH ZMQ.")
-else()
-    # We set the default communication library to ZMQ
-    add_compile_definitions(USE_ZMQ_BTW_QPU)
-    message(STATUS "COMMUNICATIONS BETWEEN QPUS WITH ZMQ BY DEFAULT.")
-endif()
 
 add_subdirectory(src)
 add_subdirectory(cunqa)

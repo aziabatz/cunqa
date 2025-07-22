@@ -5,7 +5,6 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include "json.hpp"
-#include "logger.hpp"
 
 namespace cunqa {
 
@@ -26,21 +25,16 @@ void write_on_file(JSON local_data, const std::string &filename)
             file_in >> j;
         file_in.close();
 
-        // This is done because the task epilog does not 
-        // have access to SLURM_TASK_PID variable
-        //std::string local_id = std::getenv("SLURM_LOCALID");
+        // This two SLURM variables conform the ID of the process
         std::string local_id = std::getenv("SLURM_TASK_PID");
         std::string job_id = std::getenv("SLURM_JOB_ID");
-        
         auto task_id = job_id + "_" + local_id;
         
-        //j[std::to_string(j.size())] = local_data;
         j[task_id] = local_data;
 
         std::ofstream file_out(filename, std::ios::trunc);
         file_out << j.dump(4);
         file_out.close();
-        LOGGER_DEBUG("Succesfully written this process JSON into the file.");
 
         flock(file, LOCK_UN);
         close(file);

@@ -36,15 +36,19 @@ qc.x(0)
 qc.measure_all()
 
 qjobs = []
-for _ in range(1000):
+""" for _ in range(1000):
     for qpu in qpus: 
-        qjobs.append(qpu.run(qc, transpile=False, shots = 1))
+        qjobs.append(qpu.run(qc, transpile=False, shots = 1)) """
 
-results = gather(qjobs)
+qjob = qpus[0].run(qc, transpile=False, shots = 1024)
+counts = qjob.result.counts
+
+print(counts)
+""" results = gather(qjobs)
 
 import statistics
 tiempo_medio = statistics.mean([result.time_taken for result in results])
-print(f"Tiempo medio empleado: {tiempo_medio}")
+print(f"Tiempo medio empleado: {tiempo_medio}") """
 
 # Dinamic execution mean time: 0.04063898839652538
 # Usual execution mean time: 0.00011611848566147576

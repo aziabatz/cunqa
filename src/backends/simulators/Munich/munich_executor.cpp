@@ -52,14 +52,13 @@ void MunichExecutor::run()
             if(!message.empty()) {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);
-                
                 quantum_tasks.push_back(QuantumTask(message));
             }
         }
 
         auto qc = std::make_unique<QuantumComputationAdapter>(quantum_tasks);
         CircuitSimulatorAdapter simulator(std::move(qc));
-        auto result = simulator.simulate(quantum_tasks[0].config.at("shots").get<std::size_t>());
+        auto result = simulator.simulate(&classical_channel);
         
         // TODO: transform results to give each qpu its results
         std::string result_str = result.dump();

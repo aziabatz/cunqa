@@ -2,12 +2,13 @@
 
 #include <regex>
 #include <string>
-#include "quantum_task.hpp"
-#include "utils/json.hpp"
 #include <bitset>
+#include <chrono>
 
 #include "utils/helpers/reverse_bitstring.hpp"
-#include "logger.hpp"
+
+using namespace std::string_literals;
+using namespace AER;
 
 namespace cunqa {
 namespace sim {
