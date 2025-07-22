@@ -11,7 +11,7 @@ from cunqa.circuit import CunqaCircuit
 from qiskit import QuantumCircuit
 
 # Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
-family = qraise(2, "00:10:00", simulator = "Munich",  cloud = True)
+family = qraise(2, "00:10:00", simulator = "Aer",  cloud = True)
 
 qpus  = getQPUs(local = False, family = family)
 
@@ -28,7 +28,7 @@ qc.measure_all()
 
 
 qpu = qpus[0]
-qjob = qpu.run(qc, shots = 5)# non-blocking call
+qjob = qpu.run(qc, shots = 1024)# non-blocking call
 print(qjob.result.counts)
 
 """ distr_jobs = run_distributed([qc], [qpu], shots=20) 

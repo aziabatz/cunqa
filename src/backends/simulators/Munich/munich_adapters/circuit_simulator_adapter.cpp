@@ -14,7 +14,7 @@ namespace cunqa
 {
 namespace sim
 {
-JSON CircuitSimulatorAdapter::simulate(SimpleBackend backend, comm::ClassicalChannel *classical_channel)
+JSON CircuitSimulatorAdapter::simulate(const SimpleBackend& backend, comm::ClassicalChannel *classical_channel)
 {
     try
     {   

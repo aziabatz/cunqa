@@ -24,7 +24,7 @@ public:
     inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op) { applyOperationToState(op); }
     inline char measureAdapter(dd::Qubit i) { return measure(i); }
 
-    JSON simulate(SimpleBackend backend, comm::ClassicalChannel* classical_channel = nullptr);
+    JSON simulate(const SimpleBackend& backend, comm::ClassicalChannel* classical_channel = nullptr);
     JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 private:
 

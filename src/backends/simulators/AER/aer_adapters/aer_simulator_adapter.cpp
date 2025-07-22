@@ -35,6 +35,7 @@ JSON usual_execution_(const SimpleBackend& backend, const QuantumTask& quantum_t
 
         // TODO: See how to manage the seeds
         //run_config_json["seed_simulator"] = run_config.seed;
+        LOGGER_DEBUG("Config is: {}", quantum_task.config.dump(4));
         Config aer_config(run_config_json);
 
         //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
