@@ -3,16 +3,15 @@
 #   - Álvaro Carballido Costas
 #   - Marta Losada Estévez
 #   - Jorge Vázquez Pérez 
+#   - Daniel Expósito Patiño 
 # Fundacion Publica Galega Centro Tecnoloxico de Supercomputacion de Galicia (CESGA)
 
 easyblock = 'CMakePythonPackage'
 
 name = 'cunqa'
 version = '0.3.0'
-versionsuffix = '-Python-3.9.9s'
 
 homepage = "https://github.com/CESGA-Quantum-Spain/cunqa"
-#cambiar *** por descripcion: modhierinfo() se incluye automaticamente
 description = """ 
 CUNQA is a program for executing distributed quantum computations employing CESGA 
 resources as emulated QPUs. It defines an API for communicating with the QPUs and 
@@ -21,11 +20,19 @@ the necessary tools to manage them.
 
 toolchain = {'name': 'GCC', 'version': 'system'}
 
-#number of threads to use on build
-#parallel = 8
+#sources = [{
+#    'filename': '%(namelower)s-%(version)s.tar.gz',
+#    'git_config': {
+#        'url': 'https://github.com/CESGA-Quantum-Spain',
+#        'repo_name': '%(namelower)s',
+#        'recursive': True,
+#        'tag': '%(version)s',
+#    },
+#}]
+#
+#unpack_options = '--strip-components=1'
 
-#source_urls = ['...']
-sources = ['v%(version)s.tar.gz']
+sources = ['%(name)s-%(version)s.tar.gz']
 
 builddependencies = [
    ('FlexiBLAS', '3.3.0'),
@@ -42,6 +49,14 @@ dependencies = [
 sanity_check_paths = {
     'files': ['bin/qraise', 'bin/qdrop', 'bin/setup_qpus'],
     'dirs': ['bin', 'lib'],
+}
+
+configopts = [
+    "-DCMAKE_CXX_FLAGS=",
+]
+
+modextrapaths = {
+    'PYTHONPATH': ['.'],
 }
 
 moduleclass = 'tools'

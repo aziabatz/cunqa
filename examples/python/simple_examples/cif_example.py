@@ -1,6 +1,6 @@
 import os, sys
 # path to access c++ files
-sys.path.append(os.getenv("HOME"))
+#sys.path.append(os.getenv("HOME"))
 
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather

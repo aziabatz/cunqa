@@ -2,7 +2,7 @@ import os, sys
 from time import sleep
 
 # path to access c++ files
-sys.path.append(os.getenv("HOME"))
+#sys.path.append(os.getenv("HOME"))
 
 from cunqa.qutils import getQPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit

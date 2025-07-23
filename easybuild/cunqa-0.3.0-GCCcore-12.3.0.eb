@@ -1,72 +1,73 @@
-# TODO: QMIO EasyBuild file for CUNQA
-
+# QMIO EasyBuild file for CUNQA
 # Author:
 #   - Álvaro Carballido Costas
 #   - Marta Losada Estévez
-#   - Jorge Vázquez Pérez 
+#   - Jorge Vázquez Pérez
+#   - Daniel Expósito Patiño 
 # Fundacion Publica Galega Centro Tecnoloxico de Supercomputacion de Galicia (CESGA)
 
-easyblock = 'CMakeMake'
+easyblock = 'CMakePythonPackage'
+
 name = 'cunqa'
-version = '0.1.0'
+version = '0.3.0'
+local_pyversionsuffix = '-python-3.9.9'
+versionsuffix = '%s-mpi' % local_pyversionsuffix
 
 homepage = "https://github.com/CESGA-Quantum-Spain/cunqa"
-#cambiar *** por descripcion: modhierinfo() se incluye automaticamente
 description = """ 
 CUNQA is a program for executing distributed quantum computations employing CESGA 
 resources as emulated QPUs. It defines an API for communicating with the QPUs and 
 the necessary tools to manage them.
 """
 
-toolchain = {'name': 'GCCcore', 'version': '12.3.0'}
+toolchain = {'name': 'GCC', 'version': '12.3.0'}
+toolchainopts = {'rpath': False}
 
-#number of threads to use on build
-#parallel = ...
+#sources = [{
+#    'filename': '%(namelower)s-%(version)s.tar.gz',
+#    'git_config': {
+#        'url': 'https://github.com/CESGA-Quantum-Spain',
+#        'repo_name': '%(namelower)s',
+#        'recursive': True,
+#        'tag': '%(version)s',
+#    },
+#}]
+#
+#unpack_options = '--strip-components=1'
 
-#source_urls = ['...']
-sources = ['v%(version)s.tar.gz']
+sources = ['%(name)s-%(version)s.tar.gz']
 
-#patches = ['...']
-
+#patches = ['cunqa-0.3.0-CMakeLists.patch']
 
 builddependencies = [
-   ('...', '...'),
+   ('FlexiBLAS', '3.3.0'),
+   ('Boost.Python', '1.85.0', local_pyversionsuffix),
+   ('pybind11', '2.12.0', local_pyversionsuffix),
+   ('CMake', '3.27.6')
 ]
 
+# Implicit from Qiskit: ('hpcx-mt-ompi', EXTERNAL_MODULE),
 dependencies = [
-   ('...','...'),
+    ('Python', '3.9.9'),
+#   ('ZeroMQ', '4.3.4', local_pyversionsuffix),
+    ('nlohmann_json', '3.11.3'),
+    ('Qiskit', '1.2.4', versionsuffix),
 ]
 
-#sanity_check_paths: files/directories that must get installed
-#sanity_check_commands: (simple) commands that must work when the installed module is loaded
-sanity_check_paths = {
-    'files': [""],
-    'dirs': [],
+configopts = [
+    "-DCMAKE_CXX_FLAGS=",
+]
+
+modextrapaths = {
+    'PYTHONPATH': ['.'],
 }
 
-#Easybuild module classes
-#       base:      Default module class
-#       bio:       Bioinformatics, biology and biomedical
-#       cae:       Computer Aided Engineering (incl. CFD)
-#       chem:      Chemistry, Computational Chemistry and Quantum Chemistry
-#       compiler:  Compilers
-#       data:      Data management & processing tools
-#       debugger:  Debuggers
-#       devel:     Development tools
-#       geo:       Earth Sciences
-#       ide:       Integrated Development Environments (e.g. editors)
-#       lang:      Languages and programming aids
-#       lib:       General purpose libraries
-#       math:      High-level mathematical software
-#       mpi:       MPI stacks
-#       numlib:    Numerical Libraries
-#       perf:      Performance tools
-#       phys:      Physics and physical systems simulations
-#       system:    System utilities (e.g. highly depending on system OS and hardware)
-#       toolchain: EasyBuild toolchains
-#       tools:     General purpose tools
-#       vis:       Visualization, plotting, documentation and typesetting
-moduleclass = '...'
+sanity_check_paths = {
+    'files': ['bin/qraise', 'bin/qdrop', 'bin/setup_qpus'],
+    'dirs': ['bin', 'lib'],
+}
+
+moduleclass = 'tools'
 
 #CESGA areas
 #area_bioinformatics
@@ -84,7 +85,7 @@ moduleclass = '...'
 #area_tools
 #area_visualizationanddataformats
 #area_quantumcomputing
-modluafooter = 'add_property("type0","area_....")'
+modluafooter = 'add_property("type0","area_quantumcomputing")'
 
 usage = """
 \033[94mINTERACTIVE USE:\033[0m
@@ -98,4 +99,4 @@ usage = """
 examples = """
 """
 
-docurls = [ '%(installdir)s/...' ]
+#docurls = [ '%(installdir)s/...' ]
