@@ -1,17 +1,15 @@
-# QMIO EasyBuild file for CUNQA
+# FT3 EasyBuild file for CUNQA
 # Author:
 #   - Álvaro Carballido Costas
 #   - Marta Losada Estévez
-#   - Jorge Vázquez Pérez
+#   - Jorge Vázquez Pérez 
 #   - Daniel Expósito Patiño 
 # Fundacion Publica Galega Centro Tecnoloxico de Supercomputacion de Galicia (CESGA)
 
 easyblock = 'CMakePythonPackage'
 
 name = 'cunqa'
-version = '0.3.0'
-local_pyversionsuffix = '-python-3.9.9'
-versionsuffix = '%s-mpi' % local_pyversionsuffix
+version = '0.3.1'
 
 homepage = "https://github.com/CESGA-Quantum-Spain/cunqa"
 description = """ 
@@ -20,8 +18,7 @@ resources as emulated QPUs. It defines an API for communicating with the QPUs an
 the necessary tools to manage them.
 """
 
-toolchain = {'name': 'GCC', 'version': '12.3.0'}
-toolchainopts = {'rpath': False}
+toolchain = {'name': 'GCC', 'version': 'system'}
 
 #sources = [{
 #    'filename': '%(namelower)s-%(version)s.tar.gz',
@@ -37,22 +34,22 @@ toolchainopts = {'rpath': False}
 
 sources = ['%(name)s-%(version)s.tar.gz']
 
-#patches = ['cunqa-0.3.0-CMakeLists.patch']
-
 builddependencies = [
    ('FlexiBLAS', '3.3.0'),
-   ('Boost.Python', '1.85.0', local_pyversionsuffix),
-   ('pybind11', '2.12.0', local_pyversionsuffix),
+   ('OpenMPI', '5.0.5'),
+   ('Boost', '1.83.0'),
+   ('pybind11', '2.12.0'),
    ('CMake', '3.27.6')
 ]
 
-# Implicit from Qiskit: ('hpcx-mt-ompi', EXTERNAL_MODULE),
 dependencies = [
-    ('Python', '3.9.9'),
-#   ('ZeroMQ', '4.3.4', local_pyversionsuffix),
-    ('nlohmann_json', '3.11.3'),
-    ('Qiskit', '1.2.4', versionsuffix),
+    ('Qiskit', '1.2.4')
 ]
+
+sanity_check_paths = {
+    'files': ['bin/qraise', 'bin/qdrop', 'bin/setup_qpus'],
+    'dirs': ['bin', 'lib'],
+}
 
 configopts = [
     "-DCMAKE_CXX_FLAGS=",
@@ -60,11 +57,6 @@ configopts = [
 
 modextrapaths = {
     'PYTHONPATH': ['.'],
-}
-
-sanity_check_paths = {
-    'files': ['bin/qraise', 'bin/qdrop', 'bin/setup_qpus'],
-    'dirs': ['bin', 'lib'],
 }
 
 moduleclass = 'tools'
