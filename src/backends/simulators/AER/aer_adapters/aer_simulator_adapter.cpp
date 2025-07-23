@@ -69,6 +69,7 @@ JSON dynamic_execution_(const QuantumTask& quantum_task, comm::ClassicalChannel*
     JSON run_config = quantum_task.config;
     uint_t n_qubits = run_config.at("num_qubits").get<uint_t>();
     int shots = run_config.at("shots");
+    std::string method = run_config.at("method");
     std::string instruction_name;
     std::vector<uint_t> qubits;
     std::map<std::string, std::size_t> measurementCounter;
@@ -80,7 +81,7 @@ JSON dynamic_execution_(const QuantumTask& quantum_task, comm::ClassicalChannel*
     std::map<std::size_t, bool> remoteClassicRegister;
 
     AER::AerState *state = new AER::AerState();
-    state->configure("method", "statevector");
+    state->configure("method", method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
     
