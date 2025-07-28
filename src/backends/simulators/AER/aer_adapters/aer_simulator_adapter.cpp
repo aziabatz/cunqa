@@ -117,13 +117,14 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
         blocked[quantum_task.id] = false;
         finished.push_back(false);
     }
+    std::string method = quantum_tasks[0].config.at("method").get<std::string>();
 
     std::string resultString(n_clbits, '0');
     if (size(quantum_tasks) > 1)
         n_qubits += 2;
 
     AER::AerState *state = new AER::AerState();
-    state->configure("method", "statevector");
+    state->configure("method", method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
 
