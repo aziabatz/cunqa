@@ -32,10 +32,7 @@ JSON usual_execution_(const SimpleBackend& backend, const QuantumTask& quantum_t
         circuits.push_back(std::make_shared<Circuit>(circuit));
 
         JSON run_config_json(aer_quantum_task.config);
-
-        // TODO: See how to manage the seeds
-        //run_config_json["seed_simulator"] = run_config.seed;
-        LOGGER_DEBUG("Config is: {}", quantum_task.config.dump(4));
+        run_config_json["seed_simulator"] = quantum_task.config.at("seed");
         Config aer_config(run_config_json);
 
         //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
@@ -83,6 +80,7 @@ JSON dynamic_execution_(const QuantumTask& quantum_task, comm::ClassicalChannel*
     state->configure("method", "statevector");
     state->configure("device", "CPU");
     state->configure("precision", "double");
+    state->configure("seed_simulator", std::to_string(quantum_task.config.at("seed").get<int>()));
     
     LOGGER_DEBUG("AER variables ready.");
 
