@@ -74,6 +74,22 @@ class Result:
             logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
             raise error
         return counts
+    
+    @property
+    def density_matrix(self) -> object:
+        try:
+            if "results" in list(self._result.keys()): # aer
+                density_matrix = self._result["results"][0]["data"]["density_matrix"]
+
+            else:
+                logger.error(f"Density Matrix not found.")
+                raise ResultError
+
+        except Exception as error:
+            logger.error(f"Some error occured with density matrix [{type(error).__name__}]: {error}.")
+            raise error
+        
+        return density_matrix
 
     @property
     def density_matrix(self) -> object:
