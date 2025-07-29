@@ -25,6 +25,7 @@ struct CCConfig {
     std::vector<std::string> gates;
     JSON noise_model;
     JSON noise_properties;
+    std::string noise_path = "";
 
     friend void from_json(const JSON& j, CCConfig &obj)
     {
@@ -38,6 +39,7 @@ struct CCConfig {
         j.at("gates").get_to(obj.gates);
         j.at("noise_model").get_to(obj.noise_model);
         j.at("noise_properties").get_to(obj.noise_properties);
+        j.at("noise_path").get_to(obj.noise_path);
     }
 
     friend void to_json(JSON& j, const CCConfig& obj)
@@ -51,10 +53,9 @@ struct CCConfig {
             {"basis_gates", obj.basis_gates}, 
             {"custom_instructions", obj.custom_instructions},
             {"gates", obj.gates},
-            {"noise_properties", obj.noise_properties}
+            {"noise", obj.noise_path}
         };
     }
-    
 };
 
 class CCBackend final : public Backend {
