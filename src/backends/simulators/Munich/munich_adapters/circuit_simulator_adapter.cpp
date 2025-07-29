@@ -14,7 +14,7 @@ namespace cunqa
 {
 namespace sim
 {
-JSON CircuitSimulatorAdapter::simulate(const SimpleBackend& backend, comm::ClassicalChannel *classical_channel)
+JSON CircuitSimulatorAdapter::simulate(const Backend* backend)
 {
     try
     {   
@@ -28,7 +28,7 @@ JSON CircuitSimulatorAdapter::simulate(const SimpleBackend& backend, comm::Class
         float time_taken;
         int n_qubits = quantum_task.config.at("num_qubits");
 
-        JSON noise_model_json = backend.config.noise_model;
+        JSON noise_model_json = backend->config.at("noise_model");
         if (!noise_model_json.empty()) {
             LOGGER_DEBUG("Noise model execution");
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
@@ -92,7 +92,7 @@ JSON CircuitSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel
     auto shots = p_qca->quantum_tasks[0].config.at("shots").get<std::size_t>();
     for (std::size_t i = 0; i < shots; i++)
     {
-        meas_counter[execute_shot_(classical_channel, p_qca->quantum_tasks)]++;
+        meas_counter[execute_shot_(p_qca->quantum_tasks, classical_channel)]++;
     } // End all shots
 
     auto end = std::chrono::high_resolution_clock::now();
@@ -140,7 +140,7 @@ void CircuitSimulatorAdapter::generate_entanglement_(const int &n_qubits)
     applyOperationToStateAdapter(std::move(std_op2));
 }
 
-std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel *classical_channel, const std::vector<QuantumTask> &quantum_tasks)
+std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask> &quantum_tasks, comm::ClassicalChannel *classical_channel)
 {
     std::vector<JSON::const_iterator> its;
     std::vector<JSON::const_iterator> ends;
@@ -370,7 +370,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(comm::ClassicalChannel *class
                     apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
                 }
 
-                // Desbloquear el QRECV
+                // Unlock QRECV
                 blocked[instruction.at("qpus")[0]] = false;
                 break;
             }

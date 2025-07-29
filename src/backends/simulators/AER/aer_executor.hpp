@@ -6,10 +6,10 @@
 namespace cunqa {
 namespace sim {
 
-class MunichExecutor {
+class AerExecutor {
 public:
-    MunichExecutor();
-    ~MunichExecutor() = default;
+    AerExecutor();
+    ~AerExecutor() = default;
 
     void run();
 private:

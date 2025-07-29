@@ -23,9 +23,8 @@ struct SimpleConfig {
     std::vector<std::string> basis_gates = constants::BASIS_GATES;
     std::string custom_instructions;
     std::vector<std::string> gates;
-    JSON noise_model;
-    JSON noise_properties;
-    std::string noise_path = "";
+    JSON noise_model = {};
+    JSON noise_properties = {};
 
     friend void from_json(const JSON& j, SimpleConfig &obj)
     {
@@ -62,12 +61,15 @@ struct SimpleConfig {
 
 class SimpleBackend final : public Backend {
 public:
-    SimpleConfig config;
+    SimpleConfig simple_config;
     
-    SimpleBackend(const SimpleConfig& config, std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator) : 
-        config{config},
+    SimpleBackend(const SimpleConfig& simple_config, std::unique_ptr<SimulatorStrategy<SimpleBackend>> simulator) : 
+        simple_config{simple_config},
         simulator_{std::move(simulator)}
-    { }
+    { 
+        config = simple_config;
+        config["noise_model"] = simple_config.noise_model; // Not in to_json() to avoid the writing on qpus.json
+    }
 
     SimpleBackend(SimpleBackend& simple_backend) = default;
 
@@ -79,7 +81,7 @@ public:
     // TODO: Achieve this using the JSON adl serializer
     JSON to_json() const override 
     {
-        JSON config_json = config;
+        JSON config_json = simple_config;
         const auto simulator_name = simulator_->get_name();
         config_json["simulator"] = simulator_name;
         return config_json;

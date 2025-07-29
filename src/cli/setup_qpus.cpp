@@ -9,6 +9,7 @@
 #include "backends/cc_backend.hpp"
 #include "backends/simulators/AER/aer_simple_simulator.hpp"
 #include "backends/simulators/AER/aer_cc_simulator.hpp"
+#include "backends/simulators/AER/aer_qc_simulator.hpp"
 #include "backends/simulators/Munich/munich_simple_simulator.hpp"
 #include "backends/simulators/Munich/munich_cc_simulator.hpp"
 #include "backends/simulators/Munich/munich_qc_simulator.hpp"
@@ -146,6 +147,10 @@ int main(int argc, char *argv[])
                 case murmur::hash("Munich"): 
                     LOGGER_DEBUG("QPU going to turn on with MunichQCSimulator.");
                     turn_ON_QPU<MunichQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
+                    break;
+                case murmur::hash("Aer"): 
+                    LOGGER_DEBUG("QPU going to turn on with AerQCSimulator.");
+                    turn_ON_QPU<AerQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support quantum communication simulation or does not exist.", sim_arg);

@@ -22,7 +22,11 @@ JSON MunichCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const
     auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     CircuitSimulatorAdapter csa(std::move(p_qca));
 
-    return csa.simulate(&classical_channel);
+    if (quantum_task.is_dynamic) {
+        return csa.simulate(&classical_channel);
+    } else {
+        return csa.simulate(&backend);
+    }
 }
 
 } // End namespace sim

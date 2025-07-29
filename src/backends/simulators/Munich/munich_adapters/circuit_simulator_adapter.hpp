@@ -3,7 +3,7 @@
 
 #include "quantum_computation_adapter.hpp"
 #include "classical_channel/classical_channel.hpp"
-#include "backends/simple_backend.hpp"
+#include "backends/backend.hpp"
 
 #include "utils/json.hpp"
 
@@ -24,12 +24,12 @@ public:
     inline void applyOperationToStateAdapter(std::unique_ptr<qc::Operation>&& op) { applyOperationToState(op); }
     inline char measureAdapter(dd::Qubit i) { return measure(i); }
 
-    JSON simulate(const SimpleBackend& backend, comm::ClassicalChannel* classical_channel = nullptr);
+    JSON simulate(const Backend* backend);
     JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 private:
 
     void apply_gate_(const JSON& instruction, std::unique_ptr<qc::StandardOperation>&& std_op, std::map<std::size_t, bool>& classic_reg, std::map<std::size_t, bool>& r_classic_reg);
-    std::string execute_shot_(comm::ClassicalChannel* classical_channel, const std::vector<QuantumTask>& quantum_tasks);
+    std::string execute_shot_(const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel);
     void generate_entanglement_(const int& n_qubits);
     
 };
