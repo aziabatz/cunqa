@@ -21,3 +21,5 @@ target_link_libraries(qpu PUBLIC server
                           PRIVATE json quantum_task logger_qpu)
 
 add_subdirectory(cli)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/utils/json_schema" DESTINATION "$ENV{STORE}/.cunqa")

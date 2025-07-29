@@ -20,6 +20,9 @@ target_link_libraries(qdrop PRIVATE logger_client SLURM::SLURM json)
 install(TARGETS qdrop DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "$ENV{STORE}/.cunqa") 
 
+file(GLOB NOISE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/noise_model/*.py")
+install(FILES ${NOISE_SCRIPTS} DESTINATION "$ENV{STORE}/.cunqa/noise_model")
+
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 

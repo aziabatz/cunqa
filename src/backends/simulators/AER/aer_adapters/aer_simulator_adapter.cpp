@@ -38,10 +38,7 @@ JSON AerSimulatorAdapter::simulate(const SimpleBackend& backend)
         circuits.push_back(std::make_shared<Circuit>(circuit));
 
         JSON run_config_json(aer_quantum_task.config);
-
-        // TODO: See how to manage the seeds
-        //run_config_json["seed_simulator"] = run_config.seed;
-        LOGGER_DEBUG("Config is: {}", quantum_task.config.dump(4));
+        run_config_json["seed_simulator"] = quantum_task.config.at("seed");
         Config aer_config(run_config_json);
 
         //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
@@ -127,9 +124,15 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
     state->configure("method", method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
+    state->configure("seed_simulator", std::to_string(quantum_task.config.at("seed").get<int>()));
+    
+    LOGGER_DEBUG("AER variables ready.");
 
-    auto qubit_ids = state->allocate_qubits(n_qubits);
-    state->initialize();
+    auto start_time = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < shots; i++) {
+        
+        auto qubit_ids = state->allocate_qubits(n_qubits);
+        state->initialize();
 
     std::vector<unsigned long> qubits;
     std::map<std::size_t, bool> classic_values;
