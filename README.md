@@ -32,6 +32,7 @@
     - [FINISTERRAE III (FT3)](#finisterrae-iii-ft3)
       - [Automatic installation](#automatic-installation-1)
       - [Manual installation](#manual-installation-1)
+  - [UNINSTALL](#uninstall)
   - [RUN YOUR FIRST DISTRIBUTED PROGRAM](#run-your-first-distributed-program)
     - [1. `qraise`command](#1-qraisecommand)
     - [2. Python Program Example](#2-python-program-example)
@@ -94,14 +95,14 @@ ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind1
 
 3. Once the previous steps are done, everything is set for the build/installation. There are two options: 
     
-* **Standard way (slower)**
+* **Standard way**
 ```console
 cmake -B build/ 
 cmake --build build/ --parallel $(nproc)
 cmake --install build/
 ```
 
-* **Using [Ninja](https://ninja-build.org/) (faster)**
+* **Using [Ninja](https://ninja-build.org/)**
 ```console
 cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
