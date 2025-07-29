@@ -17,7 +17,7 @@ JSON MunichSimpleSimulator::execute(const SimpleBackend& backend, const QuantumT
 {
     auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     CircuitSimulatorAdapter csa(std::move(p_qca));
-    return csa.simulate(backend);
+    return csa.simulate(&backend);
 } 
 
 } // End of sim namespace

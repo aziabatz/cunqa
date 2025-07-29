@@ -18,7 +18,11 @@ JSON AerCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantu
 
     AerComputationAdapter aer_ca(quantum_task);
     AerSimulatorAdapter aer_sa(aer_ca);
-    return aer_sa.simulate(&classical_channel);
+    if (quantum_task.is_dynamic) {
+        return aer_sa.simulate(&classical_channel);
+    } else {
+        return aer_sa.simulate(&backend);
+    }
 }
 
 } // End namespace sim
