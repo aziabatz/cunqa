@@ -4,7 +4,7 @@
 
 #include "quantum_task.hpp"
 #include "classical_channel/classical_channel.hpp"
-#include "backends/simple_backend.hpp"
+#include "backends/backend.hpp"
 #include "aer_computation_adapter.hpp"
 
 #include "utils/json.hpp"
@@ -18,7 +18,7 @@ public:
     AerSimulatorAdapter() = default;
     AerSimulatorAdapter(AerComputationAdapter& qc) : qc{qc} {}
 
-    JSON simulate(const SimpleBackend& backend);
+    JSON simulate(const Backend* backend);
     JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 
     AerComputationAdapter qc;

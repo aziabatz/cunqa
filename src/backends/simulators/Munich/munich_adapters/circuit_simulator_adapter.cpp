@@ -14,7 +14,7 @@ namespace cunqa
 {
 namespace sim
 {
-JSON CircuitSimulatorAdapter::simulate(const SimpleBackend& backend)
+JSON CircuitSimulatorAdapter::simulate(const Backend* backend)
 {
     try
     {   
@@ -28,7 +28,7 @@ JSON CircuitSimulatorAdapter::simulate(const SimpleBackend& backend)
         float time_taken;
         int n_qubits = quantum_task.config.at("num_qubits");
 
-        JSON noise_model_json = backend.config.noise_model;
+        JSON noise_model_json = backend->config.at("noise_model");
         if (!noise_model_json.empty()) {
             LOGGER_DEBUG("Noise model execution");
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};

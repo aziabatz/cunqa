@@ -24,8 +24,10 @@
 namespace cunqa {
 namespace sim {
 
-JSON AerSimulatorAdapter::simulate(const SimpleBackend& backend)
+
+JSON AerSimulatorAdapter::simulate(const Backend* backend)
 {
+    LOGGER_DEBUG("Inside usual simulation with Aer");
     try {
         auto quantum_task = qc.quantum_tasks[0];
 
@@ -41,8 +43,8 @@ JSON AerSimulatorAdapter::simulate(const SimpleBackend& backend)
         run_config_json["seed_simulator"] = quantum_task.config.at("seed");
         Config aer_config(run_config_json);
 
-        //LOGGER_DEBUG("circuit: {}.", backend.config.noise_model);
-        Noise::NoiseModel noise_model(backend.config.noise_model);
+        LOGGER_DEBUG("backend->config: {}.", backend->config.dump());
+        Noise::NoiseModel noise_model(backend->config.at("noise_model"));
 
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
 
@@ -124,15 +126,10 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
     state->configure("method", method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
-    state->configure("seed_simulator", std::to_string(quantum_task.config.at("seed").get<int>()));
-    
-    LOGGER_DEBUG("AER variables ready.");
+    state->configure("seed_simulator", std::to_string(quantum_tasks[0].config.at("seed").get<int>()));
 
-    auto start_time = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < shots; i++) {
-        
-        auto qubit_ids = state->allocate_qubits(n_qubits);
-        state->initialize();
+    auto qubit_ids = state->allocate_qubits(n_qubits);
+    state->initialize();
 
     std::vector<unsigned long> qubits;
     std::map<std::size_t, bool> classic_values;
