@@ -1,21 +1,19 @@
+import os
+import sys
+import glob
+
+installation_path = os.getenv("HOME")
+sys.path.append(installation_path)
+
 from cunqa.logger import logger
 
 from qiskit.providers import BackendV2
-from qiskit.providers import QubitProperties, BackendV2, Provider, Options, Job
-from qiskit.providers import JobStatus, JobV1  
-from qiskit.providers.models.backendstatus import BackendStatus
-from qiskit.circuit.gate import Instruction
+from qiskit.providers import QubitProperties, BackendV2, Options
 from qiskit.circuit.library import ECRGate, IGate, Measure, RZXGate, RZGate, SXGate,ECRGate, XGate
-from qiskit.circuit import Delay
 from qiskit.transpiler import Target, InstructionProperties, TranspilerError
 from qiskit.circuit.library import UGate, CXGate, Measure
-from qiskit.circuit import Parameter, QuantumCircuit, ClassicalRegister
-from qiskit.pulse import Schedule, ScheduleBlock
-from qiskit.result.models import ExperimentResult, ExperimentResultData
-from qiskit.result import Result, Counts  
-from qiskit.qobj import QobjExperimentHeader
-from qiskit import qasm2, qasm3, transpile
-from qiskit.qobj.utils import MeasLevel
+from qiskit.circuit import Parameter
+
 
 
 class CunqaBackend(BackendV2):
@@ -34,7 +32,7 @@ class CunqaBackend(BackendV2):
         for k,q in qubits.items():
             # TODO: check if key is the correct format q[i]
             qubits_properties.append(QubitProperties(t1=q["T1 (s)"],t2=q["T2 (s)"],frequency=q["Drive Frequency (Hz)"]))
-            readout_errors[(_get_qubit_index(k),)] = InstructionProperties(duration=q["Readout duration (s)"], error = 1-q["Readout fidelity(RB)"])
+            readout_errors[(_get_qubit_index(k),)] = InstructionProperties(duration=q["Readout duration (s)"], error = 1-q["Readout fidelity (RB)"])
         
         logger.debug(f"{self._num_qubits} qubits properties loaded from noise_properties_json.")
 
@@ -93,7 +91,7 @@ class CunqaBackend(BackendV2):
                 logger.warning("Instruction will be ignored.")
 
         logger.debug("Added single qubit gates instructions to Target:")
-        logger.debug(f"{single_qubit_gates}")
+        #logger.debug(f"{single_qubit_gates}")
 
         
         # loading two-qubit-gate errors
@@ -117,7 +115,7 @@ class CunqaBackend(BackendV2):
                     if _get_qubits_indexes(qubits) != [gate_properties["Control"],gate_properties["Target"]]:
                         logger.warning(f"Inconsistency in control and target qubits for gate {gate}({_get_qubits_indexes(qubits)}!={[gate_properties['Control'],gate_properties['Target']]}), instruction will be added for qubits {[gate_properties['Control'],gate_properties['Target']]}.")
 
-                    two_qubit_gates[gate][1][(gate_properties["Control"],gate_properties["Target"],)]  = InstructionProperties(duration = gate_properties["Gate duration (s)"], error = 1- gate_properties["Fidelity(RB)"] )
+                    two_qubit_gates[gate][1][(gate_properties["Control"],gate_properties["Target"],)]  = InstructionProperties(duration = gate_properties["Duration (s)"], error = 1- gate_properties["Fidelity(RB)"] )
 
                 except ValueError as error:
                     logger.warning(f"Qubits {qubits} do not have the right sintax [{type(error).__name__}].")
