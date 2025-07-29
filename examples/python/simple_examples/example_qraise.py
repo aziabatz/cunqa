@@ -2,7 +2,7 @@ import os, sys
 from time import sleep
 
 # path to access c++ files
-#sys.path.append(os.getenv("HOME"))
+sys.path.append(os.getenv("HOME"))
 
 from cunqa.qutils import getQPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
@@ -19,7 +19,7 @@ qc.cx(0, 1)
 qc.measure_all()
 
 qpu = qpus[0]
-qjob = qpu.run(qc, shots = 10)# non-blocking call
+qjob = qpu.run(qc, transpile = True, shots = 10)# non-blocking call
 
 counts = qjob.result.counts
 time = qjob.time_taken

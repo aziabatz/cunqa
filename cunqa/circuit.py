@@ -1226,7 +1226,7 @@ def flatten(lists: "list[list]"):
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
-def qc_to_json(qc: QuantumCircuit) -> Tuple[dict, bool]:
+def qc_to_json(qc: Union['QuantumCircuit', 'CunqaCircuit', str]) -> Tuple[dict, bool]:
     """
     Transforms a QuantumCircuit to json dict.
 
