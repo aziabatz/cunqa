@@ -2,7 +2,7 @@ import os, sys
 import numpy as np
 
 # path to access c++ files
-#sys.path.append(os.getenv("HOME"))
+sys.path.append(os.getenv("HOME"))
 
 from cunqa import getQPUs, gather
 from cunqa.circuit import CunqaCircuit

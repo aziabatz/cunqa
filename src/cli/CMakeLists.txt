@@ -23,12 +23,6 @@ install(PROGRAMS "${CMAKE_CURRENT_SOURCE_DIR}/epilog.sh" DESTINATION "$ENV{STORE
 file(GLOB NOISE_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/noise_model/*.py")
 install(FILES ${NOISE_SCRIPTS} DESTINATION "$ENV{STORE}/.cunqa/noise_model")
 
-if("$ENV{LMOD_SYSTEM_NAME}" STREQUAL "QMIO")
-    install(FILES "slurm_qmio.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}" RENAME "slurm.conf")
-else()
-    install(FILES "slurm_ft3.conf" DESTINATION "${CMAKE_INSTALL_PREFIX}" RENAME "slurm.conf")
-endif()
-
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 
