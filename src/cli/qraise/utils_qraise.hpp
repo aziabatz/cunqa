@@ -21,22 +21,19 @@ bool check_mem_format(const int& mem)
     return std::regex_match(mem_str, format);
 }
 
-int check_memory_specs(int& mem_per_qpu, int& cores_per_qpu)
+int check_memory_specs(const int& mem_per_qpu, const int& cores_per_qpu)
 {
     int mem_per_cpu = mem_per_qpu/cores_per_qpu;
-    const char* system_var = std::getenv("LMOD_SYSTEM_NAME");
+    auto system_var = std::getenv("LMOD_SYSTEM_NAME");
     if ((std::string(system_var) == "QMIO" && mem_per_cpu > 15)) {
         return 1;
     } else if ((std::string(system_var) == "FT3" && mem_per_cpu > 4)){
         return 2;
     }
-
-    LOGGER_DEBUG("Correct memory per core.");
-
     return 0;
 }
 
-bool exists_family_name(std::string& family, std::string& info_path)
+bool exists_family_name(const std::string& family, const std::string& info_path)
 {
     std::ifstream file(info_path);
     if (!file) {
@@ -69,7 +66,7 @@ bool exists_family_name(std::string& family, std::string& info_path)
     }
 }
 
-bool check_simulator_name(std::string& sim_name)
+bool check_simulator_name(const std::string& sim_name)
 {
     if (sim_name == "Cunqa" || sim_name == "Munich" || sim_name == "Aer") {  // Add new valid simulators to the check here
         return true;
@@ -78,7 +75,7 @@ bool check_simulator_name(std::string& sim_name)
     }
 }
 
-int number_of_nodes(int& number_of_qpus, int& cores_per_qpu, int& number_of_nodes, const int& cores_per_node)
+int number_of_nodes(const int& number_of_qpus, const int& cores_per_qpu, const int& number_of_nodes, const int& cores_per_node)
 {
     if (number_of_qpus * cores_per_qpu < number_of_nodes * cores_per_node) {
         return number_of_nodes;

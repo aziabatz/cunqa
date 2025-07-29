@@ -43,30 +43,24 @@ MunichExecutor::MunichExecutor() : classical_channel{"executor"}
 void MunichExecutor::run()
 {
     std::vector<QuantumTask> quantum_tasks;
-    JSON quantum_task_json;
     std::vector<std::string> qpus_working;
+    JSON quantum_task_json;
     std::string message;
     while (true) {
         for(const auto& qpu_id: qpu_ids) {
             message = classical_channel.recv_info(qpu_id);
-            if(message != "") {
+            if(!message.empty()) {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);
-                
                 quantum_tasks.push_back(QuantumTask(message));
             }
         }
 
         auto qc = std::make_unique<QuantumComputationAdapter>(quantum_tasks);
         CircuitSimulatorAdapter simulator(std::move(qc));
-
-        auto start = std::chrono::high_resolution_clock::now();
-        auto result = simulator.simulate(quantum_tasks[0].config.at("shots").get<std::size_t>());
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float> duration = end - start;
-        float time_taken = duration.count();
+        auto result = simulator.simulate(&classical_channel);
         
-        // TODO: transformar los circuitos
+        // TODO: transform results to give each qpu its results
         std::string result_str = result.dump();
 
         for(const auto& qpu: qpus_working) {

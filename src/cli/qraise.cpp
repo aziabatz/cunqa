@@ -37,7 +37,6 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
     sbatchFile << "#SBATCH -N " << n_nodes << "\n";
     
-
     if (args.qpus_per_node.has_value()) {
         if (args.n_qpus < args.qpus_per_node) {
             LOGGER_ERROR("Less qpus than selected qpus_per_node.");
@@ -92,7 +91,6 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     }
 
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
-
     if (memory_specs == 1) {
         LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
         return;
@@ -106,7 +104,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
 
 void write_env_variables(std::ofstream& sbatchFile)
 {
-    const char* store = std::getenv("STORE");
+    auto store = std::getenv("STORE");
 
     sbatchFile << "\n";
     sbatchFile << "if [ ! -d \"$STORE/.cunqa\" ]; then\n";
@@ -116,7 +114,6 @@ void write_env_variables(std::ofstream& sbatchFile)
     sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
     sbatchFile << "export INFO_PATH=" << store << "/.cunqa/qpus.json\n";
     sbatchFile << "export COMM_PATH=" << store << "/.cunqa/communications.json\n";
-    
 }
 
 void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const std::string& mode)
@@ -185,6 +182,7 @@ int main(int argc, char* argv[])
     write_run_command(sbatchFile, args, mode);
     sbatchFile.close();
 
+    
     // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");

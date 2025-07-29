@@ -4,17 +4,17 @@
 #include "src/executor.hpp"
 #include "src/utils/types_cunqasim.hpp"
 
-#include "classical_channel.hpp"
 #include "quantum_task.hpp"
+#include "classical_channel/classical_channel.hpp"
 #include "utils/json.hpp"
 #include "utils/constants.hpp"
 #include "cunqa_helpers.hpp"
+
 #include "logger.hpp"
 
 namespace cunqa {
 
-template <class BackendType>
-inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
+inline JSON cunqa_execution_(const QuantumTask& quantum_task, comm::ClassicalChannel* classical_channel = nullptr)
 {
     LOGGER_DEBUG("Starting cunqa_execution_.");
     // Connect to the classical communications endpoints
@@ -51,13 +51,25 @@ inline JSON cunqa_execution_(const BackendType& backend, const QuantumTask& quan
                     int measurement = executor.apply_measure(qubits);
                     if (!clreg.empty()) {
                         classicRegister[clreg[0]] = (measurement == 1);
-                    }
+                    }   
                     break;
                 }
                 case constants::UNITARY:
                 {
                     auto matrix = instruction.at("params").get<Matrix>();
-                    executor.apply_unitary("custom", matrix, qubits);
+                    if (instruction.contains("conditional_reg")) {
+                        auto conditional_reg = instruction.at("conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (classicRegister[conditional_reg[0]]) {
+                            executor.apply_unitary("unitary", matrix, qubits);
+                        }
+                    } else if (instruction.contains("remote_conditional_reg")) {
+                        auto conditional_reg = instruction.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+                        if (remoteClassicRegister[conditional_reg[0]]) {
+                            executor.apply_unitary("unitary", matrix, qubits);
+                        }
+                    } else {
+                        executor.apply_unitary("unitary", matrix, qubits);
+                    }
                     break;
                 }
                 case constants::ID:

@@ -7,7 +7,9 @@
 #include "zmq.hpp"
 
 #include "classical_channel.hpp"
-#include "zmq_classical_channel_helpers.hpp"
+#include "utils/helpers/net_functions.hpp"
+
+#include "utils/json.hpp"
 #include "logger.hpp"
 
 namespace cunqa {
@@ -26,7 +28,10 @@ struct ClassicalChannel::Impl
     Impl(const std::string& id)
     {
         //Endpoint part
-        zmq_endpoint = get_my_endpoint();
+        auto port = get_port(true);
+        auto IP = get_global_IP_address();
+        zmq_endpoint = "tcp://" + IP + ":" + port;
+
         zmq_id = id == "" ? zmq_endpoint : id;
 
         //Server part
@@ -70,8 +75,8 @@ struct ClassicalChannel::Impl
                 zmq::message_t id;
                 zmq::message_t message;
                 
-                zmq_comm_server.recv(id, zmq::recv_flags::none);
-                zmq_comm_server.recv(message, zmq::recv_flags::none);
+                [[maybe_unused]] auto ret1 = zmq_comm_server.recv(id, zmq::recv_flags::none);
+                [[maybe_unused]] auto ret2 = zmq_comm_server.recv(message, zmq::recv_flags::none);
                 std::string id_str(static_cast<char*>(id.data()), id.size());
                 std::string data(static_cast<char*>(message.data()), message.size());
 

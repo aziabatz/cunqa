@@ -2,6 +2,13 @@
 add_executable(qraise qraise.cpp)
 target_include_directories(qraise PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 target_link_libraries(qraise PRIVATE json logger_client)
+
+if(USE_MPI_BTW_QPU)
+    target_compile_definitions(qraise PUBLIC USE_MPI_BTW_QPU)
+elseif(USE_ZMQ_BTW_QPU)
+    target_compile_definitions(qraise PUBLIC USE_ZMQ_BTW_QPU)
+endif()
+
 install(TARGETS qraise DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # QDROP executable
@@ -25,10 +32,9 @@ endif()
 # SETUP_QPUS executable
 add_executable(setup_qpus setup_qpus.cpp)
 target_link_libraries(setup_qpus PRIVATE json logger_qpu qpu 
-                                         aer_simulator
+                                         aer_simple_simulator aer_cc_simulator
                                          munich_simple_simulator munich_cc_simulator munich_qc_simulator 
-                                         cunqa_simple_simulator cunqa_cc_simulator
-                                         )
+                                         cunqa_simple_simulator cunqa_cc_simulator)
 target_include_directories(setup_qpus PRIVATE "${CMAKE_SOURCE_DIR}/src")
 install(TARGETS setup_qpus DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
@@ -40,7 +46,7 @@ install(TARGETS setup_executor DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 # QINFO executable
 add_executable(qinfo qinfo.cpp)
-target_link_libraries(qinfo PRIVATE json)
+target_link_libraries(qinfo PRIVATE json logger_client)
 target_include_directories(qinfo PRIVATE "${CMAKE_SOURCE_DIR}/src/third-party/argparse/include/argparse")
 install(TARGETS qinfo DESTINATION "${CMAKE_INSTALL_BINDIR}")
 

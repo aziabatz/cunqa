@@ -2,7 +2,7 @@ import os, sys
 import numpy as np
 
 # path to access c++ files
-sys.path.append(os.getenv("HOME"))
+#sys.path.append(os.getenv("HOME"))
 
 from cunqa import getQPUs, gather
 from cunqa.circuit import CunqaCircuit
@@ -42,12 +42,5 @@ for _ in range(1):
 
 results = gather(qjobs)
 
-import statistics
-tiempo_medio = statistics.mean([result.time_taken for result in results])
-print(f"Tiempo medio empleado: {tiempo_medio}")
-
 for result in results:
     print("Resultado: ", result.counts)
-
-# Dinamic execution mean time: 0.04063898839652538
-# Usual execution mean time: 0.00011611848566147576

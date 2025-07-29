@@ -75,7 +75,7 @@ def qraise(n, time, *,
         backend (str): path to a file containing backend information.
 
     """
-
+    print("Setting up the requested QPUs...")
     SLURMD_NODENAME = os.getenv("SLURMD_NODENAME")
     if SLURMD_NODENAME == None:
         command = f"qraise -n {n} -t {time}"
@@ -127,7 +127,8 @@ def qraise(n, time, *,
         while True:
             if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
                 break
-
+        
+        print("QPUs ready to work \U00002705")
         return (family, str(job_id)) if family is not None else str(job_id)
     
     except Exception as error:
