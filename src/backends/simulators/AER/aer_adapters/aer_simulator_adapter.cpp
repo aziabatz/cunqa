@@ -48,8 +48,6 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
     }
 
     std::string resultString(n_clbits, '0');
-    if (size(quantum_tasks) > 1)
-        n_qubits += 2;
 
     std::vector<unsigned long> qubits;
     std::map<std::size_t, bool> classic_values;
