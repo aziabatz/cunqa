@@ -71,7 +71,8 @@ class Result:
                 logger.error(f"Some error occured with counts.")
                 raise ResultError
             
-            counts = convert_counts(counts, self._registers)
+            if len(self._registers) > 1:
+                counts = convert_counts(counts, self._registers)
 
         except Exception as error:
             logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
@@ -161,11 +162,7 @@ def convert_counts(counts: dict, registers: dict) -> dict:
     Counts dictionary with keys as binary string correctly separated with spaces accordingly to the classical registers.
     """
 
-    logger.debug("Converting counts.")
-
     if isinstance(registers, dict):
-        # counting number of classical bits
-        num_clbits = sum([len(i) for i in registers.values()])
         # getting lenghts of bits for the different registers
         lengths = []
         for v in registers.values():
@@ -174,18 +171,12 @@ def convert_counts(counts: dict, registers: dict) -> dict:
         logger.error(f"regsters must be dict, but {type(registers)} was provided [TypeError].")
         raise ResultError # I capture this error in QJob.result()
     
-    if len(lengths) > 1:
-        logger.debug(f"Dividing strings into {len(lengths)} classical registers.")
+    logger.debug(f"Dividing strings into {len(lengths)} classical registers.")
 
     if isinstance(counts, dict):
         new_counts = {}
         for k,v in counts.items():
-
-            if k.startswith('0x'): # converting to binary string and dividing in bit strings
-                new_counts[divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
-
-            else: # just dividing the bit stings
-                new_counts[divide(k, lengths)] = v
+            new_counts[divide(k, lengths)] = v
     else:
         logger.error(f"counts must be dict, but {type(registers)} was provided [TypeError].")
         raise ResultError # I capture this error in QJob.result()
