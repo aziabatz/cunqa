@@ -2,6 +2,7 @@
 #include "circuit_simulator_adapter.hpp"
 #include "munich_helpers.hpp"
 
+#include <stack>
 #include <chrono>
 
 #include "quantum_task.hpp"
@@ -173,7 +174,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
     std::map<std::size_t, bool> classic_values;
     std::map<std::size_t, bool> classic_reg;
     std::map<std::size_t, bool> r_classic_reg;
-    std::unordered_map<std::string, std::queue<int>> qc_meas;
+    std::unordered_map<std::string, std::stack<int>> qc_meas;
 
     bool ended = false;
     while (!ended)
@@ -383,9 +384,9 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 }
 
                 // Receive the measurements from the sender
-                int meas1 = qc_meas[instruction.at("qpus")[0]].front();
+                int meas1 = qc_meas[instruction.at("qpus")[0]].top();
                 qc_meas[instruction.at("qpus")[0]].pop();
-                int meas2 = qc_meas[instruction.at("qpus")[0]].front();
+                int meas2 = qc_meas[instruction.at("qpus")[0]].top();
                 qc_meas[instruction.at("qpus")[0]].pop();
 
                 // Apply, conditioned to the measurement, the X and Z gates
