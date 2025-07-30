@@ -1,6 +1,6 @@
 
 #include <unordered_map>
-#include <queue>
+#include <stack>
 #include <chrono>
 
 #include "aer_simulator_adapter.hpp"
@@ -24,7 +24,7 @@
 namespace cunqa {
 namespace sim {
 
-std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel)
+std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel)
 {
     std::vector<JSON::const_iterator> its;
     std::vector<JSON::const_iterator> ends;
@@ -48,12 +48,14 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
     }
 
     std::string resultString(n_clbits, '0');
+    if (size(quantum_tasks) > 1)
+        n_qubits += 2; 
 
     std::vector<unsigned long> qubits;
     std::map<std::size_t, bool> classic_values;
     std::map<std::size_t, bool> classic_reg;
     std::map<std::size_t, bool> r_classic_reg;
-    std::unordered_map<std::string, std::queue<std::size_t>> qc_meas;
+    std::unordered_map<std::string, std::stack<std::size_t>> qc_meas;
 
     bool ended = false;
     while (!ended)
@@ -373,12 +375,8 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
 
                 qc_meas[quantum_tasks[i].id].push(result);
                 qc_meas[quantum_tasks[i].id].push(state->apply_measure({n_qubits - 2}));
+                state->apply_reset({n_qubits - 2, qubits[0] + zero_qubit[i]});
 
-                // We reset to 0 the qubit sent
-                if (result)
-                {
-                    state->apply_mcx({qubits[0] + zero_qubit[i]});
-                }
                 // Unlock QRECV
                 blocked[instruction.at("qpus")[0]] = false;
                 break;
@@ -392,9 +390,9 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
                 }
  
                 // Receive the measurements from the sender
-                std::size_t meas1 = qc_meas[instruction.at("qpus")[0]].front();
+                std::size_t meas1 = qc_meas[instruction.at("qpus")[0]].top();
                 qc_meas[instruction.at("qpus")[0]].pop();
-                std::size_t meas2 = qc_meas[instruction.at("qpus")[0]].front();
+                std::size_t meas2 = qc_meas[instruction.at("qpus")[0]].top();
                 qc_meas[instruction.at("qpus")[0]].pop();
 
                 // Apply, conditioned to the measurement, the X and Z gates
@@ -409,12 +407,23 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
 
                 // Swap the value to the desired qubit
                 state->apply_mcswap({n_qubits - 1, qubits[0] + zero_qubit[i]});
+                state->apply_reset({n_qubits - 1});
+
+                LOGGER_DEBUG("Vector de probabilidades: ");
+                std::vector<uint_t> qubit_ids = {0, 2};
+                auto probs = state->probabilities(qubit_ids);
+                std::cout << "[ ";
+                for (const auto& prob: probs) {
+                    std::cout << prob << " ";
+                }
+                std::cout << "]\n";
+
                 break;
             }
             default:
                 std::cerr << "Instruction not suported!" << "\n";
-            } // End switch 
-
+            } // End switch  
+            
             ++its[i];
             if (its[i] != ends[i])
                 ended = false;
@@ -423,6 +432,12 @@ std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>&
         }
 
     } // End one shot
+
+    /* std::cout << "\n[ ";
+    for (size_t i=0; i<prob.size(); i++){
+        std::cout << prob[i] << " ";
+    }
+    std::cout << "]\n"; */
 
     // result is a map from the cbit index to the Boolean value
     for (const auto &[bitIndex, value] : classic_values)
@@ -507,6 +522,7 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         qubit_ids = state->allocate_qubits(n_qubits);
         state->initialize();
         meas_counter[execute_shot_(state, aer_ca.quantum_tasks, classical_channel)]++;
+        auto prob = state->probabilities(qubit_ids);
         state->clear();
         
     } // End all shots
