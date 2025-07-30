@@ -24,77 +24,7 @@
 namespace cunqa {
 namespace sim {
 
-
-JSON AerSimulatorAdapter::simulate(const Backend* backend)
-{
-    LOGGER_DEBUG("Inside usual simulation with Aer");
-    try {
-        auto quantum_task = qc.quantum_tasks[0];
-
-        auto aer_quantum_task = quantum_task_to_AER(quantum_task);
-        int n_clbits = quantum_task.config.at("num_clbits");
-        JSON circuit_json = aer_quantum_task.circuit;
-
-        Circuit circuit(circuit_json);
-        std::vector<std::shared_ptr<Circuit>> circuits;
-        circuits.push_back(std::make_shared<Circuit>(circuit));
-
-        JSON run_config_json(aer_quantum_task.config);
-        run_config_json["seed_simulator"] = quantum_task.config.at("seed");
-        Config aer_config(run_config_json);
-
-        LOGGER_DEBUG("backend->config: {}.", backend->config.dump());
-        Noise::NoiseModel noise_model(backend->config.at("noise_model"));
-
-        Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
-
-        JSON result_json = result.to_json();
-        convert_standard_results_Aer(result_json, n_clbits);
-
-        return result_json;
-
-    } catch (const std::exception& e) {
-        // TODO: specify the circuit format in the docs.
-        LOGGER_ERROR("Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
-        return {{"ERROR", std::string(e.what())}};
-    }
-    return {};
-}
-
-JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
-{
-    // TODO: Avoid the static casting?
-    AerComputationAdapter aer_ca(qc);
-    std::map<std::string, std::size_t> meas_counter;
-
-    // This is for distinguising classical and quantum communications
-    // TODO: Make it more clear
-    if (classical_channel && aer_ca.quantum_tasks.size() == 1)
-    {
-        std::vector<std::string> connect_with = aer_ca.quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
-    }
-
-    auto start = std::chrono::high_resolution_clock::now();
-    auto shots = aer_ca.quantum_tasks[0].config.at("shots").get<std::size_t>();
-    for (std::size_t i = 0; i < shots; i++)
-    {
-        meas_counter[execute_shot_(aer_ca.quantum_tasks, classical_channel)]++;
-    } // End all shots
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> duration = end - start;
-    float time_taken = duration.count();
-
-    reverse_bitstring_keys_json(meas_counter);
-    JSON result_json = {
-        {"counts", meas_counter},
-        {"time_taken", time_taken}};
-    return result_json;
-}
-
-
-std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel)
+std::string execute_shot_(AER::AerState*& state, const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel)
 {
     std::vector<JSON::const_iterator> its;
     std::vector<JSON::const_iterator> ends;
@@ -116,20 +46,10 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
         blocked[quantum_task.id] = false;
         finished.push_back(false);
     }
-    std::string method = quantum_tasks[0].config.at("method").get<std::string>();
 
     std::string resultString(n_clbits, '0');
     if (size(quantum_tasks) > 1)
         n_qubits += 2;
-
-    AER::AerState *state = new AER::AerState();
-    state->configure("method", method);
-    state->configure("device", "CPU");
-    state->configure("precision", "double");
-    state->configure("seed_simulator", std::to_string(quantum_tasks[0].config.at("seed").get<int>()));
-
-    auto qubit_ids = state->allocate_qubits(n_qubits);
-    state->initialize();
 
     std::vector<unsigned long> qubits;
     std::map<std::size_t, bool> classic_values;
@@ -153,7 +73,7 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
             case constants::MEASURE:
             {
                 auto clreg = instruction.at("clreg").get<std::vector<std::uint64_t>>();
-                std::size_t measurement = state->apply_measure({qubits[0] + zero_qubit[i]});
+                uint_t measurement = state->apply_measure({qubits[0] + zero_qubit[i]});
                 classic_values[qubits[0] + zero_qubit[i]] = (measurement == 1);
                 if (!clreg.empty())
                 {
@@ -444,13 +364,14 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
                 state->apply_mcx({n_qubits - 2, n_qubits - 1});
                 //----------------------------------------------------
 
+
                 // CX to the entangled pair
                 state->apply_mcx({qubits[0] + zero_qubit[i], n_qubits - 2});
 
                 // H to the sent qubit
                 state->apply_h(qubits[0] + zero_qubit[i]);
 
-                std::size_t result = state->apply_measure({qubits[0] + zero_qubit[i]});
+                uint_t result = state->apply_measure({qubits[0] + zero_qubit[i]});
 
                 qc_meas[quantum_tasks[i].id].push(result);
                 qc_meas[quantum_tasks[i].id].push(state->apply_measure({n_qubits - 2}));
@@ -460,7 +381,6 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
                 {
                     state->apply_mcx({qubits[0] + zero_qubit[i]});
                 }
-
                 // Unlock QRECV
                 blocked[instruction.at("qpus")[0]] = false;
                 break;
@@ -472,7 +392,7 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
                     blocked[quantum_tasks[i].id] = true;
                     continue;
                 }
-
+ 
                 // Receive the measurements from the sender
                 std::size_t meas1 = qc_meas[instruction.at("qpus")[0]].front();
                 qc_meas[instruction.at("qpus")[0]].pop();
@@ -495,7 +415,7 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
             }
             default:
                 std::cerr << "Instruction not suported!" << "\n";
-            } // End switch
+            } // End switch 
 
             ++its[i];
             if (its[i] != ends[i])
@@ -515,6 +435,97 @@ std::string AerSimulatorAdapter::execute_shot_(const std::vector<QuantumTask>& q
     return resultString;
 
 }
+
+JSON AerSimulatorAdapter::simulate(const Backend* backend)
+{
+    try {
+        auto quantum_task = qc.quantum_tasks[0];
+
+        auto aer_quantum_task = quantum_task_to_AER(quantum_task);
+        int n_clbits = quantum_task.config.at("num_clbits");
+        JSON circuit_json = aer_quantum_task.circuit;
+
+        Circuit circuit(circuit_json);
+        std::vector<std::shared_ptr<Circuit>> circuits;
+        circuits.push_back(std::make_shared<Circuit>(circuit));
+
+        JSON run_config_json(aer_quantum_task.config);
+        run_config_json["seed_simulator"] = quantum_task.config.at("seed");
+        Config aer_config(run_config_json);
+
+        Noise::NoiseModel noise_model(backend->config.at("noise_model"));
+
+        Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
+
+        JSON result_json = result.to_json();
+        convert_standard_results_Aer(result_json, n_clbits);
+
+        return result_json;
+
+    } catch (const std::exception& e) {
+        // TODO: specify the circuit format in the docs.
+        LOGGER_ERROR("Error executing the circuit in the AER simulator.\n\tTry checking the format of the circuit sent and/or of the noise model.");
+        return {{"ERROR", std::string(e.what())}};
+    }
+    return {};
+}
+
+
+JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
+{
+    AerComputationAdapter aer_ca(qc);
+    std::map<std::string, std::size_t> meas_counter;
+
+    // This is for distinguising classical and quantum communications
+    // TODO: Make it more clear
+    if (classical_channel && aer_ca.quantum_tasks.size() == 1)
+    {
+        std::vector<std::string> connect_with = aer_ca.quantum_tasks[0].sending_to;
+        classical_channel->connect(connect_with);
+    }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto shots = aer_ca.quantum_tasks[0].config.at("shots").get<std::size_t>();
+    std::string method = aer_ca.quantum_tasks[0].config.at("method").get<std::string>();
+
+    AER::AerState* state = new AER::AerState();
+    state->configure("method", method);
+    state->configure("device", "CPU");
+    state->configure("precision", "double");
+    state->configure("seed_simulator", std::to_string(aer_ca.quantum_tasks[0].config.at("seed").get<int>()));
+
+
+    unsigned long n_qubits = 0;
+    for (auto &quantum_task : aer_ca.quantum_tasks)
+    {
+        n_qubits += quantum_task.config.at("num_qubits").get<unsigned long>();
+    }
+    if (size(aer_ca.quantum_tasks) > 1)
+        n_qubits += 2;
+
+    reg_t qubit_ids;
+    for (std::size_t i = 0; i < shots; i++)
+    {
+        qubit_ids = state->allocate_qubits(n_qubits);
+        state->initialize();
+        meas_counter[execute_shot_(state, aer_ca.quantum_tasks, classical_channel)]++;
+        state->clear();
+        
+    } // End all shots
+
+    delete state;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> duration = end - start;
+    float time_taken = duration.count();
+
+    reverse_bitstring_keys_json(meas_counter);
+    JSON result_json = {
+        {"counts", meas_counter},
+        {"time_taken", time_taken}};
+    return result_json;
+}
+
 
 } // End of sim namespace
 } // End of cunqa namespace

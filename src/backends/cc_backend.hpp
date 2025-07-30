@@ -25,6 +25,7 @@ struct CCConfig {
     std::vector<std::string> gates;
     JSON noise_model = {};
     JSON noise_properties = {};
+    std::string noise_path;
 
     friend void from_json(const JSON& j, CCConfig &obj)
     {
