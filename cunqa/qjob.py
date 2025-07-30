@@ -95,6 +95,9 @@ class QJob:
         except Exception as error:
                 logger.error(f"Error while reading the results {error}")
                 raise SystemExit # User's level
+        
+        if self._backend.simulator == "CunqaSimulator" and self.num_clbits != self.num_qubits:
+            logger.warning(f"Be aware that for CunqaSimualtor, number of clbits is required to be equal than the number of qubits of the circuit. Classical bits can appear to be rewritten.")
 
         return self._result
 
