@@ -41,7 +41,7 @@ def are_qpus_raised(family: Optional[str] = None) -> bool:
     
 
 
-def qraise(n, time, *, 
+def qraise(n, t, *, 
            classical_comm = False, 
            quantum_comm = False,  
            simulator = None, 
@@ -59,7 +59,7 @@ def qraise(n, time, *,
 
     Args
         n (int): number of QPUs to be raised.
-        time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
+        t (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
         
         fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
         classical_comm (bool): if True the raised QPUs are communicated classically.
@@ -78,11 +78,11 @@ def qraise(n, time, *,
     print("Setting up the requested QPUs...")
     SLURMD_NODENAME = os.getenv("SLURMD_NODENAME")
     if SLURMD_NODENAME == None:
-        command = f"qraise -n {n} -t {time}"
+        command = f"qraise -n {n} -t {t}"
     else: 
         logger.warning("Be careful, you are deploying QPUs from an interactive session.")
         HOSTNAME = os.getenv("HOSTNAME")
-        command = f"ssh {HOSTNAME} \"ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9 && cd bin && ./qraise -n {n} -t {time}"
+        command = f"ssh {HOSTNAME} \"ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9 && cd bin && ./qraise -n {n} -t {t}"
 
     try:
         # Add specified flags
