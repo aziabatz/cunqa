@@ -158,7 +158,6 @@ def convert_counts(counts: dict, registers: dict) -> dict:
     """
 
     if isinstance(registers, dict):
-        
         # counting number of classical bits
         num_clbits = sum([len(i) for i in registers.values()])
         # getting lenghts of bits for the different registers
@@ -166,17 +165,20 @@ def convert_counts(counts: dict, registers: dict) -> dict:
         for v in registers.values():
             lengths.append(len(v))
     else:
-        logger.error(f"Error when converting `counts` strings.")
+        logger.error(f"regsters must be dict, but {type(registers)} was provided [TypeError].")
         raise ResultError # I capture this error in QJob.result()
 
     if isinstance(counts, dict):
-        res_counts = {}
+        new_counts = {}
         for k,v in counts.items():
+
             if k.startswith('0x'): # converting to binary string and dividing in bit strings
                 new_counts[divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
+
             else: # just dividing the bit stings
                 new_counts[divide(k, lengths)] = v
-    elif isinstance(counts, list):
-        for count in counts:
-            new_counts[divide(format(count[0],'0'+str(num_clbits)+'b')[::-1], lengths)] = count[1] 
+    else:
+        logger.error(f"counts must be dict, but {type(registers)} was provided [TypeError].")
+        raise ResultError # I capture this error in QJob.result()
+    
     return new_counts
