@@ -1,6 +1,7 @@
 """ Holds functions that manage virtual QPUs or provide information about them."""
 import os
 import sys
+import time
 from typing import Union, Optional
 from subprocess import run
 from json import load
@@ -118,17 +119,33 @@ def qraise(n, time, *,
            with open(INFO_PATH, "w") as file:
                 file.write("{}")
 
-        old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted sbatch job 136285') and selects the number
         
-        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
-        while True:
-            if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
-                break
+        cmd_getstate = ["squeue", "-h", "-j", job_id, "-o", "%T"]
         
+        i = 0
+        while True:
+            state = run(cmd_getstate, capture_output=True, text=True, check=True).stdout.strip()
+            if state == "RUNNING":
+                try:     
+                    with open(INFO_PATH, "r") as file:
+                        data = json.load(file)
+                except json.JSONDecodeError:
+                    continue
+                count = sum(1 for key in data if key.startswith(job_id))
+                if count == n:
+                    break
+            # We do this to prevent an overload to the Slurm deamon through the 
+            if i == 500:
+                time.sleep(2)
+            else:
+                i += 1
+
+        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
         print("QPUs ready to work \U00002705")
+
         return (family, str(job_id)) if family is not None else str(job_id)
     
     except Exception as error:
