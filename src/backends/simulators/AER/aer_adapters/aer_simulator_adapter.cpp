@@ -522,7 +522,6 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         qubit_ids = state->allocate_qubits(n_qubits);
         state->initialize();
         meas_counter[execute_shot_(state, aer_ca.quantum_tasks, classical_channel)]++;
-        auto prob = state->probabilities(qubit_ids);
         state->clear();
         
     } // End all shots
