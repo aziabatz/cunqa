@@ -1,5 +1,6 @@
 #include "cunqa_cc_simulator.hpp"
-#include "cunqa_executors.hpp"
+#include "cunqa_adapters/cunqa_computation_adapter.hpp"
+#include "cunqa_adapters/cunqa_simulator_adapter.hpp"
 
 namespace cunqa {
 namespace sim {
@@ -11,8 +12,13 @@ CunqaCCSimulator::CunqaCCSimulator()
 
 JSON CunqaCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const QuantumTask& quantum_task)
 {
-    LOGGER_DEBUG("We are in the execute() method of CCCunqa.");
-    return cunqa_execution_(quantum_task, &classical_channel);
+    std::vector<std::string> connect_with = quantum_task.sending_to;
+    classical_channel.connect(connect_with);
+
+    CunqaComputationAdapter cunqa_ca(quantum_task);
+    CunqaSimulatorAdapter cunqa_sa(cunqa_ca);
+
+    return cunqa_sa.simulate(&backend, &classical_channel);
 }
 
 

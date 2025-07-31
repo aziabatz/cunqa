@@ -12,8 +12,8 @@ std::string get_qc_run_command(const CunqaArgs& args, const std::string& mode)
     std::string backend_path;
     std::string backend;
 
-    if (args.simulator != "Aer" && args.simulator != "Munich") {
-        LOGGER_ERROR("Quantum communications only are available under \"Munich\" simulators, but the following simulator was provided: {}", args.simulator);
+    if (args.simulator != "Aer" && args.simulator != "Munich" && args.simulator != "Cunqa") {
+        LOGGER_ERROR("Quantum communications only are available under \"Aer\", \"Munich\" and \"CUNQA\" simulators, but the following simulator was provided: {}", args.simulator);
         std::system("rm qraise_sbatch_tmp.sbatch");
         return "0";
     } 

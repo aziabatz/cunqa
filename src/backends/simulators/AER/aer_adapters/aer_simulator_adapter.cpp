@@ -344,7 +344,7 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             case constants::MEASURE_AND_SEND:
             {
                 auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
-                uint_t measurement = state->apply_measure(qubits);
+                uint_t measurement = state->apply_measure({qubits[0] + zero_qubit[i]});
                 int measurement_as_int = static_cast<int>(measurement);
                 classical_channel->send_measure(measurement_as_int, endpoint[0]); 
                 break;
@@ -408,16 +408,6 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
                 // Swap the value to the desired qubit
                 state->apply_mcswap({n_qubits - 1, qubits[0] + zero_qubit[i]});
                 state->apply_reset({n_qubits - 1});
-
-                LOGGER_DEBUG("Vector de probabilidades: ");
-                std::vector<uint_t> qubit_ids = {0, 2};
-                auto probs = state->probabilities(qubit_ids);
-                std::cout << "[ ";
-                for (const auto& prob: probs) {
-                    std::cout << prob << " ";
-                }
-                std::cout << "]\n";
-
                 break;
             }
             default:
@@ -432,12 +422,6 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         }
 
     } // End one shot
-
-    /* std::cout << "\n[ ";
-    for (size_t i=0; i<prob.size(); i++){
-        std::cout << prob[i] << " ";
-    }
-    std::cout << "]\n"; */
 
     // result is a map from the cbit index to the Boolean value
     for (const auto &[bitIndex, value] : classic_values)
@@ -497,7 +481,6 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         classical_channel->connect(connect_with);
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
     auto shots = aer_ca.quantum_tasks[0].config.at("shots").get<std::size_t>();
     std::string method = aer_ca.quantum_tasks[0].config.at("method").get<std::string>();
 
@@ -517,14 +500,13 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         n_qubits += 2;
 
     reg_t qubit_ids;
+    auto start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < shots; i++)
     {
         qubit_ids = state->allocate_qubits(n_qubits);
         state->initialize();
         meas_counter[execute_shot_(state, aer_ca.quantum_tasks, classical_channel)]++;
-        auto prob = state->probabilities(qubit_ids);
         state->clear();
-        
     } // End all shots
 
     delete state;

@@ -29,11 +29,11 @@ def cyclic_ccommunication(n):
     circuits["cc_0"]=CunqaCircuit(1, 1, id= f"cc_0")
     circuits["cc_0"].h(0)
     circuits["cc_0"].rz(np.pi/6, 0)
-    circuits["cc_0"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{1}") 
-    circuits["cc_0"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{2}")
-    circuits["cc_0"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{3}")
+    circuits["cc_0"].measure_and_send(qubit = 0, target_circuit = f"cc_{1}") 
+    circuits["cc_0"].measure_and_send(qubit = 0, target_circuit = f"cc_{2}")
+    circuits["cc_0"].measure_and_send(qubit = 0, target_circuit = f"cc_{3}")
 
-    circuits["cc_0"].remote_c_if("x", target_qubits = 0, param=None, control_circuit = f"cc_{n-1}")
+    circuits["cc_0"].remote_c_if("x", qubits = 0, param=None, control_circuit = f"cc_{n-1}")
 
     circuits[f"cc_0"].measure(0,0)
     

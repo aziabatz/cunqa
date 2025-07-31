@@ -405,6 +405,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 qc::Targets targets = {static_cast<unsigned int>(n_qubits - 1), static_cast<unsigned int>(qubits[0] + zero_qubit[i])};
                 auto std_op3 = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
                 apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
+                //TODO: Reset the other communication qubit
                 break;
             }
             default:
