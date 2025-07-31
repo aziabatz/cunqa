@@ -39,8 +39,6 @@ class CunqaCircuit:
     Supported gates
         {all_gates!r}
     TODO: Indicate supported gates, supported gates dor send() and recv(),... etc
-
-    *** Indicate supported gates ***
     """
     
     _id: str
