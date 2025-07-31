@@ -408,16 +408,6 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
                 // Swap the value to the desired qubit
                 state->apply_mcswap({n_qubits - 1, qubits[0] + zero_qubit[i]});
                 state->apply_reset({n_qubits - 1});
-
-                LOGGER_DEBUG("Vector de probabilidades: ");
-                std::vector<uint_t> qubit_ids = {0, 2};
-                auto probs = state->probabilities(qubit_ids);
-                std::cout << "[ ";
-                for (const auto& prob: probs) {
-                    std::cout << prob << " ";
-                }
-                std::cout << "]\n";
-
                 break;
             }
             default:

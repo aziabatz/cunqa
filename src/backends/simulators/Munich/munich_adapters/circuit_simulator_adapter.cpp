@@ -107,7 +107,7 @@ JSON CircuitSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel
     return result_json;
 }
 
-void CircuitSimulatorAdapter::apply_gate_(const JSON &instruction, std::unique_ptr<qc::StandardOperation> &&std_op, std::map<std::size_t, bool> &classic_reg, std::map<std::size_t, bool> &r_classic_reg)
+void CircuitSimulatorAdapter::apply_gate_(const JSON &instruction, std::unique_ptr<qc::Operation> &&std_op, std::map<std::size_t, bool> &classic_reg, std::map<std::size_t, bool> &r_classic_reg)
 {
     if (instruction.contains("conditional_reg"))
     {
@@ -364,11 +364,13 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 qc_meas[quantum_tasks[i].id].push(result);
                 qc_meas[quantum_tasks[i].id].push(measureAdapter(n_qubits - 2) - '0');
 
-                // We reset to 0 the qubit sent
+                // We reset to 0 the qubit sent and the EPR (we cannot use the reset op in DD)
                 if (result)
                 {
-                    auto std_op3 = std::make_unique<qc::StandardOperation>(qubits[0] + zero_qubit[i], qc::OpType::X);
-                    apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
+                    auto reset_teleported = std::make_unique<qc::StandardOperation>(qubits[0] + zero_qubit[i], qc::OpType::X);
+                    apply_gate_(instruction, std::move(reset_teleported), classic_reg, r_classic_reg);
+                    auto reset_epr = std::make_unique<qc::StandardOperation>(n_qubits - 2, qc::OpType::X);
+                    apply_gate_(instruction, std::move(reset_epr), classic_reg, r_classic_reg);
                 }
 
                 // Unlock QRECV
@@ -390,13 +392,11 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 qc_meas[instruction.at("qpus")[0]].pop();
 
                 // Apply, conditioned to the measurement, the X and Z gates
-                if (meas1)
-                {
+                if (meas1) {
                     auto std_op1 = std::make_unique<qc::StandardOperation>(n_qubits - 1, qc::OpType::X);
                     apply_gate_(instruction, std::move(std_op1), classic_reg, r_classic_reg);
                 }
-                if (meas2)
-                {
+                if (meas2) {
                     auto std_op2 = std::make_unique<qc::StandardOperation>(n_qubits - 1, qc::OpType::Z);
                     apply_gate_(instruction, std::move(std_op2), classic_reg, r_classic_reg);
                 }
@@ -405,6 +405,12 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 qc::Targets targets = {static_cast<unsigned int>(n_qubits - 1), static_cast<unsigned int>(qubits[0] + zero_qubit[i])};
                 auto std_op3 = std::make_unique<qc::StandardOperation>(targets, qc::OpType::SWAP);
                 apply_gate_(instruction, std::move(std_op3), classic_reg, r_classic_reg);
+
+                int result = measureAdapter(n_qubits - 1) - '0';
+                if (result) {
+                    auto reset_epr = std::make_unique<qc::StandardOperation>(n_qubits - 1, qc::OpType::X);
+                    apply_gate_(instruction, std::move(reset_epr), classic_reg, r_classic_reg);
+                }
                 break;
             }
             default:
