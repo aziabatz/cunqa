@@ -304,34 +304,46 @@ std::string execute_shot_(Executor& executor, const std::vector<QuantumTask>& qu
     return resultString;
 }
 
-JSON CunqaSimulatorAdapter::simulate([[maybe_unused]] const Backend* backend, comm::ClassicalChannel* classical_channel)
+JSON CunqaSimulatorAdapter::simulate([[maybe_unused]] const Backend* backend)
 {
-    CunqaComputationAdapter cunqa_ca(qc);
+    auto n_qubits = qc.quantum_tasks[0].config.at("num_qubits").get<int>();
+    auto shots = qc.quantum_tasks[0].config.at("shots").get<int>();
+    Executor executor(n_qubits);
+    QuantumCircuit circuit = qc.quantum_tasks[0].circuit;
+    JSON result = executor.run(circuit, shots);
+    reverse_bitstring_keys_json(result);
+
+    return result;
+
+}
+
+JSON CunqaSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
+{
     std::map<std::string, std::size_t> meas_counter;
 
     // This is for distinguising classical and quantum communications
     // TODO: Make it more clear
-    if (classical_channel && cunqa_ca.quantum_tasks.size() == 1)
+    if (classical_channel && qc.quantum_tasks.size() == 1)
     {
-        std::vector<std::string> connect_with = cunqa_ca.quantum_tasks[0].sending_to;
+        std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
         classical_channel->connect(connect_with);
     }
 
-    auto shots = cunqa_ca.quantum_tasks[0].config.at("shots").get<int>();
+    auto shots = qc.quantum_tasks[0].config.at("shots").get<int>();
 
     int n_qubits = 0;
-    for (auto &quantum_task : cunqa_ca.quantum_tasks)
+    for (auto &quantum_task : qc.quantum_tasks)
     {
         n_qubits += quantum_task.config.at("num_qubits").get<int>();
     }
-    if (size(cunqa_ca.quantum_tasks) > 1)
+    if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
 
     Executor executor(n_qubits);
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++)
     {
-        meas_counter[execute_shot_(executor, cunqa_ca.quantum_tasks, classical_channel)]++;
+        meas_counter[execute_shot_(executor, qc.quantum_tasks, classical_channel)]++;
         executor.restart_statevector();
         
     } // End all shots
