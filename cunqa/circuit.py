@@ -1,5 +1,5 @@
 """
-    Holds our custom circuit class and functions to transform between circuit formats.
+    Holds Cunqa's custom circuit class and functions to translate its instructions into other formats for circuit definition.
 """
 from cunqa.logger import logger
 
@@ -8,7 +8,25 @@ import random
 import string
 from typing import Tuple, Union, Optional
 
-def generate_id(size=4):
+def _generate_id(size: int = 4) -> str:
+    """Return a random alphanumeric identifier.
+
+    Args:
+        size (int): Desired length of the identifier.  
+                    Defaults to 4 and must be a positive integer.
+
+    Returns:
+        A string of uppercase/lowercase letters and digits.
+
+    Return type:
+        str
+
+    Raises:
+        ValueError: If *size* is smaller than 1.
+    """
+    if size < 1:
+        raise ValueError("size must be >= 1")
+    
     chars = string.ascii_letters + string.digits
     return ''.join(random.choices(chars, k=size))
 
@@ -34,13 +52,41 @@ class CunqaCircuitError(Exception):
 
 class CunqaCircuit:
     """
-    Class to define a quantum circuit for the `cunqa` api.
+    Class to define a quantum circuit for the ``cunqa`` api.
 
-    Supported gates
-        {all_gates!r}
-    TODO: Indicate supported gates, supported gates dor send() and recv(),... etc
+    This class serves as a tool for the user to describe not only simple circuits, but also to describe classical and quantum operations between circuits.
+    On its initialization, it takes as mandatory the number of qubits for the circuit (*num_qubits*), also number of classical bits (*num_clbits*) and a personalized id (*id*), which by default would be randomly generated.
+    Once the object is created, class methods canbe used to add instructions to the circuit such as single-qubit and two-qubits gates, measurements, conditional operations,... but also operations that allow to send measurement outcomes or qubits to other circuits.
+    This sending operations require that the virtual QPUs to which the circuits are sent support classical or quantum communications with the desired connectivity.
+    
+    **Supported operations**
 
-    *** Indicate supported gates ***
+    Single-qubit gates:
+    :py:meth:`~CunqaCircuit.id`, :py:meth:`~CunqaCircuit.x`, :py:meth:`~CunqaCircuit.y`, :py:meth:`~CunqaCircuit.z`, :py:meth:`~CunqaCircuit.h`,  :py:meth:`~CunqaCircuit.s`,
+    :py:meth:`~CunqaCircuit.sdg`, :py:meth:`~CunqaCircuit.sx`, :py:meth:`~CunqaCircuit.sxdg`, :py:meth:`~CunqaCircuit.t`, :py:meth:`~CunqaCircuit.tdg`, :py:meth:`~CunqaCircuit.u1`,
+    :py:meth:`~CunqaCircuit.u2`, :py:meth:`~CunqaCircuit.u3`, :py:meth:`~CunqaCircuit.u`, :py:meth:`~CunqaCircuit.p`, :py:meth:`~CunqaCircuit.r`, :py:meth:`~CunqaCircuit.rx`,
+    :py:meth:`~CunqaCircuit.ry`, :py:meth:`~CunqaCircuit.rz`.
+
+    Two-qubits gates:
+    :py:meth:`~CunqaCircuit.swap`, :py:meth:`~CunqaCircuit.cx`, :py:meth:`~CunqaCircuit.cy`, :py:meth:`~CunqaCircuit.cz`, :py:meth:`~CunqaCircuit.csx`, :py:meth:`~CunqaCircuit.cp`,
+    :py:meth:`~CunqaCircuit.cu`, :py:meth:`~CunqaCircuit.cu1`, :py:meth:`~CunqaCircuit.cu3`, :py:meth:`~CunqaCircuit.rxx`, :py:meth:`~CunqaCircuit.ryy`, :py:meth:`~CunqaCircuit.rzz`,
+    :py:meth:`~CunqaCircuit.rzx`, :py:meth:`~CunqaCircuit.crx`, :py:meth:`~CunqaCircuit.cry`, :py:meth:`~CunqaCircuit.crz`, :py:meth:`~CunqaCircuit.ecr`,
+
+    Thre-qubits gates:
+    :py:meth:`~CunqaCircuit.ccx`, :py:meth:`~CunqaCircuit.ccy`, :py:meth:`~CunqaCircuit.ccz`, :py:meth:`~CunqaCircuit.cswap`.
+
+    n-qubits gates:
+    :py:meth:`~CunqaCircuit.unitary`.
+
+    Non-unitary local operations:
+    :py:meth:`~CunqaCircuit.c_if`, :py:meth:`~CunqaCircuit.measure`, :py:meth:`~CunqaCircuit.measure_all`, :py:meth:`~CunqaCircuit.reset`.
+
+    Remote operations for classical communications:
+    :py:meth:`~CunqaCircuit.measure_and_send`, :py:meth:`~CunqaCircuit.remote_c_if`.
+
+    Remote operations for quantum comminications:
+    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
+
     """
     
     _id: str
@@ -68,7 +114,7 @@ class CunqaCircuit:
             raise SystemExit
         
         if id is None:
-            self._id = "CunqaCircuit_" + generate_id()
+            self._id = "CunqaCircuit_" + _generate_id()
         elif isinstance(id, str):
             self._id = id
         else:
@@ -91,7 +137,7 @@ class CunqaCircuit:
 
     @property
     def num_qubits(self) -> int:
-        return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
+        return len(_flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
     def info(self) -> dict:
@@ -100,7 +146,7 @@ class CunqaCircuit:
 
     @property
     def num_clbits(self):
-        return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
+        return len(_flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
 
     def from_instructions(self, instructions):
@@ -188,8 +234,8 @@ class CunqaCircuit:
                     logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
-                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
+                if not all([q in _flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {_flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
 
@@ -204,8 +250,8 @@ class CunqaCircuit:
                         logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
                         raise TypeError # I capture this at _add_instruction method
                     
-                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
-                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
+                    if not all([c in _flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
+                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {_flatten([cr for cr in self.classical_regs.values()])}.")
                         raise ValueError
                     
                 elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
@@ -235,7 +281,7 @@ class CunqaCircuit:
                     if not len(instruction["params"]) == gate_params:
                         logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
                         raise ValueError
-                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
+                elif (not ("params" in instruction)) and (instruction["name"] in _flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
                     logger.error("instruction is parametric, therefore requires params.")
                     raise ValueError
                     
@@ -967,8 +1013,8 @@ class CunqaCircuit:
             self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_target_qubit, list_control_qubit]),
-                "registers":flatten([list_control_qubit]),
+                "qubits": _flatten([list_target_qubit, list_control_qubit]),
+                "registers":_flatten([list_control_qubit]),
                 "params":[matrix]
             })
             # we have to exit here
@@ -1004,8 +1050,8 @@ class CunqaCircuit:
             self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_target_qubit, list_control_qubit]),
-                "conditional_reg":flatten([list_control_qubit]),
+                "qubits": _flatten([list_target_qubit, list_control_qubit]),
+                "conditional_reg":_flatten([list_control_qubit]),
                 "params":list_param
             })
 
@@ -1013,7 +1059,6 @@ class CunqaCircuit:
             logger.error(f"Gate {gate} is not supported for conditional operation.")
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
-
 
     # TODO: check if simulators accept reset instruction as native
     def reset(self, qubits: Union[list[int], int]):
@@ -1198,7 +1243,7 @@ class CunqaCircuit:
 
                 
 
-def flatten(lists: list[list]):
+def _flatten(lists: list[list]):
     return [element for sublist in lists for element in sublist]
 
 
