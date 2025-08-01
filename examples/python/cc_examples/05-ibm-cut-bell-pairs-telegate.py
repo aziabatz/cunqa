@@ -59,12 +59,12 @@ Alice.rz(z[14],1)
 
 # First telegate #
 Alice.cx(0,1)
-Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bobby")
-Alice.measure_and_send(control_qubit = 1, target_circuit = "Bobby")
+Alice.remote_c_if("z", qubits = 0, param=None, control_circuit = "Bobby")
+Alice.measure_and_send(qubit = 1, target_circuit = "Bobby")
 # Second telegate #
 Alice.cx(0,2)
-Alice.remote_c_if("z", target_qubits = 0, param=None, control_circuit = "Bobby")
-Alice.measure_and_send(control_qubit = 2, target_circuit = "Bobby")
+Alice.remote_c_if("z", qubits = 0, param=None, control_circuit = "Bobby")
+Alice.measure_and_send(qubit = 2, target_circuit = "Bobby")
 
 Alice.measure(0,0)
 Alice.measure(1,1)
@@ -92,13 +92,13 @@ Bob.rz(z[15],1)
 # First telegate #
 Bob.cx(1,2)
 Bob.h(1)
-Bob.measure_and_send(control_qubit = 1, target_circuit = "Alice")
-Bob.remote_c_if("x", target_qubits = 2, param=None, control_circuit = "Alice")
+Bob.measure_and_send(qubit = 1, target_circuit = "Alice")
+Bob.remote_c_if("x", qubits = 2, param=None, control_circuit = "Alice")
 # Second telegate #
 Bob.cx(0,2)
 Bob.h(0)
-Bob.measure_and_send(control_qubit = 0, target_circuit = "Alice")
-Bob.remote_c_if("x", target_qubits = 2, param=None, control_circuit = "Alice")
+Bob.measure_and_send(qubit = 0, target_circuit = "Alice")
+Bob.remote_c_if("x", qubits = 2, param=None, control_circuit = "Alice")
 
 Bob.measure(0,0)
 Bob.measure(1,1)
