@@ -51,7 +51,7 @@ class Result:
         YELLOW = "\033[33m"
         RESET = "\033[0m"   
         GREEN = "\033[32m"
-        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken: {GREEN}{float(self.time_taken)/1e3} ms{RESET}{'}'}\n"
+        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken: {GREEN}{self.time_taken} s{RESET}{'}'}\n"
 
 
     @property
