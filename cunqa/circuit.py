@@ -87,6 +87,13 @@ class CunqaCircuit:
     Remote operations for quantum comminications:
     :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
 
+    **Creating your first CunqaCircuit**
+
+    Start by instantiating the class providing the desired number of qubits:
+
+        >>> circuit = CunqaCircuit(4)
+
+
     """
     
     _id: str
@@ -150,6 +157,9 @@ class CunqaCircuit:
 
 
     def from_instructions(self, instructions):
+        """
+        Class method to 
+        """
         for instruction in instructions:
             self._add_instruction(instruction)
         return self
@@ -169,7 +179,6 @@ class CunqaCircuit:
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
             raise error
-
 
     def _check_instruction(self, instruction):
         """
@@ -301,8 +310,7 @@ class CunqaCircuit:
         self.quantum_regs[new_name] = [(self.num_qubits + 1 + i) for i in range(number_qubits)]
 
         return new_name
-    
-    
+
     def _add_cl_register(self, name, number_clbits):
 
         if name in self.classical_regs:
