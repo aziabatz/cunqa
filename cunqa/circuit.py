@@ -59,7 +59,8 @@ class CunqaCircuit:
     Once the object is created, class methods canbe used to add instructions to the circuit such as single-qubit and two-qubits gates, measurements, conditional operations,... but also operations that allow to send measurement outcomes or qubits to other circuits.
     This sending operations require that the virtual QPUs to which the circuits are sent support classical or quantum communications with the desired connectivity.
     
-    **Supported operations**
+    Supported operations
+    ----------------------
 
     Single-qubit gates:
     :py:meth:`~CunqaCircuit.id`, :py:meth:`~CunqaCircuit.x`, :py:meth:`~CunqaCircuit.y`, :py:meth:`~CunqaCircuit.z`, :py:meth:`~CunqaCircuit.h`,  :py:meth:`~CunqaCircuit.s`,
@@ -86,6 +87,20 @@ class CunqaCircuit:
 
     Remote operations for quantum comminications:
     :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
+
+    Creating your first CunqaCircuit
+    ---------------------------------
+
+    Start by instantiating the class providing the desired number of qubits:
+
+        >>> circuit = CunqaCircuit(2)
+
+    Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
+
+        >>> circuit.h(0) # adding hadamard to qubit 0
+
+        >>> circuit.cx(0,1)
+
 
     """
     
@@ -150,6 +165,9 @@ class CunqaCircuit:
 
 
     def from_instructions(self, instructions):
+        """
+        Class method to 
+        """
         for instruction in instructions:
             self._add_instruction(instruction)
         return self
@@ -169,7 +187,6 @@ class CunqaCircuit:
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
             raise error
-
 
     def _check_instruction(self, instruction):
         """
@@ -301,8 +318,7 @@ class CunqaCircuit:
         self.quantum_regs[new_name] = [(self.num_qubits + 1 + i) for i in range(number_qubits)]
 
         return new_name
-    
-    
+
     def _add_cl_register(self, name, number_clbits):
 
         if name in self.classical_regs:

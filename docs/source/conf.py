@@ -33,6 +33,8 @@ extensions = [
 
 source_suffix = ['.rst', '.md']
 
+autodoc_member_order = "bysource"
+
 autosummary_generate = True 
 autodoc_mock_imports = [
     'os', 
