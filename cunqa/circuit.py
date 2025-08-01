@@ -51,6 +51,7 @@ class CunqaCircuitError(Exception):
     pass
 
 class CunqaCircuit:
+    # TODO: look for other alternatives for describing the documentation that do not requiere such long docstrings, maybe gatehring everything in another file and using decorators, as in ther APIs.
     """
     Class to define a quantum circuit for the ``cunqa`` api.
 
@@ -73,7 +74,7 @@ class CunqaCircuit:
     :py:meth:`~CunqaCircuit.cu`, :py:meth:`~CunqaCircuit.cu1`, :py:meth:`~CunqaCircuit.cu3`, :py:meth:`~CunqaCircuit.rxx`, :py:meth:`~CunqaCircuit.ryy`, :py:meth:`~CunqaCircuit.rzz`,
     :py:meth:`~CunqaCircuit.rzx`, :py:meth:`~CunqaCircuit.crx`, :py:meth:`~CunqaCircuit.cry`, :py:meth:`~CunqaCircuit.crz`, :py:meth:`~CunqaCircuit.ecr`,
 
-    **Thre-qubits gates:**
+    **Three-qubits gates:**
     :py:meth:`~CunqaCircuit.ccx`, :py:meth:`~CunqaCircuit.ccy`, :py:meth:`~CunqaCircuit.ccz`, :py:meth:`~CunqaCircuit.cswap`.
 
     **n-qubits gates:**
@@ -104,7 +105,7 @@ class CunqaCircuit:
 
         >>> circuit.measure_all()
 
-    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`.qpu.run`.
+    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`cunqa.qpu.run`.
 
     Classical communications among circuits
     ---------------------------------------
@@ -120,7 +121,7 @@ class CunqaCircuit:
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
-    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`.mappers.run_distributed` function.
+    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`cunqa.mappers.run_distributed` function.
 
     Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
 
@@ -149,7 +150,8 @@ class CunqaCircuit:
         >>> circuit_2.cx(0,1)
         >>> circuit_2.measure_all()
 
-
+    It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
+    If we want to send more qubits afer, we can use it since it is reset to zero.
 
     """
     
