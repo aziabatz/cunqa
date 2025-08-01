@@ -470,33 +470,32 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
 
 JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 {
-    AerComputationAdapter aer_ca(qc);
     std::map<std::string, std::size_t> meas_counter;
 
     // This is for distinguising classical and quantum communications
     // TODO: Make it more clear
-    if (classical_channel && aer_ca.quantum_tasks.size() == 1)
+    if (classical_channel && qc.quantum_tasks.size() == 1)
     {
-        std::vector<std::string> connect_with = aer_ca.quantum_tasks[0].sending_to;
+        std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
         classical_channel->connect(connect_with);
     }
 
-    auto shots = aer_ca.quantum_tasks[0].config.at("shots").get<std::size_t>();
-    std::string method = aer_ca.quantum_tasks[0].config.at("method").get<std::string>();
+    auto shots = qc.quantum_tasks[0].config.at("shots").get<std::size_t>();
+    std::string method = qc.quantum_tasks[0].config.at("method").get<std::string>();
 
     AER::AerState* state = new AER::AerState();
     state->configure("method", method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
-    state->configure("seed_simulator", std::to_string(aer_ca.quantum_tasks[0].config.at("seed").get<int>()));
+    state->configure("seed_simulator", std::to_string(qc.quantum_tasks[0].config.at("seed").get<int>()));
 
 
     unsigned long n_qubits = 0;
-    for (auto &quantum_task : aer_ca.quantum_tasks)
+    for (auto &quantum_task : qc.quantum_tasks)
     {
         n_qubits += quantum_task.config.at("num_qubits").get<unsigned long>();
     }
-    if (size(aer_ca.quantum_tasks) > 1)
+    if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
 
     reg_t qubit_ids;
@@ -505,7 +504,7 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     {
         qubit_ids = state->allocate_qubits(n_qubits);
         state->initialize();
-        meas_counter[execute_shot_(state, aer_ca.quantum_tasks, classical_channel)]++;
+        meas_counter[execute_shot_(state, qc.quantum_tasks, classical_channel)]++;
         state->clear();
     } // End all shots
 

@@ -18,7 +18,11 @@ JSON CunqaCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const 
     CunqaComputationAdapter cunqa_ca(quantum_task);
     CunqaSimulatorAdapter cunqa_sa(cunqa_ca);
 
-    return cunqa_sa.simulate(&backend, &classical_channel);
+    if (quantum_task.is_dynamic) {
+        return cunqa_sa.simulate(&classical_channel);
+    } else {
+        return cunqa_sa.simulate(&backend);
+    }
 }
 
 

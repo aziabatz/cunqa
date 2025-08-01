@@ -18,7 +18,8 @@ public:
     CunqaSimulatorAdapter() = default;
     CunqaSimulatorAdapter(CunqaComputationAdapter& qc) : qc{qc} {}
 
-    JSON simulate([[maybe_unused]] const Backend* backend = nullptr, comm::ClassicalChannel* classical_channel = nullptr);
+    JSON simulate([[maybe_unused]] const Backend* backend);
+    JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 
     CunqaComputationAdapter qc;
 
