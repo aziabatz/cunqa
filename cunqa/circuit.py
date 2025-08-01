@@ -153,6 +153,20 @@ class CunqaCircuit:
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
 
+    :ivar quantum_regs: Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
+
+    :ivar classical_regs: Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
+
+    :ivar instructions: Set of operations applied to the circuit.
+
+    :ivar is_parametric: Weather the circuit contains parametric gates.
+
+    :ivar has_cc: Weather the circuit contains classical communications with other circuit.
+
+    :ivar is_dynamic: Weather the circuit has local non-unitary operations.
+
+    :ivar sending_to: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
+
     """
     
     _id: str
@@ -200,16 +214,17 @@ class CunqaCircuit:
         elif isinstance(num_clbits, int):
             self.classical_regs = {'c0':[c for c in range(num_clbits)]}
 
+    @property
+    def info(self) -> dict:
+        """
+        Information about the main class attributes given as a dictinary.
+        """
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "has_cc":self.has_cc, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
 
     @property
     def num_qubits(self) -> int:
         return len(_flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
-    @property
-    def info(self) -> dict:
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "has_cc":self.has_cc, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
-
-
     @property
     def num_clbits(self):
         return len(_flatten([[c for c in cr] for cr in self.classical_regs.values()]))

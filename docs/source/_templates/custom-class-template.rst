@@ -10,7 +10,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: {{ _('Attributes') }}
+   .. rubric:: {{ _('Attributes') | escape | underline('=') }}
 
    .. autosummary::
    {% for item in attributes %}
