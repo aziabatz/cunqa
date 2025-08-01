@@ -153,19 +153,21 @@ class CunqaCircuit:
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
 
-    :ivar quantum_regs: Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
+    Atributes:
 
-    :ivar classical_regs: Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
+        quantum_regs: Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
 
-    :ivar instructions: Set of operations applied to the circuit.
+        classical_regs: Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
 
-    :ivar is_parametric: Weather the circuit contains parametric gates.
+        instructions: Set of operations applied to the circuit.
 
-    :ivar has_cc: Weather the circuit contains classical communications with other circuit.
+        is_parametric: Weather the circuit contains parametric gates.
 
-    :ivar is_dynamic: Weather the circuit has local non-unitary operations.
+        has_cc: Weather the circuit contains classical communications with other circuit.
 
-    :ivar sending_to: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
+        is_dynamic: Weather the circuit has local non-unitary operations.
+
+        sending_to: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
 
     """
     
