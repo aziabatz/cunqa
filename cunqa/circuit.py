@@ -59,39 +59,54 @@ class CunqaCircuit:
     Once the object is created, class methods canbe used to add instructions to the circuit such as single-qubit and two-qubits gates, measurements, conditional operations,... but also operations that allow to send measurement outcomes or qubits to other circuits.
     This sending operations require that the virtual QPUs to which the circuits are sent support classical or quantum communications with the desired connectivity.
     
-    **Supported operations**
+    Supported operations
+    ======================
 
     Single-qubit gates:
+    -------------------
     :py:meth:`~CunqaCircuit.id`, :py:meth:`~CunqaCircuit.x`, :py:meth:`~CunqaCircuit.y`, :py:meth:`~CunqaCircuit.z`, :py:meth:`~CunqaCircuit.h`,  :py:meth:`~CunqaCircuit.s`,
     :py:meth:`~CunqaCircuit.sdg`, :py:meth:`~CunqaCircuit.sx`, :py:meth:`~CunqaCircuit.sxdg`, :py:meth:`~CunqaCircuit.t`, :py:meth:`~CunqaCircuit.tdg`, :py:meth:`~CunqaCircuit.u1`,
     :py:meth:`~CunqaCircuit.u2`, :py:meth:`~CunqaCircuit.u3`, :py:meth:`~CunqaCircuit.u`, :py:meth:`~CunqaCircuit.p`, :py:meth:`~CunqaCircuit.r`, :py:meth:`~CunqaCircuit.rx`,
     :py:meth:`~CunqaCircuit.ry`, :py:meth:`~CunqaCircuit.rz`.
 
     Two-qubits gates:
+    -------------------
     :py:meth:`~CunqaCircuit.swap`, :py:meth:`~CunqaCircuit.cx`, :py:meth:`~CunqaCircuit.cy`, :py:meth:`~CunqaCircuit.cz`, :py:meth:`~CunqaCircuit.csx`, :py:meth:`~CunqaCircuit.cp`,
     :py:meth:`~CunqaCircuit.cu`, :py:meth:`~CunqaCircuit.cu1`, :py:meth:`~CunqaCircuit.cu3`, :py:meth:`~CunqaCircuit.rxx`, :py:meth:`~CunqaCircuit.ryy`, :py:meth:`~CunqaCircuit.rzz`,
     :py:meth:`~CunqaCircuit.rzx`, :py:meth:`~CunqaCircuit.crx`, :py:meth:`~CunqaCircuit.cry`, :py:meth:`~CunqaCircuit.crz`, :py:meth:`~CunqaCircuit.ecr`,
 
     Thre-qubits gates:
+    -------------------
     :py:meth:`~CunqaCircuit.ccx`, :py:meth:`~CunqaCircuit.ccy`, :py:meth:`~CunqaCircuit.ccz`, :py:meth:`~CunqaCircuit.cswap`.
 
     n-qubits gates:
+    -------------------
     :py:meth:`~CunqaCircuit.unitary`.
 
     Non-unitary local operations:
+    -------------------
     :py:meth:`~CunqaCircuit.c_if`, :py:meth:`~CunqaCircuit.measure`, :py:meth:`~CunqaCircuit.measure_all`, :py:meth:`~CunqaCircuit.reset`.
 
     Remote operations for classical communications:
+    -------------------
     :py:meth:`~CunqaCircuit.measure_and_send`, :py:meth:`~CunqaCircuit.remote_c_if`.
 
     Remote operations for quantum comminications:
+    -------------------
     :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
 
-    **Creating your first CunqaCircuit**
+    Creating your first CunqaCircuit
+    =================================
 
     Start by instantiating the class providing the desired number of qubits:
 
-        >>> circuit = CunqaCircuit(4)
+        >>> circuit = CunqaCircuit(2)
+
+    Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
+
+        >>> circuit.h(0) # adding hadamard to qubit 0
+
+        >>> circuit.cx(0,1)
 
 
     """
