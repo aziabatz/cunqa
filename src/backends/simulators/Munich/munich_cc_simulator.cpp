@@ -1,10 +1,8 @@
+#include <chrono>
+
 #include "munich_cc_simulator.hpp"
 #include "munich_adapters/circuit_simulator_adapter.hpp"
 #include "munich_adapters/quantum_computation_adapter.hpp"
-
-#include <chrono>
-
-#include "StochasticNoiseSimulator.hpp"
 
 #include "utils/constants.hpp"
 
@@ -24,7 +22,11 @@ JSON MunichCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const
     auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     CircuitSimulatorAdapter csa(std::move(p_qca));
 
-    return csa.simulate(quantum_task.config.at("shots").get<std::size_t>(), &classical_channel);
+    if (quantum_task.is_dynamic) {
+        return csa.simulate(&classical_channel);
+    } else {
+        return csa.simulate(&backend);
+    }
 }
 
 } // End namespace sim

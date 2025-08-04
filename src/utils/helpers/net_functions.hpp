@@ -101,10 +101,18 @@ inline std::string get_port(const bool comm = false)
         std::string ports_str(ports);
         size_t pos = ports_str.find('-');
         if (pos != std::string::npos) {
-            std::string base_port_str = comm ? ports_str.substr(pos + 1) : ports_str.substr(0, pos);
-            int base_port = std::stoi(base_port_str);
+            if (comm) {
+                std::string base_port_str = ports_str.substr(pos + 1);
+                int base_port = std::stoi(base_port_str);
+                
+                return std::to_string(base_port - std::stoi(id));
+            } else {
+                std::string base_port_str = ports_str.substr(0, pos);
+                int base_port = std::stoi(base_port_str);
+                
+                return std::to_string(base_port + std::stoi(id));
+            }
             
-            return std::to_string(base_port + std::stoi(id));
         }
         throw std::runtime_error("Not a valid expression format of the ports.");
     }

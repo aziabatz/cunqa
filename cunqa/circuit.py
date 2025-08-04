@@ -1,5 +1,5 @@
 """
-    Holds our custom circuit class and functions to transform between circuit formats.
+    Holds Cunqa's custom circuit class and functions to translate its instructions into other formats for circuit definition.
 """
 from cunqa.logger import logger
 
@@ -8,7 +8,25 @@ import random
 import string
 from typing import Tuple, Union, Optional
 
-def generate_id(size=4):
+def _generate_id(size: int = 4) -> str:
+    """Return a random alphanumeric identifier.
+
+    Args:
+        size (int): Desired length of the identifier.  
+                    Defaults to 4 and must be a positive integer.
+
+    Returns:
+        A string of uppercase/lowercase letters and digits.
+
+    Return type:
+        str
+
+    Raises:
+        ValueError: If *size* is smaller than 1.
+    """
+    if size < 1:
+        raise ValueError("size must be >= 1")
+    
     chars = string.ascii_letters + string.digits
     return ''.join(random.choices(chars, k=size))
 
@@ -33,14 +51,131 @@ class CunqaCircuitError(Exception):
     pass
 
 class CunqaCircuit:
+    # TODO: look for other alternatives for describing the documentation that do not requiere such long docstrings, maybe gatehring everything in another file and using decorators, as in ther APIs.
     """
-    Class to define a quantum circuit for the `cunqa` api.
+    Class to define a quantum circuit for the ``cunqa`` api.
 
-    Supported gates
-        {all_gates!r}
-    TODO: Indicate supported gates, supported gates dor send() and recv(),... etc
+    This class serves as a tool for the user to describe not only simple circuits, but also to describe classical and quantum operations between circuits.
+    On its initialization, it takes as mandatory the number of qubits for the circuit (*num_qubits*), also number of classical bits (*num_clbits*) and a personalized id (*id*), which by default would be randomly generated.
+    Once the object is created, class methods canbe used to add instructions to the circuit such as single-qubit and two-qubits gates, measurements, conditional operations,... but also operations that allow to send measurement outcomes or qubits to other circuits.
+    This sending operations require that the virtual QPUs to which the circuits are sent support classical or quantum communications with the desired connectivity.
+    
+    Supported operations
+    ----------------------
 
-    *** Indicate supported gates ***
+    **Single-qubit gates:**
+    :py:meth:`~CunqaCircuit.id`, :py:meth:`~CunqaCircuit.x`, :py:meth:`~CunqaCircuit.y`, :py:meth:`~CunqaCircuit.z`, :py:meth:`~CunqaCircuit.h`,  :py:meth:`~CunqaCircuit.s`,
+    :py:meth:`~CunqaCircuit.sdg`, :py:meth:`~CunqaCircuit.sx`, :py:meth:`~CunqaCircuit.sxdg`, :py:meth:`~CunqaCircuit.t`, :py:meth:`~CunqaCircuit.tdg`, :py:meth:`~CunqaCircuit.u1`,
+    :py:meth:`~CunqaCircuit.u2`, :py:meth:`~CunqaCircuit.u3`, :py:meth:`~CunqaCircuit.u`, :py:meth:`~CunqaCircuit.p`, :py:meth:`~CunqaCircuit.r`, :py:meth:`~CunqaCircuit.rx`,
+    :py:meth:`~CunqaCircuit.ry`, :py:meth:`~CunqaCircuit.rz`.
+
+    **Two-qubits gates:**
+    :py:meth:`~CunqaCircuit.swap`, :py:meth:`~CunqaCircuit.cx`, :py:meth:`~CunqaCircuit.cy`, :py:meth:`~CunqaCircuit.cz`, :py:meth:`~CunqaCircuit.csx`, :py:meth:`~CunqaCircuit.cp`,
+    :py:meth:`~CunqaCircuit.cu`, :py:meth:`~CunqaCircuit.cu1`, :py:meth:`~CunqaCircuit.cu3`, :py:meth:`~CunqaCircuit.rxx`, :py:meth:`~CunqaCircuit.ryy`, :py:meth:`~CunqaCircuit.rzz`,
+    :py:meth:`~CunqaCircuit.rzx`, :py:meth:`~CunqaCircuit.crx`, :py:meth:`~CunqaCircuit.cry`, :py:meth:`~CunqaCircuit.crz`, :py:meth:`~CunqaCircuit.ecr`,
+
+    **Three-qubits gates:**
+    :py:meth:`~CunqaCircuit.ccx`, :py:meth:`~CunqaCircuit.ccy`, :py:meth:`~CunqaCircuit.ccz`, :py:meth:`~CunqaCircuit.cswap`.
+
+    **n-qubits gates:**
+    :py:meth:`~CunqaCircuit.unitary`.
+
+    **Non-unitary local operations:**
+    :py:meth:`~CunqaCircuit.c_if`, :py:meth:`~CunqaCircuit.measure`, :py:meth:`~CunqaCircuit.measure_all`, :py:meth:`~CunqaCircuit.reset`.
+
+    **Remote operations for classical communications:**
+    :py:meth:`~CunqaCircuit.measure_and_send`, :py:meth:`~CunqaCircuit.remote_c_if`.
+
+    **Remote operations for quantum comminications:**
+    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
+
+    Creating your first CunqaCircuit
+    ---------------------------------
+
+    Start by instantiating the class providing the desired number of qubits:
+
+        >>> circuit = CunqaCircuit(2)
+
+    Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
+
+        >>> circuit.h(0) # adding hadamard to qubit 0
+        >>> circuit.cx(0,1)
+
+    Finally, qubits are measured by:
+
+        >>> circuit.measure_all()
+
+    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`cunqa.qpu.run`.
+
+    Classical communications among circuits
+    ---------------------------------------
+
+    The strong part of CunqaCircuit is that it allows to define communication directives between circuits.
+    We can define the sending of a classical bit from one circuit to another by:
+
+        >>> circuit_1 = CunqaCircuit(2)
+        >>> circuit_2 = CunqaCircuit(2)
+        >>> circuit_1.h(0)
+        >>> circuit_1.measure_and_send(0, circuit_2) # qubit 0 is measured and the outcome is sent to circuit_2
+        >>> circuit_2.remote_c_if("x", circuit_1) # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
+
+    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`cunqa.mappers.run_distributed` function.
+
+    Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
+
+        >>> circuit_1 = CunqaCircuit(2, id = "1")
+        >>> circuit_2 = CunqaCircuit(2, id = "2")
+        >>> circuit_1.h(0)
+        >>> circuit_1.measure_and_send(0, "2") # qubit 0 is measured and the outcome is sent to circuit_2
+        >>> circuit_2.remote_c_if("x", "1") # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
+
+    Sending qubits between circuits
+    --------------------------------
+
+    When quantum communications among the QPUs utilized are available, a qubit from one circuit can be sent to another.
+    In this scheme, generally an acilla qubit would be neccesary to perform the communication. Let's see an example for the creation of a Bell pair remotely:
+
+        >>> circuit_1 = CunqaCircuit(2, 1, id = "1")
+        >>> circuit_2 = CunqaCircuit(2, 2, id = "2")
+        >>>
+        >>> circuit_1.h(0); circuit_1.cx(0,1)
+        >>> circuit_1.qsend(1, "1") # sending qubit 1 to circuit with id "2"
+        >>> circuit_1.measure(0,0)
+        >>>
+        >>> circuit_2.qrecv(0, "2") # reciving qubit from circuit with id "1" and assigning it to qubit 0
+        >>> circuit_2.cx(0,1)
+        >>> circuit_2.measure_all()
+
+    It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
+    If we want to send more qubits afer, we can use it since it is reset to zero.
+
+    Properties:
+    -----------
+        quantum_regs: dict
+            Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
+
+        classical_regs: dict
+            Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
+
+        instructions: list
+            Set of operations applied to the circuit.
+
+        is_parametric: bool
+            Weather the circuit contains parametric gates.
+
+        has_cc: bool
+            Weather the circuit contains classical communications with other circuit.
+
+        is_dynamic: bool
+            Weather the circuit has local non-unitary operations.
+
+        sending_to: list[str]
+            List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
+
     """
     
     _id: str
@@ -68,7 +203,7 @@ class CunqaCircuit:
             raise SystemExit
         
         if id is None:
-            self._id = "CunqaCircuit_" + generate_id()
+            self._id = "CunqaCircuit_" + _generate_id()
         elif isinstance(id, str):
             self._id = id
         else:
@@ -88,22 +223,26 @@ class CunqaCircuit:
         elif isinstance(num_clbits, int):
             self.classical_regs = {'c0':[c for c in range(num_clbits)]}
 
+    @property
+    def info(self) -> dict:
+        """
+        Information about the main class attributes given as a dictinary.
+        """
+        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "has_cc":self.has_cc, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
 
     @property
     def num_qubits(self) -> int:
-        return len(flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
+        return len(_flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
-    def info(self) -> dict:
-        return {"id":self._id, "instructions":self.instructions, "num_qubits": self.num_qubits,"num_clbits": self.num_clbits,"classical_registers": self.classical_regs,"quantum_registers": self.quantum_regs, "has_cc":self.has_cc, "is_dynamic":self.is_dynamic, "sending_to":self.sending_to}
-
-
-    @property
     def num_clbits(self):
-        return len(flatten([[c for c in cr] for cr in self.classical_regs.values()]))
+        return len(_flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
 
     def from_instructions(self, instructions):
+        """
+        Class method to 
+        """
         for instruction in instructions:
             self._add_instruction(instruction)
         return self
@@ -123,7 +262,6 @@ class CunqaCircuit:
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
             raise error
-
 
     def _check_instruction(self, instruction):
         """
@@ -188,8 +326,8 @@ class CunqaCircuit:
                     logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not all([q in flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
-                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {flatten([qr for qr in self.quantum_regs.values()])}.")
+                if not all([q in _flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                    logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {_flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
 
@@ -204,8 +342,8 @@ class CunqaCircuit:
                         logger.error(f"instruction clbits must be a list of ints, but {type(instruction['clbits'])} was provided.")
                         raise TypeError # I capture this at _add_instruction method
                     
-                    if not all([c in flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
-                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {flatten([cr for cr in self.classical_regs.values()])}.")
+                    if not all([c in _flatten([cr for cr in self.classical_regs.values()]) for c in instruction["clbits"]]):
+                        logger.error(f"instruction clbits out of range: {instruction['clbits']} not in {_flatten([cr for cr in self.classical_regs.values()])}.")
                         raise ValueError
                     
                 elif ("clbits" in instruction) and not (instruction["name"] in instructions_with_clbits):
@@ -235,7 +373,7 @@ class CunqaCircuit:
                     if not len(instruction["params"]) == gate_params:
                         logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
                         raise ValueError
-                elif (not ("params" in instruction)) and (instruction["name"] in flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
+                elif (not ("params" in instruction)) and (instruction["name"] in _flatten([SUPPORTED_GATES_PARAMETRIC_1, SUPPORTED_GATES_PARAMETRIC_2, SUPPORTED_GATES_PARAMETRIC_3, SUPPORTED_GATES_PARAMETRIC_4])):
                     logger.error("instruction is parametric, therefore requires params.")
                     raise ValueError
                     
@@ -255,8 +393,7 @@ class CunqaCircuit:
         self.quantum_regs[new_name] = [(self.num_qubits + 1 + i) for i in range(number_qubits)]
 
         return new_name
-    
-    
+
     def _add_cl_register(self, name, number_clbits):
 
         if name in self.classical_regs:
@@ -874,7 +1011,6 @@ class CunqaCircuit:
             "params":[matrix]
         })
         
-
     def measure(self, qubits: Union[int, "list[int]"], clbits: Union[int, "list[int]"]) -> None:
         """
         Class method to add a measurement of a qubit or a list of qubits and to register that measurement in the given classical bits.
@@ -913,7 +1049,6 @@ class CunqaCircuit:
                 "clbits":[self.classical_regs[new_clreg][q]],
                 "clreg":[]
             })
-
 
     def c_if(self, gate: str, control_qubit: int, target_qubit: int, param: Optional[float] = None, matrix: Optional["list[list[list[complex]]]"] = None) -> None:
         """
@@ -969,8 +1104,8 @@ class CunqaCircuit:
             self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_target_qubit, list_control_qubit]),
-                "registers":flatten([list_control_qubit]),
+                "qubits": _flatten([list_target_qubit, list_control_qubit]),
+                "registers":_flatten([list_control_qubit]),
                 "params":[matrix]
             })
             # we have to exit here
@@ -1006,8 +1141,8 @@ class CunqaCircuit:
             self.measure(list_control_qubit[0], list_control_qubit[0])
             self._add_instruction({
                 "name": name,
-                "qubits": flatten([list_target_qubit, list_control_qubit]),
-                "conditional_reg":flatten([list_control_qubit]),
+                "qubits": _flatten([list_target_qubit, list_control_qubit]),
+                "conditional_reg":_flatten([list_control_qubit]),
                 "params":list_param
             })
 
@@ -1016,6 +1151,7 @@ class CunqaCircuit:
             raise SystemExit
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
 
+    # TODO: check if simulators accept reset instruction as native
     def reset(self, qubits: Union[list[int], int]):
         if isinstance(qubits, list):
             for q in qubits:
@@ -1027,38 +1163,30 @@ class CunqaCircuit:
         else:
             logger.error(f"Argument for reset must be list or int, but {type(qubits)} was provided.")
 
-    def measure_and_send(self, control_qubit: Optional[int] = None, target_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+    def measure_and_send(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> None:
         """
         Class method to measure and send a bit from the current circuit to a remote one.
         
         Args:
-            gate (str): gate to be applied. Has to be supported by CunqaCircuit.
         -------
 
-            control_qubit (int): control qubit from self.
+            qubit (int): qubit to be measured and sent.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
+            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the result of the measurement is sent.
 
-            target_qubit (int): qubit where the gate will be conditionally applied.
-
-            param (float or int): parameter in case the gate provided is parametric.
-
-        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
         """
         self.is_dynamic = True
         self.has_cc = True
         
-        if isinstance(control_qubit, int):
-            list_control_qubit = [control_qubit]
-        else:
-            logger.error(f"control qubit must be int, but {type(control_qubit)} was provided [TypeError].")
-            raise SystemExit
+        # TODO: accept a list of qubits to be measured and sent to one circuit or to a list of them
 
-        if target_circuit is None:
-            logger.error("target_circuit not provided.")
+        if isinstance(qubit, int):
+            qubits = [qubit]
+        else:
+            logger.error(f"control qubit must be int, but {type(qubit)} was provided [TypeError].")
             raise SystemExit
         
-        elif isinstance(target_circuit, str):
+        if isinstance(target_circuit, str):
             target_circuit_id = target_circuit
 
         elif isinstance(target_circuit, CunqaCircuit):
@@ -1070,37 +1198,33 @@ class CunqaCircuit:
 
         self._add_instruction({
             "name": "measure_and_send",
-            "qubits": flatten([list_control_qubit]),
+            "qubits": qubits,
             "circuits": [target_circuit_id]
         })
 
 
         self.sending_to.append(target_circuit_id)
     
-    def qsend(self, sent_qubit: Optional[int] = None, target_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+    def qsend(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> None:
         """
-        Class method to send a qubit from the current circuit to a remote one.
+        Class method to send a qubit from the current circuit to another one.
         
         Args:
         -------
 
-        sent_qubit (int): control qubit from self.
+        qubit (int): qubit to be sent.
 
-        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
+        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the qubit is sent.
         """
         self.is_dynamic = True
         
-        if isinstance(sent_qubit, int):
-            list_control_qubit = [sent_qubit]
+        if isinstance(qubit, int):
+            list_control_qubit = [qubit]
         else:
-            logger.error(f"control qubit must be int, but {type(sent_qubit)} was provided [TypeError].")
-            raise SystemExit
-
-        if target_circuit is None:
-            logger.error("target_circuit not provided.")
+            logger.error(f"control qubit must be int, but {type(qubit)} was provided [TypeError].")
             raise SystemExit
         
-        elif isinstance(target_circuit, str):
+        if isinstance(target_circuit, str):
             target_circuit_id = target_circuit
 
         elif isinstance(target_circuit, CunqaCircuit):
@@ -1112,74 +1236,68 @@ class CunqaCircuit:
 
         self._add_instruction({
             "name": "qsend",
-            "qubits": flatten([list_control_qubit]),
+            "qubits": list_control_qubit,
             "circuits": [target_circuit_id]
         })
 
-    def qrecv(self, recv_qubit: Optional[int] = None, target_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+    def qrecv(self, qubit: int, control_circuit: Union[str, 'CunqaCircuit']) -> None:
         """
         Class method to send a qubit from the current circuit to a remote one.
         
         Args:
         -------
+            qubit (int): ancilla to which the received qubit is assigned.
 
-        sent_qubit (int): control qubit from self.
-
-        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
+            control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit from which the qubit is received.
         """
         self.is_dynamic = True
         
-        if isinstance(recv_qubit, int):
-            list_control_qubit = [recv_qubit]
+        if isinstance(qubit, int):
+            qubits = [qubit]
         else:
-            logger.error(f"control qubit must be int, but {type(recv_qubit)} was provided [TypeError].")
-            raise SystemExit
-
-        if target_circuit is None:
-            logger.error("target_circuit not provided.")
+            logger.error(f"control qubit must be int, but {type(qubit)} was provided [TypeError].")
             raise SystemExit
         
-        elif isinstance(target_circuit, str):
-            target_circuit_id = target_circuit
+        if isinstance(control_circuit, str):
+            control_circuit_id = control_circuit
 
-        elif isinstance(target_circuit, CunqaCircuit):
-            target_circuit_id = target_circuit._id
+        elif isinstance(control_circuit, CunqaCircuit):
+            control_circuit_id = control_circuit._id
         else:
-            logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            logger.error(f"control_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(control_circuit)} was provided [TypeError].")
             raise SystemExit
         
-
         self._add_instruction({
             "name": "qrecv",
-            "qubits": flatten([list_control_qubit]),
-            "circuits": [target_circuit_id]
+            "qubits": qubits,
+            "circuits": [control_circuit_id]
         })
 
-    def remote_c_if(self, gate: str, target_qubits: Union[int, "list[int]"], param: float, control_circuit: Optional[Union[str, 'CunqaCircuit']] = None) -> None:
+    def remote_c_if(self, gate: str, qubits: Union[int, list[int]], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit']) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
         
-        Args:   
+        Args:
+        -------
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
+
+            target_qubits (int, list[int]): qubit or qubits to which the gate is conditionally applied.
 
             param (float or int): parameter in case the gate provided is parametric.
 
-            control_qubit (int): control qubit from self.
+            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit to which we will send the gate or the circuit itself.
-
-            target_qubit (int): qubit where the gate will be conditionally applied.       
         """
 
         self.is_dynamic = True
         self.has_cc = True
         
-        if isinstance(target_qubits, int):
-            target_qubits = [target_qubits]
-        elif isinstance(target_qubits, list):
+        if isinstance(qubits, int):
+            qubits = [qubits]
+        elif isinstance(qubits, list):
             pass
         else:
-            logger.error(f"target qubits must be int ot list, but {type(target_qubits)} was provided [TypeError].")
+            logger.error(f"target qubits must be int ot list, but {type(qubits)} was provided [TypeError].")
             raise SystemExit
         
         if param is not None:
@@ -1203,20 +1321,20 @@ class CunqaCircuit:
         self._add_instruction({
             "name": "recv",
             "qubits":[],
-            "remote_conditional_reg":flatten([target_qubits]),
+            "remote_conditional_reg":qubits,
             "circuits": [control_circuit]
         })
 
         self._add_instruction({
             "name": gate,
-            "qubits": flatten([target_qubits]),
-            "remote_conditional_reg":flatten([target_qubits]),
+            "qubits": qubits,
+            "remote_conditional_reg":qubits,
             "params":params,
         })
 
                 
 
-def flatten(lists: "list[list]"):
+def _flatten(lists: list[list]):
     return [element for sublist in lists for element in sublist]
 
 
@@ -1226,7 +1344,7 @@ def flatten(lists: "list[list]"):
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
-def qc_to_json(qc: QuantumCircuit) -> Tuple[dict, bool]:
+def qc_to_json(qc: Union['QuantumCircuit', 'CunqaCircuit', str]) -> Tuple[dict, bool]:
     """
     Transforms a QuantumCircuit to json dict.
 

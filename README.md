@@ -23,14 +23,16 @@
 <br>
 
 # Table of contents
-  - [CLONE REPOSITORY](#clone-repository)
+  - [USE AS LMOD MODULE](#use-as-lmod-module)
   - [INSTALLATION](#installation)
+    - [CLONE REPOSITORY](#clone-repository)
     - [QMIO](#qmio)
       - [Automatic installation](#automatic-installation)
       - [Manual installation](#manual-installation)
     - [FINISTERRAE III (FT3)](#finisterrae-iii-ft3)
       - [Automatic installation](#automatic-installation-1)
       - [Manual installation](#manual-installation-1)
+  - [UNINSTALL](#uninstall)
   - [RUN YOUR FIRST DISTRIBUTED PROGRAM](#run-your-first-distributed-program)
     - [1. `qraise`command](#1-qraisecommand)
     - [2. Python Program Example](#2-python-program-example)
@@ -38,7 +40,13 @@
   - [ACKNOWLEDGEMENTS](#acknowledgements)
 
 
-## Clone repository
+## Use as Lmod module
+Cunqa is available as Lmod module in CESGA. To use it all you have to do is:
+- In QMIO: `module load qmio/hpc gcc/12.3.0 cunqa/0.3.1-python-3.9.9-mpi`
+- In FT3: `module load cesga/2022 gcc/system cunqa/0.3.1`
+
+## Installation 
+### Clone repository
 It is important to say that, for ensuring a correct cloning of the repository, the SSH is the one preferred. In order to get this to work one has to do:
 
 ```console
@@ -61,7 +69,6 @@ cd scripts
 bash setup_submodules.sh
 ```
 
-## Installation 
 ### QMIO
 #### Automatic installation
 The `scripts/configure.sh` file is prepared to bring an automatic installation of the **CUNQA** platform. The user only has to execute this file followed by the path to the desire installation folder: 
@@ -88,14 +95,14 @@ ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind1
 
 3. Once the previous steps are done, everything is set for the build/installation. There are two options: 
     
-* **Standard way (slower)**
+* **Standard way**
 ```console
 cmake -B build/ 
-cmake --build build/
+cmake --build build/ --parallel $(nproc)
 cmake --install build/
 ```
 
-* **Using [Ninja](https://ninja-build.org/) (faster)**
+* **Using [Ninja](https://ninja-build.org/)**
 ```console
 cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
@@ -132,14 +139,14 @@ ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake
 
 5. Again: configure, compile and install using CMake:
 
-* **Standard way (slower)**
+* **Standard way**
 ```console
 cmake -B build/ 
 cmake --build build/
 cmake --install build/
 ```
 
-* **Using [Ninja](https://ninja-build.org/) (faster)**
+* **Using [Ninja](https://ninja-build.org/)**
 ```console
 cmake -G Ninja -B build/
 ninja -C build -j $(nproc)
@@ -150,6 +157,21 @@ cmake --install build/
 > Is **KEY** that this compilation is done in a compute node with sufficient resources (if not, the compilation process could be killed).
 
 And that's it! Everything is set—either on QMIO or in the FT3—to perform an execution. 
+
+## Uninstall
+There has also been developed a Make directive to uninstall CUNQA if needed: 
+
+1. If you installed using the standard way: `make uninstall`. 
+
+2. If you installed using Ninja: `ninja uninstall`.
+
+Be sure to execute this command inside the `build/` directory in both cases. An alternative is using:
+
+```console
+cmake --build build/ --target uninstall
+``` 
+
+to abstract from the installation method.
 
 ## Run your first distributed program
 

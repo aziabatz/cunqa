@@ -1,6 +1,7 @@
 """ Holds functions that manage virtual QPUs or provide information about them."""
 import os
 import sys
+import time
 from typing import Union, Optional
 from subprocess import run
 from json import load
@@ -41,7 +42,7 @@ def are_qpus_raised(family: Optional[str] = None) -> bool:
     
 
 
-def qraise(n, time, *, 
+def qraise(n, t, *, 
            classical_comm = False, 
            quantum_comm = False,  
            simulator = None, 
@@ -59,12 +60,12 @@ def qraise(n, time, *,
 
     Args
         n (int): number of QPUs to be raised.
-        time (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
+        t (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
         
         fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
         classical_comm (bool): if True the raised QPUs are communicated classically.
         quantum_comm (bool): if True the raised QPUs have quantum communications.
-        simulator (str): name of the desired simulator to use. Default in this branch is Cunqasimulator.
+        simulator (str): name of the desired simulator to use. Default is AerSimulator.
         family (str): name to identify the group of QPUs raised on the specific call of the function.
         mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
         cores (str):  number of cores for the SLURM job.
@@ -78,11 +79,11 @@ def qraise(n, time, *,
     print("Setting up the requested QPUs...")
     SLURMD_NODENAME = os.getenv("SLURMD_NODENAME")
     if SLURMD_NODENAME == None:
-        command = f"qraise -n {n} -t {time}"
+        command = f"qraise -n {n} -t {t}"
     else: 
         logger.warning("Be careful, you are deploying QPUs from an interactive session.")
         HOSTNAME = os.getenv("HOSTNAME")
-        command = f"ssh {HOSTNAME} \"ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9 && cd bin && ./qraise -n {n} -t {time}"
+        command = f"ssh {HOSTNAME} \"ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9 && cd bin && ./qraise -n {n} -t {t}"
 
     try:
         # Add specified flags
@@ -118,17 +119,33 @@ def qraise(n, time, *,
            with open(INFO_PATH, "w") as file:
                 file.write("{}")
 
-        old_time = os.stat(INFO_PATH).st_mtime # establish when the file qpus.json was modified last to check later that we did modify it
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)
         job_id = ''.join(e for e in str(output) if e.isdecimal()) #sees the output on the console (looks like 'Submitted sbatch job 136285') and selects the number
         
-        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
-        while True:
-            if old_time != os.stat(INFO_PATH).st_mtime: #checks that the file has been modified
-                break
+        cmd_getstate = ["squeue", "-h", "-j", job_id, "-o", "%T"]
         
+        i = 0
+        while True:
+            state = run(cmd_getstate, capture_output=True, text=True, check=True).stdout.strip()
+            if state == "RUNNING":
+                try:     
+                    with open(INFO_PATH, "r") as file:
+                        data = json.load(file)
+                except json.JSONDecodeError:
+                    continue
+                count = sum(1 for key in data if key.startswith(job_id))
+                if count == n:
+                    break
+            # We do this to prevent an overload to the Slurm deamon through the 
+            if i == 500:
+                time.sleep(2)
+            else:
+                i += 1
+
+        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
         print("QPUs ready to work \U00002705")
+
         return (family, str(job_id)) if family is not None else str(job_id)
     
     except Exception as error:

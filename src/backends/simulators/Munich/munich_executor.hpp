@@ -1,6 +1,7 @@
+#pragma once
 
 #include <string>
-#include "classical_channel.hpp"
+#include "classical_channel/classical_channel.hpp"
 
 namespace cunqa {
 namespace sim {

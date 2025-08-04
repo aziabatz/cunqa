@@ -59,13 +59,13 @@ def distr_rz2_QPE(angle, n_precision):
 
         for j in range(i):
             #print(f"Recibimos de {j} en {i}.")
-            circuits[f"cc_{i}"].remote_c_if("rz", target_qubits = 0, param = -np.pi*2**(i-j-2), control_circuit = f"cc_{j}")
+            circuits[f"cc_{i}"].remote_c_if("rz", qubits = 0, param = -np.pi*2**(i-j-2), control_circuit = f"cc_{j}")
 
         circuits[f"cc_{i}"].h(0)
 
         for k in range(n_precision-i-1):
             #print(f"Mandamos desde {i} a {i+1+k}.")
-            circuits[f"cc_{i}"].measure_and_send(control_qubit = 0, target_circuit = f"cc_{i+1+k}") 
+            circuits[f"cc_{i}"].measure_and_send(qubit = 0, target_circuit = f"cc_{i+1+k}") 
 
         circuits[f"cc_{i}"].measure(0,0)
         circuits[f"cc_{i}"].measure(1,1)

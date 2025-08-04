@@ -11,7 +11,6 @@
 #include "utils/constants.hpp"
 #include "qraise/utils_qraise.hpp"
 #include "qraise/args_qraise.hpp"
-#include "qraise/fakeqmio_conf_qraise.hpp"
 #include "qraise/noise_model_conf_qraise.hpp"
 #include "qraise/simple_conf_qraise.hpp"
 #include "qraise/cc_conf_qraise.hpp"
@@ -32,13 +31,13 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
-    sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
+    int max_cores_per_task = !args.qc ? args.cores_per_qpu : args.cores_per_qpu * args.n_qpus;
+    sbatchFile << "#SBATCH -c " << max_cores_per_task << "\n";
     int tasks = args.qc ? args.n_qpus + 1 : args.n_qpus;
     sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
     int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
     sbatchFile << "#SBATCH -N " << n_nodes << "\n";
     
-
     if (args.qpus_per_node.has_value()) {
         if (args.n_qpus < args.qpus_per_node) {
             LOGGER_ERROR("Less qpus than selected qpus_per_node.");
@@ -74,7 +73,12 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     if (check_mem_format(args.mem_per_qpu)){
         int mem_per_qpu = args.mem_per_qpu;
         int cores_per_qpu = args.cores_per_qpu;
-        sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+        if (!args.qc) {
+            sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+        } else {
+            sbatchFile << "#SBATCH --mem=" << mem_per_qpu * args.n_qpus << "G\n";
+        }
+        
     } else {
         LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
         return;
@@ -93,7 +97,6 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     }
 
     int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
-
     if (memory_specs == 1) {
         LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
         return;
@@ -107,7 +110,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
 
 void write_env_variables(std::ofstream& sbatchFile)
 {
-    const char* store = std::getenv("STORE");
+    auto store = std::getenv("STORE");
 
     sbatchFile << "\n";
     sbatchFile << "if [ ! -d \"$STORE/.cunqa\" ]; then\n";
@@ -117,32 +120,30 @@ void write_env_variables(std::ofstream& sbatchFile)
     sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
     sbatchFile << "export INFO_PATH=" << store << "/.cunqa/qpus.json\n";
     sbatchFile << "export COMM_PATH=" << store << "/.cunqa/communications.json\n";
-    
 }
 
 void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const std::string& mode)
 {
     std::string run_command;
-    if (args.fakeqmio.has_value()) {
-        LOGGER_DEBUG("Fakeqmio provided as a FLAG");
-        if (args.simulator == "Munich" or args.simulator == "Cunqa"){
-            LOGGER_WARN("Personalized noise model only supported for AerSimulator, switching simulator setting from {} to Aer.", args.simulator.c_str());
-        }
-        run_command = get_fakeqmio_run_command(args, mode);
-    
-    } else if (args.noise_properties.has_value()){
+    if (args.noise_properties.has_value() || args.fakeqmio.has_value()){
         LOGGER_DEBUG("noise_properties json path provided");
         if (args.simulator == "Munich" or args.simulator == "Cunqa"){
-            LOGGER_WARN("Personalized noise model only supported for AerSimulator, switching simulator setting from {} to Aer.", args.simulator.c_str());
+            LOGGER_WARN("Personalized noise models only supported for AerSimulator, switching simulator setting from {} to Aer.", args.simulator.c_str());
         }
+        if (args.cc || args.qc){
+            LOGGER_ERROR("Personalized noise models not supported for classical/quantum communications schemes.");
+            return;
+        }
+
+        if (args.backend.has_value()){
+            LOGGER_WARN("Because noise properties were provided backend will be redefined according to them.");
+        }
+
         run_command = get_noise_model_run_command(args, mode);
 
-    } else if (!args.fakeqmio.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
-        LOGGER_ERROR("FakeQmio flags where provided but --fakeqmio was not included.");
-        return;
 
-    } else if (!args.noise_properties.has_value() && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
-        LOGGER_ERROR("noise_properties flags where provided but --noise_properties arg was not included.");
+    } else if ((!args.noise_properties.has_value() || !args.fakeqmio.has_value()) && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
+        LOGGER_ERROR("noise_properties flags where provided but --noise_properties nor --fakeqmio args were not included.");
         return;
 
     } else {
@@ -177,7 +178,7 @@ int main(int argc, char* argv[])
     if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
         LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
         std::system("rm qraise_sbatch_tmp.sbatch");
-        return 0;
+        return -1;
     }
 
     // Writing the sbatch file
@@ -187,6 +188,7 @@ int main(int argc, char* argv[])
     write_run_command(sbatchFile, args, mode);
     sbatchFile.close();
 
+    
     // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");

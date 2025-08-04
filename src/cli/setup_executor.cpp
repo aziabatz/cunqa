@@ -5,7 +5,10 @@
 #include <string>
 
 #include "qpu.hpp"
+#include "backends/simulators/AER/aer_executor.hpp"
 #include "backends/simulators/Munich/munich_executor.hpp"
+#include "backends/simulators/CUNQA/cunqa_executor.hpp"
+
 
 #include "utils/json.hpp"
 #include "utils/helpers/murmur_hash.hpp"
@@ -27,12 +30,23 @@ int main(int argc, char *argv[])
 
     switch(murmur::hash(sim_arg)) {
         case murmur::hash("Aer"): 
-            LOGGER_ERROR("Aer does not support quantum communications.");
+        {
+            LOGGER_DEBUG("Raising executor with Munich.");
+            AerExecutor executor;
+            executor.run();
             break;
+        }
         case murmur::hash("Munich"):
         {
             LOGGER_DEBUG("Raising executor with Munich.");
             MunichExecutor executor;
+            executor.run();
+            break;
+        }
+        case murmur::hash("Cunqa"):
+        {
+            LOGGER_DEBUG("Raising executor with Cunqa.");
+            CunqaExecutor executor;
             executor.run();
             break;
         }

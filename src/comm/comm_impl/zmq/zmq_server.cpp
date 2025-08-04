@@ -43,7 +43,6 @@ struct Server::Impl {
     void send(const std::string& result) 
     {
         try {
-            LOGGER_DEBUG("Entra en el send.");
             zmq::message_t message(result.begin(), result.end());
             message.set_routing_id(rid_queue_.front());
             rid_queue_.pop();

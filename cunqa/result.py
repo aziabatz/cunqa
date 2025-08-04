@@ -31,12 +31,15 @@ class Result:
         if result is None or len(result) == 0:
             logger.error(f"Empty object passed, result is {None} [{ValueError.__name__}].")
             raise ValueError
+        
         elif "ERROR" in result:
             logger.debug(f"Result received: {result}\n")
             message = result["ERROR"]
             logger.error(f"Error during simulation, please check availability of QPUs, run arguments syntax and circuit syntax: {message}")
             raise ResultError
+        
         else:
+            logger.debug(f"Result received: {result}\n")
             self._result = result
         
         #logger.debug("Results correctly loaded.")
@@ -48,7 +51,7 @@ class Result:
         YELLOW = "\033[33m"
         RESET = "\033[0m"   
         GREEN = "\033[32m"
-        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken: {GREEN}{float(self.time_taken)/1e3} ms{RESET}{'}'}\n"
+        return f"{YELLOW}{self._id}:{RESET} {'{'}counts: {self.counts}, \n\t time_taken: {GREEN}{self.time_taken} s{RESET}{'}'}\n"
 
 
     @property
@@ -68,12 +71,30 @@ class Result:
                 logger.error(f"Some error occured with counts.")
                 raise ResultError
             
-            #counts = convert_counts(counts, self._registers)   #TODO
+            if len(self._registers) > 1:
+                counts = convert_counts(counts, self._registers)
 
         except Exception as error:
             logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
             raise error
+        
         return counts
+    
+    @property
+    def density_matrix(self) -> object:
+        try:
+            if "results" in list(self._result.keys()): # aer
+                density_matrix = self._result["results"][0]["data"]["density_matrix"]
+
+            else:
+                logger.error(f"Density Matrix not found.")
+                raise ResultError
+
+        except Exception as error:
+            logger.error(f"Some error occured with density matrix [{type(error).__name__}]: {error}.")
+            raise error
+        
+        return density_matrix
 
 
     @property
@@ -142,25 +163,22 @@ def convert_counts(counts: dict, registers: dict) -> dict:
     """
 
     if isinstance(registers, dict):
-        
-        # counting number of classical bits
-        num_clbits = sum([len(i) for i in registers.values()])
         # getting lenghts of bits for the different registers
         lengths = []
         for v in registers.values():
             lengths.append(len(v))
     else:
-        logger.error(f"Error when converting `counts` strings.")
+        logger.error(f"regsters must be dict, but {type(registers)} was provided [TypeError].")
         raise ResultError # I capture this error in QJob.result()
+    
+    logger.debug(f"Dividing strings into {len(lengths)} classical registers.")
 
     if isinstance(counts, dict):
-        res_counts = {}
+        new_counts = {}
         for k,v in counts.items():
-            if k.startswith('0x'): # converting to binary string and dividing in bit strings
-                new_counts[divide(format( int(k, 16), '0'+str(num_clbits)+'b' ), lengths)]= v
-            else: # just dividing the bit stings
-                new_counts[divide(k, lengths)] = v
-    elif isinstance(counts, list):
-        for count in counts:
-            new_counts[divide(format(count[0],'0'+str(num_clbits)+'b')[::-1], lengths)] = count[1] 
+            new_counts[divide(k, lengths)] = v
+    else:
+        logger.error(f"counts must be dict, but {type(registers)} was provided [TypeError].")
+        raise ResultError # I capture this error in QJob.result()
+    
     return new_counts
