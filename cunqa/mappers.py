@@ -75,14 +75,15 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         
 
     #Check whether the QPUs are valid
-    if not all(qpu._family == qpus[0]._family for qpu in qpus):
+    # TODO: check only makes sense if we have selected mpi option at compilation time. For the moment it remains commented
+    """ if not all(qpu._family == qpus[0]._family for qpu in qpus):
         logger.debug(f"QPUs of different families were provided.")
-        if not all(re.match(r"^tcp://", qpu._comm_endpoint) for qpu in qpus):
+        if not all(re.match(r"^tcp://", qpu._endpoint) for qpu in qpus):
             names = set()
             for qpu in qpus:
                 names.add(qpu._family)
             logger.error(f"QPU objects provided are from different families ({list(names)}). For this version, classical communications beyond families are only supported with zmq communication type.")
-            raise SystemExit # User's level
+            raise SystemExit # User's level """
     
     logger.debug(f"Run arguments provided for simulation: {run_args}")
     
