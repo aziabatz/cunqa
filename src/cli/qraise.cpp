@@ -31,7 +31,8 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
-    sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
+    int max_cores_per_task = !args.qc ? args.cores_per_qpu : args.cores_per_qpu * args.n_qpus;
+    sbatchFile << "#SBATCH -c " << max_cores_per_task << "\n";
     int tasks = args.qc ? args.n_qpus + 1 : args.n_qpus;
     sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
     int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
@@ -72,7 +73,12 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     if (check_mem_format(args.mem_per_qpu)){
         int mem_per_qpu = args.mem_per_qpu;
         int cores_per_qpu = args.cores_per_qpu;
-        sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+        if (!args.qc) {
+            sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+        } else {
+            sbatchFile << "#SBATCH --mem=" << mem_per_qpu * args.n_qpus << "G\n";
+        }
+        
     } else {
         LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
         return;
