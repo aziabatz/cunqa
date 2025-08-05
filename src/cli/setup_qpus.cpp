@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
     } else if (back_path_json.contains("backend_path")) {
         std::ifstream f(back_path_json.at("backend_path").get<std::string>());
         backend_json = JSON::parse(f);
-    } else if (back_path_json.contains("qpu_properties")) {
-        auto list_backend_paths = back_path_json.at("qpu_properties").get<std::vector<std::string>>();
+    } else if (back_path_json.contains("backend_from_infrastructure")) {
+        auto list_backend_paths = back_path_json.at("backend_from_infrastructure").get<std::vector<std::string>>();
         backend_json = convert_to_backend(list_backend_paths);
     } else {    
         LOGGER_DEBUG("No backend_path nor noise_properties_path were provided.");

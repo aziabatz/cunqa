@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
 
     if (args.infrastructure.has_value()) {
             std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-            write_sbatch_infrastructure_file(sbatchFile, args);
+            write_sbatch_file_from_infrastructure(sbatchFile, args);
+            sbatchFile.close();
     } else {
         // Setting and checking mode and family name, respectively
         std::string mode = args.cloud ? "cloud" : "hpc";
