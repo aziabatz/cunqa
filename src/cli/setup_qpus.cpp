@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "qpu.hpp"
 #include "backends/simple_backend.hpp"
@@ -25,6 +26,25 @@ using namespace std::string_literals;
 
 using namespace cunqa;
 using namespace cunqa::sim;
+
+namespace {
+    
+JSON convert_to_backend(const std::vector<std::string>& list_backend_paths)
+{
+    JSON backend;
+    if (list_backend_paths.size() == 1) {
+        std::ifstream f(list_backend_paths[0]); // try-catch
+        JSON qpu_properties = JSON::parse(f);
+        //TODO: convert qpu_properties to compatible backend. Check SimpleBackend::from_json()
+
+    } else {
+        // TODO
+    }
+    
+    return backend;
+}
+
+}
 
 template<typename Simulator, typename Config, typename BackendType>
 void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::string& family)
@@ -96,7 +116,10 @@ int main(int argc, char *argv[])
     } else if (back_path_json.contains("backend_path")) {
         std::ifstream f(back_path_json.at("backend_path").get<std::string>());
         backend_json = JSON::parse(f);
-    } else {
+    } else if (back_path_json.contains("qpu_properties")) {
+        auto list_backend_paths = back_path_json.at("qpu_properties").get<std::vector<std::string>>();
+        backend_json = convert_to_backend(list_backend_paths);
+    } else {    
         LOGGER_DEBUG("No backend_path nor noise_properties_path were provided.");
     }
 

@@ -1,0 +1,25 @@
+{
+    "qpus":
+    {
+        "qpu_0":
+        {
+            "backend":"./examples/insfrastructure/qpu.json",
+            "simulator":"Aer"
+        },
+        "qpu_1":
+        {
+            "backend":"./examples/insfrastructure/qpu.json",
+            "simulator":"Aer"
+        },
+        "qpu_2":
+        {
+            "backend":"./examples/insfrastructure/qpu.json",
+            "simulator":"Munich"
+        }
+    },
+    
+    "classical_connectivity":["qpu_2"],
+
+    "quantum_connectivity": [["qpu_0", "qpu_1"]]
+
+}
