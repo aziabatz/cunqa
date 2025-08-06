@@ -31,11 +31,26 @@ namespace {
     
 JSON convert_to_backend(const std::vector<std::string>& list_backend_paths)
 {
+    LOGGER_DEBUG("Inside convert_to_backend");
     JSON backend;
     if (list_backend_paths.size() == 1) {
-        std::ifstream f(list_backend_paths[0]); // try-catch
+        std::ifstream f(list_backend_paths[0]); // try-catch?
         JSON qpu_properties = JSON::parse(f);
-        //TODO: convert qpu_properties to compatible backend. Check SimpleBackend::from_json()
+
+        //TODO: complete the noise part
+        backend = {
+            {"name", qpu_properties.at("name")}, 
+            {"version", ""},
+            {"description", qpu_properties.at("description")},
+            {"n_qubits", qpu_properties.at("n_qubits")}, 
+            {"coupling_map", qpu_properties.at("coupling_map")},
+            {"basis_gates", qpu_properties.at("basis_gates")}, 
+            {"custom_instructions", ""}, // What's this?
+            {"gates", JSON::array()}, // gates vs basis_gates?
+            {"noise_model", JSON()},
+            {"noise_properties", JSON()},
+            {"noise_path", ""}
+        };
 
     } else {
         // TODO
@@ -53,7 +68,6 @@ void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::s
     Config config;
     if (!backend_json.empty())
         config = backend_json;
-    JSON config_json = config;
     QPU qpu(std::make_unique<BackendType>(config, std::move(simulator)), mode, family);
     LOGGER_DEBUG("QPU instantiated.");
     qpu.turn_ON();

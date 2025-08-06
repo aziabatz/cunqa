@@ -47,6 +47,7 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
 
 
     //----------------- Sbatch header block --------------------------
+    //TODO: Resources should come from the infrastructure.json?
     int n_tasks = qpus.size() + quantum_connectivity.size();
     int cores_per_task = 2; // 2 cores per QPU by default
     int mem_per_qpu = 2; // 2GB per QPU by default
