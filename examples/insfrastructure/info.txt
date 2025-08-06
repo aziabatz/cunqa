@@ -1,0 +1,30 @@
+
+###################### QUBITS #####################
+Tempo T1 (ns)               ---> t1 
+Tempo T2 (ns)               ---> t2
+Fidelidade de Lectura       ---> redout_fidelity
+Tempo de Lecture (ns)       ---> readout_duration
+Frecuencia de Lectura (GHz) ---> measuring_frecuency
+Frecuencia de Control (GHz)  ---> drive_frecuency
+
+
+#################### PORTAS ########################
+Fidelidade ---> fidelity
+Tempo (ns) ---> gate_duration
+
+
+################### A TENER EN CUENTA ##############
+1) Para la primera version: en el infrastructure.json, los campos "classical_connectivity"
+y "quantum_connectivity" deben ser mutuamente excluyentes:
+
+    - "quantum_connectivity": lista de listas de strings. Cada sublista debe contener los
+    nombres de las QPU que están conectadas cuánticamente entre ellas.
+
+    - "classical_connectivity": lista de strings. Debe contener la lista de QPU que tienen
+    conexión clásica con alguna otra, excluyendo las que tienen comunicaciones cuánticas.
+
+    ¿Qué pasa con una QPU conectada clásicamente con otra QPU y cuánticamente con una tercera?
+    Debe ir en la sublista correspondiente de "quantum_connectivity" y NO aparecer en la lista
+    de "classical_connectivity".
+
+    

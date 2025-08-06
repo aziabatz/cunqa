@@ -33,28 +33,34 @@ JSON convert_to_backend(const std::vector<std::string>& list_backend_paths)
 {
     LOGGER_DEBUG("Inside convert_to_backend");
     JSON backend;
+    JSON qpu_properties;
     if (list_backend_paths.size() == 1) {
         std::ifstream f(list_backend_paths[0]); // try-catch?
-        JSON qpu_properties = JSON::parse(f);
-
-        //TODO: complete the noise part
-        backend = {
-            {"name", qpu_properties.at("name")}, 
-            {"version", ""},
-            {"description", qpu_properties.at("description")},
-            {"n_qubits", qpu_properties.at("n_qubits")}, 
-            {"coupling_map", qpu_properties.at("coupling_map")},
-            {"basis_gates", qpu_properties.at("basis_gates")}, 
-            {"custom_instructions", ""}, // What's this?
-            {"gates", JSON::array()}, // gates vs basis_gates?
-            {"noise_model", JSON()},
-            {"noise_properties", JSON()},
-            {"noise_path", ""}
-        };
-
+        qpu_properties = JSON::parse(f);
+    } else if (list_backend_paths.size() > 1) {
+        std::string str_local_id = std::getenv("SLURM_LOCALID");
+        int local_id = std::stoi(str_local_id);
+        std::ifstream f(list_backend_paths[local_id]); // try-catch?
+        qpu_properties = JSON::parse(f);
     } else {
-        // TODO
+        LOGGER_ERROR("No backends provided");
+        throw;
     }
+
+    //TODO: complete the noise part
+    backend = {
+        {"name", qpu_properties.at("name")}, 
+        {"version", ""},
+        {"description", qpu_properties.at("description")},
+        {"n_qubits", qpu_properties.at("n_qubits")}, 
+        {"coupling_map", qpu_properties.at("coupling_map")},
+        {"basis_gates", qpu_properties.at("basis_gates")}, 
+        {"custom_instructions", ""}, // What's this?
+        {"gates", JSON::array()}, // gates vs basis_gates?
+        {"noise_model", JSON()},
+        {"noise_properties", JSON()},
+        {"noise_path", ""}
+    };
     
     return backend;
 }
