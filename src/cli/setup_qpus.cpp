@@ -29,18 +29,21 @@ using namespace cunqa::sim;
 
 namespace {
     
-JSON convert_to_backend(const std::vector<std::string>& list_backend_paths)
+JSON convert_to_backend(const JSON& backend_paths)
 {
-    LOGGER_DEBUG("Inside convert_to_backend");
-    JSON backend;
+    std::string qpu_name;
     JSON qpu_properties;
-    if (list_backend_paths.size() == 1) {
-        std::ifstream f(list_backend_paths[0]); // try-catch?
+    if (backend_paths.size() == 1) {
+        qpu_name = backend_paths.begin().key();
+        std::ifstream f(backend_paths.begin().value()); // try-catch?
         qpu_properties = JSON::parse(f);
-    } else if (list_backend_paths.size() > 1) {
+    } else if (backend_paths.size() > 1) {
         std::string str_local_id = std::getenv("SLURM_LOCALID");
         int local_id = std::stoi(str_local_id);
-        std::ifstream f(list_backend_paths[local_id]); // try-catch?
+        auto qpu = backend_paths.begin();
+        std::advance(qpu, local_id);
+        qpu_name = qpu.key();
+        std::ifstream f(qpu.value()); // try-catch?
         qpu_properties = JSON::parse(f);
     } else {
         LOGGER_ERROR("No backends provided");
@@ -48,10 +51,11 @@ JSON convert_to_backend(const std::vector<std::string>& list_backend_paths)
     }
 
     //TODO: complete the noise part
+    JSON backend;
     backend = {
-        {"name", qpu_properties.at("name")}, 
+        {"name", qpu_name}, 
         {"version", ""},
-        {"description", qpu_properties.at("description")},
+        {"description", "QPU from infrastructure"},
         {"n_qubits", qpu_properties.at("n_qubits")}, 
         {"coupling_map", qpu_properties.at("coupling_map")},
         {"basis_gates", qpu_properties.at("basis_gates")}, 
@@ -137,8 +141,8 @@ int main(int argc, char *argv[])
         std::ifstream f(back_path_json.at("backend_path").get<std::string>());
         backend_json = JSON::parse(f);
     } else if (back_path_json.contains("backend_from_infrastructure")) {
-        auto list_backend_paths = back_path_json.at("backend_from_infrastructure").get<std::vector<std::string>>();
-        backend_json = convert_to_backend(list_backend_paths);
+        auto backend_paths = back_path_json.at("backend_from_infrastructure").get<JSON>();
+        backend_json = convert_to_backend(backend_paths);
     } else {    
         LOGGER_DEBUG("No backend_path nor noise_properties_path were provided.");
     }

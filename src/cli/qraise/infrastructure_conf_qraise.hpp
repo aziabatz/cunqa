@@ -38,8 +38,8 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
 
     std::string simulator;
     std::string backend_path;
-    std::vector<std::string> paths_to_backend;
-    std::string qpu_backend_path;
+    std::string path;
+    std::string qpus_path;
     std::string family_name;
     int n_ports;
 
@@ -100,27 +100,25 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
         }
         first_qc_group = false;
 
+        bool first_qpu = true;
+        qpus_path = R"({"backend_from_infrastructure":{)";
         for (auto& qc_qpu : qc_group) {
+            if (!first_qpu) {
+                qpus_path += ", ";
+            }
+            first_qpu = false;
+
             n_ports = qc_group.size() * 3;
             simulator = infrastructure.at("qpus").at(qc_qpu).at("simulator").get<std::string>();
-            paths_to_backend.push_back(infrastructure.at("qpus").at(qc_qpu).at("backend").get<std::string>());
+            path = infrastructure.at("qpus").at(qc_qpu).at("backend").get<std::string>();
+            qpus_path += "\"" + qc_qpu + "\":\"" + path + "\"";
 
             written_qpus.push_back(qc_qpu);
             n_qc_qpus++;
         }
+        qpus_path += R"(}})";
 
-        qpu_backend_path = R"({"backend_from_infrastructure":[)";
-        bool first = true;
-        for (auto& path : paths_to_backend) {
-            if (!first) {
-                qpu_backend_path += ", ";
-            }
-            first = false;
-            qpu_backend_path += "\"" + path + "\"";
-        } 
-        qpu_backend_path += R"(]})";
-
-        sbatchFile << "srun -n " + std::to_string(qc_group.size()) + " -c 1 --mem-per-cpu=1G --resv-ports=" + std::to_string(n_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud qc default " + simulator + " \'" + qpu_backend_path + "\' &\n";
+        sbatchFile << "srun -n " + std::to_string(qc_group.size()) + " -c 1 --mem-per-cpu=1G --resv-ports=" + std::to_string(n_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud qc default " + simulator + " \'" + qpus_path + "\' &\n";
 
         sbatchFile << "sleep 1\n";
 
@@ -146,9 +144,9 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
         n_ports = 2;
         simulator = infrastructure.at("qpus").at(cc_qpu).at("simulator").get<std::string>();
         backend_path = infrastructure.at("qpus").at(cc_qpu).at("backend").get<std::string>();
-        qpu_backend_path = R"({"backend_from_infrastructure":[")" + backend_path + R"("]})";
+        qpus_path = R"({"backend_from_infrastructure":{")" + cc_qpu + "\":\"" + backend_path + R"("}})";
 
-        sbatchFile << "srun -n 1 --resv-ports=2 --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud cc " + cc_qpu + " " + simulator + " \'" + qpu_backend_path + "\'";
+        sbatchFile << "srun -n 1 --resv-ports=2 --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud cc " + cc_qpu + " " + simulator + " \'" + qpus_path + "\'";
 
         written_qpus.push_back(cc_qpu);
         n_cc_qpus++;    
@@ -173,8 +171,8 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
 
         simulator = properties.at("simulator").get<std::string>();
         backend_path = properties.at("backend").get<std::string>();
-        qpu_backend_path = R"({"backend_from_infrastructure":[")" + backend_path + R"("]})" ;
-        sbatchFile << "srun -n 1 --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud no_comm "  + name + " " + simulator + " \'" + qpu_backend_path + "\'"; 
+        qpus_path = R"({"backend_from_infrastructure":{")" + name + "\":\"" + backend_path +  R"("}})" ;
+        sbatchFile << "srun -n 1 --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud no_comm "  + name + " " + simulator + " \'" + qpus_path + "\'"; 
         
     }
     //--------------------------------------------------

@@ -4,23 +4,23 @@
 {
     "qpu_0":
     {
-        "backend":"./examples/insfrastructure/dummy_qpu.json",
+        "backend":"./examples/insfrastructure/dummy_qpu_0.json",
         "simulator":"Aer"
     },
-    "qpu_1":
+    "blablabla":
     {
-        "backend":"./examples/insfrastructure/dummy_qpu.json",
+        "backend":"./examples/insfrastructure/dummy_qpu_1.json",
         "simulator":"Aer"
     },
-    "qpu_2":
+    "personalized_name":
     {
-        "backend":"./examples/insfrastructure/dummy_qpu.json",
+        "backend":"./examples/insfrastructure/dummy_qpu_0.json",
         "simulator":"Munich"
     }
 },
 
-"classical_connectivity":["qpu_2"],
+"classical_connectivity":["personalized_name"],
 
-"quantum_connectivity": [["qpu_0", "qpu_1"]]
+"quantum_connectivity": [["qpu_0", "blablabla"]]
 
 }
