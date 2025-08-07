@@ -129,7 +129,7 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
 
     //----------- Classical communications block -----------
     if ((classical_connectivity.size() > 0) && (quantum_connectivity.size() > 0)) {
-        sbatchFile << " &\n\n sleep 1 \n\n";
+        sbatchFile << " &\n\n";
     }
 
     bool first_cc_qpu = true;

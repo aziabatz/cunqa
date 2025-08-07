@@ -323,10 +323,15 @@ JSON CunqaSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 
     // This is for distinguising classical and quantum communications
     // TODO: Make it more clear
-    if (classical_channel && qc.quantum_tasks.size() == 1)
+    /* if (classical_channel && qc.quantum_tasks.size() == 1)
     {
         std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
+        classical_channel->connect(connect_with, true);
+    } */
+
+    for (const auto& quantum_task : qc.quantum_tasks) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with, true);
     }
 
     auto shots = qc.quantum_tasks[0].config.at("shots").get<int>();

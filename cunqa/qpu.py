@@ -33,12 +33,13 @@ class QPU:
     """
     _id: int 
     _qclient: 'QClient' 
-    _backend: 'Backend' 
+    _backend: 'Backend'
+    _name: str 
     _family: str
     _endpoint: "tuple[str, int]" 
     _connected: bool 
     
-    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]"):
+    def __init__(self, id: int, qclient: 'QClient', backend: Backend, name: str, family: str, endpoint: "tuple[str, int]"):
         """
         Initializes the QPU class.
 
@@ -56,6 +57,7 @@ class QPU:
         self._id = id
         self._qclient = qclient
         self._backend = backend
+        self._name = name
         self._family = family
         self._endpoint = endpoint
         self._connected = False
@@ -65,6 +67,10 @@ class QPU:
     @property
     def id(self) -> int:
         return self._id
+    
+    @property
+    def name(self) -> str:
+        return self._name
     
     @property
     def backend(self) -> Backend:

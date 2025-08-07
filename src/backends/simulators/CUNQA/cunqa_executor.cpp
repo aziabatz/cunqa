@@ -67,16 +67,13 @@ CunqaExecutor::CunqaExecutor(const std::string& group_id) : classical_channel{"e
 
 void CunqaExecutor::run()
 {
-    LOGGER_DEBUG("Inside CunqaExecutor::run");
     std::vector<QuantumTask> quantum_tasks;
     std::vector<std::string> qpus_working;
     JSON quantum_task_json;
     std::string message;
     while (true) {
         for(const auto& qpu_id: qpu_ids) {
-            LOGGER_DEBUG("qpu_id: {}", qpu_id);
             message = classical_channel.recv_info(qpu_id);
-            LOGGER_DEBUG("Message received from qpu_id: {}", qpu_id);
             if(!message.empty()) {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);

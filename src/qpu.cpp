@@ -14,9 +14,10 @@ namespace {
 
 namespace cunqa {
 
-QPU::QPU(std::unique_ptr<sim::Backend> backend, const std::string& mode, const std::string& family) :
+QPU::QPU(std::unique_ptr<sim::Backend> backend, const std::string& mode, const std::string& name, const std::string& family) :
     backend{std::move(backend)},
     server{std::make_unique<comm::Server>(mode)},
+    name_{name},
     family_{family}
 { }
 

@@ -43,7 +43,6 @@ JSON CircuitSimulatorAdapter::simulate(const Backend* backend)
             time_taken = duration.count();
 
             if (!result.empty()) {
-                LOGGER_DEBUG("Result non empty");
                 reverse_bitstring_keys_json(result);
                 return {{"counts", result}, {"time_taken", time_taken}};
             }
@@ -59,7 +58,6 @@ JSON CircuitSimulatorAdapter::simulate(const Backend* backend)
             time_taken = duration.count();
 
             if (!result.empty()) {
-                LOGGER_DEBUG("Result non empty");
                 reverse_bitstring_keys_json(result);
                 return {{"counts", result}, {"time_taken", time_taken}};
             }
@@ -83,10 +81,15 @@ JSON CircuitSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel
 
     // This is for distinguising classical and quantum communications
     // TODO: Make it more clear
-    if (classical_channel && p_qca->quantum_tasks.size() == 1)
+    /* if (classical_channel && p_qca->quantum_tasks.size() == 1)
     {
         std::vector<std::string> connect_with = p_qca->quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
+        classical_channel->connect(connect_with, true);
+    } */
+
+    for (const auto& quantum_task : p_qca->quantum_tasks) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with, true);
     }
 
     auto start = std::chrono::high_resolution_clock::now();

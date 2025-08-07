@@ -18,9 +18,6 @@ AerCCSimulator::AerCCSimulator(const std::string& group_id)
 // Distributed AerSimulator
 JSON AerCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    classical_channel.connect(connect_with);
-
     AerComputationAdapter aer_ca(quantum_task);
     AerSimulatorAdapter aer_sa(aer_ca);
     if (quantum_task.is_dynamic) {

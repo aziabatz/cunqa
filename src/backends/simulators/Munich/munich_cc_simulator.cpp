@@ -21,9 +21,6 @@ MunichCCSimulator::MunichCCSimulator(const std::string& group_id)
 
 JSON MunichCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const QuantumTask& quantum_task)
 {
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    classical_channel.connect(connect_with);
-
     auto p_qca = std::make_unique<QuantumComputationAdapter>(quantum_task);
     CircuitSimulatorAdapter csa(std::move(p_qca));
 

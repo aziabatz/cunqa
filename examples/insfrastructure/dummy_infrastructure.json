@@ -2,30 +2,35 @@
 
 "qpus":
 {
-    "qpu_0":
+    "qpu_0_with_AerQC":
     {
         "backend":"./examples/insfrastructure/dummy_qpu_0.json",
         "simulator":"Aer"
     },
-    "blablabla":
+    "qpu_1_with_AerQC":
     {
         "backend":"./examples/insfrastructure/dummy_qpu_1.json",
         "simulator":"Aer"
     },
-    "personalized_name":
+    "qpu_0_with_MunichQC":
     {
         "backend":"./examples/insfrastructure/dummy_qpu_0.json",
         "simulator":"Munich"
     },
-    "other_qpu":
+    "qpu_1_with_MunichQC":
     {
-        "backend":"./examples/insfrastructure/dummy_qpu_0.json",
+        "backend":"./examples/insfrastructure/dummy_qpu_1.json",
+        "simulator":"Munich"
+    },
+    "qpu_0_with_MunichCC":
+    {
+        "backend":"./examples/insfrastructure/dummy_qpu_1.json",
         "simulator":"Munich"
     }
 },
 
-"classical_connectivity":[],
+"classical_connectivity":["qpu_0_with_MunichCC"],
 
-"quantum_connectivity": [["qpu_0", "blablabla"], ["personalized_name", "other_qpu"]]
+"quantum_connectivity": [["qpu_0_with_AerQC", "qpu_1_with_AerQC"], ["qpu_0_with_MunichQC", "qpu_1_with_MunichQC"]]
 
 }

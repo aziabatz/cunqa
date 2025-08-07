@@ -11,4 +11,4 @@ from cunqa.qjob import gather
 
 qpus  = getQPUs(local=False)
 
-print([qpu._id for qpu in qpus])
+print([qpu.name for qpu in qpus])

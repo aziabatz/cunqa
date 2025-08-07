@@ -17,8 +17,8 @@ CunqaCCSimulator::CunqaCCSimulator(const std::string& group_id)
 
 JSON CunqaCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const QuantumTask& quantum_task)
 {
-    std::vector<std::string> connect_with = quantum_task.sending_to;
-    classical_channel.connect(connect_with);
+    /* std::vector<std::string> connect_with = quantum_task.sending_to;
+    classical_channel.connect(connect_with); */
 
     CunqaComputationAdapter cunqa_ca(quantum_task);
     CunqaSimulatorAdapter cunqa_sa(cunqa_ca);

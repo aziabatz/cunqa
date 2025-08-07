@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     switch(murmur::hash(sim_arg)) {
         case murmur::hash("Aer"): 
         {
-            LOGGER_DEBUG("Raising executor with Munich.");
+            LOGGER_DEBUG("Raising executor with Aer.");
             AerExecutor executor(family_name);
             executor.run();
             break;
