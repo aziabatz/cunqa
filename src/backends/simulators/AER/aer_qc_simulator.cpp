@@ -10,6 +10,12 @@ AerQCSimulator::AerQCSimulator()
     classical_channel.connect(executor_endpoint, "executor");
 };
 
+AerQCSimulator::AerQCSimulator(const std::string& group_id)
+{
+    classical_channel.publish(group_id);
+    auto executor_endpoint = classical_channel.recv_info("executor");
+    classical_channel.connect(executor_endpoint, "executor");
+};
 
 JSON AerQCSimulator::execute([[maybe_unused]] const QCBackend& backend, const QuantumTask& quantum_task)
 {

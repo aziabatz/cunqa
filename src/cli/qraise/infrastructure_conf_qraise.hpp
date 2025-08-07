@@ -118,11 +118,11 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
         }
         qpus_path += R"(}})";
 
-        sbatchFile << "srun -n " + std::to_string(qc_group.size()) + " -c 1 --mem-per-cpu=1G --resv-ports=" + std::to_string(n_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud qc default " + simulator + " \'" + qpus_path + "\' &\n";
+        sbatchFile << "srun -n " + std::to_string(qc_group.size()) + " -c 1 --mem-per-cpu=1G --resv-ports=" + std::to_string(n_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH cloud qc " + qc_group[0] + " " + simulator + " \'" + qpus_path + "\' &\n";
 
         sbatchFile << "sleep 1\n";
 
-        sbatchFile << "srun -n 1 --resv-ports=" + std::to_string(qc_group.size()) + " setup_executor " + simulator;
+        sbatchFile << "srun -n 1 --resv-ports=" + std::to_string(qc_group.size()) + " setup_executor " + simulator + " " + qc_group[0];
     }
     //------------------------------------------------------
 

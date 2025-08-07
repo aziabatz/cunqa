@@ -16,11 +16,16 @@
     {
         "backend":"./examples/insfrastructure/dummy_qpu_0.json",
         "simulator":"Munich"
+    },
+    "other_qpu":
+    {
+        "backend":"./examples/insfrastructure/dummy_qpu_0.json",
+        "simulator":"Munich"
     }
 },
 
-"classical_connectivity":["personalized_name"],
+"classical_connectivity":[],
 
-"quantum_connectivity": [["qpu_0", "blablabla"]]
+"quantum_connectivity": [["qpu_0", "blablabla"], ["personalized_name", "other_qpu"]]
 
 }

@@ -10,6 +10,13 @@ MunichQCSimulator::MunichQCSimulator()
     classical_channel.connect(executor_endpoint, "executor");
 };
 
+MunichQCSimulator::MunichQCSimulator(const std::string& group_id)
+{
+    classical_channel.publish(group_id);
+    auto executor_endpoint = classical_channel.recv_info("executor");
+    classical_channel.connect(executor_endpoint, "executor");
+};
+
 
 JSON MunichQCSimulator::execute([[maybe_unused]] const QCBackend& backend, const QuantumTask& quantum_task)
 {

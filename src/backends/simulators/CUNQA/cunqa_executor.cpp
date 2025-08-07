@@ -39,17 +39,44 @@ CunqaExecutor::CunqaExecutor() : classical_channel{"executor"}
             classical_channel.send_info(classical_channel.endpoint, qpu_endpoint);
         }
     }
-}
+};
+
+CunqaExecutor::CunqaExecutor(const std::string& group_id) : classical_channel{"executor"}
+{
+    std::string filename = std::string(std::getenv("STORE")) + "/.cunqa/communications.json";
+    std::ifstream in(filename);
+
+    if (!in.is_open()) {
+        throw std::runtime_error("Error opening the communications file.");
+    }
+
+    JSON j;
+    if (in.peek() != std::ifstream::traits_type::eof())
+        in >> j;
+    in.close();
+
+    for (const auto& [key, value]: j.items()) {
+        if (key.rfind(group_id) == key.size() - group_id.size()) {
+            auto qpu_endpoint = value["communications_endpoint"].get<std::string>();
+            qpu_ids.push_back(qpu_endpoint);
+            classical_channel.connect(qpu_endpoint);
+            classical_channel.send_info(classical_channel.endpoint, qpu_endpoint);
+        }
+    }
+};
 
 void CunqaExecutor::run()
 {
+    LOGGER_DEBUG("Inside CunqaExecutor::run");
     std::vector<QuantumTask> quantum_tasks;
     std::vector<std::string> qpus_working;
     JSON quantum_task_json;
     std::string message;
     while (true) {
         for(const auto& qpu_id: qpu_ids) {
+            LOGGER_DEBUG("qpu_id: {}", qpu_id);
             message = classical_channel.recv_info(qpu_id);
+            LOGGER_DEBUG("Message received from qpu_id: {}", qpu_id);
             if(!message.empty()) {
                 qpus_working.push_back(qpu_id);
                 quantum_task_json = JSON::parse(message);

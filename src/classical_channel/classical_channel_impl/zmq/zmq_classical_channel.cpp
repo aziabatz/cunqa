@@ -106,7 +106,7 @@ ClassicalChannel::~ClassicalChannel() = default;
 //-------------------------------------------------
 // Publish the endpoint for other processes to read
 //-------------------------------------------------
-void ClassicalChannel::publish() 
+void ClassicalChannel::publish(const std::string& suffix) 
 {
     const std::string store = getenv("STORE");
     const std::string filepath = store + "/.cunqa/communications.json"s;
@@ -114,7 +114,7 @@ void ClassicalChannel::publish()
     {
         {"communications_endpoint", endpoint}
     };
-    write_on_file(communications_endpoint, filepath);
+    write_on_file(communications_endpoint, filepath, suffix);
 }
 
 

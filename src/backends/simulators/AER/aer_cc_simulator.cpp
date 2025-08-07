@@ -10,6 +10,11 @@ AerCCSimulator::AerCCSimulator()
     classical_channel.publish();
 };
 
+AerCCSimulator::AerCCSimulator(const std::string& group_id)
+{
+    classical_channel.publish(group_id);
+};
+
 // Distributed AerSimulator
 JSON AerCCSimulator::execute(const CCBackend& backend, const QuantumTask& quantum_task)
 {

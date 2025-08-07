@@ -10,7 +10,14 @@ CunqaQCSimulator::CunqaQCSimulator()
     classical_channel.publish();
     auto executor_endpoint = classical_channel.recv_info("executor");
     classical_channel.connect(executor_endpoint, "executor");
-}
+};
+
+CunqaQCSimulator::CunqaQCSimulator(const std::string& group_id)
+{
+    classical_channel.publish(group_id);
+    auto executor_endpoint = classical_channel.recv_info("executor");
+    classical_channel.connect(executor_endpoint, "executor");
+};
 
 JSON CunqaQCSimulator::execute(const QCBackend& backend, const QuantumTask& quantum_task)
 {

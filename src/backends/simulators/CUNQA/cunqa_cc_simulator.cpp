@@ -8,7 +8,12 @@ namespace sim {
 CunqaCCSimulator::CunqaCCSimulator()
 {
     classical_channel.publish();
-}
+};
+
+CunqaCCSimulator::CunqaCCSimulator(const std::string& group_id)
+{
+    classical_channel.publish(group_id);
+};
 
 JSON CunqaCCSimulator::execute([[maybe_unused]] const CCBackend& backend, const QuantumTask& quantum_task)
 {

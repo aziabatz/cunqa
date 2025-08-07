@@ -15,6 +15,7 @@ class CunqaQCSimulator final : public SimulatorStrategy<QCBackend>
 {
 public:
     CunqaQCSimulator();
+    CunqaQCSimulator(const std::string& group_id);
     ~CunqaQCSimulator() = default;
 
     inline std::string get_name() const override {return "CunqaSimulator";}

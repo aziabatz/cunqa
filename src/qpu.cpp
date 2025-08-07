@@ -26,7 +26,7 @@ void QPU::turn_ON()
     std::thread compute([this](){this->compute_result_();});
 
     JSON qpu_config = *this;
-    write_on_file(qpu_config, filepath);
+    write_on_file(qpu_config, filepath, family_);
 
     listen.join();
     compute.join();

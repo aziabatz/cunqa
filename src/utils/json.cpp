@@ -4,11 +4,12 @@
 #include <exception>
 #include <sys/file.h>
 #include <unistd.h>
+
 #include "json.hpp"
 
 namespace cunqa {
 
-void write_on_file(JSON local_data, const std::string &filename) 
+void write_on_file(JSON local_data, const std::string &filename, const std::string& suffix) 
 {
     try {
         int file = open(filename.c_str(), O_RDWR | O_CREAT, 0666);
@@ -28,7 +29,7 @@ void write_on_file(JSON local_data, const std::string &filename)
         // This two SLURM variables conform the ID of the process
         std::string local_id = std::getenv("SLURM_TASK_PID");
         std::string job_id = std::getenv("SLURM_JOB_ID");
-        auto task_id = job_id + "_" + local_id;
+        auto task_id = (suffix == "") ? job_id + "_" + local_id : job_id + "_" + local_id + "_" + suffix;
         
         j[task_id] = local_data;
 

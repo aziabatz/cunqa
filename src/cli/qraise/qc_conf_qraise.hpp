@@ -32,7 +32,7 @@ std::string get_qc_run_command(const CunqaArgs& args, const std::string& mode)
 
     // This is done to avoid run conditions in the IP publishing of the QPUs for the executor
     run_command += "sleep 1\n";
-    run_command +=  "srun -n 1 -c " + std::to_string(simulator_task_n_cores) + " --mem=" + std::to_string(simulator_task_mem) + "G --resv-ports=" + std::to_string(args.n_qpus) + " setup_executor " + args.simulator + "\n";
+    run_command +=  "srun -n 1 -c " + std::to_string(simulator_task_n_cores) + " --mem=" + std::to_string(simulator_task_mem) + "G --resv-ports=" + std::to_string(args.n_qpus) + " setup_executor " + args.simulator + " " + args.family_name + "\n";
     #else
     LOGGER_ERROR("For quantum communications ZMQ has to be available.");
     return "0";

@@ -74,7 +74,7 @@ JSON convert_to_backend(const JSON& backend_paths)
 template<typename Simulator, typename Config, typename BackendType>
 void turn_ON_QPU(const JSON& backend_json, const std::string& mode, const std::string& family)
 {
-    std::unique_ptr<Simulator> simulator = std::make_unique<Simulator>();
+    std::unique_ptr<Simulator> simulator = std::make_unique<Simulator>(family);
     Config config;
     if (!backend_json.empty())
         config = backend_json;
@@ -201,8 +201,8 @@ int main(int argc, char *argv[])
                     turn_ON_QPU<MunichQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
                     break;
                 case murmur::hash("Cunqa"): 
-                    LOGGER_DEBUG("QPU going to turn on with AerQCSimulator.");
-                    turn_ON_QPU<AerQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
+                    LOGGER_DEBUG("QPU going to turn on with CunqaQCSimulator.");
+                    turn_ON_QPU<CunqaQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
                     break;
                 default:
                     LOGGER_ERROR("Simulator {} do not support quantum communication simulation or does not exist.", sim_arg);
