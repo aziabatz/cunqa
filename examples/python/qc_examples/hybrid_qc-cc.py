@@ -12,7 +12,7 @@ from cunqa.qjob import gather
 
 qpus  = getQPUs(local=False)
 
-hybrid_qpus = [qpus[0], qpus[1], qpus[4]] # irst two with QC and last with CC
+hybrid_qpus = [qpus[0], qpus[1], qpus[4]] # First two with QC and last with CC (/examples/infrastructure/dummy_infrastructure.json)
 print("qpus_selected: ", [qpu.name for qpu in hybrid_qpus])
 
 ########## Circuits to run ##########
@@ -20,7 +20,7 @@ print("qpus_selected: ", [qpu.name for qpu in hybrid_qpus])
 qc_1 = CunqaCircuit(10, 2, id="First_QC")
 qc_1.h(0)
 qc_1.measure_and_send(qubit = 0, target_circuit = "CC_circuit")
-qc_1.measure_all()
+qc_1.measure_all() # WARNING! Fails if not measure_all()
 
 qc_2 = CunqaCircuit(1, 1, id="Second_QC") 
 qc_2.x(0)

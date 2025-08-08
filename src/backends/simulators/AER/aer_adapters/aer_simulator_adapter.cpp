@@ -472,14 +472,7 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 {
     std::map<std::string, std::size_t> meas_counter;
 
-    // This is for distinguising classical and quantum communications
-    // TODO: Make it more clear
-    /* if (classical_channel && qc.quantum_tasks.size() == 1)
-    {
-        std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
-    } */
-
+    // Enables the possibility of classical communications between qc_QPU with cc_QPU
     for (const auto& quantum_task : qc.quantum_tasks) {
         std::vector<std::string> connect_with = quantum_task.sending_to;
         classical_channel->connect(connect_with, true);
