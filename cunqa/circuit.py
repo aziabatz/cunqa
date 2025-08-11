@@ -159,7 +159,7 @@ class CunqaCircuit:
     has_cc: bool #: Weather the circuit contains classical communications with other circuit.
     is_dynamic: bool #: Weather the circuit has local non-unitary operations.
     instructions: "list[dict]" #: Set of operations applied to the circuit.
-    quantum_regs: dict #: Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
+    quantum_regs: dict #: Dictionary of quantum registers of the circuit as {'name' : <list of qubits assigned>}.
     classical_regs: dict #: Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
     sending_to: "list[str]" #: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
 
