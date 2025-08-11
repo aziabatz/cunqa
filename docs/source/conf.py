@@ -106,7 +106,13 @@ html_theme_options = {
     'titles_only': False
 }
 
-
+def _drop_object_base(app, what, name, obj, options, bases):
+    """
+    Quita 'object' de la lista de bases.
+    Si la única base era 'object', la lista queda vacía → no se muestra 'Bases'.
+    """
+    # 'bases' es una lista de nombres totalmente cualificados (str)
+    return [b for b in bases if not (b == "object" or b.endswith(".object"))]
 
 def setup(app):
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
@@ -119,6 +125,8 @@ def setup(app):
 
     dest_dir.mkdir(exist_ok=True) 
     dest_dir_2.mkdir(exist_ok=True)
+
+    app.connect("autodoc-process-bases", _drop_object_base)
 
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
