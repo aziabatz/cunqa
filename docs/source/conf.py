@@ -106,13 +106,12 @@ html_theme_options = {
     'titles_only': False
 }
 
-def _drop_object_base(app, what, name, obj, options, bases):
-    """
-    Quita 'object' de la lista de bases.
-    Si la única base era 'object', la lista queda vacía → no se muestra 'Bases'.
-    """
-    # 'bases' es una lista de nombres totalmente cualificados (str)
-    return [b for b in bases if not (b == "object" or b.endswith(".object"))]
+def _drop_object_base(app, what, obj, options, bases):
+    """Oculta 'Bases: object' dejando la lista de bases vacía en ese caso."""
+    if what != "class":
+        return
+    # 'bases' es una lista de nombres (strings). Filtramos 'object' y 'builtins.object'.
+    bases[:] = [b for b in bases if not (b == "object" or b.endswith(".object"))]
 
 def setup(app):
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
