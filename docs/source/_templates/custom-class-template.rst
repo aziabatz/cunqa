@@ -11,7 +11,7 @@
 
 .. autosummary::
    :nosignatures:
-{% for item in attributes | bysource(module, objname) %}
+{% for item in attributes%}
 {%- if not item.startswith('_') %}
    ~{{ name }}.{{ item }}
 {%- endif %}{% endfor %}
@@ -20,7 +20,7 @@
 {% if methods %}
 {{ _('Methods') | escape | underline('-') }}
 
-{% for item in methods | bysource(module, objname) %}
+{% for item in methods%}
 {%- if not item.startswith('_') %}
 .. automethod:: {{ name }}.{{ item }}
 {%- endif %}
