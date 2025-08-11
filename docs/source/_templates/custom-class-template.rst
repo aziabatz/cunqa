@@ -4,6 +4,7 @@
 
 .. autoclass:: {{ objname }}
    :show-inheritance:
+   :exclude-base-classes: object
 
 {# === TABLAS (resumen) === #}
 {% if attributes %}
