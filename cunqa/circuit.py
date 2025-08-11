@@ -155,30 +155,30 @@ class CunqaCircuit:
 
     Properties:
     -----------
-        quantum_regs: dict
+        quantum_regs: _dict_
             Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
 
-        classical_regs: dict
+        classical_regs: _dict_
             Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
 
-        instructions: list
+        instructions: _list_
             Set of operations applied to the circuit.
 
-        is_parametric: bool
+        is_parametric: _bool_
             Weather the circuit contains parametric gates.
 
-        has_cc: bool
+        has_cc: _bool_
             Weather the circuit contains classical communications with other circuit.
 
-        is_dynamic: bool
+        is_dynamic: _bool_
             Weather the circuit has local non-unitary operations.
 
-        sending_to: list[str]
+        sending_to: _list[str]_
             List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
 
     """
     
-    _id: str
+    _id: str #: Upper bound; None means unlimited.
     is_parametric: bool 
     has_cc: bool 
     is_dynamic: bool
@@ -232,16 +232,22 @@ class CunqaCircuit:
 
     @property
     def num_qubits(self) -> int:
+        """
+        Number of qubits of the circuit.
+        """
         return len(_flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
     def num_clbits(self):
+        """
+        Number of classical bits of the circuit.
+        """
         return len(_flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
 
     def from_instructions(self, instructions):
         """
-        Class method to 
+        Class method to add operations to the circuit from a list of dict-type instructions.
         """
         for instruction in instructions:
             self._add_instruction(instruction)
