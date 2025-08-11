@@ -360,6 +360,14 @@ class CunqaCircuit:
                     raise ValueError
                     
     def _add_q_register(self, name, number_qubits):
+        """
+        Class method to add a quantum register to the circuit. A quantum register is understood as a group of qubits with a label.
+
+        Args:
+            name (str): label for the quantum register.
+
+            number_qubits (int): number of qubits.
+        """
 
         if name in self.quantum_regs:
             i = 0
@@ -377,6 +385,14 @@ class CunqaCircuit:
         return new_name
 
     def _add_cl_register(self, name, number_clbits):
+        """
+        Class method to add a classical register to the circuit. A classical register is understood as a group of classical bits with a label.
+
+        Args:
+            name (str): label for the quantum register.
+
+            number_clbits (int): number of classical bits.
+        """
 
         if name in self.classical_regs:
             i = 0
@@ -1135,6 +1151,13 @@ class CunqaCircuit:
 
     # TODO: check if simulators accept reset instruction as native
     def reset(self, qubits: Union[list[int], int]):
+        """
+        Class method to add reset instruction to a qubit or list of qubits.
+
+        Args:
+        
+        """
+
         if isinstance(qubits, list):
             for q in qubits:
                 self.c_if("x", q, q)

@@ -99,6 +99,16 @@ html_theme_options = {
     'titles_only': False
 }
 
+def _bysource_filter(names, module, clsname):
+    """Devuelve 'names' (lista de miembros) ordenada como en el código fuente."""
+    import importlib
+    mod = importlib.import_module(module)
+    cls = getattr(mod, clsname)
+    # Python 3.6+ preserva el orden de definición en __dict__
+    order = list(cls.__dict__.keys())
+    idx = {n: i for i, n in enumerate(order)}
+    return sorted(names, key=lambda n: idx.get(n, 10**9))
+
 def setup(app):
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
     here = Path(__file__).resolve() # CUNQA/docs/source/
