@@ -152,40 +152,16 @@ class CunqaCircuit:
 
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
-
-    Properties:
-    -----------
-        quantum_regs: _dict_
-            Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
-
-        classical_regs: _dict_
-            Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
-
-        instructions: _list_
-            Set of operations applied to the circuit.
-
-        is_parametric: _bool_
-            Weather the circuit contains parametric gates.
-
-        has_cc: _bool_
-            Weather the circuit contains classical communications with other circuit.
-
-        is_dynamic: _bool_
-            Weather the circuit has local non-unitary operations.
-
-        sending_to: _list[str]_
-            List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
-
     """
     
-    _id: str #: Upper bound; None means unlimited.
-    is_parametric: bool  #: Upper bound; None means unlimited.
-    has_cc: bool 
-    is_dynamic: bool
-    instructions: "list[dict]"
-    quantum_regs: dict
-    classical_regs: dict
-    sending_to: "list[str]"
+    _id: str #: Circuit identificator.
+    is_parametric: bool  #: Weather the circuit contains parametric gates.
+    has_cc: bool #: Weather the circuit contains classical communications with other circuit.
+    is_dynamic: bool #: Weather the circuit has local non-unitary operations.
+    instructions: "list[dict]" #: Set of operations applied to the circuit.
+    quantum_regs: dict #: Dictionary of quantum registers of the circuit as {"name" : <list of qubits assigned>}.
+    classical_regs: dict #: Dictionary of classical registers of the circuit as {"name" : <list of clbits assigned>}
+    sending_to: "list[str]" #: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
 
 
     def __init__(self, num_qubits: int, num_clbits: Optional[int] = None, id: Optional[str] = None):
@@ -238,7 +214,7 @@ class CunqaCircuit:
         return len(_flatten([[q for q in qr] for qr in self.quantum_regs.values()]))
     
     @property
-    def num_clbits(self):
+    def num_clbits(self) -> int:
         """
         Number of classical bits of the circuit.
         """
