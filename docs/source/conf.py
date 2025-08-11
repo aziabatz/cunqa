@@ -33,13 +33,16 @@ extensions = [
 
 source_suffix = ['.rst', '.md']
 
-autodoc_member_order = "bysource"
-
 autosummary_generate = True
 
 autosummary_generate_overwrite = True
 
-# autodoc_default_options = {"members": True}
+autodoc_default_options = {
+    # "members": True,        # ← NO
+    "private-members": False,
+    "special-members": "",
+}
+autodoc_member_order = "bysource"
 
 autodoc_mock_imports = [
     'os', 
@@ -99,21 +102,13 @@ html_theme_options = {
     'titles_only': False
 }
 
-def _bysource_filter(names, module, clsname):
-    """Devuelve 'names' (lista de miembros) ordenada como en el código fuente."""
-    import importlib
-    mod = importlib.import_module(module)
-    cls = getattr(mod, clsname)
-    # Python 3.6+ preserva el orden de definición en __dict__
-    order = list(cls.__dict__.keys())
-    idx = {n: i for i, n in enumerate(order)}
-    return sorted(names, key=lambda n: idx.get(n, 10**9))
+
 
 def setup(app):
 
     def _register_filter(_app):
         _app.builder.templates.environment.filters['bysource'] = _bysource_filter
-        
+
     app.connect('builder-inited', _register_filter, priority=0)
 
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
