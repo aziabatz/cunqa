@@ -37,7 +37,7 @@ source_suffix = ['.rst', '.md']
 
 autosummary_generate = True
 
-autodoc_default_options = {"members": True}
+# autodoc_default_options = {"members": True}
 
 autodoc_mock_imports = [
     'os', 
