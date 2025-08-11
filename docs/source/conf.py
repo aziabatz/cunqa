@@ -28,7 +28,9 @@ extensions = [
     'nbsphinx',
     'sphinx_mdinclude',
     'sphinx.ext.githubpages',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    "autodocsumm",
+    "sphinx_toolbox.more_autosummary"
 ]
 
 source_suffix = ['.rst', '.md']
@@ -37,12 +39,14 @@ autosummary_generate = True
 
 autosummary_generate_overwrite = True
 
+
 autodoc_default_options = {
     # "members": True,        # ← NO
     "private-members": False,
     "special-members": "",
 }
 autodoc_member_order = "bysource"
+autodocsumm_member_order = "bysource"
 
 autodoc_mock_imports = [
     'os', 
@@ -86,7 +90,6 @@ html_css_files = [
 html_logo = "_static/logo_cesga_blanco.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
-
     'logo_only': False,
     'prev_next_buttons_location': 'bottom',
     'style_external_links': False,
