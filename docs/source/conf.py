@@ -105,12 +105,6 @@ html_theme_options = {
 
 
 def setup(app):
-
-    def _register_filter(_app):
-        _app.builder.templates.environment.filters['bysource'] = _bysource_filter
-
-    app.connect('builder-inited', _register_filter, priority=0)
-
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
     here = Path(__file__).resolve() # CUNQA/docs/source/
     project_root = here.parents[2]  # Goes from /docs/source to project root
