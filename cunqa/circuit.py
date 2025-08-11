@@ -179,7 +179,7 @@ class CunqaCircuit:
     """
     
     _id: str #: Upper bound; None means unlimited.
-    is_parametric: bool 
+    is_parametric: bool  #: Upper bound; None means unlimited.
     has_cc: bool 
     is_dynamic: bool
     instructions: "list[dict]"
