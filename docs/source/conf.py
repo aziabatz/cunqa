@@ -86,6 +86,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = [
     'table.css',
+    'hide_bases_object.js',
 ]
 html_logo = "_static/logo_cesga_blanco.png"
 html_favicon = "_static/favicon.ico"
