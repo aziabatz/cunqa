@@ -37,6 +37,8 @@ autodoc_member_order = "bysource"
 
 autosummary_generate = True
 
+autosummary_generate_overwrite = True
+
 # autodoc_default_options = {"members": True}
 
 autodoc_mock_imports = [
