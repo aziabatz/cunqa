@@ -121,6 +121,10 @@ def setup(app):
     dest_dir.mkdir(exist_ok=True) 
     dest_dir_2.mkdir(exist_ok=True)
 
+    def _register_filter(_app):
+        _app.builder.templates.environment.filters['bysource'] = _bysource_filter
+    app.connect('builder-inited', _register_filter)
+
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
     for py_file in source_py_dir.glob('*.py'):
