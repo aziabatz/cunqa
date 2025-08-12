@@ -1,5 +1,20 @@
 """
     Holds Cunqa's custom circuit class and functions to translate its instructions into other formats for circuit definition.
+
+    Users can define a circuit using :py:class:`~CunqaCircuit` to then send it to the virtual QPUs. Nevertheless, for the case in which no communications are needed among the circuits sent, other formats are allowed.
+
+    This module also provides global functions that translate form `qiskit.circuit.QuantumCircuit` to a instructions json (:py:meth:`~qc_to_json`) and the other way around (:py:meth:`~from_json_to_qc`).
+
+    For example, if a user wants to transform a `qiskit.circuit.Quantumcircuit` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
+
+    >>> qc = QuantumCircuit(4)
+    >>> ...
+    >>> cunqacirc = CunqaCircuit(4)
+    >>> instruction_set = qc_to_json(qc)
+    >>> cunqacirc.from_instructions(instruction_set)
+
+    Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check :py:class:`its documentation <~CunqaCircuit>`.
+
 """
 from cunqa.logger import logger
 
@@ -117,7 +132,7 @@ class CunqaCircuit:
         >>> circuit_2 = CunqaCircuit(2)
         >>> circuit_1.h(0)
         >>> circuit_1.measure_and_send(0, circuit_2) # qubit 0 is measured and the outcome is sent to circuit_2
-        >>> circuit_2.remote_c_if("x", circuit_1) # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_2.remote_c_if("x", 0, circuit_1) # the outcome is recived to perform a classicaly controlled operation
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
@@ -129,7 +144,7 @@ class CunqaCircuit:
         >>> circuit_2 = CunqaCircuit(2, id = "2")
         >>> circuit_1.h(0)
         >>> circuit_1.measure_and_send(0, "2") # qubit 0 is measured and the outcome is sent to circuit_2
-        >>> circuit_2.remote_c_if("x", "1") # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_2.remote_c_if("x", 0, "1") # the outcome is recived to perform a classicaly controlled operation
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
@@ -1054,6 +1069,10 @@ class CunqaCircuit:
 
         For parametric gates, only one-parameter gates are supported, therefore only one parameter must be passed.
 
+        The gates supported by the method are the following: h, x, y, z, rx, ry, rz, cx, cy, cz, unitary.
+
+        To implement the conditioned uniraty gate, the corresponding matrix should be passed by the `matrix` argument.
+
         Args:
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
@@ -1281,6 +1300,10 @@ class CunqaCircuit:
     def remote_c_if(self, gate: str, qubits: Union[int, list[int]], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit']) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
+
+        The gates supported by the method are the following: h, x, y, z, rx, ry, rz, cx, cy, cz, unitary.
+
+        To implement the conditioned uniraty gate, the corresponding matrix should be passed by the `param` argument.
         
         Args:
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
@@ -1289,7 +1312,7 @@ class CunqaCircuit:
 
             param (float or int): parameter in case the gate provided is parametric.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
+            control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
 
         """
 

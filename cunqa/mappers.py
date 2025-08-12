@@ -1,5 +1,22 @@
 """
-    Contains map-like callables to distribute circuits in virtual QPUS. Useful when working with evolutive optimizators.
+    Contains map-like callables to distribute circuits in virtual QPUS, needed when communications among circuits are present.
+
+    When having classical or quantum communications among circuits, :py:meth:~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
+
+    So, once the virtual QPUs that allow the desired type of communications are raised and circuits have been defined using :py:class:~cunqa.circuit.CunqaCircuit`,
+    they can be sent using the :py:meth:~run_distributed` function:
+
+    >>> circuit1 = CunqaCircuit(1, "1")
+    >>> circuit2 = CunqaCircuit(1, "2")
+    >>> circuit1.h(0)
+    >>> circuit1.measure_and_send(0, "2")
+    >>> circuit2.remote_c_if("x", 0, "1")
+    >>>
+    >>> qpus = getQPUs()
+    >>>
+    >>> qjobs = run_distributed([circuit1, circuit2], qpus)
+    >>> results = gather(qjobs)
+
 """
 from cunqa.logger import logger
 from cunqa.qjob import gather
@@ -17,7 +34,6 @@ import re
 import copy
 
 
-
 def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['QPU']", **run_args: Any):
     """
     Method to send circuits to serveral QPUs allowing classical communications among them. 
@@ -31,15 +47,13 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     transpilation is not supported. The arguments provided will be the same for the all `QJobs` created.
 
     Args:
-    ---------
-    circuits (list[dict, CunqaCircuit]): circuits to be run.
+        circuits (list[dict, CunqaCircuit]): circuits to be run.
 
-    qpus (list[<class 'cunqa.qpu.QPU'>]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
+        qpus (list[<class 'cunqa.qpu.QPU'>]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
-    **run_args: any other run arguments and parameters.
+        run_args: any other run arguments and parameters.
 
     Return:
-    ---------
     List of <class `cunqa.qjob.QJobs`> objects.
     """
 
