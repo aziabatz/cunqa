@@ -25,7 +25,6 @@
 .. automethod:: {{ name }}.{{ item }}
 {% elif item == '__init__' %}
 .. automethod:: {{ name }}.{{ item }}
+{%- endif %}{% endfor %}
 {% endif %}
-{%- endif %}
-{% endfor %}
-{% endif %}
+
