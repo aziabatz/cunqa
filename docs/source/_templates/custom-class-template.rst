@@ -9,6 +9,8 @@
 {% if attributes %}
 {{ _('Attributes') | escape | underline('-') }}
 
+{% set bases = [b for b in bases if not (b == 'object' or b.endswith('.object'))] %}
+
 .. autosummary::
    :nosignatures:
 {% for item in attributes%}
