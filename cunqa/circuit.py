@@ -224,6 +224,11 @@ class CunqaCircuit:
     def from_instructions(self, instructions):
         """
         Class method to add operations to the circuit from a list of dict-type instructions.
+        
+        Each instruction must have as mandatory keys "name" and "qubits", while other keys are accepted: "clbits", "params", "circuits" or "remote_conditional_reg".
+
+        Args:
+            isntructions (list[dict]): list gathering all the each instruction as a dict.
         """
         for instruction in instructions:
             self._add_instruction(instruction)
@@ -233,6 +238,8 @@ class CunqaCircuit:
     def _add_instruction(self, instruction):
         """
         Class method to add an instruction to the CunqaCircuit.
+
+        Each instruction must have as mandatory keys "name" and "qubits", while other keys are accepted: "clbits", "params", "circuits" or "remote_conditional_reg".
 
         Args:
             instruction (dict): instruction to be added.
@@ -250,6 +257,8 @@ class CunqaCircuit:
         Class method to check format for circuit instruction. If method finds some inconsistency, raises an error that must be captured avobe.
         
         If format is correct, no error is raise and nothing is returned.
+
+        Each instruction must have as mandatory keys `` "name":str `` and ``"qubits":`[int]``, while other keys are accepted: ``"clbits":[int]``, ``"params":[int or float]``, ``"circuits":[str]`` or ``"remote_conditional_reg":[int]``.
 
         Args:
             instruction (dict): instruction to be checked.
@@ -553,7 +562,7 @@ class CunqaCircuit:
         Class method to apply swap gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied.
+            qubits (list[int]): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"swap",
@@ -565,7 +574,7 @@ class CunqaCircuit:
         Class method to apply ecr gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied.
+            qubits (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"ecr",
@@ -577,7 +586,7 @@ class CunqaCircuit:
         Class method to apply cx gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+            qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cx",
@@ -589,7 +598,7 @@ class CunqaCircuit:
         Class method to apply cy gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+            qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cy",
@@ -601,7 +610,7 @@ class CunqaCircuit:
         Class method to apply cz gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+            qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"cz",
@@ -613,7 +622,7 @@ class CunqaCircuit:
         Class method to apply csx gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
+            qubits (int): qubits in which the gate is applied, first one will be control qubit and second one target qubit.
         """
         self._add_instruction({
             "name":"csx",
@@ -627,7 +636,7 @@ class CunqaCircuit:
         Class method to apply ccx gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+            qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccx",
@@ -639,7 +648,7 @@ class CunqaCircuit:
         Class method to apply ccy gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+            qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccy",
@@ -651,7 +660,7 @@ class CunqaCircuit:
         Class method to apply ccz gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+            qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"ccz",
@@ -663,7 +672,7 @@ class CunqaCircuit:
         Class method to apply cswap gate to the given qubits.
 
         Args:
-            ``*qubits`` (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
+            qubits (int): qubits in which the gate is applied, first two will be control qubits and the following one will be target qubit.
         """
         self._add_instruction({
             "name":"cswap",
@@ -673,7 +682,7 @@ class CunqaCircuit:
     
     # methods for parametric single-qubit gates
 
-    def u1(self, param: float, qubit: int) -> None:
+    def u1(self, param: Union[float,int], qubit: int) -> None:
         """
         Class method to apply u1 gate to the given qubit.
 
@@ -688,7 +697,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def u2(self, theta: float, phi: float, qubit: int) -> None:
+    def u2(self, theta:  Union[float,int], phi:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply u2 gate to the given qubit.
 
@@ -703,7 +712,7 @@ class CunqaCircuit:
             "params":[theta,phi]
         })
 
-    def u(self, theta: float, phi: float, lam: float, qubit: int) -> None:
+    def u(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply u gate to the given qubit.
 
@@ -719,7 +728,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
 
-    def u3(self, theta: float, phi: float, lam: float, qubit: int) -> None:
+    def u3(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply u3 gate to the given qubit.
 
@@ -735,7 +744,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
 
-    def p(self, param: float, qubit: int) -> None:
+    def p(self, param:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply p gate to the given qubit.
 
@@ -750,7 +759,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def r(self, theta: float, phi: float, qubit: int) -> None:
+    def r(self, theta:  Union[float,int], phi:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply r gate to the given qubit.
 
@@ -765,7 +774,7 @@ class CunqaCircuit:
             "params":[theta, phi]
         })
 
-    def rx(self, param: float, qubit: int) -> None:
+    def rx(self, param:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply rx gate to the given qubit.
 
@@ -780,7 +789,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def ry(self, param: float, qubit: int) -> None:
+    def ry(self, param:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply ry gate to the given qubit.
 
@@ -795,7 +804,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def rz(self, param: float, qubit: int) -> None:
+    def rz(self, param:  Union[float,int], qubit: int) -> None:
         """
         Class method to apply rz gate to the given qubit.
 
@@ -812,14 +821,13 @@ class CunqaCircuit:
 
     # methods for parametric two-qubit gates
 
-    def rxx(self, param: float, *qubits: int) -> None:
+    def rxx(self, param: Union[int,float], *qubits: int) -> None:
         """
         Class method to apply rxx gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"rxx",
@@ -827,14 +835,13 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def ryy(self, param: float, *qubits: int) -> None:
+    def ryy(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply ryy gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"ryy",
@@ -842,14 +849,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def rzz(self, param: float, *qubits: int) -> None:
+    def rzz(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply rzz gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"rzz",
@@ -857,14 +863,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def rzx(self, param: float, *qubits: int) -> None:
+    def rzx(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply rzx gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied.
         """
         self._add_instruction({
             "name":"rzx",
@@ -872,14 +877,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def crx(self, param: float, *qubits: int) -> None:
+    def crx(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply crx gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"crx",
@@ -887,14 +891,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cry(self, param: float, *qubits: int) -> None:
+    def cry(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply cry gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cry",
@@ -902,14 +905,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def crz(self, param: float, *qubits: int) -> None:
+    def crz(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply crz gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"crz",
@@ -917,14 +919,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cp(self, param: float, *qubits: int) -> None:
+    def cp(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply cp gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cp",
@@ -932,14 +933,13 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cu1(self, param: float, *qubits: int) -> None:
+    def cu1(self, param:  Union[float,int], *qubits: int) -> None:
         """
         Class method to apply cu1 gate to the given qubits.
 
         Args:
-            qubits (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
-
             param (float or int): parameter for the parametric gate.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cu1",
@@ -947,7 +947,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def cu3(self, theta: float, phi: float, lam: float, *qubits: int) -> None: # three parameters
+    def cu3(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], *qubits: int) -> None: # three parameters
         """
         Class method to apply cu3 gate to the given qubits.
 
@@ -955,7 +955,7 @@ class CunqaCircuit:
             theta (float): angle.
             phi (float): angle.
             lam (float): angle.
-            ``*qubits`` (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
+            qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cu3",
@@ -963,7 +963,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
     
-    def cu(self, theta: float, phi: float, lam: float, gamma: float, *qubits: int) -> None: # four parameters
+    def cu(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], gamma:  Union[float,int], *qubits: int) -> None: # four parameters
         """
         Class method to apply cu gate to the given qubits.
 
@@ -972,7 +972,7 @@ class CunqaCircuit:
             phi (float): angle.
             lam (float): angle.
             gamma (float): angle.
-            ``*qubits`` (list[int, int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
+            qubits (int or list[int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
             "name":"cu",
@@ -989,7 +989,7 @@ class CunqaCircuit:
         Args:
             matrix (list or <class 'numpy.ndarray'>): unitary operator in matrix form to be applied to the given qubits.
 
-            ``*qubits`` (int): qubits to which the unitary operator will be applied.
+            qubits (int): qubits to which the unitary operator will be applied.
 
         """
         if isinstance(matrix, np.ndarray) and (matrix.shape[0] == matrix.shape[1]) and (matrix.shape[0]%2 == 0):
@@ -1057,11 +1057,14 @@ class CunqaCircuit:
         Args:
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
-            control (int): control qubit whose classical measurement will control the execution of the gate.
+            control_qubit (int): control qubit whose classical measurement will control the execution of the gate.
 
-            target (list[int], int): list of qubits or qubit to which the gate is intended to be applied.
+            target_qubit (list[int], int): list of qubits or qubit to which the gate is intended to be applied.
 
             param (float or int): parameter for the case parametric gate is provided.
+
+            matrix (list or <class 'numpy.ndarray'>): unitary operator in matrix form to be applied to the given qubits.
+
         """
 
         self.is_dynamic = True
@@ -1150,11 +1153,12 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
 
     # TODO: check if simulators accept reset instruction as native
-    def reset(self, qubits: Union[list[int], int]):
+    def reset(self, *qubits: int):
         """
         Class method to add reset instruction to a qubit or list of qubits.
 
         Args:
+            qubits (int): qubits to which the reset operation is applied.
         
         """
 
@@ -1173,7 +1177,6 @@ class CunqaCircuit:
         Class method to measure and send a bit from the current circuit to a remote one.
         
         Args:
-        -------
 
             qubit (int): qubit to be measured and sent.
 
@@ -1215,11 +1218,9 @@ class CunqaCircuit:
         Class method to send a qubit from the current circuit to another one.
         
         Args:
-        -------
+            qubit (int): qubit to be sent.
 
-        qubit (int): qubit to be sent.
-
-        target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the qubit is sent.
+            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the qubit is sent.
         """
         self.is_dynamic = True
         
@@ -1250,7 +1251,6 @@ class CunqaCircuit:
         Class method to send a qubit from the current circuit to a remote one.
         
         Args:
-        -------
             qubit (int): ancilla to which the received qubit is assigned.
 
             control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit from which the qubit is received.
@@ -1283,7 +1283,6 @@ class CunqaCircuit:
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
         
         Args:
-        -------
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
             target_qubits (int, list[int]): qubit or qubits to which the gate is conditionally applied.
@@ -1340,6 +1339,12 @@ class CunqaCircuit:
                 
 
 def _flatten(lists: list[list]):
+    """
+    Takes the elements of the lists supplied and creates a single list gathering all of them.
+
+    Args:
+        lists (list[list]): list of the lists which elements are wanted to be gathered.
+    """
     return [element for sublist in lists for element in sublist]
 
 
@@ -1349,9 +1354,9 @@ def _flatten(lists: list[list]):
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
-def qc_to_json(qc: Union['QuantumCircuit', 'CunqaCircuit', str]) -> Tuple[dict, bool]:
+def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     """
-    Transforms a QuantumCircuit to json dict.
+    Transforms a `qiskit.circuit.QuantumCircuit` to json dict.
 
     Args:
         qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to transform to json.
@@ -1388,7 +1393,6 @@ def qc_to_json(qc: Union['QuantumCircuit', 'CunqaCircuit', str]) -> Tuple[dict, 
             qreg = [r._register.name for r in instruction.qubits]
             qubit = [q._index for q in instruction.qubits]
             
-            creg = [r._register.name for r in instruction.clbits]
             bit = [b._index for b in instruction.clbits]
 
             if instruction.name == "barrier":
@@ -1534,7 +1538,7 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
 
 def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     """
-    Extracts the number of classical and quantum registers from a QuantumCircuit.
+    Returns a list of two dicts corresponding to the classical and quantum registers of the circuit supplied.
 
     Args
         qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
