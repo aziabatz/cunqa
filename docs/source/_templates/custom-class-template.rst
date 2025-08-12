@@ -4,6 +4,8 @@
 
 .. autoclass:: {{ objname }}
    :show-inheritance:
+   :member-order: bysource
+   :special-members: __init__
 
 {# === TABLAS (resumen) === #}
 {% if attributes %}
@@ -17,12 +19,12 @@
 {%- endif %}{% endfor %}
 {% endif %}
 
-{% if methods %}
-{{ _('Methods') | escape | underline('-') }}
+.. .. {% if methods %}
+.. .. {{ _('Methods') | escape | underline('-') }}
 
-{% for item in methods%}
-{%- if not item.startswith('_') %}
-.. automethod:: {{ name }}.{{ item }}
-{%- endif %}
-{% endfor %}
-{% endif %}
+.. .. {% for item in methods%}
+.. .. {%- if not item.startswith('_') %}
+.. .. automethod:: {{ name }}.{{ item }}
+.. .. {%- endif %}
+.. .. {% endfor %}
+.. .. {% endif %}
