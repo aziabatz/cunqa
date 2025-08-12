@@ -20,11 +20,16 @@
 {% if methods %}
 {{ _('Methods') | escape | underline('-') }}
 
-{% for item in methods%}
-{%- if not item.startswith('_') %}
-.. automethod:: {{ name }}.{{ item }}
-{% elif item == '__init__' %}
-.. automethod:: {{ name }}.{{ item }}
-{%- endif %}{% endfor %}
-{% endif %}
+.. automethod:: {{ name }}.__init__
 
+{% set ns = namespace(pub=[]) %}
+{% for item in methods %}
+{% if item != '__init__' and item[0] != '_' %}
+{% set ns.pub = ns.pub + [item] %}
+{% endif %}
+{% endfor %}
+
+{% for item in ns.pub | sort %}
+.. automethod:: {{ name }}.{{ item }}
+{% endfor %}
+{% endif %}
