@@ -3,9 +3,9 @@
 
     Users can define a circuit using :py:class:`~CunqaCircuit` to then send it to the virtual QPUs. Nevertheless, for the case in which no communications are needed among the circuits sent, other formats are allowed.
 
-    This module also provides global functions that translate form `qiskit.circuit.QuantumCircuit` to a instructions json (:py:meth:`~qc_to_json`) and the other way around (:py:meth:`~from_json_to_qc`).
+    This module also provides global functions that translate form ``qiskit.circuit.QuantumCircuit`` to a instructions json (:py:meth:`~qc_to_json`) and the other way around (:py:meth:`~from_json_to_qc`).
 
-    For example, if a user wants to transform a `qiskit.circuit.Quantumcircuit` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
+    For example, if a user wants to transform a ``qiskit.circuit.Quantumcircuit`` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
 
     >>> qc = QuantumCircuit(4)
     >>> ...
@@ -13,7 +13,7 @@
     >>> instruction_set = qc_to_json(qc)
     >>> cunqacirc.from_instructions(instruction_set)
 
-    Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check :py:class:`its documentation <~CunqaCircuit>`.
+    Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check :py:class:`its documentation <CunqaCircuit>`.
 
 """
 from cunqa.logger import logger
@@ -1379,7 +1379,7 @@ from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstructio
 
 def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     """
-    Transforms a `qiskit.circuit.QuantumCircuit` to json dict.
+    Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
 
     Args:
         qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to transform to json.
@@ -1462,10 +1462,10 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
+    Function to transform a circuit in json dict format to ```qiskit.circuit.QuantumCircuit`` <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`.
 
     Args:
-        circuit_dict (dict): circuit to be transformed to QuantumCircuit.
+        circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
 
     Return:
         QuantumCircuit with the given instructions.
