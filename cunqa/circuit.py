@@ -132,7 +132,7 @@ class CunqaCircuit:
         >>> circuit_2 = CunqaCircuit(2)
         >>> circuit_1.h(0)
         >>> circuit_1.measure_and_send(0, circuit_2) # qubit 0 is measured and the outcome is sent to circuit_2
-        >>> circuit_2.remote_c_if("x", circuit_1) # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_2.remote_c_if("x", 0, circuit_1) # the outcome is recived to perform a classicaly controlled operation
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
@@ -144,7 +144,7 @@ class CunqaCircuit:
         >>> circuit_2 = CunqaCircuit(2, id = "2")
         >>> circuit_1.h(0)
         >>> circuit_1.measure_and_send(0, "2") # qubit 0 is measured and the outcome is sent to circuit_2
-        >>> circuit_2.remote_c_if("x", "1") # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_2.remote_c_if("x", 0, "1") # the outcome is recived to perform a classicaly controlled operation
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
@@ -1312,7 +1312,7 @@ class CunqaCircuit:
 
             param (float or int): parameter in case the gate provided is parametric.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
+            control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
 
         """
 
