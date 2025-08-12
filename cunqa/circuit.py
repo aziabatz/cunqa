@@ -1462,7 +1462,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to ` ``qiskit.circuit.QuantumCircuit`` <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`.
+    Function to transform a circuit in json dict format to ` ``qiskit.circuit.QuantumCircuit`` <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_.
 
     Args:
         circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
