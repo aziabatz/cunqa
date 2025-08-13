@@ -30,19 +30,12 @@
 
     :py:class:`~QJobMapper` takes a list of existing :py:class:`~cunqa.qjob.QJob` objects and a list of :py:class:`~cunqa.qpu.QPU` objects corresponding to the virtual QPUs that we want to use.
     Then, the class can be called passing a set of parameters and a cost function.
-    This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qpu.QPU.upgrade_parameters` method.
+    This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` method.
     Then, gathers the results of the executions and returns the value of the cost function for each.
-    Let's see a simple example in which we want to update the parameters of a set of already sent circuits and obtain the value of a cost function for them:
-
-    >>> def cost_function(counts):
-    >>>     ···
-    >>>     return cost_value
-    >>> 
-    >>> Mapper = QJobMapper(qjobs) # passing existing qjobs
-    >>>
-    >>> new_parameters_list = [···] # defining new parameters for each qjob
-    >>>
-    >>> cost_results = Mapper(new_parameters_list, cost_function)
+    
+    On the other hand, :py:class:`~QPUCircuitMapper` is instanciated with a circuit and instructions for its execution, toguether with a list of the :py:class:`~cunqa.qpu.QPU` objects.
+    The difference with :py:class:`~QJobMapper` is that here the method :py:meth:`~cunqa.qpu.QPU.run` is mapped to each QPU, passing it the circuit with the given parameters.
+    
 
     References:
     ~~~~~~~~~~~
