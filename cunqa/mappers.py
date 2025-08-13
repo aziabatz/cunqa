@@ -31,7 +31,18 @@
     :py:class:`~QJobMapper` takes a list of existing :py:class:`~cunqa.qjob.QJob` objects and a list of :py:class:`~cunqa.qpu.QPU` objects corresponding to the virtual QPUs that we want to use.
     Then, the class can be called passing a set of parameters and a cost function.
     This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qpu.QPU.upgrade_parameters` method.
-    Then, gathers the results of the executions and returns the value of the cost function for each. Let's see an example using Differential Evolution [#]_ optimzier.
+    Then, gathers the results of the executions and returns the value of the cost function for each. Let's see an example using Differential Evolution [#]_ optimzier:
+
+    >>> ansatz = QuantumCircuit(5)
+    >>> ...
+    >>> ansatz.assign_parameters(initial_parameters)
+    >>> qpus = getQPUs()
+    >>> qjobs = []
+    >>> for qpu in qpus:
+    >>>     qjob = qpu.run(ansatz)
+    >>>     qjobs.append(qjob)
+    >>> Mapper = QJobMapper(qjobs)
+    >>> optimization_result = differential_evolution(cost_function, ..., workers = Mapper)
 
     References:
     ~~~~~~~~~~~
