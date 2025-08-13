@@ -1,7 +1,10 @@
 """
     Contains map-like callables to distribute circuits in virtual QPUS, needed when communications among circuits are present.
 
-    When having classical or quantum communications among circuits, :py:func:`~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
+    Sending circuits with classical or quantum communications
+    ---------------------------------------------------------
+
+    When having classical or quantum communications among circuits, method :py:func:`~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
 
     So, once the virtual QPUs that allow the desired type of communications are raised and circuits have been defined using :py:class:`~cunqa.circuit.CunqaCircuit`,
     they can be sent using the :py:meth:`~run_distributed` function:
@@ -16,6 +19,17 @@
     >>>
     >>> qjobs = run_distributed([circuit1, circuit2], qpus)
     >>> results = gather(qjobs)
+
+
+    Mapping circuits to virtual QPUs in optimization problems
+    ---------------------------------------------------------
+
+    **Variational Quantum Algorithms** [vqas]_ require from numerous executions of parametric cirucits, while in each step of the optimization process new parameters are assigned to them.
+    This implies that, after parameters are updated, a new circuit must be created, transpiled and then sent to the quantum processor or simulator.
+
+
+    References:
+    .. [vqas] `Variational Quantum Algorithms arxiv <https://arxiv.org/abs/2012.09265>`_
 
 """
 from cunqa.logger import logger
