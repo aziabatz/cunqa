@@ -19,7 +19,6 @@
    {{ _('Functions') | escape | underline('-') }}
 
    .. autosummary::
-      :toctree:
       :nosignatures:
    {% for item in functions %}
       {{ item }}
@@ -32,7 +31,6 @@
    {{ _('Classes') | escape | underline('-') }}
 
    .. autosummary::
-      :toctree:
       :template: custom-class-template.rst
       :nosignatures:
    {% for item in classes %}
