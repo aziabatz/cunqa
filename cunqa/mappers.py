@@ -28,14 +28,20 @@
     This implies that, after parameters are updated, a new circuit must be created, transpiled and then sent to the quantum processor or simulator.
     For simplifying this process, we have :py:class:`~QJobMapper` and :py:class:`~QPUCircuitMapper` classes. Both classes are thought to be used for Scipy optimizers [#]_ as the ``workers`` argument in global optimizers.
 
+    QJobMapper
+    ==========
+
     :py:class:`~QJobMapper` takes a list of existing :py:class:`~cunqa.qjob.QJob` objects and a list of :py:class:`~cunqa.qpu.QPU` objects corresponding to the virtual QPUs that we want to use.
     Then, the class can be called passing a set of parameters and a cost function.
     This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` method.
     Then, gathers the results of the executions and returns the value of the cost function for each.
     
+    QPUCircuitMapper
+    ===============
+
     On the other hand, :py:class:`~QPUCircuitMapper` is instanciated with a circuit and instructions for its execution, toguether with a list of the :py:class:`~cunqa.qpu.QPU` objects.
     The difference with :py:class:`~QJobMapper` is that here the method :py:meth:`~cunqa.qpu.QPU.run` is mapped to each QPU, passing it the circuit with the given parameters.
-    
+
 
     References:
     ~~~~~~~~~~~
