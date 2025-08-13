@@ -79,20 +79,20 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     transpilation is not supported. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
-        circuits (list[dict, :py:class:`~cunqa.circuit.CunqaCircuit`]): circuits to be run.
+        circuits (list[dict, CunqaCircuit]): circuits to be run.
 
         qpus (list[QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
         run_args: any other run arguments and parameters.
 
     Return:
-    List of <class `cunqa.qjob.QJobs`> objects.
+    List of :py:class:`~cunqa.qjob.QJob` objects.
     """
 
     distributed_qjobs = []
     circuit_jsons = []
 
-    remote_controlled_gates = ["measure_and_send", "recv", "qsend", "qrecv"]
+    remote_controlled_gates = ["measure_and_send", "remote_c_if", "qsend", "qrecv"]
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons
