@@ -13,10 +13,10 @@
     >>> instruction_set = qc_to_json(qc)
     >>> cunqacirc.from_instructions(instruction_set)
 
-    Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check :py:class:`its documentation <CunqaCircuit>`.
+    Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
 
     
-    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_
+    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
 
 """
 from cunqa.logger import logger
@@ -1465,10 +1465,10 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_.
+    Function to transform a circuit in json dict format to ``qiskit.circuit.QuantumCircuit``.
 
     Args:
-        circuit_dict (dict): circuit to be transformed to `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_.
+        circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
 
     Return:
         QuantumCircuit with the given instructions.
