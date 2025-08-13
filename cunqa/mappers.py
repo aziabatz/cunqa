@@ -37,7 +37,9 @@
     ~~~~~~~~~~~
 
     .. [#] `Variational Quantum Algorithms arXiv <https://arxiv.org/abs/2012.09265>`_ .
-    .. [##] `scipy.optimize documentation <https://docs.scipy.org/doc/scipy/reference/optimize.html>`_
+
+    .. [##] `scipy.optimize documentation <https://docs.scipy.org/doc/scipy/reference/optimize.html>`_.
+    
     .. [###] Differential Evolution initializes a population of inidividuals that evolute from generation to generation in order to collectively find the lowest value to a given cost function.
     This optimizer has shown great performance for VQAs [`Reference <https://arxiv.org/abs/2303.12186>`_].
     It is well implemented at Scipy by the `scipy.optimize.differential_evolution <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution>`_ function.
