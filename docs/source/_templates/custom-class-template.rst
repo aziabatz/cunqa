@@ -29,8 +29,7 @@
 {% endif %}
 {% endfor %}
 
-{% set sorted_methods = ns.pub | sort %}
-{% for item in sorted_methods %}
+{% for item in ns.pub | sort %}
 .. automethod:: {{ name }}.{{ item }}
 {% endfor %}
 {% endif %}
