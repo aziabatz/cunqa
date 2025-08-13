@@ -72,14 +72,15 @@ import copy
 def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['QPU']", **run_args: Any):
     """
     Function to send circuits to serveral virtual QPUs allowing classical or quantum communications among them. 
-    
     Each circuit will be sent to each QPU in order, therefore both lists must be of the same size.
+
+    Because the function is destined for the execution that require communications, only :py:class:`~CunqaCircuit` or instruction sets are accepted.
 
     If ``transpile``, ``initial_layout`` or ``opt_level`` are passed as ``**run_args`` they will be ignored since for the current version
     transpilation is not supported. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
-        circuits (list[dict, CunqaCircuit]): circuits to be run.
+        circuits (list[dict], CunqaCircuit): circuits to be run.
 
         qpus (list[QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
