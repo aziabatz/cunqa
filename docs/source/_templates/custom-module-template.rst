@@ -16,9 +16,12 @@
 
    {% block functions %}
    {% if functions %}
-   {{ _('Functions') | escape | underline('-') }}
+   .. raw:: html
+
+      <h2> {{ _('Functions') }} </h2>
 
    .. autosummary::
+      :toctree:
       :nosignatures:
    {% for item in functions %}
       {{ item }}
@@ -28,9 +31,12 @@
 
    {% block classes %}
    {% if classes %}
-   {{ _('Classes') | escape | underline('-') }}
+   .. raw:: html
+
+      <h2> {{ _('Classes') }} </h2>
 
    .. autosummary::
+      :toctree:
       :template: custom-class-template.rst
       :nosignatures:
    {% for item in classes %}
@@ -41,7 +47,9 @@
 
    {% block exceptions %}
    {% if exceptions %}
-   {{  _('Exceptions') | escape | underline('-')  }}
+   .. raw:: html
+
+      <h2> {{ _('Exceptions') }} </h2>
 
    .. autosummary::
       :toctree:
@@ -53,6 +61,10 @@
 
 {% block modules %}
 {% if modules %}
+.. raw:: html
+
+   <h2> {{ _('Modules') }} </h2>
+
 .. autosummary::
    :toctree:
    :template: custom-module-template.rst
