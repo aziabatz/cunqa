@@ -79,7 +79,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     transpilation is not supported. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
-        circuits (list[dict, CunqaCircuit]): circuits to be run.
+        circuits (list[dict, :py:class:`~cunqa.circuit.CunqaCircuit`]): circuits to be run.
 
         qpus (list[QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
