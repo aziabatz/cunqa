@@ -30,16 +30,16 @@
 
     QJobMapper
     ==========
-
     :py:class:`~QJobMapper` takes a list of existing :py:class:`~cunqa.qjob.QJob` objects, then, the class can be called passing a set of **parameters** and a **cost function**.
-    This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` method.
-    Then, it gathers the results of the executions and returns the value of the cost function for each.
+    This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such **parameters** through the :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` method.
+    Then, it gathers the results of the executions and returns the **value of the cost function** for each.
     
     QPUCircuitMapper
     ===============
     On the other hand, :py:class:`~QPUCircuitMapper` is instanciated with a circuit and instructions for its execution, toguether with a list of the :py:class:`~cunqa.qpu.QPU` objects.
-    The difference with :py:class:`~QJobMapper` is that here the method :py:meth:`~cunqa.qpu.QPU.run` is mapped to each QPU, passing it the circuit with the given parameters.
+    The difference with :py:class:`~QJobMapper` is that here the method :py:meth:`~cunqa.qpu.QPU.run` is mapped to each QPU, passing it the circuit with the given parameters assigned so that for this case several :py:class:`~cunqa.qjob.QJob` objects are created.
 
+    Examples utilizing both classes can be found in the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_. These examples focus on optimization of VQAs, using a global optimizer called Differential Evolution [#]_.
 
     References:
     ~~~~~~~~~~~
