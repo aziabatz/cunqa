@@ -1,10 +1,10 @@
 """
     Contains map-like callables to distribute circuits in virtual QPUS, needed when communications among circuits are present.
 
-    When having classical or quantum communications among circuits, :py:meth:~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
+    When having classical or quantum communications among circuits, :py:func:`~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
 
-    So, once the virtual QPUs that allow the desired type of communications are raised and circuits have been defined using :py:class:~cunqa.circuit.CunqaCircuit`,
-    they can be sent using the :py:meth:~run_distributed` function:
+    So, once the virtual QPUs that allow the desired type of communications are raised and circuits have been defined using :py:class:`~cunqa.circuit.CunqaCircuit`,
+    they can be sent using the :py:meth:`~run_distributed` function:
 
     >>> circuit1 = CunqaCircuit(1, "1")
     >>> circuit2 = CunqaCircuit(1, "2")
