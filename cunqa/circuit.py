@@ -184,6 +184,18 @@ class CunqaCircuit:
 
     def __init__(self, num_qubits: int, num_clbits: Optional[int] = None, id: Optional[str] = None):
 
+        """
+        Class constructor to create a CunqaCirucit. Only the ``num_qubits`` argument is mandatory, also ``num_clbits`` can be provided if there is intention to incorporate intermediate measurements.
+        If no ``id`` is provided, one is generated randomly, then it can be access through the class attribute :py:att:`~CunqaCircuit._id`.
+
+        Args:
+            num_qubits (int): Number of qubits of the circuit.
+
+            num_clbits (int): Numeber of classical bits for the circuit. A classical register is initially added.
+
+            id (str): Label for identifying the circuit. This id is then used for refering to the circuit in classical and quantum communications methods.
+        """
+
         self.is_parametric = False
         self.has_cc = False
         self.is_dynamic = False
