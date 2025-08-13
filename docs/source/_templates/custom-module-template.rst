@@ -16,7 +16,7 @@
 
    {% block functions %}
    {% if functions %}
-   .. rubric:: {{ _('Functions') }}
+   .. rubric:: {{ _('Functions') | escape | underline('-') }}
 
    .. autosummary::
       :toctree:
@@ -29,7 +29,7 @@
 
    {% block classes %}
    {% if classes %}
-   .. rubric:: {{ _('Classes') }}
+   .. rubric:: {{ _('Classes') | escape | underline('-') }}
 
    .. autosummary::
       :toctree:
@@ -43,7 +43,7 @@
 
    {% block exceptions %}
    {% if exceptions %}
-   .. rubric:: {{ _('Exceptions') }}
+   .. rubric:: {{  _('Exceptions') | escape | underline('-')  }}
 
    .. autosummary::
       :toctree:
