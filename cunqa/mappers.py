@@ -32,30 +32,17 @@
     Then, the class can be called passing a set of parameters and a cost function.
     This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qpu.QPU.upgrade_parameters` method.
     Then, gathers the results of the executions and returns the value of the cost function for each.
-    Let's see a simple example in which we want to measure the value of a cost function for different parameters in the same parametric circuit.
+    Let's see a simple example in which we want to update the parameters of a set of already sent circuits and obtain the value of a cost function for them:
 
-    >>> ansatz = QuantumCircuit(5)
-    >>> ...
-    >>> initial_parameters_list = [···]
-    >>>
     >>> def cost_function(counts):
     >>>     ···
     >>>     return cost_value
-    >>>
-    >>> qpus = getQPUs()
-    >>> qjobs = []
-    >>> for qpu, params in zip(qpus, parameters_list):
-    >>>     circuit = ansatz.assign_parameters(params)
-    >>>     qjob = qpu.run(circuit)
-    >>>     qjobs.append(qjob)
     >>> 
-    >>> Mapper = QJobMapper(qjobs)
+    >>> Mapper = QJobMapper(qjobs) # passing existing qjobs
     >>>
-    >>> new_parameters_list = [···]
+    >>> new_parameters_list = [···] # defining new parameters for each qjob
     >>>
     >>> cost_results = Mapper(new_parameters_list, cost_function)
-
-    <<< [2.0, 4.2, -5.5]
 
     References:
     ~~~~~~~~~~~
