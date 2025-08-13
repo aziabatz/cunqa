@@ -26,21 +26,21 @@
 
     **Variational Quantum Algorithms** [#]_ require from numerous executions of parametric cirucits, while in each step of the optimization process new parameters are assigned to them.
     This implies that, after parameters are updated, a new circuit must be created, transpiled and then sent to the quantum processor or simulator.
-    For simplifying this process, we have :py:class:`~QJobMapper` and :py:class:`~QPUCircuitMapper` classes. Both classes are thought to be used for Scipy optimizers [##]_ as the ``workers`` argument in global optimizers.
+    For simplifying this process, we have :py:class:`~QJobMapper` and :py:class:`~QPUCircuitMapper` classes. Both classes are thought to be used for Scipy optimizers [#]_ as the ``workers`` argument in global optimizers.
 
     :py:class:`~QJobMapper` takes a list of existing :py:class:`~cunqa.qjob.QJob` object and a list of :py:class:`~cunqa.qpu.QPU` objects corresponding to the virtual QPUs that we want to use.
     Then, the class can be called passing a set of parameters and a cost function.
     This callable updates the each existing :py:class:`~cunqa.qjob.QJob` object with such parameters through the :py:meth:`~cunqa.qpu.QPU.upgrade_parameters` method.
-    Then, gathers the results of the executions and returns the value of the cost function for each. Let's see an example using Differential Evolution [###]_ optimzier.
+    Then, gathers the results of the executions and returns the value of the cost function for each. Let's see an example using Differential Evolution [#]_ optimzier.
 
     References:
     ~~~~~~~~~~~
 
     .. [#] `Variational Quantum Algorithms arXiv <https://arxiv.org/abs/2012.09265>`_ .
 
-    .. [##] `scipy.optimize documentation <https://docs.scipy.org/doc/scipy/reference/optimize.html>`_.
-    
-    .. [###] Differential Evolution initializes a population of inidividuals that evolute from generation to generation in order to collectively find the lowest value to a given cost function.
+    .. [#] `scipy.optimize documentation <https://docs.scipy.org/doc/scipy/reference/optimize.html>`_.
+
+    .. [#] Differential Evolution initializes a population of inidividuals that evolute from generation to generation in order to collectively find the lowest value to a given cost function.
     This optimizer has shown great performance for VQAs [`Reference <https://arxiv.org/abs/2303.12186>`_].
     It is well implemented at Scipy by the `scipy.optimize.differential_evolution <https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.differential_evolution.html#scipy.optimize.differential_evolution>`_ function.
 
