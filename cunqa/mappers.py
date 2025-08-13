@@ -29,7 +29,9 @@
 
 
     References:
-    .. [#] `Variational Quantum Algorithms arxiv <https://arxiv.org/abs/2012.09265>`_
+    ~~~~~~~~~~~
+
+    .. [#] `Variational Quantum Algorithms arxiv <https://arxiv.org/abs/2012.09265>`_ .
 
 """
 from cunqa.logger import logger
