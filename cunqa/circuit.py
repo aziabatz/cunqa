@@ -1468,10 +1468,10 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     Function to transform a circuit in json dict format to ``qiskit.circuit.QuantumCircuit``.
 
     Args:
-        circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
+        circuit_dict (dict): circuit instructions to be transformed.
 
     Return:
-        QuantumCircuit with the given instructions.
+        ``qiskit.circuit.QuantumCircuit`` with the given instructions.
 
     """
     # Checking validity of the provided circuit
