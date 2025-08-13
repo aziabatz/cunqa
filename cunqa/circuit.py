@@ -186,7 +186,7 @@ class CunqaCircuit:
 
         """
         Class constructor to create a CunqaCirucit. Only the ``num_qubits`` argument is mandatory, also ``num_clbits`` can be provided if there is intention to incorporate intermediate measurements.
-        If no ``id`` is provided, one is generated randomly, then it can be access through the class attribute :py:att:`~CunqaCircuit._id`.
+        If no ``id`` is provided, one is generated randomly, then it can be access through the class attribute :py:attr:`~CunqaCircuit._id`.
 
         Args:
             num_qubits (int): Number of qubits of the circuit.
