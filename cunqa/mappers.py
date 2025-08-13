@@ -24,12 +24,12 @@
     Mapping circuits to virtual QPUs in optimization problems
     ---------------------------------------------------------
 
-    **Variational Quantum Algorithms** [vqas]_ require from numerous executions of parametric cirucits, while in each step of the optimization process new parameters are assigned to them.
+    **Variational Quantum Algorithms** [#]_ require from numerous executions of parametric cirucits, while in each step of the optimization process new parameters are assigned to them.
     This implies that, after parameters are updated, a new circuit must be created, transpiled and then sent to the quantum processor or simulator.
 
 
     References:
-    .. [vqas] `Variational Quantum Algorithms arxiv <https://arxiv.org/abs/2012.09265>`_
+    .. [#] `Variational Quantum Algorithms arxiv <https://arxiv.org/abs/2012.09265>`_
 
 """
 from cunqa.logger import logger
