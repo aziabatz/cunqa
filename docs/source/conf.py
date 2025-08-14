@@ -106,8 +106,7 @@ html_theme_options = {
     'titles_only': False
 }
 
-napoleon_google_docstring = False
-napoleon_numpy_docstring = True
+napoleon_google_docstring = True
 
 
 def setup(app):
@@ -126,7 +125,7 @@ def setup(app):
     for notebook in source_notebooks_dir.glob('*.ipynb'):
         shutil.copy(notebook, dest_dir / notebook.name)
     for py_file in source_py_dir.glob('*.py'):
-        shutil.copy(py_file, dest_dir_2 / py_file.name) 
+        shutil.copy(py_file, dest_dir_2 / py_file.name)
 
     # Automatically create files that include each of the .py examples
     for code_file in dest_dir_2.glob('*.py'):
