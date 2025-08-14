@@ -117,6 +117,13 @@ class CunqaCircuit:
 
     Start by instantiating the class providing the desired number of qubits:
 
+
+    .. code-block:: python
+
+       from cunqa import CunqaCircuit
+       c = CunqaCircuit()
+       c.run()
+
         >>> circuit = CunqaCircuit(2)
 
     Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
@@ -136,7 +143,7 @@ class CunqaCircuit:
        :header-rows: 1
        :widths: 20 80
 
-       * - Methoh
+       * - Method
          - 
        * - :py:meth:`~CunqaCircuit.from_instructions`
          - Class method to add operations to the circuit from a list of dict-type instructions.
