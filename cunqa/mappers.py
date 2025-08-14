@@ -161,16 +161,16 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
 
 class QJobMapper:
     """
-    Class to map the method `QJob.upgrade_parameters` to a list of QJobs.
+    Class to map the method.
     """
     qjobs: "list['QJob']"
 
     def __init__(self, qjobs: "list['QJob']"):
         """
-        Initializes the QJobMapper class.
+        Class constructor. Takes a list of  objects to be mapped.
 
         Args:
-            qjobs (list[<class 'qjob.QJob'>]): list of QJobs to be mapped.
+            qjobs (list[QJob]): list of :py:class:`~cunqa.qjob.QJob` objects to be mapped.
 
         """
         self.qjobs = qjobs
