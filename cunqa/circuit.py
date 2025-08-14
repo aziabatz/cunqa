@@ -129,10 +129,18 @@ class CunqaCircuit:
 
     Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`QPU.run`.
 
-    Properties:
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 80
 
-    Hello: hola que tal
-    buenas: bool
+       * - Attribute
+         - Description
+       * - name
+         - Name of the object.
+       * - age
+         - Age in years.
+       * - created_at
+         - Creation timestamp.
     
 
     Classical communications among circuits
