@@ -31,7 +31,7 @@ import string
 from typing import Tuple, Union, Optional
 
 def _generate_id(size: int = 4) -> str:
-    """Return a random alphanumeric identifier.
+    """Returns a random alphanumeric identifier.
 
     Args:
         size (int): Desired length of the identifier.  
