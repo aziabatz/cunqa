@@ -209,19 +209,19 @@ class QPUCircuitMapper:
     Class to map the function `qpu.QPU.run()` to a list of QPUs.
     """
     qpus: "list['QPU']" #: :py:class:`~cunqa.qpu.QPU` ibjects linked to the virtual QPUs to wich the circuit is mapped.
-    ansatz: 'QuantumCircuit' #: Circuit to which parameters are assigned at :py:meth:`QPUCircuitMapper.__call__`.
-    transpile: Optional[bool]
-    initial_layout: Optional["list[int]"]
-    run_parameters: Optional[Any]
+    ansatz: 'QuantumCircuit' #: Circuit to which parameters are assigned at the :py:meth:`QPUCircuitMapper.__call__` method.
+    transpile: Optional[bool] #: Weather transpilation is wanted to be done before sending each circuit.
+    initial_layout: Optional["list[int]"] #: Transpilation information, qubits of the backend to which the qubits of the circuit are mapped.
+    run_parameters: Optional[Any] #: Any other run instructions needed for the simulation.
 
     def __init__(self, qpus: "list['QPU']", ansatz: 'QuantumCircuit', transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
         Class constructor.
 
         Args:
-            qpus (list[<class 'qpu.QPU'>]): list of QPU objects.
+            qpus (list[QPU]): list of objects linked to the virtual QPUs intended to be used.
 
-            circuit (json dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be run in the QPUs.
+            circuit (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
