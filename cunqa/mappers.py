@@ -76,7 +76,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
 
     Because the function is destined for the execution that require communications, only :py:class:`~cunqa.circuit.CunqaCircuit` or instruction sets are accepted.
 
-    If *transpile*, *initial_layout* or *opt_level* are passed as * **run_args* they will be ignored since for the current version
+    If *transpile*, *initial_layout* or *opt_level* are passed as *run_args* they will be ignored since for the current version
     transpilation is not supported when communications are present. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
@@ -87,7 +87,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         run_args: any other run arguments and parameters.
 
     Return:
-        List of :py:class:`~cunqa.qjob.QJob` objects.
+        List of QJob objects.
     """
 
     distributed_qjobs = []
