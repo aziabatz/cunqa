@@ -87,7 +87,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         run_args: any other run arguments and parameters.
 
     Return:
-        List of QJob objects.
+        List of :py:class:`~cunqa.qjob.QJob` objects.
     """
 
     distributed_qjobs = []
