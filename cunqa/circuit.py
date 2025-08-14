@@ -268,14 +268,14 @@ class CunqaCircuit:
         return len(_flatten([[c for c in cr] for cr in self.classical_regs.values()]))
 
 
-    def from_instructions(self, instructions):
+    def from_instructions(self, instructions: list[dict]):
         """
         Class method to add operations to the circuit from a list of dict-type instructions.
         
-        Each instruction must have as mandatory keys "name" and "qubits", while other keys are accepted: "clbits", "params", "circuits" or "remote_conditional_reg".
+        Each instruction must have as mandatory keys ``"name"`` and ``"qubits"``, while other keys are accepted: ``"clbits"``, ``"params"``, ``"circuits"`` or ``"remote_conditional_reg"``.
 
         Args:
-            isntructions (list[dict]): list gathering all the each instruction as a dict.
+            instructions (list[dict]): list gathering all the each instruction as a dict.
         """
         for instruction in instructions:
             self._add_instruction(instruction)
