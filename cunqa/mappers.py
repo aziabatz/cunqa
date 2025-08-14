@@ -161,9 +161,9 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
 
 class QJobMapper:
     """
-    Class to map the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` to a set of jobs sent to a virtual QPU.
+    Class to map the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` to a set of jobs sent to virtual QPUs.
     """
-    qjobs: "list['QJob']" #: set of jobs that are mapped.
+    qjobs: "list['QJob']" #: Set of jobs that are mapped.
 
     def __init__(self, qjobs: "list['QJob']"):
         """
@@ -178,15 +178,18 @@ class QJobMapper:
 
     def __call__(self, func, population):
         """
-        Callable method to map the function to the given QJobs.
+        Callable method to map the function to the given jobs.
 
         Args:
-            func (func): function to be mapped to the QJobs. It must take as argument the an object <class 'qjob.Result'>.
+            func (func): function to be passed to the results of the jobs.
+            Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
+            For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
-            population (list[list]): population of vectors to be mapped to the QJobs.
+            population (list[list[int or float]]): list of vectors to be mapped to the jobs.
+            Each set of parameters will be assigned to each py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
 
         Return:
-            List of results of the function applied to the QJobs for the given population.
+            List of outputs of the function applied to the results of each job for the given population.
         """
         qjobs_ = []
         for i, params in enumerate(population):
