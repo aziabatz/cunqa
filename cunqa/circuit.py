@@ -13,7 +13,8 @@
     >>> qc = QuantumCircuit(4)
     >>> ...
     >>> cunqacirc = CunqaCircuit(4)
-    >>> instruction_set = qc_to_json(qc)
+    >>> circuit_json = qc_to_json(qc)
+    >>> instruction_set = circuit_json["instructions"]
     >>> cunqacirc.from_instructions(instruction_set)
 
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
