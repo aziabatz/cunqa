@@ -26,7 +26,7 @@
 
     **Variational Quantum Algorithms** [#]_ require from numerous executions of parametric cirucits, while in each step of the optimization process new parameters are assigned to them.
     This implies that, after parameters are updated, a new circuit must be created, transpiled and then sent to the quantum processor or simulator.
-    For simplifying this process, we have :py:class:`~QJobMapper` and :py:class:`~QPUCircuitMapper` classes. Both classes are thought to be used for Scipy optimizers [#]_ as the ``workers`` argument in global optimizers.
+    For simplifying this process, we have :py:class:`~QJobMapper` and :py:class:`~QPUCircuitMapper` classes. Both classes are thought to be used for Scipy optimizers [#]_ as the *workers* argument in global optimizers.
 
     QJobMapper
     ==========
@@ -74,9 +74,9 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     Function to send circuits to serveral virtual QPUs allowing classical or quantum communications among them. 
     Each circuit will be sent to each QPU in order, therefore both lists must be of the same size.
 
-    Because the function is destined for the execution that require communications, only :py:class:`~CunqaCircuit` or instruction sets are accepted.
+    Because the function is destined for the execution that require communications, only :py:class:`~cunqa.circuit.CunqaCircuit` or instruction sets are accepted.
 
-    If ``transpile``, ``initial_layout`` or ``opt_level`` are passed as ``**run_args`` they will be ignored since for the current version
+    If *transpile*, *initial_layout* or *opt_level* are passed as * **run_args* they will be ignored since for the current version
     transpilation is not supported when communications are present. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
