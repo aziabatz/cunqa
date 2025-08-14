@@ -15,6 +15,8 @@
 
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
 
+    References:
+    ~~~~~~~~~~~
     
     .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
 
@@ -1017,7 +1019,7 @@ class CunqaCircuit:
         Class method to apply a unitary gate created from an unitary matrix provided.
 
         Args:
-            matrix (list or <class 'numpy.ndarray'>): unitary operator in matrix form to be applied to the given qubits.
+            matrix (list or numpy.ndarray): unitary operator in matrix form to be applied to the given qubits.
 
             qubits (int): qubits to which the unitary operator will be applied.
 
@@ -1097,7 +1099,7 @@ class CunqaCircuit:
 
             param (float or int): parameter for the case parametric gate is provided.
 
-            matrix (list or <class 'numpy.ndarray'>): unitary operator in matrix form to be applied to the given qubits.
+            matrix (list or numpy.ndarray): unitary operator in matrix form to be applied to the given qubits.
 
         """
 
@@ -1214,7 +1216,7 @@ class CunqaCircuit:
 
             qubit (int): qubit to be measured and sent.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the result of the measurement is sent.
+            target_circuit (str or CunqaCircuit): id of the circuit or circuit to which the result of the measurement is sent.
 
         """
         self.is_dynamic = True
@@ -1254,7 +1256,7 @@ class CunqaCircuit:
         Args:
             qubit (int): qubit to be sent.
 
-            target_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit to which the qubit is sent.
+            target_circuit (str or CunqaCircuit): id of the circuit or circuit to which the qubit is sent.
         """
         self.is_dynamic = True
         
@@ -1287,7 +1289,7 @@ class CunqaCircuit:
         Args:
             qubit (int): ancilla to which the received qubit is assigned.
 
-            control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit from which the qubit is received.
+            control_circuit (str or CunqaCircuit): id of the circuit from which the qubit is received.
         """
         self.is_dynamic = True
         
@@ -1327,7 +1329,7 @@ class CunqaCircuit:
 
             param (float or int): parameter in case the gate provided is parametric.
 
-            control_circuit (str, <class 'cunqa.circuit.CunqaCircuit'>): id of the circuit or circuit from which the condition is sent.
+            control_circuit (str or CunqaCircuit): id of the circuit or circuit from which the condition is sent.
 
         """
 
@@ -1397,7 +1399,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
 
     Args:
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to transform to json.
+        qc (``qiskit.circuit.QuantumCircuit``): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
@@ -1579,7 +1581,7 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     Returns a list of two dicts corresponding to the classical and quantum registers of the circuit supplied.
 
     Args
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
+        qc (``qiskit.circuit.QuantumCircuit``): quantum circuit whose number of registers we want to know
 
     Return:
         Two element list with quantum and classical registers, in that order.
@@ -1624,12 +1626,12 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
 
 def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
     """
-    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
+    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric ``qiskit.circuit.QuantumCircuit``.
     For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we
     consider it a parametric circuit for our purposes.
 
     Args:
-        circuit (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, dict or str): the circuit from which we want to find out if it's parametric.
+        circuit (``qiskit.circuit.QuantumCircuit``, dict or str): the circuit from which we want to find out if it's parametric.
 
     Return:
         True if the circuit is considered parametric, False if it's not.
