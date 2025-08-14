@@ -22,6 +22,10 @@
 
 .. automethod:: {{ name }}.__init__
 
+{% if objname == 'QJobMapper' or 'QPUCircuitMapper'}
+.. automethod:: {{ name }}.__call__
+{% endif}
+
 {% set ns = namespace(pub=[]) %}
 {% for item in methods %}
 {% if item != '__init__' and item[0] != '_' %}
