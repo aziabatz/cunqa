@@ -127,7 +127,13 @@ class CunqaCircuit:
 
         >>> circuit.measure_all()
 
-    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`cunqa.qpu.run`.
+    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`QPU.run`.
+
+    Properties:
+
+    Hello: hola que tal
+    buenas: bool
+    
 
     Classical communications among circuits
     ---------------------------------------
