@@ -187,8 +187,6 @@ class QJobMapper:
             func (func): function to be passed to the results of the jobs. 
 
             population (list[list[int or float]]): list of vectors to be mapped to the jobs.
-
-         
             
         Return:
             List of outputs of the function applied to the results of each job for the given population.
@@ -210,15 +208,15 @@ class QPUCircuitMapper:
     """
     Class to map the function `qpu.QPU.run()` to a list of QPUs.
     """
-    qpus: "list['QPU']"
-    ansatz: 'QuantumCircuit'
+    qpus: "list['QPU']" #: :py:class:`~cunqa.qpu.QPU` ibjects linked to the virtual QPUs to wich the circuit is mapped.
+    ansatz: 'QuantumCircuit' #: Circuit to which parameters are assigned at :py:meth:`QPUCircuitMapper.__call__`.
     transpile: Optional[bool]
     initial_layout: Optional["list[int]"]
     run_parameters: Optional[Any]
 
     def __init__(self, qpus: "list['QPU']", ansatz: 'QuantumCircuit', transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
-        Initializes the QPUCircuitMapper class.
+        Class constructor.
 
         Args:
             qpus (list[<class 'qpu.QPU'>]): list of QPU objects.
