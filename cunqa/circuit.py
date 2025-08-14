@@ -120,7 +120,6 @@ class CunqaCircuit:
 
     Start by instantiating the class providing the desired number of qubits:
 
-
     .. code-block:: python
         :linenos:
 
@@ -130,6 +129,7 @@ class CunqaCircuit:
 
     .. code-block:: python
         :linenos:
+        :emphasize-lines: 2,4
     
         circuit.h(0) # adding hadamard to qubit 0
         circuit.cx(0,1)
