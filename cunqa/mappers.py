@@ -9,11 +9,11 @@
     So, once the virtual QPUs that allow the desired type of communications are raised and circuits have been defined using :py:class:`~cunqa.circuit.CunqaCircuit`,
     they can be sent using the :py:meth:`~run_distributed` function:
 
-    >>> circuit1 = CunqaCircuit(1, "1")
-    >>> circuit2 = CunqaCircuit(1, "2")
+    >>> circuit1 = CunqaCircuit(1, "circuit_1")
+    >>> circuit2 = CunqaCircuit(1, "circuit_2")
     >>> circuit1.h(0)
-    >>> circuit1.measure_and_send(0, "2")
-    >>> circuit2.remote_c_if("x", 0, "1")
+    >>> circuit1.measure_and_send(0, "circuit_2")
+    >>> circuit2.remote_c_if("x", 0, "circuit_1")
     >>>
     >>> qpus = getQPUs()
     >>>
