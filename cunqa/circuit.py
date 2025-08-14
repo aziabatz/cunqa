@@ -11,6 +11,7 @@
     For example, if a user wants to transform a ``qiskit.circuit.QuantumCircuit`` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
 
     .. code-block:: python
+        :linenos:
 
         qc = QuantumCircuit(4)
         ···
@@ -121,12 +122,14 @@ class CunqaCircuit:
 
 
     .. code-block:: python
+        :linenos:
 
         circuit = CunqaCircuit(2)
 
     Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
 
     .. code-block:: python
+        :linenos:
     
         circuit.h(0) # adding hadamard to qubit 0
         circuit.cx(0,1)
@@ -134,6 +137,7 @@ class CunqaCircuit:
     Finally, qubits are measured by:
 
     .. code-block:: python
+        :linenos:
 
         circuit.measure_all()
 
@@ -158,6 +162,7 @@ class CunqaCircuit:
     We can define the sending of a classical bit from one circuit to another by:
 
     .. code-block:: python
+        :linenos:
 
         circuit_1 = CunqaCircuit(2)
         circuit_2 = CunqaCircuit(2)
@@ -172,6 +177,7 @@ class CunqaCircuit:
     Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
 
     .. code-block:: python
+        :linenos:
 
         circuit_1 = CunqaCircuit(2, id = "1")
         circuit_2 = CunqaCircuit(2, id = "2")
@@ -188,6 +194,7 @@ class CunqaCircuit:
     In this scheme, generally an acilla qubit would be neccesary to perform the communication. Let's see an example for the creation of a Bell pair remotely:
 
     .. code-block:: python
+        :linenos:
 
         circuit_1 = CunqaCircuit(2, 1, id = "1")
         circuit_2 = CunqaCircuit(2, 2, id = "2")
