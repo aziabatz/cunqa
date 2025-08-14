@@ -179,7 +179,7 @@ class QJobMapper:
     def __call__(self, func, population):
         """
         Callable method to map the function to the given jobs.
-        Regarding the population, each set of parameters will be assigned to each py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
+        Regarding the population, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
         Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
         For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
