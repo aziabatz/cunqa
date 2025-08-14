@@ -181,13 +181,12 @@ class QJobMapper:
         Callable method to map the function to the given jobs.
 
         Args:
-            func (func): function to be passed to the results of the jobs.
-            Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
-            For example, the function can evaluate the expected value of an observable from the output of the circuit.
+            func (func): function to be passed to the results of the jobs. Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value. For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
-            population (list[list[int or float]]): list of vectors to be mapped to the jobs.
-            Each set of parameters will be assigned to each py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
+            population (list[list[int or float]]): list of vectors to be mapped to the jobs. Each set of parameters will be assigned to each py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
 
+         
+            
         Return:
             List of outputs of the function applied to the results of each job for the given population.
         """
