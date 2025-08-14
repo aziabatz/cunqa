@@ -10,15 +10,12 @@
 
     For example, if a user wants to transform a ``qiskit.circuit.QuantumCircuit`` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
 
-    .. code-block:: python
-        :linenos:
-
-        qc = QuantumCircuit(4)
-        ···
-        cunqacirc = CunqaCircuit(4)
-        circuit_json = qc_to_json(qc)
-        instruction_set = circuit_json["instructions"]
-        cunqacirc.from_instructions(instruction_set)
+    >>> qc = QuantumCircuit(4)
+    >>> ...
+    >>> cunqacirc = CunqaCircuit(4)
+    >>> circuit_json = qc_to_json(qc)
+    >>> instruction_set = circuit_json["instructions"]
+    >>> cunqacirc.from_instructions(instruction_set)
 
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
 
@@ -120,26 +117,19 @@ class CunqaCircuit:
 
     Start by instantiating the class providing the desired number of qubits:
 
+
     .. code-block:: python
-        :linenos:
 
         circuit = CunqaCircuit(2)
 
     Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
 
-    .. code-block:: python
-        :linenos:
-        :emphasize-lines: 2,4
-    
-        circuit.h(0) # adding hadamard to qubit 0
-        circuit.cx(0,1)
+        >>> circuit.h(0) # adding hadamard to qubit 0
+        >>> circuit.cx(0,1)
 
     Finally, qubits are measured by:
 
-    .. code-block:: python
-        :linenos:
-
-        circuit.measure_all()
+        >>> circuit.measure_all()
 
     Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`~cunqa.qpu.QPU.run`.
 
@@ -161,31 +151,25 @@ class CunqaCircuit:
     The strong part of CunqaCircuit is that it allows to define communication directives between circuits.
     We can define the sending of a classical bit from one circuit to another by:
 
-    .. code-block:: python
-        :linenos:
-
-        circuit_1 = CunqaCircuit(2)
-        circuit_2 = CunqaCircuit(2)
-        circuit_1.h(0)
-        circuit_1.measure_and_send(0, circuit_2) # qubit 0 is measured and the outcome is sent to circuit_2
-        circuit_2.remote_c_if("x", 0, circuit_1) # the outcome is recived to perform a classicaly controlled operation
-        circuit_1.measure_all()
-        circuit_2.measure_all()
+        >>> circuit_1 = CunqaCircuit(2)
+        >>> circuit_2 = CunqaCircuit(2)
+        >>> circuit_1.h(0)
+        >>> circuit_1.measure_and_send(0, circuit_2) # qubit 0 is measured and the outcome is sent to circuit_2
+        >>> circuit_2.remote_c_if("x", 0, circuit_1) # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
 
     Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`cunqa.mappers.run_distributed` function.
 
     Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
 
-    .. code-block:: python
-        :linenos:
-
-        circuit_1 = CunqaCircuit(2, id = "1")
-        circuit_2 = CunqaCircuit(2, id = "2")
-        circuit_1.h(0)
-        circuit_1.measure_and_send(0, "2") # qubit 0 is measured and the outcome is sent to circuit_2
-        circuit_2.remote_c_if("x", 0, "1") # the outcome is recived to perform a classicaly controlled operation
-        circuit_1.measure_all()
-        circuit_2.measure_all()
+        >>> circuit_1 = CunqaCircuit(2, id = "1")
+        >>> circuit_2 = CunqaCircuit(2, id = "2")
+        >>> circuit_1.h(0)
+        >>> circuit_1.measure_and_send(0, "2") # qubit 0 is measured and the outcome is sent to circuit_2
+        >>> circuit_2.remote_c_if("x", 0, "1") # the outcome is recived to perform a classicaly controlled operation
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
 
     Sending qubits between circuits
     --------------------------------
@@ -193,19 +177,16 @@ class CunqaCircuit:
     When quantum communications among the QPUs utilized are available, a qubit from one circuit can be sent to another.
     In this scheme, generally an acilla qubit would be neccesary to perform the communication. Let's see an example for the creation of a Bell pair remotely:
 
-    .. code-block:: python
-        :linenos:
-
-        circuit_1 = CunqaCircuit(2, 1, id = "1")
-        circuit_2 = CunqaCircuit(2, 2, id = "2")
-        
-        circuit_1.h(0); circuit_1.cx(0,1)
-        circuit_1.qsend(1, "1") # sending qubit 1 to circuit with id "2"
-        circuit_1.measure(0,0)
-        
-        circuit_2.qrecv(0, "2") # reciving qubit from circuit with id "1" and assigning it to qubit 0
-        circuit_2.cx(0,1)
-        circuit_2.measure_all()
+        >>> circuit_1 = CunqaCircuit(2, 1, id = "1")
+        >>> circuit_2 = CunqaCircuit(2, 2, id = "2")
+        >>>
+        >>> circuit_1.h(0); circuit_1.cx(0,1)
+        >>> circuit_1.qsend(1, "1") # sending qubit 1 to circuit with id "2"
+        >>> circuit_1.measure(0,0)
+        >>>
+        >>> circuit_2.qrecv(0, "2") # reciving qubit from circuit with id "1" and assigning it to qubit 0
+        >>> circuit_2.cx(0,1)
+        >>> circuit_2.measure_all()
 
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
