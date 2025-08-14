@@ -107,6 +107,7 @@ html_theme_options = {
 }
 
 napoleon_google_docstring = True
+napoleon_preprocess_types = True
 
 
 def setup(app):
