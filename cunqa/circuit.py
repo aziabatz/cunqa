@@ -69,7 +69,7 @@ all_gates.update(SUPPORTED_GATES_2Q + SUPPORTED_GATES_3Q + SUPPORTED_GATES_PARAM
 SUPPORTED_GATES_CONDITIONAL = ["c_if_unitary","c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz","c_if_cx","c_if_cy","c_if_cz", "c_if_ecr"]
 
 class CunqaCircuitError(Exception):
-    """Exception for error during circuit desing at :py:clas:`~cunqa.circuit.CunqaCircuit`."""
+    """Exception for error during circuit desing at :py:class:`~cunqa.circuit.CunqaCircuit`."""
     pass
 
 class CunqaCircuit:
