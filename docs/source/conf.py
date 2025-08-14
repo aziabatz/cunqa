@@ -109,6 +109,10 @@ html_theme_options = {
 napoleon_google_docstring = True
 napoleon_preprocess_types = True
 
+highlight_options = {
+    'linenos': 'inline',  # 'table' para columna separada, 'inline' para inline numbers
+}
+
 
 def setup(app):
     #Copy jupyter notebooks (+ .py) to folder docs/source/_examples so nbsphinx can read them for our gallery
