@@ -128,20 +128,18 @@ class CunqaCircuit:
 
         >>> circuit.measure_all()
 
-    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`QPU.run`.
+    Once the circuit is ready, it is ready to be sent to a QPU by the method :py:meth:`~cunqa.qpu.QPU.run`.
+
+    Other methods to manupulate the class are:
 
     .. list-table::
        :header-rows: 1
        :widths: 20 80
 
-       * - Attribute
-         - Description
-       * - name
-         - Name of the object.
-       * - age
-         - Age in years.
-       * - created_at
-         - Creation timestamp.
+       * - Methoh
+         - 
+       * - :py:meth:`~CunqaCircuit.from_instructions`
+         - Class method to add operations to the circuit from a list of dict-type instructions.
     
 
     Classical communications among circuits
