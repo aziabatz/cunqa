@@ -73,10 +73,10 @@ class CunqaCircuitError(Exception):
 class CunqaCircuit:
     # TODO: look for other alternatives for describing the documentation that do not requiere such long docstrings, maybe gatehring everything in another file and using decorators, as in ther APIs.
     """
-    Class to define a quantum circuit for the ``cunqa`` api.
+    Class to define a quantum circuit for the :py:mod:`~cunqa` api.
 
     This class serves as a tool for the user to describe not only simple circuits, but also to describe classical and quantum operations between circuits.
-    On its initialization, it takes as mandatory the number of qubits for the circuit (*num_qubits*), also number of classical bits (*num_clbits*) and a personalized id (*id*), which by default would be randomly generated.
+    On its initialization, it takes as mandatory the number of qubits for the circuit *num_qubits*), also number of classical bits (*num_clbits*) and a personalized id (*id*), which by default would be randomly generated.
     Once the object is created, class methods canbe used to add instructions to the circuit such as single-qubit and two-qubits gates, measurements, conditional operations,... but also operations that allow to send measurement outcomes or qubits to other circuits.
     This sending operations require that the virtual QPUs to which the circuits are sent support classical or quantum communications with the desired connectivity.
     
