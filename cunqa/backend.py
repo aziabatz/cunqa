@@ -6,7 +6,7 @@ from typing import  TypedDict
 
 class BackendData(TypedDict):
     """
-        Class to gather the characteristics of a Backend.
+        Class to gather the characteristics of a :py:class:`~cunqa.backend.Backend` object.
     """
     basis_gates: "list[str]" #: Native gates that the Backend accepts. If other are used, they must be translated into the native gates.
     coupling_map: "list[list[int]]" #: Defines the physical connectivity of the qubits, in which pairs two-qubit gates can be performed.
