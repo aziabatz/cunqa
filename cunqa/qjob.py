@@ -1,5 +1,8 @@
 """
     Contains objects that define and manage quantum emulation jobs.
+
+    The core of this module is the class :py:class:`~cunqa.qjob.QJob`. These objects are created when a quantum job
+    is sent to a virtual QPU, as a return of the :py:meth:`~cunqa.qpu.QPU.run` method.
 """
 
 from typing import  Union, Any
@@ -17,7 +20,7 @@ from cunqa.qclient import QClient, FutureWrapper
 
 
 class QJobError(Exception):
-    """Exception for error during job submission to QPUs."""
+    """Exception for error during job submission to virtual QPUs."""
     pass
 
 class QJob:
