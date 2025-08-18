@@ -168,7 +168,6 @@ class QJobMapper:
     An example is shown below, once we have a list of :py:class:`~cunqa.qjob.QJob` objects as *qjobs*:
 
 
-#    >>> mapper = QJobMapper(qjobs)
     >>> # defining the parameters set accordingly to the number of parameters
     >>> # of the circuit and the number of QJobs in the list.
     >>> new_parameters = [···]
