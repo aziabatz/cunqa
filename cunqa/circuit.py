@@ -22,7 +22,7 @@
 
     References:
     ~~~~~~~~~~~
-    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
+    .. [#] `qiskit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
 
 """
 from cunqa.logger import logger
@@ -1423,7 +1423,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
     References:
     ~~~~~~~~~~~
-    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
+    .. [#] `qiskit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
 
     """
     is_dynamic = False
@@ -1510,7 +1510,7 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
 
     References:
     ~~~~~~~~~~~
-    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
+    .. [#] `qiskit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
 
 
     """
