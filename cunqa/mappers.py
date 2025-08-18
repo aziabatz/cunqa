@@ -186,7 +186,7 @@ class QJobMapper:
     obtaining the value of the cost back. Examples applied to optimizations are shown at the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_.
 
     """
-    qjobs: "list['QJob']" #: Set of jobs that are mapped.
+    qjobs: "list['QJob']" #: List of jobs that are mapped.
 
     def __init__(self, qjobs: "list['QJob']"):
         """
