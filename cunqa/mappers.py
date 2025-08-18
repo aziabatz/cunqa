@@ -200,7 +200,7 @@ class QJobMapper:
 
     def __call__(self, func, population):
         """
-        Callable method to map the function *func* to the given jobs.
+        Callable method to map the function *func* to the results of assigning *population* to the given jobs.
         Regarding the *population*, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must
         have size (*N,p*), being *N* the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs` and *p* the number of parameters in the circuit.
         Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
@@ -258,9 +258,7 @@ class QPUCircuitMapper:
     >>> cost_values = mapper(cost_function, new_parameters)
 
     For each call of the mapper, circuits are assembled, jobs are sent, results are gathered and cost values are calculated.
-
-    
-
+    Its implementation for optimization problems is shown at the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_.
 
     """
     qpus: "list['QPU']" #: :py:class:`~cunqa.qpu.QPU` ibjects linked to the virtual QPUs to wich the circuit is mapped.
