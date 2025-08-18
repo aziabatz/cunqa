@@ -1415,7 +1415,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
 
     Args:
-        qc (``qiskit.circuit.QuantumCircuit``): circuit to transform to json.
+        qc (`QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
@@ -1491,7 +1491,6 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     except Exception as error:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
         raise error
-
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
