@@ -4,6 +4,7 @@
     The core of this module is the class :py:class:`~cunqa.qjob.QJob`. These objects are created when a quantum job
     is sent to a virtual QPU, as a return of the :py:meth:`~cunqa.qpu.QPU.run` method.
 """
+#TODO: when issue #330 is closed, introduce/do not introduce function gather.
 
 from typing import  Union, Any
 import json
@@ -25,7 +26,11 @@ class QJobError(Exception):
 
 class QJob:
     """
-    Class to handle jobs sent to the simulator.
+    Class to handle jobs sent to virtual QPUs.
+
+    A :py:class:`QJob` object is created as the output of the :py:meth:`~cunqa.qpu.QPU.run` method.
+    The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
+    
     """
     _backend: 'Backend' 
     qclient: 'QClient' 
