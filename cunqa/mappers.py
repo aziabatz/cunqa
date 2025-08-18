@@ -306,7 +306,6 @@ class QPUCircuitMapper:
         Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
         For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
-
         Args:
             func (func): function to be mapped to the QPUs. It must take as argument the an object <class 'qjob.Result'>.
 
