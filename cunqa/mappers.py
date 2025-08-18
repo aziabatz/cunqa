@@ -300,7 +300,12 @@ class QPUCircuitMapper:
 
     def __call__(self, func, population):
         """
-        Callable method to map the function to the QPUs.
+        Callable method to map the function *func* to the results of the circuits sent to the given QPUs after assigning them *population*.
+        Regarding the *population*, each set of parameters will be assigned to each circuit, so the list must
+        have size (*N,p*), being *N* the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qpus` and *p* the number of parameters in the circuit.
+        Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
+        For example, the function can evaluate the expected value of an observable from the output of the circuit.
+
 
         Args:
             func (func): function to be mapped to the QPUs. It must take as argument the an object <class 'qjob.Result'>.
