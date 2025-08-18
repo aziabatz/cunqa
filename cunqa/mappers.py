@@ -167,7 +167,7 @@ class QJobMapper:
 
     An example is shown below, once we have a list of :py:class:`~cunqa.qjob.QJob` objects as *qjobs*:
 
-    >>> new_parameters = [···]
+    >>> new_parameters = []
     >>> 
     >>> # defining the cost function passed to the result of each QJob
     >>> def cost_function(result):
