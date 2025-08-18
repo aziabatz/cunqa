@@ -165,20 +165,21 @@ class QJobMapper:
 
     The core of the class is on its :py:meth:`~cunqa.mappers.QJobMapper.__call__` method, to which parameters that the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` takes are passed toguether with a cost function, so that a the value for this cost for each initial :py:class:`~cunqa.qjob.QJob` is returned.
 
-    An example is shown below:
+    An example is shown below, once we have a list of :py:class:`~cunqa.qjob.QJob` objects as *qjobs*:
 
-    >>> # creating the parametric circuit
-    >>> circuit = CunqaCircuit(···)
-    >>> ...
-    >>> # defining the cost function to evaluate an observable
-    >>> def cost_function(results):
-    >>>     counts = [r.counts for r in results]
+    >>> mapper = QJobMapper(qjobs)
+    >>> 
+    >>> # defining the parameters set accordingly to the number of parameters
+    >>> # of the circuit and the number of QJobs in the list.
+    >>> new_parameters = [···]
+    >>> 
+    >>> # defining the cost function passed to the result of each QJob
+    >>> def cost_function(result):
+    >>>     counts = result.counts
     >>>     ...
-    >>>     return cost_values
-    >>> 
+    >>>     return cost_value
     >>>
-    >>> 
-    >>> 
+    >>> cost_values = mapper(cost_function, new_parameters)
 
 
 
