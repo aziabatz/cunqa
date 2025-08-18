@@ -167,7 +167,6 @@ class QJobMapper:
 
     An example is shown below, once we have a list of :py:class:`~cunqa.qjob.QJob` objects as *qjobs*:
 
-
     >>> mapper = QJobMapper(qjobs)
     >>>
     >>> # defining the parameters set accordingly to the number of parameters
@@ -230,22 +229,54 @@ class QJobMapper:
 
 class QPUCircuitMapper:
     """
-    Class to map the function :py:meth:`~cunqa.qpu.QPU.run` to a list of QPUs.
+    Class to map the method :py:meth:`~cunqa.qpu.QPU.run` to a list of QPUs.
+
+    The class is initialized with a list of :py:class:`~cunqa.qpu.QPU` objects associated to the virtual QPUs that are intended to work with, toguether
+    with the circuit and the simulation instructions needed for its execution.
+
+    Then, its :py:meth:`~cunqa.QPUCircuitMapper` method takes a set of parameters as *population* to assing to the circuit.
+    Each assembled circuit is sent to each virtual QPU with the instructions provided on the instatiation of the mapper.
+    The method returns the value for the provided function *func* for the result of each simulation.
+
+    Its use is pretty similar to :py:class:`~cunqa.mappers.QJobMapper`, but not needing to create the :py:class:`~cunqa.qjob.QJob` objects ahead:
+
+    >>> qpus = getQPUs(...)
+    >>>
+    >>> # creating the mapper with the pre-defined parametric circuit and other simulation instructions.
+    >>> mapper = QPUCircuitMapper(qpus, circuit, shots = 1000, ...)
+    >>>
+    >>> # defining the parameters set accordingly to the number of parameters
+    >>> # of the circuit and the number of QJobs in the list.
+    >>> new_parameters = [...]
+    >>> 
+    >>> # defining the cost function passed to the result of each QJob
+    >>> def cost_function(result):
+    >>>     counts = result.counts
+    >>>     ...
+    >>>     return cost_value
+    >>> 
+    >>> cost_values = mapper(cost_function, new_parameters)
+
+    For each call of the mapper, circuits are assembled, jobs are sent, results are gathered and cost values are calculated.
+
+    
+
+
     """
     qpus: "list['QPU']" #: :py:class:`~cunqa.qpu.QPU` ibjects linked to the virtual QPUs to wich the circuit is mapped.
-    ansatz: 'QuantumCircuit' #: Circuit to which parameters are assigned at the :py:meth:`QPUCircuitMapper.__call__` method.
+    circuit: 'QuantumCircuit' #: Circuit to which parameters are assigned at the :py:meth:`QPUCircuitMapper.__call__` method.
     transpile: Optional[bool] #: Weather transpilation is wanted to be done before sending each circuit.
     initial_layout: Optional["list[int]"] #: Transpilation information, qubits of the backend to which the qubits of the circuit are mapped.
     run_parameters: Optional[Any] #: Any other run instructions needed for the simulation.
 
-    def __init__(self, qpus: "list['QPU']", ansatz: Union[dict,'QuantumCircuit','CunqaCircuit'], transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
+    def __init__(self, qpus: "list['QPU']", circuit: Union[dict,'QuantumCircuit','CunqaCircuit'], transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
         Class constructor.
 
         Args:
             qpus (list[QPU]): list of objects linked to the virtual QPUs intended to be used.
 
-            ansatz (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
+            circuit (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -256,11 +287,11 @@ class QPUCircuitMapper:
         """
         self.qpus = qpus
 
-        if isinstance(ansatz, QuantumCircuit):
-            self.ansatz = ansatz
+        if isinstance(circuit, QuantumCircuit):
+            self.circuit = circuit
 
         else:
-            logger.error(f"Parametric circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(ansatz)} was provided [{TypeError.__name__}].")
+            logger.error(f"Parametric circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, but {type(circuit)} was provided [{TypeError.__name__}].")
             raise SystemExit # User's level
 
         self.transpile = transpile
@@ -287,7 +318,7 @@ class QPUCircuitMapper:
         try:
             for i, params in enumerate(population):
                 qpu = self.qpus[i % len(self.qpus)]
-                circuit_assembled = self.ansatz.assign_parameters(params)
+                circuit_assembled = self.circuit.assign_parameters(params)
 
                 logger.debug(f"Sending QJob to QPU {qpu._id}...")
                 qjobs.append(qpu.run(circuit_assembled, transpile = self.transpile, initial_layout = self.initial_layout, **self.run_parameters))
