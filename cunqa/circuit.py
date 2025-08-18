@@ -1415,7 +1415,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
 
     Args:
-        qc (`QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_): circuit to transform to json.
+        qc (qiskit.QuantumCircuit): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
@@ -1500,7 +1500,7 @@ def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
         circuit_dict (dict): circuit instructions to be transformed.
 
     Return:
-        ``qiskit.circuit.QuantumCircuit`` with the given instructions.
+        `QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ with the given instructions.
 
     """
     # Checking validity of the provided circuit
