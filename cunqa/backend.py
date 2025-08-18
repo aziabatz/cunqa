@@ -1,5 +1,5 @@
 """
-    Module that defines objects to describe characteristics of the virtual QPUs through the ``cunqa.backend.Backend`` class.
+    Cointains the class :py:class:`~cunqa.backend.Backend` which serves as a description of the characteristics of the virtual QPUs.
 """
 
 from typing import  TypedDict
@@ -31,7 +31,7 @@ class Backend():
     #TODO: make @property?; add more methods as is_ideal, incorporate noisemodel object ot leave for transpilation only?
     def info(self) -> None:
         """
-        Prints a dictionary with the backend configurations
+        Prints a dictionary with the backend configuration.
         
         """
         print(f"""--- Backend configuration ---""")
