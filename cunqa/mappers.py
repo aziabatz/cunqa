@@ -181,7 +181,8 @@ class QJobMapper:
         >>>
         >>> cost_values = mapper(cost_function, new_parameters)
 
-
+    We intuituvely see how convinient this class can be for optimization algorithms: one has a parametric circuit to which updated sets of parameters can be sent
+    obtaining the value of the cost back. Examples applied to optimizations are shown at the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_
 
     """
     qjobs: "list['QJob']" #: Set of jobs that are mapped.
@@ -200,7 +201,8 @@ class QJobMapper:
     def __call__(self, func, population):
         """
         Callable method to map the function *func* to the given jobs.
-        Regarding the *population*, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
+        Regarding the *population*, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must
+        have size (*N,p*), being *N* the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs` and *p* the number of parameters in the circuit.
         Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
         For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
