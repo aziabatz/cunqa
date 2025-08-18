@@ -1412,13 +1412,19 @@ from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstructio
 
 def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     """
-    Transforms a :py:class:`qiskit.QuantumCircuit` to json dict.
+    Transforms a :py:class:`qiskit.QuantumCircuit` [#] to json dict.
 
     Args:
         qc (qiskit.QuantumCircuit): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
+
+
+    References:
+    ~~~~~~~~~~~
+    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
+
     """
     is_dynamic = False
     # Check validity of the provided quantum circuit
@@ -1494,13 +1500,18 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit`.
+    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit` [#].
 
     Args:
         circuit_dict (dict): circuit instructions to be transformed.
 
     Return:
         :py:class:`qiskit.QuantumCircuit` with the given instructions.
+
+    References:
+    ~~~~~~~~~~~
+    .. [#] `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.
+
 
     """
     # Checking validity of the provided circuit
