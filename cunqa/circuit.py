@@ -117,10 +117,7 @@ class CunqaCircuit:
 
     Start by instantiating the class providing the desired number of qubits:
 
-
-    .. code-block:: python
-
-        circuit = CunqaCircuit(2)
+        >>> circuit = CunqaCircuit(2)
 
     Then, gates can be added through the mentioned methods. Let's add a Hadamard gate and CNOT gates to create a Bell state:
 
