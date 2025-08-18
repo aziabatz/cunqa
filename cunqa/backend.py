@@ -25,6 +25,12 @@ class Backend():
         Class to define backend information of a QPU server.
     """
     def __init__(self, backend_dict: BackendData):
+        """
+        Class constructor.
+
+        Args:
+            backend_dict (BackendData): object that contains all the needed information about the backend.
+        """
         for key, value in backend_dict.items():
             setattr(self, key, value)
 
@@ -32,7 +38,6 @@ class Backend():
     def info(self) -> None:
         """
         Prints a dictionary with the backend configuration.
-        
         """
         print(f"""--- Backend configuration ---""")
         for attribute_name, attribute_value in self.__dict__.items():
