@@ -169,6 +169,7 @@ class QJobMapper:
 
 
     >>> mapper = QJobMapper(qjobs)
+    >>>
     >>> # defining the parameters set accordingly to the number of parameters
     >>> # of the circuit and the number of QJobs in the list.
     >>> new_parameters = [...]
