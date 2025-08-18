@@ -10,9 +10,13 @@
     When sending a circuit to a virtual QPU by:
 
         >>> qpu.run(circuit)
-    
-    the output is a :py:class:`QJob` object. This allows us to handle information about the simulation and its outcome.
-"""
+            <cunqa.qjob.QJob object at XXXXXXXX>
+        
+    the output is a :py:class:`QJob` object. Once it is created, the circuit is being simulated at the virtual QPU.
+    :py:class:`QJob` is the bridge between sending a circuit with instructions and recieving the results.
+
+
+    """
 #TODO: when issue #330 is closed, introduce/do not introduce function gather.
 
 from typing import  Union, Any
