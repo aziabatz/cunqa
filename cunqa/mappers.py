@@ -163,9 +163,25 @@ class QJobMapper:
     """
     Class to map the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` to a set of jobs sent to virtual QPUs.
 
-    The core of the class is on its ``__call__`` method, to which parameters that the function :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` takes are passed toguether with a cost function, so that a the value for this cost for each initial :py:class:`~cunqa.qjob.QJob` is returned.
+    The core of the class is on its :py:meth:`~cunqa.mappers.QJobMapper.__call__` method, to which parameters that the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` takes are passed toguether with a cost function, so that a the value for this cost for each initial :py:class:`~cunqa.qjob.QJob` is returned.
 
-    
+    An example is shown below:
+
+    >>> # creating the parametric circuit
+    >>> circuit = CunqaCircuit(···)
+    >>> ...
+    >>> # defining the cost function to evaluate an observable
+    >>> def cost_function(results):
+    >>>     counts = [r.counts for r in results]
+    >>>     ...
+    >>>     return cost_values
+    >>> 
+    >>>
+    >>> 
+    >>> 
+
+
+
     """
     qjobs: "list['QJob']" #: Set of jobs that are mapped.
 
@@ -182,8 +198,8 @@ class QJobMapper:
 
     def __call__(self, func, population):
         """
-        Callable method to map the function to the given jobs.
-        Regarding the population, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
+        Callable method to map the function *func* to the given jobs.
+        Regarding the *population*, each set of parameters will be assigned to each :py:class:`~cunqa.qjob.QJob` object, so the list must be of the lenght of :py:attr:`~cunqa.mappers.QJobMapper.qjobs`.
         Mainly, this is thought for the function to take a :py:class:`~cunqa.result.Result` object and to return a value.
         For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
