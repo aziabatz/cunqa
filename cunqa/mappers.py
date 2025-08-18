@@ -75,10 +75,11 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     Each circuit will be sent to each QPU in order, therefore both lists must be of the same size.
 
     Because the function is destined for executions that require communications, only :py:class:`~cunqa.circuit.CunqaCircuit` or instruction sets are accepted.
-
+    The arguments provided will be the same for all :py:class:`~cunqa.qjob.QJob` objects created.
+    
     .. warning::
         If *transpile*, *initial_layout* or *opt_level* are passed as *run_args* they will be ignored since for the current version
-        transpilation is not supported when communications are present. The arguments provided will be the same for all :py:class:`~cunqa.qjob.QJob` objects created.
+        transpilation is not supported when communications are present.
 
     Args:
         circuits (list[list[dict]] or list[CunqaCircuit]): circuits to be run.
