@@ -168,7 +168,7 @@ class QJobMapper:
     An example is shown below, once we have a list of :py:class:`~cunqa.qjob.QJob` objects as *qjobs*:
 
 
-    >>> mapper = QJobMapper(qjobs)
+#    >>> mapper = QJobMapper(qjobs)
     >>> # defining the parameters set accordingly to the number of parameters
     >>> # of the circuit and the number of QJobs in the list.
     >>> new_parameters = [···]
@@ -182,7 +182,7 @@ class QJobMapper:
     >>> cost_values = mapper(cost_function, new_parameters)
 
     We intuitively see how convinient this class can be for optimization algorithms: one has a parametric circuit to which updated sets of parameters can be sent
-    obtaining the value of the cost back. Examples applied to optimizations are shown at the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_
+    obtaining the value of the cost back. Examples applied to optimizations are shown at the `Examples gallery <https://cesga-quantum-spain.github.io/cunqa/_examples/Optimizers_II_mapping.html>`_.
 
     """
     qjobs: "list['QJob']" #: Set of jobs that are mapped.
@@ -237,14 +237,14 @@ class QPUCircuitMapper:
     initial_layout: Optional["list[int]"] #: Transpilation information, qubits of the backend to which the qubits of the circuit are mapped.
     run_parameters: Optional[Any] #: Any other run instructions needed for the simulation.
 
-    def __init__(self, qpus: "list['QPU']", ansatz: 'QuantumCircuit', transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
+    def __init__(self, qpus: "list['QPU']", ansatz: Union[dict,'QuantumCircuit','CunqaCircuit'], transpile: Optional[bool] = False, initial_layout: Optional["list[int]"] = None, **run_parameters: Any):
         """
         Class constructor.
 
         Args:
             qpus (list[QPU]): list of objects linked to the virtual QPUs intended to be used.
 
-            circuit (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
+            ansatz (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
