@@ -1,7 +1,7 @@
 """
     Contains map-like callables to distribute circuits in virtual QPUS, needed when communications among circuits are present.
 
-    Sending circuits with classical or quantum communications
+    Submitting circuits with classical or quantum communications
     ---------------------------------------------------------
 
     When having classical or quantum communications among circuits, method :py:func:`~cunqa.qpu.QPU.run` is obsolete, circuits must be sent as an ensemble in order to ensure correct functioning of the communication protocols.
@@ -74,10 +74,10 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     Function to send circuits to serveral virtual QPUs allowing classical or quantum communications among them. 
     Each circuit will be sent to each QPU in order, therefore both lists must be of the same size.
 
-    Because the function is destined for the execution that require communications, only :py:class:`~cunqa.circuit.CunqaCircuit` or instruction sets are accepted.
+    Because the function is destined for executions that require communications, only :py:class:`~cunqa.circuit.CunqaCircuit` or instruction sets are accepted.
 
     If *transpile*, *initial_layout* or *opt_level* are passed as *run_args* they will be ignored since for the current version
-    transpilation is not supported when communications are present. The arguments provided will be the same for the all :py:class:`~cunqa.qjob.QJob` objects created.
+    transpilation is not supported when communications are present. The arguments provided will be the same for all :py:class:`~cunqa.qjob.QJob` objects created.
 
     Args:
         circuits (list[list[dict]] or list[CunqaCircuit]): circuits to be run.
@@ -162,6 +162,10 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
 class QJobMapper:
     """
     Class to map the method :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` to a set of jobs sent to virtual QPUs.
+
+    The core of the class is on its ``__call__`` method, to which parameters that the function :py:meth:`~cunqa.qjob.QJob.upgrade_parameters` takes are passed toguether with a cost function, so that a the value for this cost for each initial :py:class:`~cunqa.qjob.QJob` is returned.
+
+    
     """
     qjobs: "list['QJob']" #: Set of jobs that are mapped.
 
@@ -206,7 +210,7 @@ class QJobMapper:
 
 class QPUCircuitMapper:
     """
-    Class to map the function `qpu.QPU.run()` to a list of QPUs.
+    Class to map the function :py:meth:`~cunqa.qpu.QPU.run` to a list of QPUs.
     """
     qpus: "list['QPU']" #: :py:class:`~cunqa.qpu.QPU` ibjects linked to the virtual QPUs to wich the circuit is mapped.
     ansatz: 'QuantumCircuit' #: Circuit to which parameters are assigned at the :py:meth:`QPUCircuitMapper.__call__` method.
