@@ -1412,7 +1412,7 @@ from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstructio
 
 def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
     """
-    Transforms a :py:class:`qiskit.QuantumCircuit`[#]_ to json dict.
+    Transforms a :py:class:`qiskit.QuantumCircuit` [#]_ to json dict.
 
     Args:
         qc (qiskit.QuantumCircuit): circuit to transform to json.
@@ -1500,7 +1500,7 @@ def qc_to_json(qc: 'QuantumCircuit') -> Tuple[dict, bool]:
 
 def from_json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit`[#]_.
+    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit` [#]_.
 
     Args:
         circuit_dict (dict): circuit instructions to be transformed.
