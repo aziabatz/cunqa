@@ -10,7 +10,7 @@
     When sending a circuit to a virtual QPU by:
 
         >>> qpu.run(circuit)
-            <cunqa.qjob.QJob object at XXXXXXXX>
+        <cunqa.qjob.QJob object at XXXXXXXX>
         
     the output is a :py:class:`QJob` object. Once it is created, the circuit is being simulated at the virtual QPU.
     :py:class:`QJob` is the bridge between sending a circuit with instructions and recieving the results.
@@ -59,12 +59,13 @@ class QJob:
         """
         Initializes the QJob class.
 
-        It is important to note that  if `transpilation` is set False, we asume user has already done the transpilation, otherwise some errors during the simulation
+        It is important to note that  if `transpilation` is set ``False``, we asume user has already done the transpilation, otherwise some errors during the simulation
         can occur, for example if the QPU has a noise model with error associated to specific gates, if the circuit is not transpiled errors might not appear.
 
-        If `transpile` is False and `initial_layout` is provided, it will be ignored, as well as `opt_level`.
+        If `transpile` is ``False`` and `initial_layout` and/or `opt_level` are provided, they will be ignored.
 
-        Possible instructions to add as `**run_parameters` can be: shots, method, parameter_binds, meas_level, ...
+        Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
+        For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
 
         Args:
