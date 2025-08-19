@@ -71,7 +71,7 @@ class QJob:
 
             backend (~cunqa.backend.Backend): gathers necessary information about the simulator.
 
-            circ (~cunqa.circuit.CunqaCircuit)(dict)(qiskit.QuantumCircuit): circuit to be run.
+            circ (~cunqa.circuit.CunqaCircuit; dict; qiskit.QuantumCircuit): circuit to be run.
 
             **run_parameters : any other simulation instructions.
 
