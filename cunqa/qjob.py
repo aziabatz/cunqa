@@ -46,7 +46,7 @@ class QJob:
 
     
 
-    
+
     """
     _backend: 'Backend' 
     qclient: 'QClient'
@@ -73,7 +73,7 @@ class QJob:
         Args:
             QPU (QPU): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-            circ (dict, CunqaCircuit): circuit to be run.
+            circ (CunqaCircuit): circuit to be run.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
