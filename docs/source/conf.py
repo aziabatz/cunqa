@@ -118,7 +118,7 @@ print()
 print()
 print()
 print(help(ndoc))
-_old_process_type = ndoc._process_type
+_old_process_type = ndoc._convert_type_spec
 
 def _custom_process_type(name, aliases={}):
     # Split the name by "|" and process each part
@@ -127,7 +127,7 @@ def _custom_process_type(name, aliases={}):
     return " | ".join(processed)
 
 # Monkeypatch
-ndoc._process_type = _custom_process_type
+ndoc._convert_type_spec = _custom_process_type
 
 
 
