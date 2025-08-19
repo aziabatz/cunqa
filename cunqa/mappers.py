@@ -82,9 +82,9 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         transpilation is not supported when communications are present.
 
     Args:
-        circuits (list[list[dict]] | list[CunqaCircuit]): circuits to be run.
+        circuits (list[list[dict]] | list[~cunqa.circuit.CunqaCircuit]): circuits to be run.
 
-        qpus (list[QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
+        qpus (list[~cunqa.qpu.QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
         run_args: any other run arguments and parameters.
 
@@ -209,9 +209,9 @@ class QJobMapper:
         For example, the function can evaluate the expected value of an observable from the output of the circuit.
 
         Args:
-            func (func): function to be passed to the results of the jobs. 
+            func (callable): function to be passed to the results of the jobs. 
 
-            population (list[list[int or float]]): list of vectors to be mapped to the jobs.
+            population (list[list[int | float]]): list of vectors to be mapped to the jobs.
             
         Return:
             List of outputs of the function applied to the results of each job for the given population.
@@ -236,7 +236,7 @@ class QPUCircuitMapper:
     The class is initialized with a list of :py:class:`~cunqa.qpu.QPU` objects associated to the virtual QPUs that are intended to work with, toguether
     with the circuit and the simulation instructions needed for its execution.
 
-    Then, its :py:meth:`~cunqa.QPUCircuitMapper` method takes a set of parameters as *population* to assing to the circuit.
+    Then, its :py:meth:`~cunqa.QPUCircuitMapper.__call__` method takes a set of parameters as *population* to assing to the circuit.
     Each assembled circuit is sent to each virtual QPU with the instructions provided on the instatiation of the mapper.
     The method returns the value for the provided function *func* for the result of each simulation.
 
@@ -274,9 +274,9 @@ class QPUCircuitMapper:
         Class constructor.
 
         Args:
-            qpus (list[QPU]): list of objects linked to the virtual QPUs intended to be used.
+            qpus (list[~cunqa.qpu.QPU]): list of objects linked to the virtual QPUs intended to be used.
 
-            circuit (dict, CunqaCircuit or QuantumCirucit): circuit to be run in the QPUs.
+            circuit (dict | ~cunqa.circuit.CunqaCircuit | qiskit.QuantumCirucit): circuit to be run in the QPUs.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -311,7 +311,7 @@ class QPUCircuitMapper:
         Args:
             func (func): function to be mapped to the QPUs. It must take as argument the an object <class 'qjob.Result'>.
 
-            params (list[list]): population of vectors to be mapped to the circuits sent to the QPUs.
+            params (list[list[float | int]]): population of vectors to be mapped to the circuits sent to the QPUs.
 
         Return:
             List of the results of the function applied to the output of the circuits sent to the QPUs.

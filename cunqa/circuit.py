@@ -735,9 +735,9 @@ class CunqaCircuit:
         Class method to apply u1 gate to the given qubit.
 
         Args:
-            qubit (int): qubit in which the gate is applied.
-
             param (float | int): parameter for the parametric gate.
+
+            qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
             "name":"u1",
@@ -750,8 +750,8 @@ class CunqaCircuit:
         Class method to apply u2 gate to the given qubit.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
             qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
@@ -765,9 +765,9 @@ class CunqaCircuit:
         Class method to apply u gate to the given qubit.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
-            lam (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
+            lam (float | int): angle.
             qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
@@ -781,9 +781,9 @@ class CunqaCircuit:
         Class method to apply u3 gate to the given qubit.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
-            lam (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
+            lam (float | int): angle.
             qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
@@ -797,9 +797,9 @@ class CunqaCircuit:
         Class method to apply p gate to the given qubit.
 
         Args:
-            qubit (int): qubit in which the gate is applied.
-
             param (float | int): parameter for the parametric gate.
+
+            qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
             "name":"p",
@@ -812,8 +812,8 @@ class CunqaCircuit:
         Class method to apply r gate to the given qubit.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
             qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
@@ -827,9 +827,9 @@ class CunqaCircuit:
         Class method to apply rx gate to the given qubit.
 
         Args:
-            qubit (int): qubit in which the gate is applied.
-
             param (float | int): parameter for the parametric gate.
+
+            qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
             "name":"rx",
@@ -842,9 +842,9 @@ class CunqaCircuit:
         Class method to apply ry gate to the given qubit.
 
         Args:
-            qubit (int): qubit in which the gate is applied.
-
             param (float | int): parameter for the parametric gate.
+
+            qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
             "name":"ry",
@@ -857,9 +857,9 @@ class CunqaCircuit:
         Class method to apply rz gate to the given qubit.
 
         Args:
-            qubit (int): qubit in which the gate is applied.
-
             param (float | int): parameter for the parametric gate.
+
+            qubit (int): qubit in which the gate is applied.
         """
         self._add_instruction({
             "name":"rz",
@@ -1000,9 +1000,9 @@ class CunqaCircuit:
         Class method to apply cu3 gate to the given qubits.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
-            lam (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
+            lam (float | int): angle.
             qubits (int): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
@@ -1016,10 +1016,10 @@ class CunqaCircuit:
         Class method to apply cu gate to the given qubits.
 
         Args:
-            theta (float): angle.
-            phi (float): angle.
-            lam (float): angle.
-            gamma (float): angle.
+            theta (float | int): angle.
+            phi (float | int): angle.
+            lam (float | int): angle.
+            gamma (float | int): angle.
             qubits (int | list[int]): qubits in which the gate is applied, first one will be the control qubit and second one the target qubit.
         """
         self._add_instruction({
@@ -1062,9 +1062,9 @@ class CunqaCircuit:
         Class method to add a measurement of a qubit or a list of qubits and to register that measurement in the given classical bits.
 
         Args:
-            qubits (list[int] | int): qubits to measure.
+            qubits (int | list[int]): qubits to measure.
 
-            clbits (list[int] | int): clasical bits where the measurement will be registered.
+            clbits (int | list[int]): clasical bits where the measurement will be registered.
         """
         if not (isinstance(qubits, list) and isinstance(clbits, list)):
             list_qubits = [qubits]; list_clbits = [clbits]
@@ -1111,7 +1111,7 @@ class CunqaCircuit:
 
             control_qubit (int): control qubit whose classical measurement will control the execution of the gate.
 
-            target_qubit (list[int], int): list of qubits or qubit to which the gate is intended to be applied.
+            target_qubit (int | list[int]): list of qubits or qubit to which the gate is intended to be applied.
 
             param (float | int): parameter for the case parametric gate is provided.
 
@@ -1341,7 +1341,7 @@ class CunqaCircuit:
         Args:
             gate (str): gate to be applied. Has to be supported by CunqaCircuit.
 
-            target_qubits (int, list[int]): qubit or qubits to which the gate is conditionally applied.
+            target_qubits (int | list[int]): qubit or qubits to which the gate is conditionally applied.
 
             param (float | int): parameter in case the gate provided is parametric.
 
