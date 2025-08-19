@@ -61,14 +61,14 @@ class QJob:
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
         .. warning:
-            
+
 
         Args:
             qclient (QClient): client linked to the server that listens at the virtual QPU.
 
             backend (~cunqa.backend.Backend): gathers necessary information about the simulator.
 
-            circ (~cunqa.circuit.CunqaCircuit, dict): circuit to be run.
+            circ (~cunqa.circuit.CunqaCircuit)(dict)(qiskit.QuantumCircuit): circuit to be run.
 
             **run_parameters : any other simulation instructions.
 
