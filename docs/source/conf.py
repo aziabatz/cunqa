@@ -119,7 +119,7 @@ _old_process_type = ndoc._convert_type_spec
 def _custom_process_type(name, aliases={}):
     # Split the name by "|" and process each part
     parts = name.split("|")
-    processed = [_old_process_type(part, aliases) for part in parts]
+    processed = [_old_process_type(part.strip(), aliases) for part in parts]
     print(processed)
     return " | ".join(processed)
 
