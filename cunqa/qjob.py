@@ -60,7 +60,7 @@ class QJob:
         Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
-        .. warning:
+        .. warning::
 
             At this point, *circuit* is asumed to be translated into the native gates of the *backend*.
             Otherwise, simulation will fail and an error will be returned as the result.
