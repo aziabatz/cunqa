@@ -91,9 +91,7 @@ class QJob:
     @property
     def result(self) -> 'Result':
         """
-        Result of the job.
-        If no error occured during simulation, a :py:class:`~cunqa.result.Result` object is retured.
-        Otherwise, :py:class:`~cunqa.result.ResultError` will be raised.
+        Result of the job. If no error occured during simulation, a :py:class:`~cunqa.result.Result` object is retured. Otherwise, :py:class:`~cunqa.result.ResultError` will be raised.
         """
         try:
             if self._future is not None and self._future.valid():
