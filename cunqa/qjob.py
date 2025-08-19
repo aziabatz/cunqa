@@ -2,17 +2,12 @@
     Contains objects that define and manage quantum emulation jobs.
 
     The core of this module is the class :py:class:`~cunqa.qjob.QJob`. These objects are created when a quantum job
-    is sent to a virtual QPU, as a return of the :py:meth:`~cunqa.qpu.QPU.run` method.
-
-    Handling QJobs
-    --------------
-
-    When sending a circuit to a virtual QPU by:
+    is sent to a virtual QPU, as a return of the :py:meth:`~cunqa.qpu.QPU.run` method:
 
         >>> qpu.run(circuit)
         <cunqa.qjob.QJob object at XXXXXXXX>
         
-    the output is a :py:class:`QJob` object. Once it is created, the circuit is being simulated at the virtual QPU.
+    Once it is created, the circuit is being simulated at the virtual QPU.
     :py:class:`QJob` is the bridge between sending a circuit with instructions and recieving the results.
 
 
@@ -44,7 +39,7 @@ class QJob:
     A :py:class:`QJob` object is created as the output of the :py:meth:`~cunqa.qpu.QPU.run` method.
     The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
 
-    
+
 
 
     """
@@ -62,24 +57,18 @@ class QJob:
         """
         Initializes the QJob class.
 
-        It is important to note that  if `transpilation` is set ``False``, we asume user has already done the transpilation, otherwise some errors during the simulation
-        can occur, for example if the QPU has a noise model with error associated to specific gates, if the circuit is not transpiled errors might not appear.
-
-        If `transpile` is ``False`` and `initial_layout` and/or `opt_level` are provided, they will be ignored.
-
         Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
+        .. warning:
+            
+
         Args:
-            QPU (~cunqa.qpu.QPU): QPU object that represents the virtual QPU to which the job is going to be sent.
+            qclient (QClient): client linked to the server that listens at the virtual QPU.
+
+            backend (~cunqa.backend.Backend): gathers necessary information about the simulator.
 
             circ (~cunqa.circuit.CunqaCircuit, dict): circuit to be run.
-
-            transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
-
-            initial_layout (list[int]):  initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
-
-            opt_level (int): optimization level for transpilation, default set to 1.
 
             **run_parameters : any other simulation instructions.
 
