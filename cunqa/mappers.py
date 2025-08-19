@@ -82,7 +82,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         transpilation is not supported when communications are present.
 
     Args:
-        circuits (list[list[dict]] or list[CunqaCircuit]): circuits to be run.
+        circuits (list[list[dict]] | list[CunqaCircuit]): circuits to be run.
 
         qpus (list[QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
@@ -194,7 +194,7 @@ class QJobMapper:
         Class constructor.
 
         Args:
-            qjobs (list[QJob]): list of :py:class:`~cunqa.qjob.QJob` objects to be mapped.
+            qjobs (list[~cunqa.qjob.QJob]): list of :py:class:`~cunqa.qjob.QJob` objects to be mapped.
 
         """
         self.qjobs = qjobs
