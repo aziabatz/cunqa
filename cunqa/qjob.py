@@ -64,6 +64,7 @@ class QJob:
 
             At this point, *circuit* is asumed to be translated into the native gates of the *backend*.
             Otherwise, simulation will fail and an error will be returned as the result.
+            For further details, checkout :py:mod:`~cunqa.transpile`.
 
 
         Args:
@@ -71,7 +72,7 @@ class QJob:
 
             backend (~cunqa.backend.Backend): gathers necessary information about the simulator.
 
-            circ (~cunqa.circuit.CunqaCircuit; dict; qiskit.QuantumCircuit): circuit to be run.
+            circ (qiskit.QuantumCircuit; dict; ~cunqa.circuit.CunqaCircuit): circuit to be run.
 
             **run_parameters : any other simulation instructions.
 
