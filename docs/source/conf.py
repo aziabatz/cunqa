@@ -115,35 +115,11 @@ napoleon_numpy_docstring = False
 import sphinx.ext.napoleon.docstring as ndoc
 
 _old_process_type = ndoc._convert_type_spec
-_old_process_type_obj = ndoc._convert_type_spec_obj
-
 
 def _custom_process_type(name, aliases={}):
     # Split the name by "|" and process each part
     parts = name.split("|")
-    processed = []
-    for part in parts:
-        part.strip()
-        if part == "qiskit.QuantumCircuit":
-            part = "`QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_"
-            processed.append(part)
-        else:
-            processed.append(_old_process_type(part, aliases))
-
-    return " | ".join(processed)
-
-def _custom_process_type_obj(name, aliases={}):
-    # Split the name by "|" and process each part
-    parts = name.split("|")
-    processed = []
-    for part in parts:
-        part.strip()
-        if part == "qiskit.QuantumCircuit":
-            part = "`QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_"
-            processed.append(part)
-        else:
-            processed.append(_old_process_type_obj(part, aliases))
-
+    processed = [_old_process_type(part, aliases) for part in parts]
     return " | ".join(processed)
 
 # Monkeypatch
