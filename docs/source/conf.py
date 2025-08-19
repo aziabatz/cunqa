@@ -114,6 +114,10 @@ napoleon_numpy_docstring = False
 # theoretically this module is loaded?
 import sphinx.ext.napoleon.docstring as ndoc
 
+print()
+print()
+print()
+print(dir(ndoc))
 _old_process_type = ndoc._process_type
 
 def _custom_process_type(name, aliases={}):
