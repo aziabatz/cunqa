@@ -91,7 +91,9 @@ class QJob:
     @property
     def result(self) -> 'Result':
         """
-        Synchronous method to obtain the result of the job. Note that this call depends on the job being finished, therefore is blocking.
+        Result of the job.
+        If no error occured during simulation, a :py:class:`~cunqa.result.Result` object is retured.
+        Otherwise, :py:class:`~cunqa.result.ResultError` will be raised.
         """
         try:
             if self._future is not None and self._future.valid():
