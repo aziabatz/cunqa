@@ -49,21 +49,6 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
 
 
     //----------------- Sbatch header block --------------------------
-    //int n_tasks = qpus.size() + quantum_connectivity.size();
-    //int cores_per_task = 2; // 2 cores per QPU by default
-    //int mem_per_qpu = 2; // 2GB per QPU by default
-    /* if (quantum_connectivity.size() > 0) {
-        int max_qc_group_size = 0;
-        for (auto& qc_group : quantum_connectivity) {
-            if (qc_group.size() > max_qc_group_size) {
-                max_qc_group_size = qc_group.size();
-            }
-        }
-        cores_per_task = cores_per_task * max_qc_group_size;
-        mem_per_qpu = mem_per_qpu * max_qc_group_size;
-    } */
-
-
     int total_number_of_cores = 0;
     int total_memory_in_gb = 0;
     for (const auto& qc_group : quantum_connectivity) {
@@ -83,7 +68,6 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
         total_memory_in_gb += classical_resources.at("qpus").at(qpu.key()).at("memory").get<int>();
     }
     
-    //int total_mem = mem_per_qpu * qpus.size(); 
     int n_nodes = std::ceil(total_number_of_cores/64.0);
     std::string time = classical_resources.at("infrastructure").at("time").get<std::string>(); 
     if (!check_time_format(time)) {
@@ -96,13 +80,12 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
     sbatchFile << "#SBATCH --job-name=qraise \n";
     sbatchFile << "#SBATCH --ntasks=" << std::to_string(total_number_of_cores) << "\n";
     sbatchFile << "#SBATCH --mem=" << std::to_string(total_memory_in_gb) << "G\n";
-    //sbatchFile << "#SBATCH -c " << std::to_string(cores_per_task) << "\n"; 
-    //sbatchFile << "#SBATCH --mem-per-cpu=" << std::to_string(mem_per_qpu) << "G\n";
     sbatchFile << "#SBATCH -N " << std::to_string(n_nodes) << "\n";
     sbatchFile << "#SBATCH --time=" << time << "\n";
     sbatchFile << "#SBATCH --output=qraise_%j\n";
     //sbatchFile << "#SBATCH --ntasks-per-node=" << 1 << "\n";
-    
+    //sbatchFile << "#SBATCH -c " << std::to_string(cores_per_task) << "\n"; 
+    //sbatchFile << "#SBATCH --mem-per-cpu=" << std::to_string(mem_per_qpu) << "G\n";
     //sbatchFile << "#SBATCH --nodelist=c7-3 \n";
     //--------------------------------------------------------
 
