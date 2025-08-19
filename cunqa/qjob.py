@@ -62,6 +62,9 @@ class QJob:
 
         .. warning:
 
+            At this point, *circuit* is asumed to be translated into the native gates of the *backend*.
+            Otherwise, simulation will fail and an error will be returned as the result.
+
 
         Args:
             qclient (QClient): client linked to the server that listens at the virtual QPU.
