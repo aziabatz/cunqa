@@ -116,11 +116,27 @@ import sphinx.ext.napoleon.docstring as ndoc
 
 _old_process_type = ndoc._convert_type_spec
 
+def processing_lists_type(part,aliases):
+    part = part[5:-1]
+    init = f"list["; end = "]"
+    while part.startswith("list[") and part.endswith("]"):
+        part = part[5:-1]
+        init+="list["; end+="]"
+
+    return init+_old_process_type(part.strip(), aliases)+end
+    
+
 def _custom_process_type(name, aliases={}):
     # Split the name by "|" and process each part
+    processed = []
     parts = name.split("|")
-    processed = [_old_process_type(part.strip(), aliases) for part in parts]
-    print(processed)
+    for part in parts:
+        part = part.strip()
+        if part.startswith("list[") and part.endswith("]"):
+            processed.append(processing_lists_type(part,aliases))
+        else:
+            processed.append(_old_process_type(part, aliases))
+
     return " | ".join(processed)
 
 # Monkeypatch
