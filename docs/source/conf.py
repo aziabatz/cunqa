@@ -107,7 +107,7 @@ html_theme_options = {
 }
 
 napoleon_google_docstring = True
-
+napoleon_preprocess_types = True
 napoleon_numpy_docstring = False
 
 # napoleon_include_init_with_doc = False  # Incluye __init__ si tiene docstring
