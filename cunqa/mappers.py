@@ -82,7 +82,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
         transpilation is not supported when communications are present.
 
     Args:
-        circuits (list[list[dict]] | list[~cunqa.circuit.CunqaCircuit]): circuits to be run.
+        circuits (list[dict] | list[~cunqa.circuit.CunqaCircuit]): circuits to be run.
 
         qpus (list[~cunqa.qpu.QPU]): QPU objects associated to the virtual QPUs in which the circuits want to be run.
     
@@ -236,7 +236,7 @@ class QPUCircuitMapper:
     The class is initialized with a list of :py:class:`~cunqa.qpu.QPU` objects associated to the virtual QPUs that are intended to work with, toguether
     with the circuit and the simulation instructions needed for its execution.
 
-    Then, its :py:meth:`~cunqa.QPUCircuitMapper.__call__` method takes a set of parameters as *population* to assing to the circuit.
+    Then, its :py:meth:`~cunqa.mappers.QPUCircuitMapper.__call__` method takes a set of parameters as *population* to assing to the circuit.
     Each assembled circuit is sent to each virtual QPU with the instructions provided on the instatiation of the mapper.
     The method returns the value for the provided function *func* for the result of each simulation.
 
