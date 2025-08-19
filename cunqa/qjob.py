@@ -44,7 +44,7 @@ class QJob:
 
     """
     _backend: 'Backend' 
-    qclient: 'QClient'
+    qclient: 'QClient' #: Client linked to the server that listens at the virtual QPU.
     _updated: bool
     _future: 'FutureWrapper' 
     _result: Optional['Result']
@@ -66,13 +66,12 @@ class QJob:
             Otherwise, simulation will fail and an error will be returned as the result.
             For further details, checkout :py:mod:`~cunqa.transpile`.
 
-
         Args:
             qclient (QClient): client linked to the server that listens at the virtual QPU.
 
             backend (~cunqa.backend.Backend): gathers necessary information about the simulator.
 
-            circ (qiskit.QuantumCircuit; dict; ~cunqa.circuit.CunqaCircuit): circuit to be run.
+            circ (qiskit.QuantumCircuit | dict | ~cunqa.circuit.CunqaCircuit): circuit to be run.
 
             **run_parameters : any other simulation instructions.
 
