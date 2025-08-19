@@ -28,7 +28,7 @@
 
 {% if objname == 'QJob' %}
 ..automethod:: {{ name }}.result
-{% endif}
+{% endif %}
 
 {% set ns = namespace(pub=[]) %}
 {% for item in methods %}
