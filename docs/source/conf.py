@@ -106,7 +106,7 @@ html_theme_options = {
     'titles_only': False
 }
 
-napoleon_google_docstring = True
+napoleon_google_docstring = False
 napoleon_preprocess_types = False
 
 highlight_options = {
