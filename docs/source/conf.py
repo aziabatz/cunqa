@@ -85,9 +85,11 @@ html_theme = 'sphinx_rtd_theme'
 # pygments_style = 'sphinx'  this color scheme displays code blocks with a green background and lively colors. maybe too much
 html_static_path = ['_static']
 html_css_files = [
+    'custom.css',
     'table.css',
     'hide_bases_object.js',
 ]
+
 html_logo = "_static/logo_cesga_blanco.png"
 html_favicon = "_static/favicon.ico"
 html_theme_options = {
