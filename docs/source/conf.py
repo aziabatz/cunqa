@@ -127,7 +127,7 @@ def processing_lists_type(part, aliases):
         end += "]"
     # Common Python types
     valid_types = [
-        "int", "float", "str", "bool", "list", "dict", "tuple", "set", "None", "bytes", "complex", "object"
+        "int", "float", "str", "bool", "list", "dict", "tuple", "set", "None", "bytes", "complex", "object", "callable"
     ]
 
     if part not in valid_types:
