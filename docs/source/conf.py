@@ -106,8 +106,16 @@ html_theme_options = {
     'titles_only': False
 }
 
-napoleon_google_docstring = False
-napoleon_preprocess_types = False
+napoleon_google_docstring = True
+
+napoleon_numpy_docstring = False
+
+# napoleon_include_init_with_doc = False  # Incluye __init__ si tiene docstring
+# # napoleon_include_private_with_doc = False  # Incluye miembros privados con docstring
+# napoleon_include_special_with_doc = False  # Incluye miembros especiales con docstring
+# napoleon_type_aliases = {}  # Puedes mapear tipos personalizados aquí
+# napoleon_attr_annotations = True  # Procesa anotaciones de atributos
+# napoleon_custom_sections = None  # Puedes definir secciones personalizadas en docstrings
 
 highlight_options = {
     'linenos': 'inline',  # 'table' para columna separada, 'inline' para inline numbers
