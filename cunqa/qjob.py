@@ -44,6 +44,9 @@ class QJob:
     A :py:class:`QJob` object is created as the output of the :py:meth:`~cunqa.qpu.QPU.run` method.
     The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
 
+    
+
+    
     """
     _backend: 'Backend' 
     qclient: 'QClient'
@@ -67,11 +70,10 @@ class QJob:
         Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
-
         Args:
-            QPU (<class 'qpu.QPU'>): QPU object that represents the virtual QPU to which the job is going to be sent.
+            QPU (QPU): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-            circ (json dict or <class 'cunqa.circuit.CunqaCircuit'>): circuit to be run.
+            circ (dict, CunqaCircuit): circuit to be run.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
