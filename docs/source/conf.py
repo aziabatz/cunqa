@@ -107,8 +107,25 @@ html_theme_options = {
 }
 
 napoleon_google_docstring = True
-napoleon_preprocess_types = True
+napoleon_preprocess_types = False
 napoleon_numpy_docstring = False
+
+
+# theoretically this module is loaded?
+import sphinx.ext.napoleon.docstring as ndoc
+
+_old_process_type = ndoc._process_type
+
+def _custom_process_type(name, aliases={}):
+    # Split the name by "|" and process each part
+    parts = name.split("|")
+    processed = [_old_process_type(part.strip, aliases) for part in parts]
+    return " | ".join(processed)
+
+# Monkeypatch
+ndoc._process_type = _custom_process_type
+
+
 
 # napoleon_include_init_with_doc = False  # Incluye __init__ si tiene docstring
 # # napoleon_include_private_with_doc = False  # Incluye miembros privados con docstring
