@@ -91,7 +91,16 @@ class QJob:
     @property
     def result(self) -> 'Result':
         """
-        Result of the job. If no error occured during simulation, a :py:class:`~cunqa.result.Result` object is retured. Otherwise, :py:class:`~cunqa.result.ResultError` will be raised.
+        Result of the job.
+        If no error occured during simulation, a :py:class:`~cunqa.result.Result` object is retured.
+        Otherwise, :py:class:`~cunqa.result.ResultError` will be raised.
+
+        .. note::
+            Since to obtain the result the simulation has to be finished, this method is a blocking call,
+            which means that the program will be blocked until the :py:class:`QClient` has recieved from
+            the corresponding server the outcome of the job.
+            The result is not sent from the server to the :py:class:`QClient` until this method is called.
+
         """
         try:
             if self._future is not None and self._future.valid():
@@ -120,7 +129,7 @@ class QJob:
     @property
     def time_taken(self) -> str:
         """
-        Method to obtain the time that the job took. It can also be obtained by `QJob._result.time_taken`.
+        Time that the job took.
         """
 
         if self._future is not None and self._future.valid():
@@ -139,7 +148,12 @@ class QJob:
 
     def submit(self) -> None:
         """
-        Asynchronous method to submit a job to the corresponding QClient.
+        Asynchronous method to submit a job to the corresponding :py:class:`QClient`.
+
+        .. note::
+            Differently from :py:meth:`~QJob.result`, this is a non-blocking call.
+            Once a job is summited, there is no wait, the python program continues at the same time that
+            the corresponding server recieves and simualtes the circuit.
         """
         if self._future is not None:
             logger.warning("QJob has already been submitted.")
