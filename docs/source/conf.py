@@ -107,17 +107,13 @@ html_theme_options = {
 }
 
 napoleon_google_docstring = True
-napoleon_preprocess_types = False
+napoleon_preprocess_types = True
 napoleon_numpy_docstring = False
 
 
 # theoretically this module is loaded?
 import sphinx.ext.napoleon.docstring as ndoc
 
-print()
-print()
-print()
-print(help(ndoc))
 _old_process_type = ndoc._convert_type_spec
 
 def _custom_process_type(name, aliases={}):
