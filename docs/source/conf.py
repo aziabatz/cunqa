@@ -116,14 +116,24 @@ import sphinx.ext.napoleon.docstring as ndoc
 
 _old_process_type = ndoc._convert_type_spec
 
-def processing_lists_type(part,aliases):
+def processing_lists_type(part, aliases):
+    original = part
     part = part[5:-1]
-    init = f"list["; end = "]"
+    init = "list["
+    end = "]"
     while part.startswith("list[") and part.endswith("]"):
         part = part[5:-1]
-        init+="list["; end+="]"
+        init += "list["
+        end += "]"
+    # Common Python types
+    valid_types = [
+        "int", "float", "str", "bool", "list", "dict", "tuple", "set", "None", "bytes", "complex", "object"
+    ]
 
-    return _old_process_type(init.strip(),aliases)+_old_process_type(part.strip(), aliases)+_old_process_type(end.strip(),aliases)
+    if part not in valid_types:
+        return _old_process_type(init.strip(),aliases)+_old_process_type(part.strip(), aliases)+_old_process_type(end.strip(),aliases)
+    else:
+        return _old_process_type(original.strip(), aliases)
     
 
 def _custom_process_type(name, aliases={}):
