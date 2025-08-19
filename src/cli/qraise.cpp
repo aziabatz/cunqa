@@ -175,6 +175,7 @@ int main(int argc, char* argv[])
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
     if (args.infrastructure.has_value()) {
+            LOGGER_DEBUG("Raising infrastructure");
             std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
             write_sbatch_file_from_infrastructure(sbatchFile, args);
             sbatchFile.close();
