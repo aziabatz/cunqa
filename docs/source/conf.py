@@ -123,7 +123,7 @@ def processing_lists_type(part,aliases):
         part = part[5:-1]
         init+="list["; end+="]"
 
-    return "`"+init+"`"+_old_process_type(part.strip(), aliases)+"`"+end+"`"
+    return " `"+init+"` "+_old_process_type(part.strip(), aliases)+" `"+end+"` "
     
 
 def _custom_process_type(name, aliases={}):
