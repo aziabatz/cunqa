@@ -71,9 +71,9 @@ class QJob:
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
 
         Args:
-            QPU (cunqa.qpu.QPU): QPU object that represents the virtual QPU to which the job is going to be sent.
+            QPU (~cunqa.qpu.QPU): QPU object that represents the virtual QPU to which the job is going to be sent.
 
-            circ (cunqa.circuit.CunqaCircuit): circuit to be run.
+            circ (~cunqa.circuit.CunqaCircuit, dict): circuit to be run.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
