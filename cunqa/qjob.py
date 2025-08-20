@@ -25,7 +25,6 @@
 
 
     """
-#TODO: when issue #330 is closed, introduce/do not introduce function gather.
 
 from typing import  Union, Any
 import json
@@ -52,7 +51,12 @@ class QJob:
     A :py:class:`QJob` object is created as the output of the :py:meth:`~cunqa.qpu.QPU.run` method.
     The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
 
+    Hadling QJobs
+    =============
 
+
+    Upgrading parameters from QJobs
+    =============================== 
 
 
     """
