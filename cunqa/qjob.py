@@ -69,7 +69,13 @@ class QJob:
     objects can be found on its documentation.
 
     Let's say we are sending two different jobs to the same QPU.
-    Because of how the client-server comunication is built
+    Because of how the client-server comunication is built, we must be careful and call for the results in the same order in which the jobs where submited.
+    The correct workflow would be:
+
+        >>> qjob_1 = qpu.run(circuit_1)
+        >>> qjob_2 = qpu.run(circuit_2)
+        >>> result_1 = qjob_1.result
+        >>> result_2 = qjob_2.result
 
     Upgrading parameters from QJobs
     =============================== 
