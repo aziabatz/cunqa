@@ -67,7 +67,6 @@ class QJob:
 
     Handling QJobs sent to the same QPU
     ====================================
-
     Let's say we are sending two different jobs to the same QPU.
     This would not result on a paralelization, each QPU can only execute one simulation at the time.
     When a virtual QPU recieves a job while simulating one, it would wait in line untill the earlier finishes.
