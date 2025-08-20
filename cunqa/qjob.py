@@ -58,10 +58,12 @@ class QJob:
     Let`s say we want to send a circuit to a QPU and get the result and the time taken for the simulation:
 
         >>> qjob = qpu.run(circuit)
-        
         >>> result = qjob.result
-
+        >>> print(result)
+        <cunqa.result.Result object at XXXXXXXX>
         >>> time_taken = qjob.time_taken
+        >>> print(time_taken)
+        0.876
 
 
     Upgrading parameters from QJobs
