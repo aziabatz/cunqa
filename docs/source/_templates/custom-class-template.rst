@@ -27,7 +27,6 @@
 {% endif %}
 
 {% if objname == 'QJob' %}
-.. automethod:: {{ name }}.submit
 .. automethod:: {{ name }}.result
 {% endif %}
 
