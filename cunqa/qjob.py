@@ -65,6 +65,11 @@ class QJob:
         >>> print(time_taken)
         0.876
 
+    Note that the `time_taken` is in seconds. More instructions on obtaining data from :py:class:`~cunqa.result.Result`
+    objects can be found on its documentation.
+
+    Let's say we are sending two different jobs to the same QPU.
+    Because of how the client-server comunication is built
 
     Upgrading parameters from QJobs
     =============================== 
