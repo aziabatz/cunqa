@@ -51,10 +51,7 @@ class QJob:
     A :py:class:`QJob` object is created as the output of the :py:meth:`~cunqa.qpu.QPU.run` method.
     The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
 
-    Hadling QJobs
-    =============
-
-    One would want to sabe the :py:class:`QJob` resulting from sending a circuit in a variable.
+    One would want to save the :py:class:`QJob` resulting from sending a circuit in a variable.
     Let`s say we want to send a circuit to a QPU and get the result and the time taken for the simulation:
 
         >>> qjob = qpu.run(circuit)
@@ -65,8 +62,11 @@ class QJob:
         >>> print(time_taken)
         0.876
 
-    Note that the `time_taken` is in seconds. More instructions on obtaining data from :py:class:`~cunqa.result.Result`
+    Note that the `time_taken` is expressed in seconds. More instructions on obtaining data from :py:class:`~cunqa.result.Result`
     objects can be found on its documentation.
+
+    Handling QJobs sent to the same QPU
+    ====================================
 
     Let's say we are sending two different jobs to the same QPU.
     Because of how the client-server comunication is built, we must be careful and call for the results in the same order in which the jobs where submited.
@@ -76,6 +76,13 @@ class QJob:
         >>> qjob_2 = qpu.run(circuit_2)
         >>> result_1 = qjob_1.result
         >>> result_2 = qjob_2.result
+
+    This is because the server follows the rule FIFO (_First in first out_), if we want to recieve the second result,
+    the first one has to be out.
+
+    .. warning::
+        In the case in which the order is not respected, everything would work, but results will not correspond
+        to the job. A mixup would happen.
 
     Upgrading parameters from QJobs
     =============================== 
