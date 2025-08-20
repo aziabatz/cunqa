@@ -13,6 +13,10 @@
 
         >>> qjob = qpu.run(circuit)
 
+    Another functionality described in the submodule is the function :py:func:`~gather`, 
+    which recieves a list of :py:class:`~QJob` objects and returns their results as :py:class:`~cunqa.result.Result`
+    objects.
+
 
     """
 #TODO: when issue #330 is closed, introduce/do not introduce function gather.
