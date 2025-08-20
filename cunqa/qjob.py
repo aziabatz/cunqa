@@ -69,6 +69,8 @@ class QJob:
     ====================================
 
     Let's say we are sending two different jobs to the same QPU.
+    This would not result on a paralelization, each QPU can only execute one simulation at the time.
+    When a virtual QPU recieves a job while simulating one, it would wait in line untill the earlier finishes.
     Because of how the client-server comunication is built, we must be careful and call for the results in the same order in which the jobs where submited.
     The correct workflow would be:
 
@@ -77,7 +79,7 @@ class QJob:
         >>> result_1 = qjob_1.result
         >>> result_2 = qjob_2.result
 
-    This is because the server follows the rule FIFO (_First in first out_), if we want to recieve the second result,
+    This is because the server follows the rule FIFO (*First in first out*), if we want to recieve the second result,
     the first one has to be out.
 
     .. warning::
