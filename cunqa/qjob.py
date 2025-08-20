@@ -17,6 +17,12 @@
     which recieves a list of :py:class:`~QJob` objects and returns their results as :py:class:`~cunqa.result.Result`
     objects.
 
+        >>> qjob_1 = qpu_1.run(circuit_1)
+        >>> qjob_2 = qpu_2.run(circuit_2)
+        >>> results = gather([qjob_1, qjob_2])
+    
+    For further information on sending and gathering quantum jobs, chekout the `Examples Galery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>`_.
+
 
     """
 #TODO: when issue #330 is closed, introduce/do not introduce function gather.
