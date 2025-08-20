@@ -68,7 +68,7 @@ class QJob:
     Handling QJobs sent to the same QPU
     ====================================
     Let's say we are sending two different jobs to the same QPU.
-    This would not result on a paralelization, each QPU can only execute one simulation at the time.
+    This would not result on a parallelization, each QPU can only execute one simulation at the time.
     When a virtual QPU recieves a job while simulating one, it would wait in line untill the earlier finishes.
     Because of how the client-server comunication is built, we must be careful and call for the results in the same order in which the jobs where submited.
     The correct workflow would be:
@@ -84,6 +84,13 @@ class QJob:
     .. warning::
         In the case in which the order is not respected, everything would work, but results will not correspond
         to the job. A mixup would happen.
+
+    Handling QJobs sent to different QPUs
+    =====================================
+    Here we can have parallelization sin we are working with more than one virtual QPU.
+    Let's send two circuits to two different QPUs:
+
+        >>> 
 
     Upgrading parameters from QJobs
     =============================== 
@@ -102,7 +109,7 @@ class QJob:
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
-        Initializes the :py:class:~`QJob` class.
+        Initializes the :py:class:`QJob` class.
 
         Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
