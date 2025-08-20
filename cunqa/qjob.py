@@ -9,6 +9,9 @@
         
     Once it is created, the circuit is being simulated at the virtual QPU.
     :py:class:`QJob` is the bridge between sending a circuit with instructions and recieving the results.
+    Because of this, usually one wants to save this output in a variable:
+
+        >>> qjob = qpu.run(circuit)
 
 
     """
@@ -55,7 +58,7 @@ class QJob:
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
-        Initializes the QJob class.
+        Initializes the :py:class:~`QJob` class.
 
         Possible instructions to add as `**run_parameters` can be: *shots*, *method*, *parameter_binds*, *meas_level*, ...
         For further information, check :py:meth:`~cunqa.qpu.QPU.run` method.
@@ -165,12 +168,13 @@ class QJob:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-    def upgrade_parameters(self, parameters: "list[float]") -> None:
+    def upgrade_parameters(self, parameters: "list[float | int]") -> None:
         """
-        Asynchronous method to upgrade the parameters in a previously submitted parametric circuit.
+        Method to upgrade the parameters in a previously submitted parametric circuit.
+        By this call, firstly the result is called from the server and afterwards the new parameters are sent.
 
         Args:
-            parameters (list[float]): list of parameters to assign to the parametrized circuit.
+            parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
         """
 
         if self._result is None:
