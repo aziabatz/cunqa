@@ -54,6 +54,15 @@ class QJob:
     Hadling QJobs
     =============
 
+    One would want to sabe the :py:class:`QJob` resulting from sending a circuit in a variable.
+    Let`s say we want to send a circuit to a QPU and get the result and the time taken for the simulation:
+
+        >>> qjob = qpu.run(circuit)
+        
+        >>> result = qjob.result
+
+        >>> time_taken = qjob.time_taken
+
 
     Upgrading parameters from QJobs
     =============================== 
