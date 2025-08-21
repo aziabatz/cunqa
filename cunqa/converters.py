@@ -11,7 +11,7 @@
 
     .. warning::
         It is not possible to convert circuits with classical or quantum communications instructions into :py:class:`qiskit.QuantumCircuit`
-        since these are not supported by this format. It one tries, an error will raise.
+        since these are not supported by this format. It one tries, an error will be raised.
 """
 
 
@@ -25,6 +25,13 @@ from cunqa.logger import logger
 
 
 def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', dict]:
+    """
+        Function to convert a quantum circuit to the desired format.
+        Detects the intup format and transforms into the one specified by *convert_to*, that can be ``"QuantumCircuit`` for :py:class:`qiskit.QuantumCircuit`,
+        ``"CuqnaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"json"`` for a json :py:class:`dict`.
+
+        
+    """
     if isinstance(circuit, QuantumCircuit):
         if convert_to == "QuantumCircuit":
             logger.warning("Provided circuit was already a QuantumCircuit")
