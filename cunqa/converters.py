@@ -145,7 +145,15 @@ def qc_to_json(qc : 'QuantumCircuit') -> dict:
         raise error
 
 def qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
-    return json_to_cunqac(qc_to_json(qc)) 
+    """
+    Converts a :py:class:`qiskit.QuantumCircuit` into a :py:class:`~cunqa.circuit.CunqaCircuit`.
+
+    Args:
+        qc (qiskit.QuantumCircuit): object that defines the quantum circuit.
+    Returns:
+        The corresponding :py:class:`~cunqa.circuit.CunqaCircuit` with the propper instructions and characteristics.
+    """
+    return json_to_cunqac(qc_to_json(qc))
 
 def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     circuit_json = {}
@@ -165,13 +173,13 @@ def cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
 
 def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
     """
-    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.cirucit.CunqaCircuit`.
+    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.circuit.CunqaCircuit`.
 
     Args:
-        circuit_dict (dict): json with the propper structur for defining a quantum circuit.
+        circuit_dict (dict): json with the propper structure for defining a quantum circuit.
     
     Returns:
-        An object :py:class:`~cunqa.circuit.CunqaCirucit` with the corresponding instructions and characteristics.
+        An object :py:class:`~cunqa.circuit.CunqaCircuit` with the corresponding instructions and characteristics.
     """
     cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
     cunqac.from_instructions(circuit_dict["instructions"])
