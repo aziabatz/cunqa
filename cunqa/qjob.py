@@ -131,13 +131,17 @@ class QJob:
 
     Let's see a simple example: creating a parametric circuit and uptading its parametes:
 
+        >>> # building the parametric circuit
         >>> circuit = CunqaCircuit(3)
         >>> circuit.ry(0.25, 0)
         >>> circuit.rx(0.5, 1)
         >>> circuit.p(0.98, 2)
         >>> circuit.measure_all()
+        >>> # sending the circuit to a virtual QPU
         >>> qjob = qpu.run(circuit)
+        >>> # defining the new set of parameters
         >>> new_parameters = [1,1,0]
+        >>> # upgrading the parameters of the job
         >>> qjob.upgrade_parameters(new_parameters)
         >>> result = qjob.result
 
