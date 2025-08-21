@@ -129,7 +129,7 @@ class QJob:
     is repeated, so :py:mod:`~cunqa` has a more efficient and simple way to handle this cases: a method to send to the QPU a list with the new parameters
     to be assigned to the circuit, :py:meth:`~QJob.upgrade_parameters`.
 
-    Let's see a simple example: creating a parametric circuit and uptading its parametes:
+    Let's see a simple example: creating a parametric circuit and uptading its parameters:
 
         >>> # building the parametric circuit
         >>> circuit = CunqaCircuit(3)
@@ -150,7 +150,7 @@ class QJob:
 
     .. warning::
         Before sending the circuit or upgrading its parameters, the result of the prior job must be called. It can be done manually, so that we can
-        save it and obtain its information, or it can be done automatically as in the example avobe, but be aware that once the :py:meth:`upgrade_parameters`
+        save it and obtain its information, or it can be done automatically as in the example above, but be aware that once the :py:meth:`upgrade_parameters`
         method is called, this result is discarded.
 
     References:
@@ -284,8 +284,14 @@ class QJob:
             
     def upgrade_parameters(self, parameters: "list[float | int]") -> None:
         """
-        Method to upgrade the parameters in a previously submitted parametric circuit.
-        By this call, firstly the result is called from the server and afterwards the new parameters are sent.
+        Method to upgrade the parameters in a previously submitted job of parametric circuit.
+        By this call, first it is checked weather if the prior simulation's result was called. If not, it calls it but does not store it, then
+        sends the new set of parameters to the server to be reasigned to the circuit and to simulate it.
+
+        This method can be used on a loop, always being careful if we want to save the intermediate results.
+
+        Examples of usage are shown above and on the `Examples Gallery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>_.
+        Also, this method is used by the class :py:class:`~cunqa.mappers.QJobMapper`, checkout its documentation for a extensive description.
 
         Args:
             parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
@@ -419,7 +425,6 @@ class QJob:
         except Exception as error:
             logger.error(f"Some error occured with the circuit dict provided [{type(error).__name__}].")
             raise QJobError # I capture the error in QPU.run() when creating the job
-
 
     def _configure(self, **run_parameters: Any) -> None:
         # configuration
