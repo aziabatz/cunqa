@@ -95,11 +95,11 @@ class QJob:
         >>> result_1 = qjob_1.result
         >>> result_2 = qjob_2.result
 
-    This way, when we send the first job, then inmediatly the sencond one is sent, because :py:mth:`~cunqa.qou.QPU.run` does not wait
+    This way, when we send the first job, then inmediatly the sencond one is sent, because :py:mth:`~cunqa.qpu.QPU.run` does not wait
     for the simulation to finish. This way, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
     since jobs are managed by different :py:class:`QClient` objects, there can be no mixup.
 
-
+    In fact, the function :py:func:`~cunqa.qjob.gather` is designed for recieving a list of qjobs and return the results:
 
 
     Upgrading parameters from QJobs
