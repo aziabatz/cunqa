@@ -87,10 +87,20 @@ class QJob:
 
     Handling QJobs sent to different QPUs
     =====================================
-    Here we can have parallelization sin we are working with more than one virtual QPU.
+    Here we can have parallelization since we are working with more than one virtual QPU.
     Let's send two circuits to two different QPUs:
 
-        >>> 
+        >>> qjob_1 = qpu_1.run(circuit_1)
+        >>> qjob_2 = qpu_2.run(circuit_2)
+        >>> result_1 = qjob_1.result
+        >>> result_2 = qjob_2.result
+
+    This way, when we send the first job, then inmediatly the sencond one is sent, because :py:mth:`~cunqa.qou.QPU.run` does not wait
+    for the simulation to finish. This way, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
+    since jobs are managed by different :py:class:`QClient` objects, there can be no mixup.
+
+
+
 
     Upgrading parameters from QJobs
     =============================== 
