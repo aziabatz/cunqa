@@ -99,7 +99,16 @@ class QJob:
     for the simulation to finish. This way, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
     since jobs are managed by different :py:class:`QClient` objects, there can be no mixup.
 
-    In fact, the function :py:func:`~cunqa.qjob.gather` is designed for recieving a list of qjobs and return the results:
+    In fact, the function :py:func:`~cunqa.qjob.gather` is designed for recieving a list of qjobs and return the results; therefore, let's say
+    we have a list of circuits that we want to submit to a group of QPUs:
+
+        >>> qjobs = []
+        >>> for circuit, qpu in zip(circuits, qpus):
+        >>> ... qjob = qpu.run(circuit)
+        >>> ... qjobs.append(qjob)
+        >>> results = gather(qjobs)
+
+    In this workflow, 
 
 
     Upgrading parameters from QJobs
