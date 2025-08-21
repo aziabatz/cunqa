@@ -1,3 +1,20 @@
+"""
+    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json :py:class:`dict`.
+
+    There is the general :py:func:`convert` function, that identifies the input format and transforms according to the format desired by the variable *convert_to*.
+
+    On the other hand, there are other functions to transform between specific formats:
+
+        - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`qiskit.QuantumCircuit` **:** :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`.
+        - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`dict` **:** :py:func:`cunqac_to_json`, :py:func:`json_to_cunqac`.
+        - :py:class:`qiskit.QuantumCircuit` **↔** :py:class:`dict` **:** :py:func:`qc_to_json`, :py:func:`json_to_qc`.
+
+    .. warning::
+        It is not possible to convert circuits with classical or quantum communications instructions into :py:class:`qiskit.QuantumCircuit`
+        since these are not supported by this format. It one tries, an error will be raised.
+"""
+
+
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
 
@@ -8,6 +25,18 @@ from cunqa.logger import logger
 
 
 def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', dict]:
+    """
+        Function to convert a quantum circuit to the desired format.
+        Detects the intup format and transforms into the one specified by *convert_to*, that can be ``"QuantumCircuit`` for :py:class:`qiskit.QuantumCircuit`,
+        ``"CunqaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"json"`` for a json :py:class:`dict`.
+
+        Args:
+            circuit (qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit | dict): circuit to be transformed.
+        
+        Returns:
+            The circuit in the desired format accordingly to *convert_to*.
+
+    """
     if isinstance(circuit, QuantumCircuit):
         if convert_to == "QuantumCircuit":
             logger.warning("Provided circuit was already a QuantumCircuit")
@@ -47,18 +76,17 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
     
     return converted_circuit
 
-
-
 def qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
-    Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
+    Transforms a :py:class:`qiskit.QuantumCircuit` to json :py:class:`dict`.
 
     Args:
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to transform to json.
+        qc (qiskit.QuantumCircuit): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
     """
+
     is_dynamic = False
     # Check validity of the provided quantum circuit
     if isinstance(qc, dict):
@@ -132,10 +160,16 @@ def qc_to_json(qc : 'QuantumCircuit') -> dict:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
         raise error
 
-
 def qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
-    return json_to_cunqac(qc_to_json(qc)) 
+    """
+    Converts a :py:class:`qiskit.QuantumCircuit` into a :py:class:`~cunqa.circuit.CunqaCircuit`.
 
+    Args:
+        qc (qiskit.QuantumCircuit): object that defines the quantum circuit.
+    Returns:
+        The corresponding :py:class:`~cunqa.circuit.CunqaCircuit` with the propper instructions and characteristics.
+    """
+    return json_to_cunqac(qc_to_json(qc))
 
 def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     circuit_json = {}
@@ -150,29 +184,44 @@ def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
 
     return circuit_json
 
-
 def cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
+    """
+    Converts a :py:class:`~cunqa.circuit.CunqaCircuit` into a :py:class:`qiskit.QuantumCircuit`.
+
+    Args:
+        cunqac (~cunqa.circuit.CunqaCircuit): object that defines the quantum circuit.
+
+    Returns:
+        The corresponding :py:class:`qiskit.QuantumCircuit` with the propper instructions and characteristics.
+    """
     return json_to_qc(cunqac_to_json(cunqac))
 
-
 def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
+    """
+    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.circuit.CunqaCircuit`.
+
+    Args:
+        circuit_dict (dict): json with the propper structure for defining a quantum circuit.
+    
+    Returns:
+        An object :py:class:`~cunqa.circuit.CunqaCircuit` with the corresponding instructions and characteristics.
+    """
     cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
     cunqac.from_instructions(circuit_dict["instructions"])
 
     return cunqac
 
-
 def json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_.
+    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit`.
 
     Args:
-        circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
+        circuit_dict (dict): circuit instructions to be transformed.
 
     Return:
-        QuantumCircuit with the given instructions.
-
+        :py:class:`qiskit.QuantumCircuit` with the given instructions.
     """
+
     # Checking validity of the provided circuit
     if isinstance(circuit_dict, QuantumCircuit):
         logger.warning("Circuit provided is already <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.")
@@ -266,7 +315,7 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     Returns a list of two dicts corresponding to the classical and quantum registers of the circuit supplied.
 
     Args
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
+        qc (qiskit.QuantumCircuit): quantum circuit whose number of registers we want to know
 
     Return:
         Two element list with quantum and classical registers, in that order.
@@ -308,15 +357,14 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
 
     return [quantum_registers, classical_registers]
 
-
 def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
     """
-    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
+    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric :py:class:`qiskit.QuantumCircuit`.
     For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we
     consider it a parametric circuit for our purposes.
 
     Args:
-        circuit (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, dict or str): the circuit from which we want to find out if it's parametric.
+        circuit (qiskit.QuantumCircuit | dict | str): the circuit from which we want to find out if it's parametric.
 
     Return:
         True if the circuit is considered parametric, False if it's not.
