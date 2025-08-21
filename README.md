@@ -1,3 +1,16 @@
+
+<p align="center">
+  <a>
+    <img src="https://img.shields.io/badge/os-linux-blue" alt="Python version" height="18">
+  </a>
+  <a>
+    <img src="https://img.shields.io/badge/python-3.9-blue.svg" alt="Python version" height="18">
+  </a>
+  <a href="cesga-quantum-spain.github.io/cunqa/">
+    <img src="https://img.shields.io/badge/docs-blue.svg" alt="Python version" height="18">
+  </a>
+</p>
+
 <p>
     <div align="center">
       <a href="https://www.cesga.es/">
@@ -19,17 +32,6 @@
 
 # CUNQA: A HPC platform to simulate Distributed Quantum Computing.
 
-<p align="center">
-  <a>
-    <img src="https://img.shields.io/badge/os-linux-blue" alt="Python version" height="18">
-  </a>
-  <a>
-    <img src="https://img.shields.io/badge/python-3.9-blue.svg" alt="Python version" height="18">
-  </a>
-  <a href="cesga-quantum-spain.github.io/cunqa/">
-    <img src="https://img.shields.io/badge/docs-blue.svg" alt="Python version" height="18">
-  </a>
-</p>
 <p align="center">
   <a href="cesga-quantum-spain.github.io/cunqa/">
   <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
