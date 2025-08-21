@@ -1,9 +1,10 @@
 """
-    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json dict.
+    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json :py:class:`dict`.
 
     There is the general :py:func:`convert` function, that identifies the input format and transforms according to the format desired by the variable *convert_to*.
 
     On the other hand, there are other functions to transform between specific formats:
+
         - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`qiskit.QuantumCircuit` **:** :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`.
         - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`dict` **:** :py:func:`cunqac_to_json`, :py:func:`json_to_cunqac`.
         - :py:class:`qiskit.QuantumCircuit` **↔** :py:class:`dict` **:** :py:func:`qc_to_json`, :py:func:`json_to_qc`.
@@ -61,7 +62,7 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
 
 def qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
-    Transforms a :py:class:`qiskit.QuantumCircuit` to json dict.
+    Transforms a :py:class:`qiskit.QuantumCircuit` to json :py:class:`dict`.
 
     Args:
         qc (qiskit.QuantumCircuit): circuit to transform to json.
@@ -163,6 +164,15 @@ def cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
     return json_to_qc(cunqac_to_json(cunqac))
 
 def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
+    """
+    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.cirucit.CunqaCircuit`.
+
+    Args:
+        circuit_dict (dict): json with the propper structur for defining a quantum circuit.
+    
+    Returns:
+        An object :py:class:`~cunqa.circuit.CunqaCirucit` with the corresponding instructions and characteristics.
+    """
     cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
     cunqac.from_instructions(circuit_dict["instructions"])
 
