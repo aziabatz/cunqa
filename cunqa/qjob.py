@@ -150,19 +150,14 @@ class QJob:
         if self._result is None:
             self._future.get()
 
-        if isinstance(parameters, list):
-            if len(parameters)>0:
-                if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
-                    message = """{{"params":{} }}""".format(parameters).replace("'", '"')
-                    if len(marked_params)>0:
-                        logger.debug()
-                else:
-                    logger.error(f"Parameters must be real numbers or integers [{ValueError.__name__}].")
-                    raise SystemExit # User's level
-                
-            elif len(marked_params)>0:
+        if isinstance(parameters, list):    
+            # Process entries ############
+            if len(marked_params)>0:
                 try:
-                    pre_message = self._current_params
+                    if len(parameters)>0:
+                        marked_params["no_name"] = parameters
+
+                    pre_message = self._current_params # If we don't 
                     for index, label in enumerate(self._param_instructions):
                         if label in marked_params:
                             pre_message[index] = marked_params.pop(0) # This is not too fast
@@ -170,6 +165,14 @@ class QJob:
                 except Exception as error:
                     logger.error(f"Error while substituting the marked parameters, check that the correct number of parameters was given. Error: {error}")
                     raise SystemExit
+                
+            elif len(parameters)>0:
+                if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
+                    premessage = parameters
+                    
+                else:
+                    logger.error(f"Parameters must be real numbers or integers [{ValueError.__name__}].")
+                    raise SystemExit # User's level
                 
             else:
                 logger.error(f"Error: no input for upgrade_parameters.")
@@ -179,8 +182,9 @@ class QJob:
             logger.error(f"Invalid parameter type, list was expected but {type(parameters)} was given. [{TypeError.__name__}].")
             raise SystemExit # User's level            
         
+        # Format message and send parameters to C++ ###########
         try:
-            #logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
+            message = """{{"params":{} }}""".format(premessage).replace("'", '"')
             self._future = self._qclient.send_parameters(message)
 
         except Exception as error:
@@ -231,7 +235,7 @@ class QJob:
                 self._has_cc = circuit.has_cc
 
                 if circuit.is_parametric:
-                    self._param_instructions = circuit.param_instructions
+                    self._param_labels = circuit.param_labels
                     self._current_params = circuit.current_params
                 
                 logger.debug("Translating to dict from CunqaCircuit...")

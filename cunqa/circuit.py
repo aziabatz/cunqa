@@ -176,7 +176,9 @@ class CunqaCircuit:
     instructions: "list[dict]" #: Set of operations applied to the circuit.
     quantum_regs: dict  #: Dictionary of quantum registers as ``{"name": [assigned qubits]}``.
     classical_regs: dict #: Dictionary of classical registers of the circuit as ``{"name": [assigned clbits]}``.
-    sending_to: "list[str]" #: List of circuit ids to which the current circuit is sending measurement outcomes or qubits.
+    sending_to: "list[str]" #: List of circuit ids to which the current circuit is sending measurement outcomes or qubits. 
+    current_params: "list[Union[int, float]]" #: List of the parameters that the circuit currently has
+    param_labels: "list[str]" #: List of labels assigned to parametric gates to be able to update them separately and conveniently. Same lenght as current_params
 
 
     def __init__(self, num_qubits: int, num_clbits: Optional[int] = None, id: Optional[str] = None):
@@ -188,6 +190,9 @@ class CunqaCircuit:
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
         self.classical_regs = {}
         self.sending_to = []
+
+        self.param_labels = []
+        self.current_params = []
 
         if not isinstance(num_qubits, int):
             logger.error(f"num_qubits must be an int, but a {type(num_qubits)} was provided [TypeError].")
@@ -372,10 +377,13 @@ class CunqaCircuit:
                         logger.error(f"instruction {instruction['name']} is not parametric, therefore does not accept params.")
                         raise ValueError
                     
-                    if not all([(isinstance(p,float) or isinstance(p,int)) for p in instruction["params"]]):
-                        logger.error(f"instruction params must be int or float, but {type(instruction['params'])} was provided.")
+                    if not all([(isinstance(p,float) or isinstance(p,int) or isinstance(p, str)) for p in instruction["params"]]):
+                        logger.error(f"Instruction params must be int, float or str (for labels), but {type(instruction['params'])} was provided.")
                         raise TypeError
                     
+                    self.current_params += instruction["params"]
+                    self.param_labels += [p if isinstance(p, str) else "no_name" for p in instruction["params"]]
+
                     if not len(instruction["params"]) == gate_params:
                         logger.error(f"instruction number of params ({gate_params}) is not consistent with params provided ({len(instruction['params'])}).")
                         raise ValueError
@@ -697,14 +705,14 @@ class CunqaCircuit:
     
     # methods for parametric single-qubit gates
 
-    def u1(self, param: Union[float,int], qubit: int) -> None:
+    def u1(self, param: Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply u1 gate to the given qubit.
 
         Args:
             qubit (int): qubit in which the gate is applied.
 
-            param (float or int): parameter for the parametric gate.
+            param (float or int or str): parameter for the parametric gate. 
         """
         self._add_instruction({
             "name":"u1",
@@ -712,7 +720,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def u2(self, theta:  Union[float,int], phi:  Union[float,int], qubit: int) -> None:
+    def u2(self, theta:  Union[float,int, str], phi:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply u2 gate to the given qubit.
 
@@ -727,7 +735,7 @@ class CunqaCircuit:
             "params":[theta,phi]
         })
 
-    def u(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], qubit: int) -> None:
+    def u(self, theta:  Union[float,int, str], phi:  Union[float,int, str], lam:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply u gate to the given qubit.
 
@@ -743,7 +751,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
 
-    def u3(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], qubit: int) -> None:
+    def u3(self, theta:  Union[float,int, str], phi:  Union[float,int, str], lam:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply u3 gate to the given qubit.
 
@@ -759,7 +767,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
 
-    def p(self, param:  Union[float,int], qubit: int) -> None:
+    def p(self, param:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply p gate to the given qubit.
 
@@ -774,7 +782,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def r(self, theta:  Union[float,int], phi:  Union[float,int], qubit: int) -> None:
+    def r(self, theta:  Union[float,int, str], phi:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply r gate to the given qubit.
 
@@ -789,7 +797,7 @@ class CunqaCircuit:
             "params":[theta, phi]
         })
 
-    def rx(self, param:  Union[float,int], qubit: int) -> None:
+    def rx(self, param:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply rx gate to the given qubit.
 
@@ -804,7 +812,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def ry(self, param:  Union[float,int], qubit: int) -> None:
+    def ry(self, param:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply ry gate to the given qubit.
 
@@ -819,7 +827,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def rz(self, param:  Union[float,int], qubit: int) -> None:
+    def rz(self, param:  Union[float,int, str], qubit: int) -> None:
         """
         Class method to apply rz gate to the given qubit.
 
@@ -836,7 +844,7 @@ class CunqaCircuit:
 
     # methods for parametric two-qubit gates
 
-    def rxx(self, param: Union[int,float], *qubits: int) -> None:
+    def rxx(self, param: Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply rxx gate to the given qubits.
 
@@ -850,7 +858,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def ryy(self, param:  Union[float,int], *qubits: int) -> None:
+    def ryy(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply ryy gate to the given qubits.
 
@@ -864,7 +872,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def rzz(self, param:  Union[float,int], *qubits: int) -> None:
+    def rzz(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply rzz gate to the given qubits.
 
@@ -878,7 +886,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def rzx(self, param:  Union[float,int], *qubits: int) -> None:
+    def rzx(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply rzx gate to the given qubits.
 
@@ -892,7 +900,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def crx(self, param:  Union[float,int], *qubits: int) -> None:
+    def crx(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply crx gate to the given qubits.
 
@@ -906,7 +914,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cry(self, param:  Union[float,int], *qubits: int) -> None:
+    def cry(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply cry gate to the given qubits.
 
@@ -920,7 +928,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def crz(self, param:  Union[float,int], *qubits: int) -> None:
+    def crz(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply crz gate to the given qubits.
 
@@ -934,7 +942,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cp(self, param:  Union[float,int], *qubits: int) -> None:
+    def cp(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply cp gate to the given qubits.
 
@@ -948,7 +956,7 @@ class CunqaCircuit:
             "params":[param]
         })
 
-    def cu1(self, param:  Union[float,int], *qubits: int) -> None:
+    def cu1(self, param:  Union[float,int, str], *qubits: int) -> None:
         """
         Class method to apply cu1 gate to the given qubits.
 
@@ -962,7 +970,7 @@ class CunqaCircuit:
             "params":[param]
         })
     
-    def cu3(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], *qubits: int) -> None: # three parameters
+    def cu3(self, theta:  Union[float,int, str], phi:  Union[float,int, str], lam:  Union[float,int, str], *qubits: int) -> None: # three parameters
         """
         Class method to apply cu3 gate to the given qubits.
 
@@ -978,7 +986,7 @@ class CunqaCircuit:
             "params":[theta,phi,lam]
         })
     
-    def cu(self, theta:  Union[float,int], phi:  Union[float,int], lam:  Union[float,int], gamma:  Union[float,int], *qubits: int) -> None: # four parameters
+    def cu(self, theta:  Union[float,int, str], phi:  Union[float,int, str], lam:  Union[float,int, str], gamma:  Union[float,int, str], *qubits: int) -> None: # four parameters
         """
         Class method to apply cu gate to the given qubits.
 
@@ -1358,6 +1366,36 @@ class CunqaCircuit:
             "remote_conditional_reg":qubits,
             "params":params,
         })
+
+    def assign_parameters(self, repetition = True, **marked_params):
+        """
+        Plugs values into the intructions of parametric gates marked with a parameter name.
+
+        Args:
+            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter 
+            label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
+            marked_parameters (dict): values for each set of marked parameters
+        """
+        try:
+            for instr in self.instructions:
+                if _is_parametric(instr):
+                    for i, param in enumerate(instr["params"]):
+                        if isinstance(param, str) and param in marked_params:
+                            if repetition or isinstance(marked_params[param], (int, float)):
+                                instr["params"][i] = marked_params[param]
+                            elif isinstance(marked_params[param], list):
+                                instr["params"][i] = marked_params[param].pop(0)
+                            else:
+                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given.")
+                                raise SystemExit
+                                
+        except Exception as error:
+            logger.error(f"Error while assigning parameters, try checking that the provided params are of the correct lenght. \n {error}")
+            raise SystemExit
+        
+        if not all([len(value)==0 for value in marked_params.values()]):
+            logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
+
 
                 
 
