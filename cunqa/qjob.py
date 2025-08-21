@@ -290,7 +290,7 @@ class QJob:
 
         This method can be used on a loop, always being careful if we want to save the intermediate results.
 
-        Examples of usage are shown above and on the `Examples Gallery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>_.
+        Examples of usage are shown above and on the `Examples Gallery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>`_.
         Also, this method is used by the class :py:class:`~cunqa.mappers.QJobMapper`, checkout its documentation for a extensive description.
 
         Args:
