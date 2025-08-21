@@ -8,6 +8,10 @@
         - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`qiskit.QuantumCircuit` **:** :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`.
         - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`dict` **:** :py:func:`cunqac_to_json`, :py:func:`json_to_cunqac`.
         - :py:class:`qiskit.QuantumCircuit` **↔** :py:class:`dict` **:** :py:func:`qc_to_json`, :py:func:`json_to_qc`.
+
+    .. warning::
+        It is not possible to convert circuits with classical or quantum communications instructions into :py:class:`qiskit.QuantumCircuit`
+        since these are not supported by this format. It one tries, an error will raise.
 """
 
 
@@ -169,6 +173,15 @@ def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     return circuit_json
 
 def cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
+    """
+    Converts a :py:class:`~cunqa.circuit.CunqaCircuit` into a :py:class:`qiskit.QuantumCircuit`.
+
+    Args:
+        cunqac (~cunqa.circuit.CunqaCircuit): object that defines the quantum circuit.
+
+    Returns:
+        The corresponding :py:class:`qiskit.QuantumCircuit` with the propper instructions and characteristics.
+    """
     return json_to_qc(cunqac_to_json(cunqac))
 
 def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
