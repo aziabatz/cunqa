@@ -4,7 +4,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: Module attributes
+   {{ _('Module Attributes') | escape | underline('-') }}
 
    .. autosummary::
       :toctree:
@@ -16,7 +16,9 @@
 
    {% block functions %}
    {% if functions %}
-   .. rubric:: {{ _('Functions') }}
+   .. raw:: html
+
+      <h2> {{ _('Functions') }} </h2>
 
    .. autosummary::
       :toctree:
@@ -29,7 +31,9 @@
 
    {% block classes %}
    {% if classes %}
-   .. rubric:: {{ _('Classes') }}
+   .. raw:: html
+
+      <h2> {{ _('Classes') }} </h2>
 
    .. autosummary::
       :toctree:
@@ -43,7 +47,9 @@
 
    {% block exceptions %}
    {% if exceptions %}
-   .. rubric:: {{ _('Exceptions') }}
+   .. raw:: html
+
+      <h2> {{ _('Exceptions') }} </h2>
 
    .. autosummary::
       :toctree:
@@ -55,6 +61,10 @@
 
 {% block modules %}
 {% if modules %}
+.. raw:: html
+
+   <h2> {{ _('Modules') }} </h2>
+
 .. autosummary::
    :toctree:
    :template: custom-module-template.rst
