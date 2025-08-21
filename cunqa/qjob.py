@@ -145,7 +145,13 @@ class QJob:
         >>> qjob.upgrade_parameters(new_parameters)
         >>> result = qjob.result
 
-        
+    From this simple workflow, we can build loops that update parameters according to some rules, or by a optimizator, and upgrade the circuit until
+    some stoping criteria is fulfilled.
+
+    .. warning::
+        Before sending the circuit or upgrading its parameters, the result of the prior job must be called. It can be done manually, so that we can
+        save it and obtain its information, or it can be done automatically as in the example avobe, but be aware that once the :py:meth:`upgrade_parameters`
+        method is called, this result is discarded.
 
     References:
     ~~~~~~~~~~~
