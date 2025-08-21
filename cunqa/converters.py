@@ -51,14 +51,15 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
 
 def qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
-    Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
+    Transforms a :py:class:`qiskit.QuantumCircuit` to json dict.
 
     Args:
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): circuit to transform to json.
+        qc (qiskit.QuantumCircuit): circuit to transform to json.
 
     Return:
         Json dict with the circuit information.
     """
+
     is_dynamic = False
     # Check validity of the provided quantum circuit
     if isinstance(qc, dict):
@@ -164,15 +165,15 @@ def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
 
 def json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
-    Function to transform a circuit in json dict format to `qiskit.circuit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_.
+    Function to transform a circuit in json dict format to :py:class:`qiskit.QuantumCircuit`.
 
     Args:
-        circuit_dict (dict): circuit to be transformed to ``qiskit.circuit.QuantumCircuit``.
+        circuit_dict (dict): circuit instructions to be transformed.
 
     Return:
-        QuantumCircuit with the given instructions.
-
+        :py:class:`qiskit.QuantumCircuit` with the given instructions.
     """
+
     # Checking validity of the provided circuit
     if isinstance(circuit_dict, QuantumCircuit):
         logger.warning("Circuit provided is already <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.")
@@ -266,7 +267,7 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     Returns a list of two dicts corresponding to the classical and quantum registers of the circuit supplied.
 
     Args
-        qc (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>): quantum circuit whose number of registers we want to know
+        qc (qiskit.QuantumCircuit): quantum circuit whose number of registers we want to know
 
     Return:
         Two element list with quantum and classical registers, in that order.
@@ -311,12 +312,12 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
 
 def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
     """
-    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>.
+    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric :py:class:`qiskit.QuantumCircuit`.
     For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we
     consider it a parametric circuit for our purposes.
 
     Args:
-        circuit (<class 'qiskit.circuit.quantumcircuit.QuantumCircuit'>, dict or str): the circuit from which we want to find out if it's parametric.
+        circuit (qiskit.QuantumCircuit | dict | str): the circuit from which we want to find out if it's parametric.
 
     Return:
         True if the circuit is considered parametric, False if it's not.
