@@ -22,6 +22,14 @@
 
 .. automethod:: {{ name }}.__init__
 
+{% if objname == 'QJobMapper' or objname == 'QPUCircuitMapper' %}
+.. automethod:: {{ name }}.__call__
+{% endif %}
+
+{% if objname == 'QJob' %}
+.. automethod:: {{ name }}.result
+{% endif %}
+
 {% set ns = namespace(pub=[]) %}
 {% for item in methods %}
 {% if item != '__init__' and item[0] != '_' %}
