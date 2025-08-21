@@ -1,10 +1,10 @@
 """
-    Holds functions for converting circuits into the different formats: py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json dict.
+    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json dict.
 
     There is the general :py:func:`convert` function, that identifies the input format and transforms according to the format desired by the variable *convert_to*.
 
     On the other hand, there are other functions to transform between specific formats:
-        - :py:class:~cunqa.circuit.CunqaCircuit` ↔ :py:class:`qiskit.QuantumCircuit`: :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`
+        - :py:class:`~cunqa.circuit.CunqaCircuit` ↔ :py:class:`qiskit.QuantumCircuit`, :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`
 """
 
 
@@ -56,8 +56,6 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
         converted_circuit = circuit
     
     return converted_circuit
-
-
 
 def qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
@@ -143,10 +141,8 @@ def qc_to_json(qc : 'QuantumCircuit') -> dict:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
         raise error
 
-
 def qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
     return json_to_cunqac(qc_to_json(qc)) 
-
 
 def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     circuit_json = {}
@@ -161,17 +157,14 @@ def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
 
     return circuit_json
 
-
 def cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
     return json_to_qc(cunqac_to_json(cunqac))
-
 
 def json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
     cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
     cunqac.from_instructions(circuit_dict["instructions"])
 
     return cunqac
-
 
 def json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
@@ -318,7 +311,6 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
         classical_registers[k] = counts[i]
 
     return [quantum_registers, classical_registers]
-
 
 def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
     """
