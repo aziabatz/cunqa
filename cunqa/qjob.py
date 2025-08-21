@@ -293,6 +293,14 @@ class QJob:
         Examples of usage are shown above and on the `Examples Gallery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>`_.
         Also, this method is used by the class :py:class:`~cunqa.mappers.QJobMapper`, checkout its documentation for a extensive description.
 
+        .. warning::
+            In the current version, parameters will be assigned to **ALL** parametric gates in the circuit. This means that if we want to make
+            some parameters fixed, it is on our responsibility to pass them correctly and in the correct order in the list.
+            If the number of parameters is less than the number of parametric gates in the circuit, an error will occur at the virtual QPU, on
+            the other hand, if more parameters are provided, there will only be used up to the number of parametric gates.
+            
+            Also, only rx, ry and rz gates are supported for this functionality, that is, they are the only gates considered *parametric* for this functionality.
+
         Args:
             parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
         """
