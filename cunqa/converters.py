@@ -4,7 +4,7 @@
     There is the general :py:func:`convert` function, that identifies the input format and transforms according to the format desired by the variable *convert_to*.
 
     On the other hand, there are other functions to transform between specific formats:
-        - :py:class:`~cunqa.circuit.CunqaCircuit` ↔ :py:class:`qiskit.QuantumCircuit`, :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`
+        - :py:class:`~cunqa.circuit.CunqaCircuit` **↔** :py:class:`qiskit.QuantumCircuit`**:** :py:func:`cunqac_to_qc`, :py:func:`qc_to_cunqac`
 """
 
 
