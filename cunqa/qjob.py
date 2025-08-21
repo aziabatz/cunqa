@@ -120,7 +120,15 @@ class QJob:
     Upgrading parameters from QJobs
     ===============================
 
+    In some ocassion, especially working with variational quantum algorithms (VQAs) [#]_, they need of changing the parameters of the gates in a circuit
+    arises. These parameters are optimzied in order to get the circuit to output a result that minimizes a problem. In this minimization process,
+    parameters are updated on each iteration (in general).
 
+
+    References:
+    ~~~~~~~~~~~
+
+    .. [#] `Variational Quantum Algorithms arXiv <https://arxiv.org/abs/2012.09265>`_ .
 
 
     """
