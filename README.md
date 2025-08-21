@@ -11,6 +11,15 @@
   </a>
 </p>
 
+
+# CUNQA: A HPC platform to simulate Distributed Quantum Computing.
+
+<p align="center">
+  <a href="cesga-quantum-spain.github.io/cunqa/">
+  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
+  </a>
+</p>
+
 <p>
     <div align="center">
       <a href="https://www.cesga.es/">
@@ -28,14 +37,6 @@
         </picture>
       </a>
     </div>
-</p>
-
-# CUNQA: A HPC platform to simulate Distributed Quantum Computing.
-
-<p align="center">
-  <a href="cesga-quantum-spain.github.io/cunqa/">
-  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
-  </a>
 </p>
 
 
