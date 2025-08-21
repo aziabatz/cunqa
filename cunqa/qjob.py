@@ -122,7 +122,10 @@ class QJob:
 
     In some ocassion, especially working with variational quantum algorithms (VQAs) [#]_, they need of changing the parameters of the gates in a circuit
     arises. These parameters are optimzied in order to get the circuit to output a result that minimizes a problem. In this minimization process,
-    parameters are updated on each iteration (in general).
+    parameters are updated on each iteration (in general). Our first thought can be to update the parameters, build a new circuit with them and send
+    it to the QPU. Nevertheless, since the nex circuit will have the same data but for the value of the parameters in the gates, a lot of information
+    is repeated, so :py:mod:`~cunqa` has a more efficient and simple way to handle this cases: a method to send to the QPU a list with the new parameters
+    to be assigned to the circuit.
 
 
     References:
