@@ -28,9 +28,14 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
     """
         Function to convert a quantum circuit to the desired format.
         Detects the intup format and transforms into the one specified by *convert_to*, that can be ``"QuantumCircuit`` for :py:class:`qiskit.QuantumCircuit`,
-        ``"CuqnaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"json"`` for a json :py:class:`dict`.
+        ``"CunqaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"json"`` for a json :py:class:`dict`.
 
+        Args:
+            circuit (qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit | dict): circuit to be transformed.
         
+        Returns:
+            The circuit in the desired format accordingly to *convert_to*.
+
     """
     if isinstance(circuit, QuantumCircuit):
         if convert_to == "QuantumCircuit":
