@@ -127,8 +127,21 @@ class QJob:
     Our first thought can be to update the parameters, build a new circuit with them and send
     it to the QPU. Nevertheless, since the next circuit will have the same data but for the value of the parameters in the gates, a lot of information
     is repeated, so :py:mod:`~cunqa` has a more efficient and simple way to handle this cases: a method to send to the QPU a list with the new parameters
-    to be assigned to the circuit.
+    to be assigned to the circuit, :py:meth:`~QJob.upgrade_parameters`.
 
+    Let's see a simple example: creating a parametric circuit and uptading its parametes:
+
+        >>> circuit = CunqaCircuit(3)
+        >>> circuit.ry(0.25, 0)
+        >>> circuit.rx(0.5, 1)
+        >>> circuit.p(0.98, 2)
+        >>> circuit.measure_all()
+        >>> qjob = qpu.run(circuit)
+        >>> new_parameters = [1,1,0]
+        >>> qjob.upgrade_parameters(new_parameters)
+        >>> result = qjob.result
+
+        
 
     References:
     ~~~~~~~~~~~
