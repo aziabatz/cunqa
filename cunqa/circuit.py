@@ -1639,7 +1639,6 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
 
     return [quantum_registers, classical_registers]
 
-
 def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
     """
     Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric :py:class:`qiskit.QuantumCircuit`.
