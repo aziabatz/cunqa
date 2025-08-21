@@ -2,7 +2,8 @@
     Holds our wrapper for the qiskit transpiler and the TranspilerError class.
 """
 from cunqa.backend import Backend
-from cunqa.circuit import convert, CunqaCircuit
+from cunqa.circuit import CunqaCircuit
+from cunqa.converters import convert
 from cunqa.logger import logger
 
 from qiskit import QuantumCircuit

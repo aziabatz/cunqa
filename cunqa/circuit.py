@@ -22,9 +22,6 @@ import random
 import string
 from typing import Union, Optional
 
-from qiskit import QuantumCircuit 
-
-from cunqa.coverters import qc_to_json, qc_to_cunqac, cunqac_to_json, cunqac_to_qc, json_to_qc, json_to_cunqac
 from cunqa.logger import logger
 
 def _generate_id(size: int = 4) -> str:
@@ -1373,44 +1370,3 @@ def _flatten(lists: "list[list]"):
         lists (list[list]): list of the lists which elements are wanted to be gathered.
     """
     return [element for sublist in lists for element in sublist]
-
-
-def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', dict]:
-    if isinstance(circuit, QuantumCircuit):
-        if convert_to == "QuantumCircuit":
-            logger.warning("Provided circuit was already a QuantumCircuit")
-            converted_circuit = circuit
-        elif convert_to == "CunqaCircuit":
-            converted_circuit = qc_to_cunqac(circuit)
-        elif convert_to == "json":
-            converted_circuit = qc_to_json(circuit)
-        else:
-            logger.error(f"Unable to convert circuit to {convert_to}")
-            converted_circuit = circuit
-    elif isinstance(circuit, CunqaCircuit):
-        if convert_to == "QuantumCircuit":
-            converted_circuit = cunqac_to_json(circuit)
-        elif convert_to == "CunqaCircuit":
-            logger.warning("Provided circuit was already a CunqaCircuit")
-            converted_circuit = circuit
-        elif convert_to == "json":
-            converted_circuit = cunqac_to_json(circuit)
-        else:
-            logger.error(f"Unable to convert circuit to {convert_to}")
-            converted_circuit = circuit
-    elif isinstance(circuit, dict):
-        if convert_to == "QuantumCircuit":
-            converted_circuit = cunqac_to_json(circuit)
-        elif convert_to == "CunqaCircuit":
-            converted_circuit = cunqac_to_qc(circuit)
-        elif convert_to == "json":
-            logger.warning("Provided circuit was already a CunqaCircuit")
-            converted_circuit = circuit
-        else:
-            logger.error(f"Unable to convert circuit to {convert_to}")
-            converted_circuit = circuit
-    else:
-        logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a json")
-        converted_circuit = circuit
-    
-    return converted_circuit

@@ -10,7 +10,7 @@ from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
 
 from cunqa.circuit import CunqaCircuit
-from cunqa.converters import qc_to_json, _registers_dict
+from cunqa.converters import convert, _registers_dict
 from cunqa.logger import logger
 from cunqa.backend import Backend
 from cunqa.result import Result
@@ -226,9 +226,9 @@ class QJob:
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
-                circuit_json, is_dynamic = qc_to_json(circuit)
-                instructions = circuit_json['instructions']
-                self._is_dynamic = is_dynamic
+                circuit_json = convert(circuit, "json")
+                instructions = circuit_json["instructions"]
+                self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
 
             elif isinstance(circuit, str):
@@ -246,9 +246,9 @@ class QJob:
 
                 logger.debug("Translating to dict from QASM2 string...")
 
-                circuit_json, is_dynamic = qc_to_json(qc_from_qasm)
-                instructions = circuit_json['instructions']
-                self._is_dynamic = is_dynamic
+                circuit_json = convert(qc_from_qasm, "json")
+                instructions = circuit_json["instructions"]
+                self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
 
             else:

@@ -6,7 +6,50 @@ from typing import Tuple, Union, Optional
 from cunqa.circuit import CunqaCircuit
 from cunqa.logger import logger
 
-def qc_to_json(qc : 'QuantumCircuit') -> Tuple[dict, bool]:
+
+def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', dict]:
+    if isinstance(circuit, QuantumCircuit):
+        if convert_to == "QuantumCircuit":
+            logger.warning("Provided circuit was already a QuantumCircuit")
+            converted_circuit = circuit
+        elif convert_to == "CunqaCircuit":
+            converted_circuit = qc_to_cunqac(circuit)
+        elif convert_to == "json":
+            converted_circuit = qc_to_json(circuit)
+        else:
+            logger.error(f"Unable to convert circuit to {convert_to}")
+            converted_circuit = circuit
+    elif isinstance(circuit, CunqaCircuit):
+        if convert_to == "QuantumCircuit":
+            converted_circuit = cunqac_to_qc(circuit)
+        elif convert_to == "CunqaCircuit":
+            logger.warning("Provided circuit was already a CunqaCircuit")
+            converted_circuit = circuit
+        elif convert_to == "json":
+            converted_circuit = cunqac_to_json(circuit)
+        else:
+            logger.error(f"Unable to convert circuit to {convert_to}")
+            converted_circuit = circuit
+    elif isinstance(circuit, dict):
+        if convert_to == "QuantumCircuit":
+            converted_circuit = json_to_qc(circuit)
+        elif convert_to == "CunqaCircuit":
+            converted_circuit = json_to_cunqac(circuit)
+        elif convert_to == "json":
+            logger.warning("Provided circuit was already a CunqaCircuit")
+            converted_circuit = circuit
+        else:
+            logger.error(f"Unable to convert circuit to {convert_to}")
+            converted_circuit = circuit
+    else:
+        logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a json")
+        converted_circuit = circuit
+    
+    return converted_circuit
+
+
+
+def qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
     Transforms a ``qiskit.circuit.QuantumCircuit`` to json dict.
 
@@ -35,6 +78,7 @@ def qc_to_json(qc : 'QuantumCircuit') -> Tuple[dict, bool]:
         json_data = {
             "id": "",
             "is_parametric": _is_parametric(qc),
+            "is_dynamic": False,
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
@@ -58,7 +102,7 @@ def qc_to_json(qc : 'QuantumCircuit') -> Tuple[dict, bool]:
             elif instruction.name != "measure":
 
                 if (instruction.operation._condition != None):
-                    is_dynamic = True
+                    json_data["is_dynamic"] = True
                     json_data["instructions"].append({"name":instruction.name, 
                                                 "qubits":[quantum_registers[k][q] for k,q in zip(qreg, qubit)],
                                                 "params":instruction.params,
@@ -82,7 +126,7 @@ def qc_to_json(qc : 'QuantumCircuit') -> Tuple[dict, bool]:
                                                 })
                     
 
-        return json_data, is_dynamic 
+        return json_data 
     
     except Exception as error:
         logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
@@ -90,13 +134,14 @@ def qc_to_json(qc : 'QuantumCircuit') -> Tuple[dict, bool]:
 
 
 def qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
-    return json_to_cunqac(qc_to_json(qc)[0]) 
+    return json_to_cunqac(qc_to_json(qc)) 
 
 
 def cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     circuit_json = {}
     circuit_json["id"] = cunqac._id
     circuit_json["is_parametric"] = cunqac.is_parametric
+    circuit_json["is_dynamic"] = cunqac.is_dynamic
     circuit_json["num_qubits"] = cunqac.num_qubits
     circuit_json["num_clbits"] = cunqac.num_clbits
     circuit_json["quantum_registers"] = cunqac.quantum_regs
