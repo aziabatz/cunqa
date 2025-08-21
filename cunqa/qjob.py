@@ -83,7 +83,7 @@ class QJob:
 
     .. warning::
         In the case in which the order is not respected, everything would work, but results will not correspond
-        to the job. A mixup would happen.
+        to the job. A mix up would happen.
 
     Handling QJobs sent to different QPUs
     =====================================
@@ -97,7 +97,7 @@ class QJob:
 
     This way, when we send the first job, then inmediatly the sencond one is sent, because :py:meth:`~cunqa.qpu.QPU.run` does not wait
     for the simulation to finish. This way, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
-    since jobs are managed by different :py:class:`QClient` objects, there can be no mixup.
+    since jobs are managed by different :py:class:`QClient` objects, there can be no mix up.
 
     In fact, the function :py:func:`~cunqa.qjob.gather` is designed for recieving a list of qjobs and return the results; therefore, let's say
     we have a list of circuits that we want to submit to a group of QPUs:
@@ -108,7 +108,9 @@ class QJob:
         >>> ... qjobs.append(qjob)
         >>> results = gather(qjobs)
 
-    In this workflow, 
+    In this workflow, all circuits are sent to each QPU an simulated at the same time. Then, when calling for the results, the program is blocked
+    waiting for all of them to finish. Other examples of classical parallelization of quantum simulation taks can be found at the
+    `Examples Gellery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>`_.
 
 
     Upgrading parameters from QJobs
