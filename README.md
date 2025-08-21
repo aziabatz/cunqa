@@ -29,7 +29,7 @@
 
 <p align="center">
   <a href="cesga-quantum-spain.github.io/cunqa/">
-  <img width=30% src="https://img.shields.io/badge/documentation-blue?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
+  <img width=30% src="https://img.shields.io/badge/documentation-black?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
   </a>
 </p>
 
