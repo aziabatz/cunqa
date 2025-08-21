@@ -112,9 +112,15 @@ class QJob:
     waiting for all of them to finish. Other examples of classical parallelization of quantum simulation taks can be found at the
     `Examples Gellery <https://cesga-quantum-spain.github.io/cunqa/examples_gallery.html>`_.
 
+    .. note::
+        The function :py:func:`~cunqa.qjob.gather` can also handle :py:class:`~QJob` objects sent to the same virtual QPU, but the order must
+        be perserved in the list provided.
+
 
     Upgrading parameters from QJobs
-    =============================== 
+    ===============================
+
+
 
 
     """
