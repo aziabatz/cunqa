@@ -495,7 +495,7 @@ def gather(qjobs: "list['QJob']") -> "list['Result']":
             Since this is mainly a for loop, the order must be respected when submiting jobs to the same virtual QPU.
 
         Args:
-            qjobs (list[QJob]): 
+            qjobs (list[QJob]): list of objects to get the result from.
 
         Return:
             List of :py:class:`~cunqa.result.Result` objects.
