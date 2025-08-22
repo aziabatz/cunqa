@@ -32,7 +32,6 @@ import string
 from typing import Union, Optional
 
 from cunqa.logger import logger
-from cunqa.converters import _is_parametric
 
 def _generate_id(size: int = 4) -> str:
     """Returns a random alphanumeric identifier.
@@ -1434,7 +1433,7 @@ class CunqaCircuit:
         """
         try:
             for instr in self.instructions:
-                if _is_parametric(instr):
+                if (("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0)):
                     for i, param in enumerate(instr["params"]):
                         if isinstance(param, str) and param in marked_params:
                             if isinstance(marked_params[param], (int, float)):
