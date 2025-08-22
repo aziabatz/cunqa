@@ -170,6 +170,7 @@ class QJob:
     _sending_to: "list[str]"
     _is_dynamic: bool
     _has_cc:bool
+    _has_qc:bool
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
@@ -283,7 +284,7 @@ class QJob:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-    def upgrade_parameters(self, parameters: "list[float | int]") -> None:
+    def upgrade_parameters(self, parameters: list[Union[float, int]] = [], **marked_params: dict[str, Union[list[Union[float, int]], float, int]]) -> None:
         """
         Method to upgrade the parameters in a previously submitted job of parametric circuit.
         By this call, first it is checked weather if the prior simulation's result was called. If not, it calls it but does not store it, then
@@ -304,31 +305,62 @@ class QJob:
 
         Args:
             parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
+            marked_params (dict[list, float, int]): used to indicate the value that should be given to the marked Parameters
         """
+        if not hasattr(self, "_param_instructions"):
+            logger.error(f"Trying to upgrade parameters of a non-parametric circuit.")
+            raise SystemExit
 
         if self._result is None:
             self._future.get()
 
-        if isinstance(parameters, list):
+        if isinstance(parameters, list):    
+            # Process entries ############
+            if len(marked_params)>0:
+                try:
+                    if len(parameters)>0:
+                        marked_params["no_name"] = parameters
 
-            if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
-                message = """{{"params":{} }}""".format(parameters).replace("'", '"')
+                    pre_message = self._current_params 
+                    for index, label in enumerate(self._param_instructions):
+                        if label in marked_params:
+                            if isinstance(marked_params[label], (int, float)):
+                                pre_message[index] = marked_params[label]
+                            elif isinstance(marked_params[label], list):
+                                pre_message[index] = marked_params[label].pop(0) # This is not too fast
 
+                    if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
+                        logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
+
+                except Exception as error:
+                    logger.error(f"Error while substituting the marked parameters, check that the correct number of parameters was given. Error: {error}")
+                    raise SystemExit
+                
+            elif len(parameters)>0:
+                if all(isinstance(param, (int, float)) for param in parameters):  # Check if all elements are real numbers
+                    premessage = parameters
+                    
+                else:
+                    logger.error(f"Parameters must be real numbers or integers [{ValueError.__name__}].")
+                    raise SystemExit # User's level
+                
             else:
-                logger.error(f"Parameters must be real numbers [{ValueError.__name__}].")
-                raise SystemExit # User's level
-        
-            try:
-                #logger.debug(f"Sending new parameters to circuit {self._circuit_id}.")
-                self._future = self._qclient.send_parameters(message)
-
-            except Exception as error:
-                logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
-                raise SystemExit # User's level
+                logger.error(f"Error: no input for upgrade_parameters.")
+                raise SystemExit
+                    
         else:
-            logger.error(f"Ivalid parameter type, list was expected but {type(parameters)} was given. [{TypeError.__name__}].")
+            logger.error(f"Invalid parameter type, list was expected but {type(parameters)} was given. [{TypeError.__name__}].")
             raise SystemExit # User's level            
         
+        # Format message and send parameters to C++ ###########
+        try:
+            message = """{{"params":{} }}""".format(premessage).replace("'", '"')
+            self._future = self._qclient.send_parameters(message)
+
+        except Exception as error:
+            logger.error(f"Some error occured when sending the new parameters to circuit {self._circuit_id} [{type(error).__name__}].")
+            raise SystemExit # User's level
+
         self._updated = False # We indicate that new results will come, in order to call server
 
     def _convert_circuit(self, circuit: Union[str, dict, 'CunqaCircuit', 'QuantumCircuit']) -> None:
@@ -347,13 +379,14 @@ class QJob:
                 if "has_cc" in circuit:
                     self._has_cc = circuit["has_cc"]
                     self._is_dynamic = True
-                elif "is_dynamic" in  circuit:
+                elif "has_qc" in circuit:
+                    self._has_qc = circuit["has_qc"]
+                    self._is_dynamic = True
+                elif "is_dynamic" in circuit:
                     self._is_dynamic = circuit["is_dynamic"]
                 else:
                     self._is_dynamic = False
                     self._has_cc = False
-
-                logger.debug("Translation to dict not necessary...")
 
                 # might explode for handmade dicts not design for ditributed execution
                 self._circuit_id = circuit["id"]
@@ -371,6 +404,11 @@ class QJob:
                 self._sending_to = circuit.sending_to
                 self._is_dynamic = circuit.is_dynamic
                 self._has_cc = circuit.has_cc
+                self._has_qc = circuit.has_qc
+
+                if circuit.is_parametric:
+                    self._param_labels = circuit.param_labels
+                    self._current_params = circuit.current_params
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -388,10 +426,11 @@ class QJob:
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
-                circuit_json = convert(circuit, "json")
+                circuit_json = convert(circuit, "dict")
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
+                self.has_qc = False
 
             elif isinstance(circuit, str):
 
@@ -408,10 +447,11 @@ class QJob:
 
                 logger.debug("Translating to dict from QASM2 string...")
 
-                circuit_json = convert(qc_from_qasm, "json")
+                circuit_json = convert(qc_from_qasm, "dict")
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
+                self._has_qc = False
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
@@ -455,7 +495,6 @@ class QJob:
             else:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
-            logger.debug("Before exec_config")
             exec_config = {
                 "id": self._circuit_id,
                 "config": run_config, 
@@ -463,11 +502,11 @@ class QJob:
                 "sending_to": self._sending_to,
                 "is_dynamic": self._is_dynamic,
                 "has_cc": self._has_cc
+                #,"has_qc": self._has_qc # Not needed in C++ 
             }
             self._execution_config = json.dumps(exec_config)
 
             logger.debug("QJob created.")
-            logger.debug(self._execution_config)
 
         except KeyError as error:
             logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")

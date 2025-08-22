@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="cesga-quantum-spain.github.io/cunqa/">
+  <a href="https://cesga-quantum-spain.github.io/cunqa/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cunqa_white.png" width="600" height="150">
     <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logo_cunqa_black.png" width="600" height="150">
@@ -28,7 +28,7 @@
 <br>
 
 <p align="center">
-  <a href="cesga-quantum-spain.github.io/cunqa/">
+  <a href="https://cesga-quantum-spain.github.io/cunqa/">
   <img width=30% src="https://img.shields.io/badge/documentation-black?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
   </a>
 </p>
@@ -40,14 +40,14 @@
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cesga_blanco.png" width="200" height="50">
           <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logo_cesga_negro.png" width="200" height="50">
-          <img src="docs/source/_static/logo_cesga_negro.png" width="30%" style="display: inline-block; margin-right: 20px;" alt="CESGA logo">
+          <img src="docs/source/_static/logo_cesga_negro.png" width="30%" style="display: inline-block;" alt="CESGA logo">
         </picture>
       </a>
       <a href="https://quantumspain-project.es/">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/QuantumSpain_logo_white.png" width="240" height="50">
           <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/QuantumSpain_logo_color.png" width="240" height="50">
-          <img src="docs/source/_static/QuantumSpain_logo_white.png" width="30%" style="display: inline-block; margin-left: 20px;" alt="QuantumSpain logo">
+          <img src="docs/source/_static/QuantumSpain_logo_white.png" width="30%" style="display: inline-block;" alt="QuantumSpain logo">
         </picture>
       </a>
     </div>
