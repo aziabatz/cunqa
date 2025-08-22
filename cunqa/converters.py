@@ -68,7 +68,7 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
             logger.warning("Provided circuit was already a CunqaCircuit")
             converted_circuit = circuit
         else:
-            logger.error(f"Unable to convert circuit to {convert_to}")
+            logger.error(f"Unable to convert circuit to {convert_to} []")
             converted_circuit = circuit
     else:
         logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a json")
