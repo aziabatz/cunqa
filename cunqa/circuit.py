@@ -20,6 +20,40 @@
 
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
 
+    
+    Circuits by json ``dict`` format
+    ================================
+
+    A low level way of representing a circuit is by a json ``dict`` with specefic fields that geather the information
+    needed by the simulator in order to run the circuit.
+
+    This structe is presented below:
+
+    .. codeblock:: python
+        {"id":str, # circuit identificator
+         "is_parametric":bool, # weather if the circuit has parametric instructions that can be updated
+         "is_dynamic":bool, # weather if the circuit has intermediate measurements and/or classically conditioned operations
+         "instructions":list[dict], # list of instructions of the circuit in dict format
+         "num_qubitst":int, # number of qubits of the circuit
+         "num_clbits":int, # number of classical bits of the circuit
+         "quantum_registers":dict, # dict specifying the grouping of the qubits in registers
+         "classical_registers":dict # dict specifying the grouping of the classical bits in registers
+        }
+
+    On the other hand, instructions have some mandatory and optional keys:
+
+    .. codeblock:: python
+        {"name":str, # MANDATORY, name of the instruction, has to be accepted by the simulator
+         "qubits":list[int], # MANDATORY, qubits on which the instruction acts
+         "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates and for \'unitary\' instruction, which accepts a metrix of the desired dimension limmited by the number of qubits in which it acts.
+         "clbits":list[int], # OPTINAL, any classical bits used in the instruction
+        }
+
+    For classical and quantum communications among circuits, we do not recomend working at such low level format, users rather
+    describe this operations through the :py:class:`~cunqa.circuit.CunqaCircuit` class. If curious, you can always
+    create the :py:class:`~cunqa.circuit.Circuit` and obtain its intructions by its attribute :py:attr:`~cunqa.circuit.CunqaCircuit.instructions`,
+    or you can convert it to the json `dict` format by the :py:func:`~cunqa.converters.convert` function.
+
     References:
     ~~~~~~~~~~~
     .. [#] `qiskit.QuantumCircuit <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.circuit.QuantumCircuit>`_ documentation.

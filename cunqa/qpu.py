@@ -1,5 +1,7 @@
 """
-    Contains our virtual QPU class.
+    Contains the :py:class:`QPU` class, an object that represent a virtual QPU deployed.
+
+    
 """
 
 import os

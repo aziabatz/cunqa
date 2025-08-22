@@ -26,7 +26,7 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
 
     Args:
     -----------
-    circuit (dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be transpiled. 
+    circuit (dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be transpiled.
 
     backend (<class 'backend.Backend'>): backend which transpilation will be done respect to.
 
