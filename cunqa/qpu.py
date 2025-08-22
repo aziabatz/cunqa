@@ -99,11 +99,11 @@ class QPU:
         # Disallow execution of distributed circuits
         if inspect.stack()[1].function != "run_distributed": # Checks if the run() is called from run_distributed()
             if isinstance(circuit, CunqaCircuit):
-                if circuit.has_cc:
+                if circuit.has_cc or circuit.has_qc:
                     logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
                     raise SystemExit
             elif isinstance(circuit, dict):
-                if 'has_cc' in circuit and circuit["has_cc"]:
+                if ('has_cc' in circuit and circuit["has_cc"]) or ('has_qc' in circuit and circuit["has_qc"]):
                     logger.error("Distributed circuits can't run using QPU.run(), try run_distributed() instead.")
                     raise SystemExit
 

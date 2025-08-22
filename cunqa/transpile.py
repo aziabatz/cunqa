@@ -47,11 +47,11 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
 
         elif isinstance(circuit, CunqaCircuit):
 
-            if circuit.has_cc:
+            if circuit.has_cc or circuit.has_qc:
                 logger.error(f"CunqaCircuit with distributed instructions was provided, transpilation is not avaliable at the moment. Make sure you are using a cunqasimulator backend, then transpilation is not necessary [{TypeError.__name__}].")
                 raise SystemExit
             else:
-                qc = convert(circuit.info, "QuantumCircuit")
+                qc = convert(circuit, "QuantumCircuit")
 
         elif isinstance(circuit, dict):
             if initial_layout is not None and len(initial_layout) != circuit['num_qubits']:

@@ -170,6 +170,7 @@ class QJob:
     _sending_to: "list[str]"
     _is_dynamic: bool
     _has_cc:bool
+    _has_qc:bool
 
     def __init__(self, qclient: 'QClient', backend: 'Backend', circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], **run_parameters: Any):
         """
@@ -347,13 +348,14 @@ class QJob:
                 if "has_cc" in circuit:
                     self._has_cc = circuit["has_cc"]
                     self._is_dynamic = True
-                elif "is_dynamic" in  circuit:
+                elif "has_qc" in circuit:
+                    self._has_qc = circuit["has_qc"]
+                    self._is_dynamic = True
+                elif "is_dynamic" in circuit:
                     self._is_dynamic = circuit["is_dynamic"]
                 else:
                     self._is_dynamic = False
                     self._has_cc = False
-
-                logger.debug("Translation to dict not necessary...")
 
                 # might explode for handmade dicts not design for ditributed execution
                 self._circuit_id = circuit["id"]
@@ -371,6 +373,7 @@ class QJob:
                 self._sending_to = circuit.sending_to
                 self._is_dynamic = circuit.is_dynamic
                 self._has_cc = circuit.has_cc
+                self._has_qc = circuit.has_qc
                 
                 logger.debug("Translating to dict from CunqaCircuit...")
 
@@ -392,6 +395,7 @@ class QJob:
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
+                self.has_qc = False
 
             elif isinstance(circuit, str):
 
@@ -412,6 +416,7 @@ class QJob:
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
+                self._has_qc = False
 
             else:
                 logger.error(f"Circuit must be dict, <class 'cunqa.circuit.CunqaCircuit'> or QASM2 str, but {type(circuit)} was provided [{TypeError.__name__}].")
@@ -455,7 +460,6 @@ class QJob:
             else:
                 logger.warning("Error when reading `run_parameters`, default were set.")
             
-            logger.debug("Before exec_config")
             exec_config = {
                 "id": self._circuit_id,
                 "config": run_config, 
@@ -463,11 +467,11 @@ class QJob:
                 "sending_to": self._sending_to,
                 "is_dynamic": self._is_dynamic,
                 "has_cc": self._has_cc
+                #,"has_qc": self._has_qc # Not needed in C++ 
             }
             self._execution_config = json.dumps(exec_config)
 
             logger.debug("QJob created.")
-            logger.debug(self._execution_config)
 
         except KeyError as error:
             logger.error(f"Format of the cirucit not correct, couldn't find 'instructions' [{type(error).__name__}].")

@@ -194,6 +194,7 @@ class CunqaCircuit:
     _id: str #: Circuit identificator.
     is_parametric: bool  #: Weather the circuit contains parametric gates.
     has_cc: bool #: Weather the circuit contains classical communications with other circuit.
+    has_qc: bool #: Weather the circuit contains quantum communications with other circuit.
     is_dynamic: bool #: Weather the circuit has local non-unitary operations.
     instructions: "list[dict]" #: Set of operations applied to the circuit.
     quantum_regs: dict  #: Dictionary of quantum registers as ``{"name": [assigned qubits]}``.
@@ -217,6 +218,7 @@ class CunqaCircuit:
 
         self.is_parametric = False
         self.has_cc = False
+        self.has_qc = False
         self.is_dynamic = False
         self.instructions = []
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
@@ -1275,6 +1277,7 @@ class CunqaCircuit:
 
             target_circuit (str | CunqaCircuit): id of the circuit or circuit to which the qubit is sent.
         """
+        self.has_qc = True
         self.is_dynamic = True
         
         if isinstance(qubit, int):
@@ -1308,6 +1311,7 @@ class CunqaCircuit:
 
             control_circuit (str | CunqaCircuit): id of the circuit from which the qubit is received.
         """
+        self.has_qc = True
         self.is_dynamic = True
         
         if isinstance(qubit, int):
