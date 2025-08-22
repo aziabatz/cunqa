@@ -160,9 +160,12 @@ class QJob:
                     pre_message = self._current_params 
                     for index, label in enumerate(self._param_instructions):
                         if label in marked_params:
-                            pre_message[index] = marked_params.pop(0) # This is not too fast
+                            if isinstance(marked_params[label], (int, float)):
+                                pre_message[index] = marked_params[label]
+                            elif isinstance(marked_params[label], list):
+                                pre_message[index] = marked_params[label].pop(0) # This is not too fast
 
-                    if not all([len(value)==0 for value in marked_params.values()]):
+                    if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
                         logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
 
                 except Exception as error:
