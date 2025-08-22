@@ -1150,7 +1150,7 @@ class CunqaCircuit:
             elif isinstance(matrix, list) and isinstance(matrix[0], list) and all([len(m) == len(matrix) for m in matrix]) and (len(matrix)%2 == 0):
                 matrix = matrix
             else:
-                logger.error(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape (2^n,2^n) [TypeError].")
+                logger.error(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape (2^n,2^n), n=1,2 [TypeError].")
                 raise SystemExit # User's level
 
             matrix = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
@@ -1331,7 +1331,7 @@ class CunqaCircuit:
             "circuits": [control_circuit_id]
         })
 
-    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit']) -> None:
+    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit'], matrix: Optional["list[list[list[complex]]]"] = None) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
 
@@ -1378,6 +1378,27 @@ class CunqaCircuit:
         else:
             logger.error(f"control_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(control_circuit)} was provided [TypeError].")
             raise SystemExit
+        
+        if (gate == "unitary") and (matrix is not None):
+
+            if isinstance(matrix, np.ndarray) and (matrix.shape[0] == matrix.shape[1]) and (matrix.shape[0]%2 == 0):
+                matrix = list(matrix)
+            elif isinstance(matrix, list) and isinstance(matrix[0], list) and all([len(m) == len(matrix) for m in matrix]) and (len(matrix)%2 == 0):
+                matrix = matrix
+            else:
+                logger.error(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape (2^n,2^n), n=1,2 [TypeError].")
+                raise SystemExit # User's level
+
+            params = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
+            return
+
+        elif (gate == "unitary") and (matrix is None):
+            logger.error(f"For unitary gate a matrix must be provided [ValueError].")
+            raise SystemExit # User's level
+        
+        elif (gate != "unitary") and (matrix is not None):
+            logger.error(f"instruction {gate} does not suppor matrix.")
+            raise SystemExit
 
         self._add_instruction({
             "name": "recv",
@@ -1394,7 +1415,6 @@ class CunqaCircuit:
         })
 
                 
-
 def _flatten(lists: "list[list]"):
     """
     Takes the elements of the lists supplied and creates a single list gathering all of them.
