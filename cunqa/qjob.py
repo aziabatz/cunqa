@@ -479,7 +479,7 @@ class QJob:
         
 
 
-def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"]:
+def gather(qjobs: "list['QJob']") -> "list['Result']":
     """
         Function to get the results of several :py:class:`QJob` objects.
 
