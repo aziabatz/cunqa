@@ -284,7 +284,7 @@ class QJob:
                 logger.error(f"Some error occured when submitting the job [{type(error).__name__}].")
                 raise QJobError # I capture the error in QPU.run() when creating the job
             
-    def upgrade_parameters(self, parameters: list[Union[float, int]] = [], **marked_params: dict[str, Union[list[Union[float. int]], float, int]]) -> None:
+    def upgrade_parameters(self, parameters: list[Union[float, int]] = [], **marked_params: dict[str, Union[list[Union[float, int]], float, int]]) -> None:
         """
         Method to upgrade the parameters in a previously submitted job of parametric circuit.
         By this call, first it is checked weather if the prior simulation's result was called. If not, it calls it but does not store it, then
