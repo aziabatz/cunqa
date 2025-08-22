@@ -483,6 +483,17 @@ def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"
     """
         Function to get the results of several :py:class:`QJob` objects.
 
+        Once the jobs are running:
+
+            >>> results = gather(qjobs)
+
+        This is a blocking call, results will be called sequentialy in . Since they are being run simultaneously,
+        even if the first one on the list takes the longest, when it finishes the rest would have been done, so
+        just the small overhead from calling them will be added.
+
+        .. warning::
+            Since this is mainly a for loop, the order must be respected when submiting jobs to the same virtual QPU.
+
         Args:
             qjobs (list[QJob]): 
 
