@@ -300,7 +300,7 @@ class QJob:
             If the number of parameters is less than the number of parametric gates in the circuit, an error will occur at the virtual QPU, on
             the other hand, if more parameters are provided, there will only be used up to the number of parametric gates.
             
-            Also, only rx, ry and rz gates are supported for this functionality, that is, they are the only gates considered *parametric* for this functionality.
+            Also, only *rx*, *ry* and *rz* gates are supported for this functionality, that is, they are the only gates considered *parametric* for this functionality.
 
         Args:
             parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
