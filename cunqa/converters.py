@@ -32,7 +32,7 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
     """
         Function to convert a quantum circuit to the desired format.
         Detects the intup format and transforms into the one specified by *convert_to*, that can be ``"QuantumCircuit`` for :py:class:`qiskit.QuantumCircuit`,
-        ``"CunqaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"json"`` for a json :py:class:`dict`.
+        ``"CunqaCircuit"`` for :py:class:`~cunqa.circuit.CunqaCircuit` and ``"dict"`` for a json :py:class:`dict`.
 
         Args:
             circuit (qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit | dict): circuit to be transformed.
@@ -41,47 +41,46 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
             The circuit in the desired format accordingly to *convert_to*.
 
     """
+    if convert_to not in ["QuantumCircuit", "CunqaCircuit", "dict"]:
+        logger.error(f"{convert_to} is not a valid circuit format to convert to [{NameError.__name__}].")
+        raise SystemExit
+
+
     try:
         if isinstance(circuit, QuantumCircuit):
             if convert_to == "QuantumCircuit":
-                logger.warning("Provided circuit was already a QuantumCircuit")
+                logger.warning("Provided circuit was already a QuantumCircuit.")
                 converted_circuit = circuit
             elif convert_to == "CunqaCircuit":
                 converted_circuit = _qc_to_cunqac(circuit)
-            elif convert_to == "json":
+            elif convert_to == "dict":
                 converted_circuit = _qc_to_json(circuit)
-            else:
-                logger.error(f"{convert_to} is not a valid circuit format to convert to.")
-                raise SystemExit
+
         elif isinstance(circuit, CunqaCircuit):
             if convert_to == "QuantumCircuit":
                 converted_circuit = _cunqac_to_qc(circuit)
             elif convert_to == "CunqaCircuit":
-                logger.warning("Provided circuit was already a CunqaCircuit")
+                logger.warning("Provided circuit was already a CunqaCircuit.")
                 converted_circuit = circuit
-            elif convert_to == "json":
+            elif convert_to == "dict":
                 converted_circuit = _cunqac_to_json(circuit)
-            else:
-                logger.error(f"{convert_to} is not a valid circuit format to convert to.")
-                raise SystemExit
+
         elif isinstance(circuit, dict):
             if convert_to == "QuantumCircuit":
                 converted_circuit = _json_to_qc(circuit)
             elif convert_to == "CunqaCircuit":
                 converted_circuit = _json_to_cunqac(circuit)
-            elif convert_to == "json":
-                logger.warning("Provided circuit was already a json")
+            elif convert_to == "dict":
+                logger.warning("Provided circuit was already a dict.")
                 converted_circuit = circuit
-            else:
-                logger.error(f"{convert_to} is not a valid circuit format to convert to.")
-                raise SystemExit
+
         else:
-            logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a json")
+            logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a dict [{TypeError.__name__}].")
             raise SystemExit
         
         return converted_circuit
     except Exception as error:
-            logger.error(f" Unable to convert circuit to {convert_to}: [{ConvertersError.__name__}] [{type(error).__name__}].")
+            logger.error(f" Unable to convert circuit to {convert_to} [{type(error).__name__}].")
             raise SystemExit
 
 def _qc_to_json(qc : 'QuantumCircuit') -> dict:
@@ -94,18 +93,6 @@ def _qc_to_json(qc : 'QuantumCircuit') -> dict:
     Return:
         Json dict with the circuit information.
     """
-
-    # Check validity of the provided quantum circuit
-    if isinstance(qc, dict):
-        logger.warning(f"Circuit provided is already a dict.")
-        return qc
-    elif isinstance(qc, QuantumCircuit):
-        pass
-    else:
-        logger.error(f"Circuit must be <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or dict, but {type(qc)} was provided [{TypeError.__name__}].")
-        raise TypeError # this error should not be raised bacause in QPU we already check type of the circuit
-
-    # Actual translation
     try:
         
         quantum_registers, classical_registers = _registers_dict(qc)
@@ -164,8 +151,8 @@ def _qc_to_json(qc : 'QuantumCircuit') -> dict:
         return json_data 
     
     except Exception as error:
-        logger.error(f"Some error occured during transformation from QuantumCircuit to json dict [{type(error).__name__}].")
-        raise error
+        logger.error(f"Some error occured during transformation from `qiskit.QuantumCircuit` to json dict [{type(error).__name__}].")
+        raise ConvertersError
 
 def _qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
     """
@@ -215,11 +202,14 @@ def _json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
     Returns:
         An object :py:class:`~cunqa.circuit.CunqaCircuit` with the corresponding instructions and characteristics.
     """
-
-    cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
-    cunqac.from_instructions(circuit_dict["instructions"])
-
-    return cunqac
+    try:
+        cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
+        cunqac.from_instructions(circuit_dict["instructions"])
+        return cunqac
+    except Exception as error:
+        logger.error(f"Some error occured during transformation from json dict to `cunqa.circuit.CunqaCircuit` [{type(error).__name__}].")
+        raise ConvertersError
+    
 
 def _json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
@@ -233,8 +223,8 @@ def _json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     """
 
     if circuit_dict["has_cc"] or circuit_dict["has_qc"]:
-        logger.error(f"Cannot convert to QuantumCircuit a circuit with communications.")
-        raise TypeError
+        logger.error(f"Cannot convert to QuantumCircuit a circuit with communications [{TypeError.__name__}].")
+        raise ConvertersError
 
     #Extract key information from the json
     try:

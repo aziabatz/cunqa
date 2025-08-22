@@ -426,7 +426,7 @@ class QJob:
 
                 logger.debug("Translating to dict from QuantumCircuit...")
 
-                circuit_json = convert(circuit, "json")
+                circuit_json = convert(circuit, "dict")
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False
@@ -447,7 +447,7 @@ class QJob:
 
                 logger.debug("Translating to dict from QASM2 string...")
 
-                circuit_json = convert(qc_from_qasm, "json")
+                circuit_json = convert(qc_from_qasm, "dict")
                 instructions = circuit_json["instructions"]
                 self._is_dynamic = circuit_json["is_dynamic"]
                 self._has_cc = False

@@ -130,7 +130,7 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
         return qc_transpiled
     
     elif isinstance(circuit, dict):
-        return convert(qc_transpiled, "json")
+        return convert(qc_transpiled, "dict")
     
     elif isinstance(circuit, CunqaCircuit):
         return convert(qc_transpiled, "CunqaCircuit")
