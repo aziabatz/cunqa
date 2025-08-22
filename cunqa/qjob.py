@@ -157,10 +157,13 @@ class QJob:
                     if len(parameters)>0:
                         marked_params["no_name"] = parameters
 
-                    pre_message = self._current_params # If we don't 
+                    pre_message = self._current_params 
                     for index, label in enumerate(self._param_instructions):
                         if label in marked_params:
                             pre_message[index] = marked_params.pop(0) # This is not too fast
+
+                    if not all([len(value)==0 for value in marked_params.values()]):
+                        logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
 
                 except Exception as error:
                     logger.error(f"Error while substituting the marked parameters, check that the correct number of parameters was given. Error: {error}")
