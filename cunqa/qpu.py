@@ -14,16 +14,16 @@
         - **Simulator**: classical resources intended to simulate circuits accordingly to the backend characteristics.
     .. image:: /_static/virtualqpuequal.png
         :align: center
-        :width: 150
-        :height: 300px
+        :width: 400px
+        :height: 200px
 
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
     
     .. image:: /_static/client-server-comm.png
         :align: center
-        :width: 400px
-        :height: 200px
+        :width: 150
+        :height: 300px
 
     Connecting to virtual QPUs
     ==========================
