@@ -1,5 +1,9 @@
 """
-    Contains our virtual QPU class.
+    Contains the description of the :py:class:`QPU` class.
+
+    These :py:class:`QPU` objects are the python representation of the virtual QPUs deployed.
+    Each one has its :py:class:`QClient` object that communicates with the server of the corresponding virtual QPU.
+    Through these objects we are able to send circuits and recieve results from simulations.
 """
 
 import os
