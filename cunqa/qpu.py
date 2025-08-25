@@ -8,14 +8,15 @@
     Connecting to virtual QPUs
     ==========================
 
-    The submodule :py:mod:`~cunqa.qutils` gather functions for obtaining information about the virtual QPUs available;
+    The submodule :py:mod:`~cunqa.qutils` gathers functions for obtaining information about the virtual QPUs available;
     among them, the :py:func:`~cunqa.qutils.get_QPUs` function returns a list of :py:class:`QPU` objects with the desired filetering:
 
     >>> from cunqa import get_QPUs
     >>> get_QPUs()
     [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
 
-    
+    When each :py:class:`QPU` is instanciated, the corresponding :py:class:`QClient` is created.
+    This :py:class:`QClient` is a C++ object that is intended to connect to the server of a virtual QPU in order to stablish communication in both ways.
 """
 
 import os
