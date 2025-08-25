@@ -17,7 +17,15 @@
 
     When each :py:class:`QPU` is instanciated, the corresponding :py:class:`QClient` is created.
     This :py:class:`QClient` is a C++ object that is intended to connect to the server of a virtual QPU in order to stablish communication in both ways.
-"""
+
+
+    .. image:: _static/virtualqpuequal.png
+        :alt: Descripción de la imagen
+        :align: center
+    
+    
+    
+    """
 
 import os
 from typing import  Union, Any, Optional
