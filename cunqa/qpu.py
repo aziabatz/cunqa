@@ -17,7 +17,6 @@
         :align: center
         :width: 400px
         :height: 200px
-        :target: 
 
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
@@ -26,7 +25,6 @@
         :align: center
         :width: 400px
         :height: 200px
-        :target: 
 
     Connecting to virtual QPUs
     ==========================
