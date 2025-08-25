@@ -25,7 +25,7 @@
         :align: center
         :width: 150
         :height: 300px
-        
+
     <BLANKLINE>
         
     Connecting to virtual QPUs
@@ -87,30 +87,29 @@ class QPU:
     """
     Class to represent a virtual QPU deployed for user interaction.
 
-    This class contains the neccesary data for connecting to the QPU's server in order to communicate circuits and results in both ways.
-    This communication is trough the :py:attr:`QPU.qclient`.
+    This class contains the neccesary data for connecting to the virtual QPU's server in order to communicate circuits and results in both ways.
+    This communication is stablished trough the :py:attr:`QPU.qclient`.
 
     """
-    _id: int 
-    _qclient: 'QClient' 
-    _backend: 'Backend' 
-    _family: str
-    _endpoint: "tuple[str, int]" 
-    _connected: bool 
+    _id: int #: Id string assigned to the object.
+    _qclient: 'QClient'  #: Object that holds the information to communicate with the server endpoint of the corresponding virtual QPU.
+    _backend: 'Backend' #: Object that provides the characteristics that the simulator at the virtual QPU uses to emulate a real device.
+    _family: str #: Name of the family to which the corresponding virtual QPU belongs.
+    _endpoint: "tuple[str, int]" #: String refering to the endpoint of the corresponding virtual QPU.
+    _connected: bool #: Weather if the :py:class:`QClient` is already connected.
     
     def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]"):
         """
-        Initializes the QPU class.
+        Initializes the :py:class:`QPU` class.
 
         Args:
-            id (int): Id assigned to the qpu, simply a int from 0 to n_qpus-1.
+            id (str): id string assigned to the object.
 
-            qclient (<class 'python.qclient.QClient'>): object that holds the information to communicate with the server
-                endpoint for a given QPU.
+            qclient (QClient): object that holds the information to communicate with the server endpoint of the corresponding virtual QPU.
                 
-            backend (<class 'backend.Backend'>): object that provides information about the QPU backend.
+            backend (~cunqa.backend.Backend): object that provides the characteristics that the simulator at the virtual QPU uses to emulate a real device.
 
-            endpoint (str): String refering to the endpoint of the server to which the QPU corresponds.
+            endpoint (str): string refering to the endpoint of the corresponding virtual QPU.
         """
         
         self._id = id
@@ -124,10 +123,12 @@ class QPU:
 
     @property
     def id(self) -> int:
+        """Id string assigned to the object."""
         return self._id
     
     @property
     def backend(self) -> Backend:
+        """Object that provides the characteristics that the simulator at the virtual QPU uses to emulate a real device."""
         return self._backend
 
     def run(self, circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], transpile: bool = False, initial_layout: Optional["list[int]"] = None, opt_level: int = 1, **run_parameters: Any) -> 'QJob':
