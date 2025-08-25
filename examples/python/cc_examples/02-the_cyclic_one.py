@@ -34,12 +34,12 @@ def cyclic_ccommunication(n):
     for i in range(n-1):
         circuits[f"cc_{i+1}"]=CunqaCircuit(2,2, id= f"cc_{i+1}")
         
-        circuits[f"cc_{i+1}"].remote_c_if("x", target_qubits = 0, param=None, control_circuit = f"cc_{i}")
+        circuits[f"cc_{i+1}"].remote_c_if("x", qubits = 0, param=None, control_circuit = f"cc_{i}")
         circuits[f"cc_{i+1}"].h(1)
         circuits[f"cc_{i+1}"].cx(1,0)
 
         siguiente = mod(i+2,n)
-        circuits[f"cc_{i+1}"].measure_and_send(control_qubit = 1, target_circuit = f"cc_{siguiente}") 
+        circuits[f"cc_{i+1}"].measure_and_send(qubit = 1, target_circuit = f"cc_{siguiente}") 
 
         circuits[f"cc_{i+1}"].measure(0,0)
         circuits[f"cc_{i+1}"].measure(1,1)
