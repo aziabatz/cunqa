@@ -1,5 +1,15 @@
 """
-    Contains the :py:class:`QPU` class, an object that represent a virtual QPU deployed.
+    Contains the description of the :py:class:`QPU` class.
+
+    These :py:class:`QPU` objects are the python representation of the virtual QPUs deployed.
+    Each one has its :py:class:`QClient` object that communicates with the server of the corresponding virtual QPU.
+    Through these objects we are able to send circuits and recieve results from simulations.
+
+    Connecting to virtual QPUs
+    ==========================
+
+    The submodule :py:mod:`~cunqa.qutils` gather functions for obtaining information about the virtual QPUs available;
+    among them, the :py:func:`~cunqa.qutils.get_QPUs` function
 
     
 """
@@ -31,7 +41,11 @@ if INFO_PATH is None:
 
 class QPU:
     """
-    Class to define a QPU.
+    Class to represent a virtual QPU deployed for user interaction.
+
+    This class contains the neccesary data for connecting to the QPU's server in order to communicate circuits and results in both ways.
+    This communication is trough the :py:attr:`QPU.qclient`.
+
     """
     _id: int 
     _qclient: 'QClient' 

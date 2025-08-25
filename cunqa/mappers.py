@@ -15,7 +15,7 @@
     >>> circuit1.measure_and_send(0, "circuit_2")
     >>> circuit2.remote_c_if("x", 0, "circuit_1")
     >>>
-    >>> qpus = getQPUs()
+    >>> qpus = get_QPUs()
     >>>
     >>> qjobs = run_distributed([circuit1, circuit2], qpus)
     >>> results = gather(qjobs)
@@ -241,7 +241,7 @@ class QPUCircuitMapper:
 
     Its use is pretty similar to :py:class:`~cunqa.mappers.QJobMapper`, but not needing to create the :py:class:`~cunqa.qjob.QJob` objects ahead:
 
-    >>> qpus = getQPUs(...)
+    >>> qpus = get_QPUs(...)
     >>>
     >>> # creating the mapper with the pre-defined parametric circuit and other simulation instructions.
     >>> mapper = QPUCircuitMapper(qpus, circuit, shots = 1000, ...)

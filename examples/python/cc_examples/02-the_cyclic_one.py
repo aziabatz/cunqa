@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.qutils import get_QPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
@@ -16,8 +16,8 @@ def mod(n, m):
 def cyclic_ccommunication(n):
     family_0 = qraise(n,"00:10:00", simulator="Aer", classical_comm=True, cloud = True)
     #family_1 = qraise(n,"00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-    qpus_comm_0 = getQPUs(local = False, family = family_0)
-    #qpus_comm_1 = getQPUs(family_1)
+    qpus_comm_0 = get_QPUs(local = False, family = family_0)
+    #qpus_comm_1 = get_QPUs(family_1)
     qpus_comm = qpus_comm_0 #+ qpus_comm_1
     
 

@@ -4,10 +4,10 @@ import json
 import time
 
 sys.path.append(os.getenv("HOME"))
-from cunqa.qutils import getQPUs, qraise, qdrop
-
+from cunqa.qutils import get_QPUs, qraise, qdrop
 family = qraise(3, "00:10:00", simulator="Cunqa", classical_comm=True, cloud = True)
-qpus  = getQPUs(local=False, family = family)
+
+qpus = get_QPUs(local=False, family = family)
 
 print("QPUs disponibles:")
 for q in qpus:

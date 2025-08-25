@@ -4,14 +4,14 @@ import numpy as np
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.qutils import get_QPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-# Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs
+# Raise QPUs (allocates classical resources for the simulation job) and retrieve them using get_QPUs
 family = qraise(2, "00:10:00", simulator="Aer", quantum_comm=True, cloud = True)
-qpus_QPE  = getQPUs(local=False, family = family)
+qpus_QPE  = get_QPUs(local=False, family = family)
 
 ########## Circuits to run ##########
 ########## First circuit ############

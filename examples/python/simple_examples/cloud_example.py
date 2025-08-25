@@ -4,7 +4,7 @@ import numpy as np
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa import getQPUs, gather
+from cunqa import get_QPUs, gather
 from cunqa.circuit import CunqaCircuit
 
 
@@ -13,7 +13,7 @@ from cunqa.circuit import CunqaCircuit
 # example: local = False. This allows to look for
 # QPUs out of the node where the work is executing.
 # --------------------------------------------------
-qpus  = getQPUs(local=False)
+qpus  = get_QPUs(local=False)
 
 
 for q in qpus:
