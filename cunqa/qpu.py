@@ -15,8 +15,8 @@
     
     .. image:: /_static/client-server-comm.png
         :align: center
-        :width: 400px
-        :height: 200px
+        :width: 200px
+        :height: 400px
 
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
