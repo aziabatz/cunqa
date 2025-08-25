@@ -13,7 +13,7 @@
         - **Backend**: characteristics that define the QPU that is emulated: coupling map, basis gates, noise model, etc.
         - **Simulator**: classical resources intended to simulate circuits accordingly to the backend characteristics.
     
-    .. image:: /_static/client-server-comm.png
+    .. image:: /_static/virtualqpuequal.png
         :align: center
         :width: 200px
         :height: 400px
@@ -21,7 +21,7 @@
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
     
-    .. image:: /_static/virtualqpuequal.png
+    .. image:: /_static/client-server-comm.png
         :align: center
         :width: 400px
         :height: 200px
