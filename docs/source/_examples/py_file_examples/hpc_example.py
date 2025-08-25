@@ -3,7 +3,7 @@ import os, sys
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa import getQPUs
+from cunqa import get_QPUs
 from cunqa.circuit import CunqaCircuit
 
 
@@ -13,7 +13,7 @@ from cunqa.circuit import CunqaCircuit
 # This allows to look for QPUs out of the node where 
 # the work is executing.
 # --------------------------------------------------
-qpus  = getQPUs()
+qpus  = get_QPUs()
 
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}, simulator: {q.backend.simulator}, version: {q.backend.version}.")

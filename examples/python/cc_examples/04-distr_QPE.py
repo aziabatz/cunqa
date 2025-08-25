@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # path to access c++ files
 sys.path.append(os.getenv("HOME"))
 
-from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.qutils import get_QPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
@@ -42,7 +42,7 @@ def distr_rz2_QPE(angle, n_precision):
 
     os.system('sleep 10')
 
-    qpus_QPE  = getQPUs(local = False, family = family)
+    qpus_QPE  = get_QPUs(local = False, family = family)
 
     circuits = {}
     for i in range(n_precision): 

@@ -4,9 +4,9 @@ import json
 import time
 
 sys.path.append(os.getenv("HOME"))
-from cunqa.qutils import getQPUs
+from cunqa.qutils import get_QPUs
 
-qpus = getQPUs(local=False)
+qpus = get_QPUs(local=False)
 print("QPUs disponibles:")
 for q in qpus:
     print(f"QPU {q.id}, backend: {q.backend.name}")
