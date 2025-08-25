@@ -17,6 +17,8 @@
         :width: 400px
         :height: 200px
 
+    
+    
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
     
@@ -25,6 +27,7 @@
         :width: 150
         :height: 300px
 
+        
     Connecting to virtual QPUs
     ==========================
 
@@ -43,6 +46,9 @@
     =============================
 
     Once we have the :py:class:`QPU` objects created, we can start interacting with them.
+    The most important method of the class is :py:meth:`QPU.run`, which allows to send a circuit to the virtual QPU for its simulation,
+    returning a :py:class:`~cunqa.qjob.QJob` object associated to the quantum task:
+
 
 
 """
