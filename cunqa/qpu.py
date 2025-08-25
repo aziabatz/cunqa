@@ -12,11 +12,10 @@
         - **Server**: classical resources intended to communicate with the python API to recieve circuits or quantum tasks and to send results of the simulations.
         - **Backend**: characteristics that define the QPU that is emulated: coupling map, basis gates, noise model, etc.
         - **Simulator**: classical resources intended to simulate circuits accordingly to the backend characteristics.
-    
     .. image:: /_static/virtualqpuequal.png
         :align: center
-        :width: 200px
-        :height: 400px
+        :width: 150
+        :height: 300px
 
     In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
     Each object will have a :py:class:`QClient` C++ object through which the communication with the classical resoruces is performed.
@@ -37,7 +36,13 @@
     [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
 
     When each :py:class:`QPU` is instanciated, the corresponding :py:class:`QClient` is created.
+    Nevertheless, it is not until the first job is submited that the client actually connects to the correspoding server.
     Other properties and information gathered in the :py:class:`QPU` class are shown on its documentation.
+
+    Interacting with virtual QPUs
+    =============================
+
+    Once we have the :py:class:`QPU` objects created, we can start interacting with them.
 
 
 """
