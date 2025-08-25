@@ -16,13 +16,21 @@
         :align: center
         :width: 400px
         :height: 200px
-        :target: none
+        :target: 
+
+    In order to stablish communication with the server, in the python API :py:class:`QPU` objects are created, each one of them associated with a virtual QPU.
+    
+    .. image:: /_static/client-server-comm.png
+        :align: center
+        :width: 400px
+        :height: 200px
+        :target: 
 
     Connecting to virtual QPUs
     ==========================
 
     The submodule :py:mod:`~cunqa.qutils` gathers functions for obtaining information about the virtual QPUs available;
-    among them, the :py:func:`~cunqa.qutils.get_QPUs` function returns a list of :py:class:`QPU` objects with the desired filetering:
+    among them, the :py:func:`~cunqa.qutils.get_QPUs` function returns a list of :py:class:`QPU` objects with the desired filtering:
 
     >>> from cunqa import get_QPUs
     >>> get_QPUs()
