@@ -33,7 +33,11 @@ if INFO_PATH is None:
 
 class QPU:
     """
-    Class to define a QPU.
+    Class to represent a virtual QPU deployed for user interaction.
+
+    This class contains the neccesary data for connecting to the QPU's server in order to communicate circuits and results in both ways.
+    This communication is trough the :py:attr:`QPU.qclient`.
+
     """
     _id: int 
     _qclient: 'QClient' 
