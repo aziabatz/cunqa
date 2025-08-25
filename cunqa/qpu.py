@@ -13,7 +13,7 @@
 
     >>> from cunqa import get_QPUs
     >>> get_QPUs()
-    [<cunqa.qpu.QPU object at XXXXX>, <cunqa.qpu.QPU object at XXXXX>, <cunqa.qpu.QPU object at XXXXX>]
+    [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
 
     
 """
