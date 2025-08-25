@@ -26,6 +26,8 @@
         :width: 150
         :height: 300px
         
+    <BLANKLINE>
+        
     Connecting to virtual QPUs
     ==========================
 
