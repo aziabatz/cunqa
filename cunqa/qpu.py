@@ -19,7 +19,7 @@
     This :py:class:`QClient` is a C++ object that is intended to connect to the server of a virtual QPU in order to stablish communication in both ways.
 
 
-    .. image:: docs/source/_static/virtualqpuequal.png
+    .. image:: /_static/logo_cesga_blanco.png
         :alt: Descripción de la imagen
         :align: center
     
