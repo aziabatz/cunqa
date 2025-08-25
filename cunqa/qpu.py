@@ -5,6 +5,19 @@
     Each one has its :py:class:`QClient` object that communicates with the server of the corresponding virtual QPU.
     Through these objects we are able to send circuits and recieve results from simulations.
 
+    Virtual QPUs
+    ============
+    Each virtual QPU is described by three elements:
+        - **Server**: classical resources intended to communicate with the python API to recieve circuits or quantum tasks and to send results of the simulations.
+        - **Backend**: characteristics that define the QPU that is emulated: coupling map, basis gates, noise model, etc.
+        - **Simulator**: classical resources intended to simulate circuits accordingly to the backend characteristics.
+    
+    .. image:: /_static/virtualqpuequal.png
+        :align: center
+        :width: 400px
+        :height: 200px
+        :target: none
+
     Connecting to virtual QPUs
     ==========================
 
@@ -17,12 +30,8 @@
 
     When each :py:class:`QPU` is instanciated, the corresponding :py:class:`QClient` is created.
     This :py:class:`QClient` is a C++ object that is intended to connect to the server of a virtual QPU in order to stablish communication in both ways.
-
-    .. image:: /_static/virtualqpuequal.png
-        :align: center
-        :width: 400px
-        :height: 200px
-        :target: none
+    
+    
 
 
 """
