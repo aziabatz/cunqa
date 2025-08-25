@@ -4,6 +4,14 @@
     These :py:class:`QPU` objects are the python representation of the virtual QPUs deployed.
     Each one has its :py:class:`QClient` object that communicates with the server of the corresponding virtual QPU.
     Through these objects we are able to send circuits and recieve results from simulations.
+
+    Connecting to virtual QPUs
+    ==========================
+
+    The submodule :py:mod:`~cunqa.qutils` gather functions for obtaining information about the virtual QPUs available;
+    among them, the :py:func:`~cunqa.qutils.get_QPUs` function
+
+    
 """
 
 import os
