@@ -288,14 +288,14 @@ def info_QPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict
 
 def get_QPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     """
-    Global function to get the QPU objects corresponding to the virtual QPUs raised.
+    Returns :py:class:`~cunqa.qpu.QPU` objects corresponding to the virtual QPUs raised by the user.
 
     Args:
-        local (bool): option to return only the QPUs in the current node (True, default option) or in all nodes (False).
-        family (str): option to return only the QPUs from the selected family (group of QPUs allocated in the same qraise)
+        local (bool): if ``True``, filters by the virtual QPUs available at the local node.
+        family (str): filters virtual QPUs by their family name.
 
     Return:
-        List of QPU objects.
+        List of :py:class:`~cunqa.qpu.QPU` objects.
     
     """
 
