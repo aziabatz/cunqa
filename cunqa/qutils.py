@@ -52,6 +52,7 @@ def qraise(n, t, *,
            classical_comm = False, 
            quantum_comm = False,  
            simulator = None, 
+           backend = None, 
            fakeqmio = False, 
            family = None, 
            cloud = True, 
@@ -59,8 +60,7 @@ def qraise(n, t, *,
            mem_per_qpu = None, 
            n_nodes = None, 
            node_list = None, 
-           qpus_per_node= None, 
-           backend = None) -> Union[tuple, str]:
+           qpus_per_node= None) -> Union[tuple, str]:
     """
     Raises a virtual QPU and returns the job id associated to its `SLURM <https://slurm.schedmd.com/documentation.html>`_ job.
 
@@ -79,21 +79,21 @@ def qraise(n, t, *,
 
         simulator (str): name of the desired simulator to use. Default is `Aer <https://github.com/Qiskit/qiskit-aer>`.
 
+        backend (str): path to a file containing backend information.
+
         family (str): name to identify the group of virtual QPUs raised.
 
         mode (str): infrastructure type for the raised QPUs. In ``"hpc"`` mode, virtual QPUs can only be accessed from the node in which they are deployed. In ``"cloud"`` mode, they can be accessed from other nodes.
 
         cores (str):  number of cores per virtual QPU, the total for the SLURM job will be `n*cores`.
 
-        mem_per_qpu (str): memory to allocate for each QPU, format to use is  "xG".
+        mem_per_qpu (str): memory to allocate for each virtual QPU in GB, format to use is  "xG".
 
         n_nodes (str): number of nodes for the SLURM job.
 
-        node_list (str): option to select specifically on which nodes the simulation job should run.
+        node_list (str): list of nodes in which the virtual QPUs will be deployed.
 
-        qpus_per_node (str): sets the number of QPUs that should be raised on each requested node.
-
-        backend (str): path to a file containing backend information.
+        qpus_per_node (str): sets the number of virtual QPUs deployed on each node.
 
     """
     print("Setting up the requested QPUs...")
