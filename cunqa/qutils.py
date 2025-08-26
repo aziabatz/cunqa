@@ -6,7 +6,7 @@ from typing import Union, Optional
 from subprocess import run
 from json import load
 import json
-from cunqa.qclient import QClient  # importamos api en C++
+from cunqa.qclient import QClient
 from cunqa.backend import Backend
 from cunqa.logger import logger
 from cunqa.qpu import QPU
@@ -22,10 +22,19 @@ else:
     raise SystemExit
 
 class QRaiseError(Exception):
-    """Exception for errors during qraise slurm command"""
+    """Exception for errors during qraise slurm command."""
     pass
 
-def are_qpus_raised(family: Optional[str] = None) -> bool:
+def are_QPUs_raised(family: Optional[str] = None) -> bool:
+    """
+    Function to check availability of QPUs, filtering by `family` if desired.
+
+    Args:
+        family (str): name of the family of the QPUs whose availability is checked.
+    
+    Returns:
+        ``True`` if those are deployed, ``False`` if not.
+    """
     last_modification = os.stat(INFO_PATH).st_mtime 
     while True:
         if last_modification != os.stat(INFO_PATH).st_mtime: 
@@ -39,9 +48,6 @@ def are_qpus_raised(family: Optional[str] = None) -> bool:
                         if value["family"] == family:
                             return True
                         
-    
-
-
 def qraise(n, t, *, 
            classical_comm = False, 
            quantum_comm = False,  
