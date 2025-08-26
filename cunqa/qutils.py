@@ -38,6 +38,16 @@
     Knowing the `job id` or the `family` name of the group of virtual QPUs:
 
         >>> qdrop('<job id>')
+
+    If no argument is passed to :py:func:`qdrop`, all QPUs deployed by the user are dropped.
+
+    .. warning::
+        The :py:func:`qraise` function can only be used when the python program is being run at a login node, otherwise an error will be raised.
+        This is because SLURM jobs can only be submmited from login nodes, but not from compute sessions or running jobs.
+
+    .. note::
+        Even if we did not raise the virtual QPUs by the :py:func:`qraise` function, we can still use :py:func:`qdrop` to cancel them.
+        In the same way, if we raise virtual QPUs by the python function, we can still drop them by terminal commands.
     
 
 """
