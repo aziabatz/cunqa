@@ -11,14 +11,14 @@
         >>> get_QPUs()
         [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
 
-    The function allows to filter by `family` name or by choosen the virtual QPUs available at the `local` node.
+    The function allows to filter by `family` name or by choosing the virtual QPUs available at the `local` node.
 
     When each :py:class:`~cunqa.qpu.QPU` is instanciated, the corresponding :py:class:`QClient` is created.
     Nevertheless, it is not until the first job is submited that the client actually connects to the correspoding server.
     Other properties and information gathered in the :py:class:`~cunqa.qpu.QPU` class are shown on its documentation.
 
     Q-raising and Q-dropping at pyhton
-    ===========================================
+    ==================================
     This submodule allows to raise and drop virtual QPUs, with no need to work in the command line.
     One must provide the neccesary information, analogous to the ``qraise`` command:
 
