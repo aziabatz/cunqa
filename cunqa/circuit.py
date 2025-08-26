@@ -64,6 +64,7 @@ import numpy as np
 import random
 import string
 from typing import Union, Optional
+from qiskit import QuantumCircuit
 
 from cunqa.logger import logger
 
@@ -1495,8 +1496,7 @@ class CunqaCircuit:
         Plugs values into the intructions of parametric gates marked with a parameter name.
 
         Args:
-            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter 
-            label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
+            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter  label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
             marked_parameters (dict): values for each set of marked parameters
         """
         try:
@@ -1529,3 +1529,42 @@ def _flatten(lists: "list[list]"):
         lists (list[list]): list of the lists which elements are wanted to be gathered.
     """
     return [element for sublist in lists for element in sublist]
+
+
+def _is_parametric(circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit']) -> bool:
+    """
+    Function to determine weather a cirucit has gates that accept parameters, not necesarily parametric :py:class:`qiskit.QuantumCircuit`.
+    For example, a circuit that is composed by hadamard and cnot gates is not a parametric circuit; but if a circuit has any of the gates defined in `parametric_gates` we
+    consider it a parametric circuit for our purposes.
+
+    Args:
+        circuit (qiskit.QuantumCircuit | dict | str): the circuit from which we want to find out if it's parametric.
+
+    Return:
+        True if the circuit is considered parametric, False if it's not.
+    """
+    parametric_gates = ["u", "u1", "u2", "u3", "rx", "ry", "rz", "crx", "cry", "crz", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "cp", "cswap", "ccx", "crz", "cu"]
+    if isinstance(circuit, QuantumCircuit):
+        for instruction in circuit.data:
+            if instruction.operation.name in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, dict):
+        for instruction in circuit['instructions']:
+            if instruction['name'] in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, list):
+        for instruction in circuit:
+            if instruction['name'] in parametric_gates:
+                return True
+        return False
+    elif isinstance(circuit, CunqaCircuit):
+        return circuit.is_parametric
+    elif isinstance(circuit, str):
+        lines = circuit.splitlines()
+        for line in lines:
+            line = line.strip()
+            if any(line.startswith(gate) for gate in parametric_gates):
+                return True
+        return False
