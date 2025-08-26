@@ -15,7 +15,7 @@
     >>> circuit1.measure_and_send(0, "circuit_2")
     >>> circuit2.remote_c_if("x", 0, "circuit_1")
     >>>
-    >>> qpus = getQPUs()
+    >>> qpus = get_QPUs()
     >>>
     >>> qjobs = run_distributed([circuit1, circuit2], qpus)
     >>> results = gather(qjobs)
@@ -95,7 +95,7 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
     distributed_qjobs = []
     circuit_jsons = []
 
-    remote_controlled_gates = ["measure_and_send", "remote_c_if", "qsend", "qrecv"]
+    remote_controlled_gates = ["measure_and_send", "remote_c_if", "recv", "qsend", "qrecv"]
     correspondence = {}
 
     #Check wether the circuits are valid and extract jsons
@@ -155,7 +155,6 @@ def run_distributed(circuits: "list[Union[dict, 'CunqaCircuit']]", qpus: "list['
 
     # no need to capture errors bacuse they are captured at `QPU.run`
     for circuit, qpu in zip(circuit_jsons, qpus):
-        logger.debug(f"The following circuit will be sent: {circuit}")
         distributed_qjobs.append(qpu.run(circuit, **run_parameters))
 
     return distributed_qjobs
@@ -242,7 +241,7 @@ class QPUCircuitMapper:
 
     Its use is pretty similar to :py:class:`~cunqa.mappers.QJobMapper`, but not needing to create the :py:class:`~cunqa.qjob.QJob` objects ahead:
 
-    >>> qpus = getQPUs(...)
+    >>> qpus = get_QPUs(...)
     >>>
     >>> # creating the mapper with the pre-defined parametric circuit and other simulation instructions.
     >>> mapper = QPUCircuitMapper(qpus, circuit, shots = 1000, ...)

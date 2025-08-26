@@ -143,7 +143,7 @@ def qraise(n, t, *,
             else:
                 i += 1
 
-        # Wait for QPUs to be raised, so that getQPUs can be executed inmediately
+        # Wait for QPUs to be raised, so that get_QPUs can be executed inmediately
         print("QPUs ready to work \U00002705")
 
         return (family, str(job_id)) if family is not None else str(job_id)
@@ -257,7 +257,7 @@ def infoQPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]
 
 
 
-def getQPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
+def get_QPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     """
     Global function to get the QPU objects corresponding to the virtual QPUs raised.
 

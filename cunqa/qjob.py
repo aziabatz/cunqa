@@ -53,7 +53,7 @@ class QJob:
     The quantum job not only contains the circuit to be simulated, but also simulation instructions and information of the virtual QPU to which the job is sent.
 
     One would want to save the :py:class:`QJob` resulting from sending a circuit in a variable.
-    Let`s say we want to send a circuit to a QPU and get the result and the time taken for the simulation:
+    Let's say we want to send a circuit to a QPU and get the result and the time taken for the simulation:
 
         >>> qjob = qpu.run(circuit)
         >>> result = qjob.result
@@ -97,7 +97,7 @@ class QJob:
         >>> result_2 = qjob_2.result
 
     This way, when we send the first job, then inmediatly the sencond one is sent, because :py:meth:`~cunqa.qpu.QPU.run` does not wait
-    for the simulation to finish. This way, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
+    for the simulation to finish. In this manner, both jobs are being run in both QPUs simultaneously! Here we do not need to perserve the order,
     since jobs are managed by different :py:class:`QClient` objects, there can be no mix up.
 
     In fact, the function :py:func:`~cunqa.qjob.gather` is designed for recieving a list of qjobs and return the results; therefore, let's say
@@ -301,7 +301,7 @@ class QJob:
             If the number of parameters is less than the number of parametric gates in the circuit, an error will occur at the virtual QPU, on
             the other hand, if more parameters are provided, there will only be used up to the number of parametric gates.
             
-            Also, only rx, ry and rz gates are supported for this functionality, that is, they are the only gates considered *parametric* for this functionality.
+            Also, only *rx*, *ry* and *rz* gates are supported for this functionality, that is, they are the only gates considered *parametric* for this functionality.
 
         Args:
             parameters (list[float | int]): list of parameters to assign to the parametrized circuit.
@@ -518,26 +518,34 @@ class QJob:
         
 
 
-def gather(qjobs: Union[QJob, "list['QJob']"]) -> Union[Result, "list['Result']"]:
+def gather(qjobs: "list['QJob']") -> "list['Result']":
     """
-        Function to get result of several QJob objects, it also takes one QJob object.
+        Function to get the results of several :py:class:`QJob` objects.
+
+        Once the jobs are running:
+
+            >>> results = gather(qjobs)
+
+        This is a blocking call, results will be called sequentialy in . Since they are being run simultaneously,
+        even if the first one on the list takes the longest, when it finishes the rest would have been done, so
+        just the small overhead from calling them will be added.
+
+        .. warning::
+            Since this is mainly a for loop, the order must be respected when submiting jobs to the same virtual QPU.
 
         Args:
-            qjobs (list of QJob objects or QJob object)
+            qjobs (list[QJob]): list of objects to get the result from.
 
         Return:
-            Result or list of results.
+            List of :py:class:`~cunqa.result.Result` objects.
     """
     if isinstance(qjobs, list):
         if all([isinstance(q, QJob) for q in qjobs]):
             return [q.result for q in qjobs]
         else:
-            logger.error(f"Objects of the list must be <class 'qjob.QJob'> [{TypeError.__name__}].")
+            logger.error(f"Objects of the list must be <class 'cunqa.qjob.QJob'> [{TypeError.__name__}].")
             raise SystemExit # User's level
-            
-    elif isinstance(qjobs, QJob):
-        return qjobs.result
 
     else:
-        logger.error(f"qjobs must be <class 'qjob.QJob'> or list, but {type(qjobs)} was provided [{TypeError.__name__}].")
+        logger.error(f"qjobs must be list, but {type(qjobs)} was provided [{TypeError.__name__}].")
         raise SystemError # User's level
