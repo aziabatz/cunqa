@@ -102,6 +102,9 @@ class QPU:
         """
         Initializes the :py:class:`QPU` class.
 
+        This initialization of the class is done by the :py:func:`~cunqa.qutils.get_QPUs` function, which loads the ``id``,
+        ``family`` and ``endpoint``, and instanciates the ```qclient`` and the ``backend`` objects.
+
         Args:
             id (str): id string assigned to the object.
 
