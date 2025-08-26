@@ -11,6 +11,8 @@
         >>> get_QPUs()
         [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
 
+    The function allows to filter by `family` name or by choosen the virtual QPUs available at the `local` node.
+
     When each :py:class:`~cunqa.qpu.QPU` is instanciated, the corresponding :py:class:`QClient` is created.
     Nevertheless, it is not until the first job is submited that the client actually connects to the correspoding server.
     Other properties and information gathered in the :py:class:`~cunqa.qpu.QPU` class are shown on its documentation.
@@ -29,8 +31,8 @@
         >>> ...    )
         '<job id>'
 
-    The function :py:func:`qraise` returns a string specifying the id of the `SLURM <https://slurm.schedmd.com/documentation.html>`_ job
-    that deploys the QPUs.
+    The function :py:func:`qraise` returns a string specifying the id of the `SLURM <https://slurm.schedmd.com/documentation.html>`_
+    job that deploys the QPUs.
 
 """
 import os
