@@ -175,15 +175,16 @@ def qraise(n, t, *,
     except Exception as error:
         raise QRaiseError(f"Unable to raise requested QPUs [{error}].")
 
-def qdrop(*families: Union[tuple, str]):
+def qdrop(*families: Union[tuple[str], str]):
     """
-    Drops the QPU families corresponding to the the entered QPU objects. By default, all raised QPUs will be dropped.
+    Drops the virtual QPU families corresponding to the the input family names.
+    If no families are provided, all virtual QPUs deployed by the user will be dropped.
 
     Args
-        qpus (tuple(<class cunqa.qpu.QPU>)): list of QPUs to drop. All QPUs that share a qraise will these will drop.
+        families (str): family names of the groups of virtual QPUs to be dropped.
     """
     
-    # Building the terminal command to drop the specified families (using family names or QFamilies)
+    # Building the terminal command to drop the specified families
     cmd = ['qdrop']
 
     # If no QPU is provided we drop all QPU slurm jobs
