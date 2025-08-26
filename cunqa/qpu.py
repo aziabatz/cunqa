@@ -53,7 +53,7 @@
         >>> qpu.run(circuit)
         <cunqa.qjob.QJob object at XXXX>
 
-    This method takes several arguments for specifications of the simulation such as ``shots`` or ``transpilation``.
+    This method takes several arguments for specifications of the simulation such as `shots` or `transpilation`.
     For a larger description of its functionalities checkout its documentation.
 
 """
