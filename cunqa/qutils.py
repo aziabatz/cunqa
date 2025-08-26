@@ -204,10 +204,9 @@ def qdrop(*families: Union[tuple[str], str]):
  
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
-
-def nodeswithQPUs() -> "list[set]":
+def nodes_with_QPUs() -> "list[set]":
     """
-    Global function to know what nodes of the computer host virtual QPUs.
+    Provides information about the nodes in which virtual QPUs are available.
 
     Return:
         List of the corresponding node names.
@@ -226,13 +225,20 @@ def nodeswithQPUs() -> "list[set]":
         logger.error(f"Some exception occurred [{type(error).__name__}].")
         raise SystemExit # User's level
 
-
-
-def infoQPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]":
+def info_QPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict]":
     """
-    Global function that returns information about the QPUs available either in the local node or globaly.
+    Provides information about the virtual QPUs available either in the local node, an specific node or globally.
 
-    It is possible also to filter by `node_names`. If `local = True` and `node_names` provided are different from the local node, only local node will be chosen.
+    If `local = True` and `node_names` provided are different from the local node, only information at local node will be displayed.
+    
+    Args:
+        local (bool): if ``True`` information at local node is displayed, else all information is displayed.
+
+        node_name (str): filters the displayed information by an specific node.
+
+    Returns:
+        A list with :py:class:`dict` objects that display the information of the virtual QPUs.
+    
     """
 
     try:
