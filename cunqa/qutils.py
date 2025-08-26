@@ -4,7 +4,8 @@
     Connecting to virtual QPUs
     ==========================
     The most important function of the submodule, and one of the most important of :py:mod:`cunqa` is the :py:func:`get_QPUs`
-    function, since it creates the objects that allow sending circuits to virtual QPUs and receiving the results of the simulations
+    function, since it creates the objects that allow sending circuits and receiving the results of the simulations from the
+    virtual QPUs already deployed:
 
         >>> from cunqa import get_QPUs
         >>> get_QPUs()
