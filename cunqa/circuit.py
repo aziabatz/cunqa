@@ -1466,38 +1466,7 @@ class CunqaCircuit:
         Plugs values into the intructions of parametric gates marked with a parameter name.
 
         Args:
-            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter 
-            label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
-            marked_parameters (dict): values for each set of marked parameters
-        """
-        try:
-            for instruction in self.instructions:
-                if (("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0)):
-                    for i, param in enumerate(instruction["params"]):
-                        if isinstance(param, str) and param in marked_params:
-                            if isinstance(marked_params[param], (int, float)):
-                                instruction["params"][i] = marked_params[param]
-                            elif isinstance(marked_params[param], list):
-                                instruction["params"][i] = marked_params[param].pop(0)
-                            else:
-                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given.")
-                                raise SystemExit
-                                
-        except Exception as error:
-            logger.error(f"Error while assigning parameters, try checking that the provided params are of the correct lenght. \n {error}")
-            raise SystemExit
-        
-        if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
-            logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
-
-
-    def assign_parameters(self, **marked_params):
-        """
-        Plugs values into the intructions of parametric gates marked with a parameter name.
-
-        Args:
-            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter  label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
-            marked_parameters (dict): values for each set of marked parameters
+            marked_parameters (dict): values for each set of marked parameters.
         """
         try:
             for instr in self.instructions:
@@ -1509,7 +1478,7 @@ class CunqaCircuit:
                             elif isinstance(marked_params[param], list):
                                 instr["params"][i] = marked_params[param].pop(0)
                             else:
-                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given.")
+                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given [TypeError].")
                                 raise SystemExit
                                 
         except Exception as error:
