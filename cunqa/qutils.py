@@ -229,7 +229,7 @@ def info_QPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict
     """
     Provides information about the virtual QPUs available either in the local node, an specific node or globally.
 
-    If `local = True` and `node_names` provided are different from the local node, only information at local node will be displayed.
+    If `local` is ``True`` and `node_name` provided is different from the local node, only information at local node will be displayed.
     
     Args:
         local (bool): if ``True`` information at local node is displayed, else all information is displayed.
@@ -285,8 +285,6 @@ def info_QPUs(local: bool = True, node_name: Optional[str] = None) -> "list[dict
     except Exception as error:
         logger.error(f"Some exception occurred [{type(error).__name__}].")
         raise error # User's level
-
-
 
 def get_QPUs(local: bool = True, family: Optional[str] = None) -> "list['QPU']":
     """
