@@ -96,7 +96,7 @@ def qraise(n, t, *,
         qpus_per_node (str): sets the number of virtual QPUs deployed on each node.
     
     Returns:
-        The SLURM job id of the job deployed. If `family` was provided, a tuple (`family`, `job id`)
+        The SLURM job id of the job deployed. If `family` was provided, a tuple (`family`, `job id`).
     """
     logger.debug("Setting up the requested QPUs...")
 
@@ -180,7 +180,7 @@ def qdrop(*families: Union[tuple[str], str]):
     Drops the virtual QPU families corresponding to the the input family names.
     If no families are provided, all virtual QPUs deployed by the user will be dropped.
 
-    Args
+    Args:
         families (str): family names of the groups of virtual QPUs to be dropped.
     """
     
