@@ -67,19 +67,32 @@ def qraise(n, t, *,
     This function allows to raise QPUs from the python API, what can also be done at terminal by ``qraise`` command.
 
     Args:
-        n (int): number of QPUs to be raised.
-        t (str): maximun time that the classical resources will be reserved for the QPU. Format: 'D-HH:MM:SS'.
-        fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
-        classical_comm (bool): if True the raised QPUs are communicated classically.
-        quantum_comm (bool): if True the raised QPUs have quantum communications.
-        simulator (str): name of the desired simulator to use. Default is AerSimulator.
-        family (str): name to identify the group of QPUs raised on the specific call of the function.
-        mode (str): infrastructure type for the raised QPUs:  "hpc" or "cloud". First one associates QPUs to different nodes.
-        cores (str):  number of cores for the SLURM job.
+        n (int): number of virtual QPUs to be raised in the job.
+
+        t (str): maximun time that the classical resources will be reserved for the job. Format: 'D-HH:MM:SS'.
+
+        fakeqmio (bool): ``True`` for raising `n` virtual QPUs with FakeQmio backend.
+
+        classical_comm (bool): if ``True``, virtual QPUs will allow classical communications.
+
+        quantum_comm (bool): if ``True``, virtual QPUs will allow quantum communications.
+
+        simulator (str): name of the desired simulator to use. Default is `Aer <https://github.com/Qiskit/qiskit-aer>`.
+
+        family (str): name to identify the group of virtual QPUs raised.
+
+        mode (str): infrastructure type for the raised QPUs. In ``"hpc"`` mode, virtual QPUs can only be accessed from the node in which they are deployed. In ``"cloud"`` mode, they can be accessed from other nodes.
+
+        cores (str):  number of cores per virtual QPU, the total for the SLURM job will be `n*cores`.
+
         mem_per_qpu (str): memory to allocate for each QPU, format to use is  "xG".
+
         n_nodes (str): number of nodes for the SLURM job.
+
         node_list (str): option to select specifically on which nodes the simulation job should run.
+
         qpus_per_node (str): sets the number of QPUs that should be raised on each requested node.
+
         backend (str): path to a file containing backend information.
 
     """
