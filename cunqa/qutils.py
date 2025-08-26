@@ -1,10 +1,23 @@
 """
     Holds functions to manage and get infomation about the virtual QPUs displayed by the user.
 
+    Connecting to virtual QPUs
+    ==========================
+    The most important function of the submodule, and one of the most important of :py:mod:`cunqa` is the :py:func:`get_QPUs`
+    function, since it creates the objects that allow sending circuits to virtual QPUs and receiving the results of the simulations
+
+        >>> from cunqa import get_QPUs
+        >>> get_QPUs()
+        [<cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>, <cunqa.qpu.QPU object at XXXX>]
+
+    When each :py:class:`~cunqa.qpu.QPU` is instanciated, the corresponding :py:class:`QClient` is created.
+    Nevertheless, it is not until the first job is submited that the client actually connects to the correspoding server.
+    Other properties and information gathered in the :py:class:`~cunqa.qpu.QPU` class are shown on its documentation.
+
     Q-raising and Q-dropping at pyhton
     ===========================================
     This submodule allows to raise and drop virtual QPUs, with no need to work in the command line.
-    One must provide the neccesary information, analogous to the command ``qraise``:
+    One must provide the neccesary information, analogous to the ``qraise`` command:
 
         >>> qraise(n = 4, # MANDATORY, number of QPUs to be raised
         >>> ...    t = "2:00:00", # MANDATORY, maximum time until they are automatically dropped
@@ -13,7 +26,7 @@
         >>> ...    cloud = True, # allowing cloud mode, QPUs can be accessed from any node
         >>> ...    family = "my_family_of_QPUs" # assigning a name to the group of QPUs
         >>> ...    )
-        'XXXX'
+        '<job id>'
 
     The function :py:func:`qraise` returns a string specifying the id of the `SLURM <https://slurm.schedmd.com/documentation.html>`_ job
     that deploys the QPUs.
