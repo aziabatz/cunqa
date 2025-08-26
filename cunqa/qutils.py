@@ -71,8 +71,6 @@ def qraise(n, t, *,
 
         t (str): maximun time that the classical resources will be reserved for the job. Format: 'D-HH:MM:SS'.
 
-        fakeqmio (bool): ``True`` for raising `n` virtual QPUs with FakeQmio backend.
-
         classical_comm (bool): if ``True``, virtual QPUs will allow classical communications.
 
         quantum_comm (bool): if ``True``, virtual QPUs will allow quantum communications.
@@ -81,9 +79,11 @@ def qraise(n, t, *,
 
         backend (str): path to a file containing backend information.
 
+        fakeqmio (bool): ``True`` for raising `n` virtual QPUs with FakeQmio backend.
+
         family (str): name to identify the group of virtual QPUs raised.
 
-        mode (str): infrastructure type for the raised QPUs. In ``"hpc"`` mode, virtual QPUs can only be accessed from the node in which they are deployed. In ``"cloud"`` mode, they can be accessed from other nodes.
+        cloud (bool): if ``True``, `cloud` mode is set, otherwise `hpc` mode is set. In `hpc` mode, virtual QPUs can only be accessed from the node in which they are deployed. In `cloud` mode, they can be accessed from other nodes.
 
         cores (str):  number of cores per virtual QPU, the total for the SLURM job will be `n*cores`.
 
