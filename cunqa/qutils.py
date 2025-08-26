@@ -94,10 +94,14 @@ def qraise(n, t, *,
         node_list (str): list of nodes in which the virtual QPUs will be deployed.
 
         qpus_per_node (str): sets the number of virtual QPUs deployed on each node.
-
+    
+    Returns:
+        The SLURM job id of the job deployed. If `family` was provided, a tuple (`family`, `job id`)
     """
-    print("Setting up the requested QPUs...")
+    logger.debug("Setting up the requested QPUs...")
+
     SLURMD_NODENAME = os.getenv("SLURMD_NODENAME")
+
     if SLURMD_NODENAME == None:
         command = f"qraise -n {n} -t {t}"
     else: 
