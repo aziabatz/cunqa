@@ -64,10 +64,11 @@ def qraise(n, t, *,
     """
     Raises a virtual QPU and returns the job id associated to its `SLURM <https://slurm.schedmd.com/documentation.html>`_ job.
 
-    Args
+    This function allows to raise QPUs from the python API, what can also be done at terminal by ``qraise`` command.
+
+    Args:
         n (int): number of QPUs to be raised.
-        t (str, format: 'D-HH:MM:SS'): maximun time that the classical resources will be reserved for the QPU.
-        
+        t (str): maximun time that the classical resources will be reserved for the QPU. Format: 'D-HH:MM:SS'.
         fakeqmio (bool): if True the raised QPUs will have the fakeqmio backend.
         classical_comm (bool): if True the raised QPUs are communicated classically.
         quantum_comm (bool): if True the raised QPUs have quantum communications.
