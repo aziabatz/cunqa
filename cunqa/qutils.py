@@ -1,7 +1,7 @@
 """
     Holds functions to manage and get infomation about the virtual QPUs displayed by the user.
 
-    Q-raising and Q-dropping virtual QPUs at pyhton
+    Q-raising and Q-dropping at pyhton
     ===========================================
     This submodule allows to raise and drop virtual QPUs, with no need to work in the command line.
     
