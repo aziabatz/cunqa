@@ -112,6 +112,8 @@ class QPU:
                 
             backend (~cunqa.backend.Backend): object that provides the characteristics that the simulator at the virtual QPU uses to emulate a real device.
 
+            family (str):  name of the family to which the corresponding virtual QPU belongs.
+            
             endpoint (str): string refering to the endpoint of the corresponding virtual QPU.
         """
         
@@ -136,17 +138,14 @@ class QPU:
 
     def run(self, circuit: Union[dict, 'CunqaCircuit', 'QuantumCircuit'], transpile: bool = False, initial_layout: Optional["list[int]"] = None, opt_level: int = 1, **run_parameters: Any) -> 'QJob':
         """
-        Class method to run a circuit in the QPU.
+        Class method to send a circuit to the corresponding virtual QPU.
 
-        It is important to note that  if `transpilation` is set False, we asume user has already done the transpilation, otherwise some errors during the simulation
-        can occur, for example if the QPU has a noise model with error associated to specific gates, if the circuit is not transpiled errors might not appear.
-
-        If `transpile` is False and `initial_layout` is provided, it will be ignored.
+        It is important to note that  if ``transpile`` is set ``False``, we asume user has already done the transpilation, otherwise some errors during the simulation can occur.
 
         Possible instructions to add as `**run_parameters` can be: shots, method, parameter_binds, meas_level, ...
 
         Args:
-            circuit (json dict or <class 'qiskit.circuit.CunqaCircuit'>): circuit to be run in the QPU.
+            circuit (dict | qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit): circuit to be simulated at the virtual QPU.
 
             transpile (bool): if True, transpilation will be done with respect to the backend of the given QPU. Default is set to False.
 
@@ -154,10 +153,14 @@ class QPU:
 
             opt_level (int): optimization level for transpilation, default set to 1.
 
-            **run_parameters : any other simulation instructions.
+            **run_parameters: any other simulation instructions.
 
         Return:
-            <class 'QJob'> object.
+            A :py:class:`~cunqa.qjob.QJob` object related to the job sent.
+
+
+        .. warning::
+            
         """
 
         # Disallow execution of distributed circuits
