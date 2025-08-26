@@ -27,7 +27,7 @@ class QRaiseError(Exception):
 
 def are_QPUs_raised(family: Optional[str] = None) -> bool:
     """
-    Function to check availability of QPUs, filtering by `family` if desired.
+    Checks availability of QPUs, filtering by `family` if desired.
 
     Args:
         family (str): name of the family of the QPUs whose availability is checked.
@@ -62,7 +62,7 @@ def qraise(n, t, *,
            qpus_per_node= None, 
            backend = None) -> Union[tuple, str]:
     """
-    Raises a QPU and returns its job_id.
+    Raises a virtual QPU and returns the job id associated to its `SLURM <https://slurm.schedmd.com/documentation.html>`_ job.
 
     Args
         n (int): number of QPUs to be raised.
