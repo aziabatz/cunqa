@@ -7,14 +7,16 @@
     One must provide the neccesary information, analogous to the command ``qraise``:
 
         >>> qraise(n = 4, # MANDATORY, number of QPUs to be raised
-                   t = "2:00:00", # MANDATORY, maximum time until they are automatically dropped
-                   classical_comm = True, # allow classical communications
-                   simulator = "Aer", # choosing Aer simulator
-                   cloud = True, # allowing cloud mode, QPUs can be accessed from any node
-                   family = "my_family_of_QPUs" # assigning a name to the group of QPUs
-                   )
-    
+        >>> ...    t = "2:00:00", # MANDATORY, maximum time until they are automatically dropped
+        >>> ...    classical_comm = True, # allow classical communications
+        >>> ...    simulator = "Aer", # choosing Aer simulator
+        >>> ...    cloud = True, # allowing cloud mode, QPUs can be accessed from any node
+        >>> ...    family = "my_family_of_QPUs" # assigning a name to the group of QPUs
+        >>> ...    )
+        'XXXX'
 
+    The function :py:func:`qraise` returns a string specifying the id of the `SLURM <https://slurm.schedmd.com/documentation.html>`_ job
+    that deploys the QPUs.
 
 """
 import os
