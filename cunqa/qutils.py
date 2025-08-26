@@ -77,7 +77,7 @@ def qraise(n, t, *,
 
         quantum_comm (bool): if ``True``, virtual QPUs will allow quantum communications.
 
-        simulator (str): name of the desired simulator to use. Default is `Aer <https://github.com/Qiskit/qiskit-aer>`.
+        simulator (str): name of the desired simulator to use. Default is `Aer <https://github.com/Qiskit/qiskit-aer>`_.
 
         backend (str): path to a file containing backend information.
 
