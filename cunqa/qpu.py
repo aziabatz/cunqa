@@ -140,9 +140,9 @@ class QPU:
         """
         Class method to send a circuit to the corresponding virtual QPU.
 
-        It is important to note that  if ``transpile`` is set ``False``, we asume user has already done the transpilation, otherwise some errors during the simulation can occur.
+        It is important to note that  if `transpile` is set ``False``, we asume user has already done the transpilation, otherwise some errors during the simulation can occur.
 
-        Possible instructions to add as `**run_parameters` can be: shots, method, parameter_binds, meas_level, ...
+        Possible instructions to add as `**run_parameters` depend on the simulator, but mainly `shots` and `method` are used.
 
         Args:
             circuit (dict | qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit): circuit to be simulated at the virtual QPU.
@@ -160,7 +160,7 @@ class QPU:
 
 
         .. warning::
-            
+
         """
 
         # Disallow execution of distributed circuits
