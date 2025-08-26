@@ -149,6 +149,10 @@ def qraise(n, t, *,
     
     Returns:
         The SLURM job id of the job deployed. If `family` was provided, a tuple (`family`, `job id`).
+
+    .. warning::
+        The :py:func:`qraise` function can only be used when the python program is being run at a login node, otherwise an error will be raised.
+        This is because SLURM jobs can only be submmited from login nodes, but not from compute sessions or running jobs.
     """
     logger.debug("Setting up the requested QPUs...")
 
