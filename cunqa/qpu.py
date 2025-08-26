@@ -160,6 +160,11 @@ class QPU:
 
 
         .. warning::
+            If `transpile` is set ``False`` and transpilation instructions (`initial_layout`, `opt_level`) are provided, they will be ignored.
+        
+        .. note::
+            Transpilation is the process of translating circuit instructions into the native gates of the destined backend accordingly to the topology of its qubits.
+            If this is not done, the simulatior receives the instructions but associates no error, so simulation outcome will not be correct.
 
         """
 
