@@ -50,6 +50,30 @@
         In the same way, if we raise virtual QPUs by the python function, we can still drop them by terminal commands.
     
 
+    Obtaining information about virtual QPUs
+    ========================================
+
+    In some cases we might be interested on checking availability of virtual QPUs or getting information about them, but before creating
+    the :py:class:`~cunqa.qpu.QPU` objects.
+
+    - To check if certain virtual QPUs are raised, :py:func:`are_QPUs_raised` should be used:
+         
+        >>> are_QPUs_raised(family = 'my_family_of_QPUs')
+        True
+        
+    - In order to know what nodes have available virtual QPUs deployed:
+
+        >>> nodes_with_QPUs()
+        ['c7-3', 'c7-4']
+
+    - For obtaining information about QPUs in the local node or in other nodes:
+
+        >>> info_QPUs(local = True)
+        [{'QPU':'<id>',
+          'node':'<node name>',
+          'family':'<family name>',
+          'backend':{···}
+          }]
 """
 import os
 import sys
@@ -260,7 +284,7 @@ def qdrop(*families: Union[tuple[str], str]):
  
     run(cmd) #run 'qdrop slurm_jobid_1 slurm_jobid_2 etc' on terminal
 
-def nodes_with_QPUs() -> "list[set]":
+def nodes_with_QPUs() -> "list[str]":
     """
     Provides information about the nodes in which virtual QPUs are available.
 
