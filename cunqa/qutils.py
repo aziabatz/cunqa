@@ -34,6 +34,12 @@
     The function :py:func:`qraise` returns a string specifying the id of the `SLURM <https://slurm.schedmd.com/documentation.html>`_
     job that deploys the QPUs.
 
+    Once we are finished with our work, we should drop the virtual QPUs in order to release classical resources.
+    Knowing the `job id` or the `family` name of the group of virtual QPUs:
+
+        >>> qdrop('<job id>')
+    
+
 """
 import os
 import sys
