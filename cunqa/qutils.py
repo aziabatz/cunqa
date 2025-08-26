@@ -98,7 +98,7 @@ def qraise(n, t, *,
            node_list = None, 
            qpus_per_node= None) -> Union[tuple, str]:
     """
-    Raises a virtual QPU and returns the job id associated to its `SLURM <https://slurm.schedmd.com/documentation.html>`_ job.
+    Raises virtual QPUs and returns the job id associated to its SLURM job.
 
     This function allows to raise QPUs from the python API, what can also be done at terminal by ``qraise`` command.
 
