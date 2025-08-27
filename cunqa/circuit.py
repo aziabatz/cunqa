@@ -177,6 +177,8 @@ class CunqaCircuit:
          - 
        * - :py:meth:`~CunqaCircuit.from_instructions`
          - Class method to add operations to the circuit from a list of dict-type instructions.
+       * - :py:meth:`~CunqaCircuit.assign_parameters`
+         - Plugs values into the intructions of parametric gates marked with a parameter name.
     
 
     Classical communications among circuits
