@@ -7,12 +7,18 @@
         >>> qjob.result
         <cunqa.result.Result object at XXXX>
     
+    This object has two main attributes for out interest: the counts distribution from the simulation and the time that the simulation took:
+
+        >>> result = qjob.result
+        >>> result.counts
+        {'000':34, '111':66}
+        >>> result.time_taken
 
 """
 from cunqa.logger import logger
 
 class ResultError(Exception):
-    """Exception for error during job submission to QPUs."""
+    """Exception for error received from a simulation."""
     pass
 
 class Result:
@@ -89,22 +95,6 @@ class Result:
             raise error
         
         return counts
-    
-    @property
-    def density_matrix(self) -> object:
-        try:
-            if "results" in list(self._result.keys()): # aer
-                density_matrix = self._result["results"][0]["data"]["density_matrix"]
-
-            else:
-                logger.error(f"Density Matrix not found.")
-                raise ResultError
-
-        except Exception as error:
-            logger.error(f"Some error occured with density matrix [{type(error).__name__}]: {error}.")
-            raise error
-        
-        return density_matrix
 
 
     @property
