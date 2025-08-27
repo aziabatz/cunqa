@@ -1,4 +1,14 @@
-"""Contains the Result class, which deals with the output of QJobs using any simulator."""
+"""
+    Contains the :py:class:`Result` class, which gathers the information about the output of a simulations, also other functions
+    to manage them.
+
+    Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`~cunqa.qjob.QJob.result`:
+
+        >>> qjob.result
+        <cunqa.result.Result object at XXXX>
+    
+
+"""
 from cunqa.logger import logger
 
 class ResultError(Exception):
@@ -72,7 +82,7 @@ class Result:
                 raise ResultError
             
             if len(self._registers) > 1:
-                counts = convert_counts(counts, self._registers)
+                counts = _convert_counts(counts, self._registers)
 
         except Exception as error:
             logger.error(f"Some error occured with counts [{type(error).__name__}]: {error}.")
@@ -114,19 +124,17 @@ class Result:
             raise error
     
 
-def divide(string: str, lengths: "list[int]") -> str:
+def _divide(string: str, lengths: "list[int]") -> str:
     """
     Divides a string of bits in groups of given lenghts separated by spaces.
 
     Args:
-    --------
-    string (str): string that we want to divide.
+        string (str): string that we want to divide.
 
-    lengths (list[int]): lenghts of the resulting strings in which the original one is divided.
+        lengths (list[int]): lenghts of the resulting strings in which the original one is divided.
 
     Return:
-    --------
-    A new string in which the resulting groups are separated by spaces.
+        A new string in which the resulting groups are separated by spaces.
 
     """
 
@@ -146,7 +154,7 @@ def divide(string: str, lengths: "list[int]") -> str:
         raise SystemExit # User's level
 
 
-def convert_counts(counts: dict, registers: dict) -> dict:
+def _convert_counts(counts: dict, registers: dict) -> dict:
 
     """
     Funtion to convert counts wirtten in hexadecimal format to binary strings and that applies the division of the bit strings.
@@ -176,7 +184,7 @@ def convert_counts(counts: dict, registers: dict) -> dict:
     if isinstance(counts, dict):
         new_counts = {}
         for k,v in counts.items():
-            new_counts[divide(k, lengths)] = v
+            new_counts[_divide(k, lengths)] = v
     else:
         logger.error(f"counts must be dict, but {type(registers)} was provided [TypeError].")
         raise ResultError # I capture this error in QJob.result()
