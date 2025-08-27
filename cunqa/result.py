@@ -96,7 +96,6 @@ class Result:
         
         return counts
 
-
     @property
     def time_taken(self) -> str:
         try:

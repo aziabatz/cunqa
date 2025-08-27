@@ -1466,19 +1466,19 @@ class CunqaCircuit:
         Plugs values into the intructions of parametric gates marked with a parameter name.
 
         Args:
-            marked_parameters (dict): values for each set of marked parameters.
+          marked_parameters (dict): values for each set of marked parameters
         """
         try:
-            for instr in self.instructions:
-                if _is_parametric(instr):
-                    for i, param in enumerate(instr["params"]):
+            for instruction in self.instructions:
+                if (("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0)):
+                    for i, param in enumerate(instruction["params"]):
                         if isinstance(param, str) and param in marked_params:
                             if isinstance(marked_params[param], (int, float)):
-                                instr["params"][i] = marked_params[param]
+                                instruction["params"][i] = marked_params[param]
                             elif isinstance(marked_params[param], list):
-                                instr["params"][i] = marked_params[param].pop(0)
+                                instruction["params"][i] = marked_params[param].pop(0)
                             else:
-                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given [TypeError].")
+                                logger.error(f"Parameters must be list[int, float], int or float but {type(marked_params[param])} was given.")
                                 raise SystemExit
                                 
         except Exception as error:
