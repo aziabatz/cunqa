@@ -1466,9 +1466,7 @@ class CunqaCircuit:
         Plugs values into the intructions of parametric gates marked with a parameter name.
 
         Args:
-            repetition (bool): determines the parameter nassigning method. If True, the unique value given is plugged into all instances of its parameter 
-            label. Otherwise, the list of values will be place in order on the parameters with the same name that appear.
-            marked_parameters (dict): values for each set of marked parameters
+          marked_parameters (dict): values for each set of marked parameters
         """
         try:
             for instruction in self.instructions:
@@ -1489,9 +1487,6 @@ class CunqaCircuit:
         
         if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
             logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
-
-
-   
 
 
                 
