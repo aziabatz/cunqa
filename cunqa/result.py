@@ -44,6 +44,9 @@ class Result:
 
     If an error occurs at the simulation, an exception will be raised at the pyhton program, :py:exc:`ResultError`.
     
+    .. note::
+        If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
+        by blank spaces in the order they were added.
     """
     _result: dict
     _id: str
@@ -54,10 +57,9 @@ class Result:
         Initializes the Result class.
 
         Args:
-        -----------
-        result (dict): dictionary given as the result of the simulation.
+            result (dict): dictionary given as the output of the simulation.
 
-        registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
+            registers (dict): dictionary specifying the classical registers defined for the circuit. This is neccessary for the correct formating of the counts bit strings.
         """
 
         self._result = {}
