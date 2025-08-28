@@ -1,5 +1,23 @@
 """
     Holds the :py:func:`transpiler` function that translates circuit instructions into native instructions that a certain virtual QPU understands.
+
+    It is important and it is assumed that the circuit that is sent to the virtual QPU for its simulation is transplated into the propper native gates
+    and adapted to te backend's topology.
+
+    Once the user has decribed the circuit :py:class:`~cunqa.circuit.CunqaCircuit`, :py:class:`qiskit.QuantumCircuit` or json ``dict``,
+    :py:mod:`cunqa` provides two alternatives for transpiling it accordingly to a certain backend:
+
+        - When submmiting the circuit, set `transpile` as ``True`` and provide the rest of transpilation instructions:
+
+            >>> qpu.run(circuit, transpile = True, ...)
+
+          This option is ``False`` by default.
+
+        - Use :py:func:`transpiler` function before sending the circuit:
+
+            >>> circuit_transpiled = transpiler(circuit, backend = qpu.backend)
+            >>> qpu.run(circuit_transpiled)
+        
 """
 from cunqa.backend import Backend
 from cunqa.circuit import CunqaCircuit
