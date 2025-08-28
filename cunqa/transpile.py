@@ -1,5 +1,5 @@
 """
-    Holds our wrapper for the qiskit transpiler and the TranspilerError class.
+    Holds the :py:func:`transpiler` function that translates circuit instructions into native instructions that a certain virtual QPU understands.
 """
 from cunqa.backend import Backend
 from cunqa.circuit import CunqaCircuit
