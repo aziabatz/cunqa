@@ -41,6 +41,8 @@ class Result:
 
     Nevertheless, depending on the simulator used, more output data is provided. For checking all the information from the simulation as a ``dict``, one can
     access the attribute :py:attr:`Result.result`.
+
+    If an error occurs at the simulation, an exception will be raised at the pyhton program, :py:excep:`ResultError`.
     
     """
     _result: dict
