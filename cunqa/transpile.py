@@ -38,7 +38,7 @@ from qiskit.providers.backend_compat import convert_to_target
 
 
 class TranspileError(Exception):
-    """Exception for error during the transpilation of a circuit to a given Backend. """
+    """Exception for error during the transpilation of a circuit to a given :py:class:`~cunqa.backend.Backend`. """
     pass
 
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
