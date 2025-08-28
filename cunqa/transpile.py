@@ -17,7 +17,9 @@
 
             >>> circuit_transpiled = transpiler(circuit, backend = qpu.backend)
             >>> qpu.run(circuit_transpiled)
-        
+
+    
+    
 """
 from cunqa.backend import Backend
 from cunqa.circuit import CunqaCircuit
@@ -25,13 +27,13 @@ from cunqa.converters import convert
 from cunqa.logger import logger
 
 from qiskit import QuantumCircuit
+from qiskit.qasm2 import dumps
 from qiskit.qasm2.exceptions import QASM2Error
 from qiskit.exceptions import QiskitError
+from qiskit.transpiler.exceptions import TranspilerError
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.models import BackendConfiguration
 from qiskit.providers.backend_compat import convert_to_target
-from qiskit.transpiler.exceptions import TranspilerError
-from qiskit.qasm2 import dumps
 
 
 class TranspileError(Exception):
@@ -40,17 +42,17 @@ class TranspileError(Exception):
 
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     """
-    Function to transpile a circuit according to a given backend. Circuit must be qiskit QuantumCircuit, dict or QASM2 string. If QASM2 string is provided, function will also return circuit in QASM2.
+    Function to transpile a circuit according to a given :py:class:`~cunqa.backend.Backend`.
+    Circuit must be qiskit QuantumCircuit, dict or QASM2 string. If QASM2 string is provided, function will also return circuit in QASM2.
 
     Args:
-    -----------
-    circuit (dict, <class 'qiskit.circuit.quantumcircuit.QuantumCircuit'> or QASM2 str): circuit to be transpiled.
+        circuit (dict | qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit): circuit to be transpiled.
 
-    backend (<class 'backend.Backend'>): backend which transpilation will be done respect to.
+        backend (~cunqa.backend.Backend): backend which transpilation will be done respect to.
 
-    opt_level (int): optimization level for creating the `qiskit.transpiler.passmanager.StagedPassManager`. Default set to 1.
+        opt_level (int): optimization level for creating the `qiskit.transpiler.passmanager.StagedPassManager`. Default set to 1.
 
-    initial_layout (list[int]): initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
+        initial_layout (list[int]): initial position of virtual qubits on physical qubits for transpilation, lenght must be equal to the number of qubits in the circuit.
     """
 
     # converting to QuantumCircuit
