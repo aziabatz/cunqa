@@ -36,7 +36,9 @@ class Result:
 
     .. note::
         If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
-        by blank spaces in the order they were added.
+        by blank spaces in the order they were added:
+        >>> result.counts
+        {'001 11':23, '110 10':77}
     
     - :py:attr:`Result.time_taken` : the time that the simulation took.
 
