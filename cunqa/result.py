@@ -2,7 +2,7 @@
     Contains the :py:class:`Result` class, which gathers the information about the output of a simulations, also other functions
     to manage them.
 
-    Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`~cunqa.qjob.QJob.result`:
+    Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`QJob.result`:
 
         >>> qjob.result
         <cunqa.result.Result object at XXXX>
@@ -15,7 +15,6 @@
         >>> result.time_taken
         0.056
     
-    Depending on the simulator, the output can be different. For example, Aer simulator  returns muhc
 
 """
 from cunqa.logger import logger
@@ -26,7 +25,23 @@ class ResultError(Exception):
 
 class Result:
     """
-    Class to describe the result of an experiment.
+    Class to describe the result of a simulation.
+
+    It has two main attributes:
+
+    - :py:attr:`Result.counts` : returns the distribution of counts from the sampling of the simulation.
+
+            >>> result.counts
+            {'000':34, '111':66}
+    
+    - :py:attr:`Result.time_taken` : the time that the simulation took.
+
+            >>> result.time_taken
+            0.056
+
+    Nevertheless, depending on the simulator used, more output data is provided. For checking all the information from the simulation as a ``dict``, one can
+    access the attribute :py:attr:`Result.result`.
+    
     """
     _result: dict
     _id: str
