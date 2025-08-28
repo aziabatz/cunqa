@@ -44,7 +44,10 @@ class TranspileError(Exception):
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     """
     Function to transpile a circuit according to a given :py:class:`~cunqa.backend.Backend`.
-    Circuit must be qiskit QuantumCircuit, dict or QASM2 string. If QASM2 string is provided, function will also return circuit in QASM2.
+    The circuit is returned in the same format as it was originaly.
+
+    Transpilation instructions are `opt_level`, goes from ``0`` to ``3`` and the higher the more optimal is the transpilation, default is ``1``; `initial_layout`
+    specifies the set of <<real>> qubits to which the quantum registers of the circuit are assigned.
 
     Args:
         circuit (dict | qiskit.QuantumCircuit | ~cunqa.circuit.CunqaCircuit): circuit to be transpiled.
