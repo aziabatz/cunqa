@@ -92,14 +92,13 @@ class Result:
 
     @property
     def result(self) -> dict:
-        """
-            Raw output of the simulation, the ``dict`` format depends on the simulator used.       
-        """
+        """Raw output of the simulation, the ``dict`` format depends on the simulator used."""
         return self._result
     
 
     @property
     def counts(self) -> dict:
+        """Counts distribution from the sampling of the simulation, format is ``{"<bit string>":<number of counts as int>}``."""
         try:
             if "results" in list(self._result.keys()): # aer
                 counts = self._result["results"][0]["data"]["counts"]
@@ -121,6 +120,7 @@ class Result:
 
     @property
     def time_taken(self) -> str:
+        """Time that the simulation took in seconds, since it is recieved at the virtual QPU until it is finished."""
         try:
             if "results" in list(self._result.keys()): # aer
                 time = self._result["results"][0]["time_taken"]
