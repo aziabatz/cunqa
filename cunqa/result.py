@@ -92,6 +92,9 @@ class Result:
 
     @property
     def result(self) -> dict:
+        """
+            Raw output of the simulation, the ``dict`` format depends on the simulator used.       
+        """
         return self._result
     
 
