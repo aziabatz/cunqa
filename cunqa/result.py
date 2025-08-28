@@ -33,8 +33,8 @@ class Result:
 
             >>> result.counts
             {'000':34, '111':66}
-            
-        .. note::
+
+    .. note::
         If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
         by blank spaces in the order they were added.
     
@@ -58,6 +58,8 @@ class Result:
 
         Args:
             result (dict): dictionary given as the output of the simulation.
+
+            circ_id (str): circuit identificator.
 
             registers (dict): dictionary specifying the classical registers defined for the circuit. This is neccessary for the correct formating of the counts bit strings.
         """
