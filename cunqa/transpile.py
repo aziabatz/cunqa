@@ -18,7 +18,8 @@
             >>> circuit_transpiled = transpiler(circuit, backend = qpu.backend)
             >>> qpu.run(circuit_transpiled)
 
-    If the circuit is not transpile, errors will not raise, but the output of the simulation will not be coherent.
+    .. warning::
+        If the circuit is not transpiled, errors will not raise, but the output of the simulation will not be coherent.
     
 """
 from cunqa.backend import Backend
