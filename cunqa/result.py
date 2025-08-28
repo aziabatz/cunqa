@@ -33,6 +33,10 @@ class Result:
 
             >>> result.counts
             {'000':34, '111':66}
+            
+        .. note::
+        If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
+        by blank spaces in the order they were added.
     
     - :py:attr:`Result.time_taken` : the time that the simulation took.
 
@@ -43,10 +47,6 @@ class Result:
     access the attribute :py:attr:`Result.result`.
 
     If an error occurs at the simulation, an exception will be raised at the pyhton program, :py:exc:`ResultError`.
-    
-    .. note::
-        If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
-        by blank spaces in the order they were added.
     """
     _result: dict
     _id: str
