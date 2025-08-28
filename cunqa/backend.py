@@ -25,7 +25,7 @@ class BackendData(TypedDict):
 
 class Backend():
     """
-        Class to define backend information of a QPU server.
+        Class to define backend information of a virtual QPU.
     """
     def __init__(self, backend_dict: BackendData):
         """
