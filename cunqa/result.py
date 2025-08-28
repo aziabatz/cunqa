@@ -7,12 +7,15 @@
         >>> qjob.result
         <cunqa.result.Result object at XXXX>
     
-    This object has two main attributes for out interest: the counts distribution from the simulation and the time that the simulation took:
+    This object has two main attributes for out interest: the counts distribution from the simulation and the time that the simulation took in seconds:
 
         >>> result = qjob.result
         >>> result.counts
         {'000':34, '111':66}
         >>> result.time_taken
+        0.056
+    
+    Depending on the simulator, the output can be different. For example, Aer simulator  returns muhc
 
 """
 from cunqa.logger import logger
@@ -25,7 +28,7 @@ class Result:
     """
     Class to describe the result of an experiment.
     """
-    _result: dict 
+    _result: dict
     _id: str
     _registers: dict
     
