@@ -47,7 +47,7 @@ def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     The circuit is returned in the same format as it was originaly.
 
     Transpilation instructions are `opt_level`, which defines how optimal is the transpilation, default is ``1``; `initial_layout`
-    specifies the set of <<real>> qubits to which the quantum registers of the circuit are assigned.
+    specifies the set of "real" qubits to which the quantum registers of the circuit are assigned.
     These instructions are associated to the `qiskit.transpiler.passmanager.StagedPassManager <https://quantum.cloud.ibm.com/docs/es/api/qiskit/qiskit.transpiler.StagedPassManager>`_,
     since it is used in the process.
 
