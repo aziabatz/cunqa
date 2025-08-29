@@ -1,5 +1,5 @@
 """
-    Contains the :py:class:`Result` class, which gathers the information about the output of a simulations, also other functions
+    Contains the :py:class:`~cunqa.result.Result` class, which gathers the information about the output of a simulations, also other functions
     to manage them.
 
     Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`QJob.result`:

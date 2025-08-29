@@ -1,5 +1,5 @@
 """
-    Holds the :py:func:`transpiler` function that translates circuit instructions into native instructions that a certain virtual QPU understands.
+    Holds the :py:func:`~cunqa.transpile.transpiler` function that translates circuit instructions into native instructions that a certain virtual QPU understands.
 
     It is important and it is assumed that the circuit that is sent to the virtual QPU for its simulation is transplated into the propper native gates
     and adapted to te backend's topology.
