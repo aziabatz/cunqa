@@ -1,3 +1,5 @@
+{{ fullname}}
+
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
