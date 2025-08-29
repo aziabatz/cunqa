@@ -1,6 +1,7 @@
 {{ fullname | escape | underline}}
 
 .. automodule:: {{ fullname }}
+   :recursive:
 
    {% block attributes %}
    {% if attributes %}
