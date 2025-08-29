@@ -7,7 +7,7 @@
 
 {# === TABLAS (resumen) === #}
 {% if attributes %}
-{{ _('Attributes') }}
+{{ _('Attributes') | escape | underline('~') }}
 
 .. autosummary::
    :nosignatures:
@@ -18,19 +18,16 @@
 {% endif %}
 
 {% if methods %}
-{{ _('Methods') }}
+{{ _('Methods') | escape | underline('~') }}
 
 .. automethod:: {{ name }}.__init__
-   :template: custom-method-template.rst
 
 {% if objname == 'QJobMapper' or objname == 'QPUCircuitMapper' %}
 .. automethod:: {{ name }}.__call__
-   :template: custom-method-template.rst
 {% endif %}
 
 {% if objname == 'QJob' %}
 .. automethod:: {{ name }}.result
-   :template: custom-method-template.rst
 {% endif %}
 
 {% set ns = namespace(pub=[]) %}
@@ -42,6 +39,5 @@
 
 {% for item in ns.pub | sort %}
 .. automethod:: {{ name }}.{{ item }}
-   :template: custom-method-template.rst
 {% endfor %}
 {% endif %}
