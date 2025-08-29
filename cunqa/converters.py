@@ -11,10 +11,12 @@
 
 from qiskit import QuantumCircuit
 from qiskit.circuit import QuantumRegister, ClassicalRegister, CircuitInstruction, Instruction, Qubit, Clbit
+from qiskit.qasm2 import dumps as dumps2
+from qiskit.qasm3 import dumps as dumps3
 
 from typing import Tuple, Union, Optional
 
-from cunqa.circuit import CunqaCircuit
+from cunqa.circuit import CunqaCircuit, _is_parametric
 from cunqa.logger import logger
 
 class ConvertersError(Exception):
@@ -22,7 +24,7 @@ class ConvertersError(Exception):
     pass
 
 
-def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', dict]:
+def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to : str) -> Union['QuantumCircuit', 'CunqaCircuit', str, dict]:
     """
         Function to convert a quantum circuit to the desired format.
         Detects the intup format and transforms into the one specified by *convert_to*, that can be ``"QuantumCircuit`` for :py:class:`qiskit.QuantumCircuit`,
@@ -35,7 +37,7 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
             The circuit in the desired format accordingly to *convert_to*.
 
     """
-    if convert_to not in ["QuantumCircuit", "CunqaCircuit", "dict"]:
+    if convert_to not in ["QuantumCircuit", "CunqaCircuit", "qasm", "dict"]:
         logger.error(f"{convert_to} is not a valid circuit format to convert to [{NameError.__name__}].")
         raise SystemExit
 
@@ -49,6 +51,8 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
                 converted_circuit = _qc_to_cunqac(circuit)
             elif convert_to == "dict":
                 converted_circuit = _qc_to_json(circuit)
+            elif convert_to == "qasm":
+                converted_circuit = _qc_to_qasm(circuit)
 
         elif isinstance(circuit, CunqaCircuit):
             if convert_to == "QuantumCircuit":
@@ -58,6 +62,8 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
                 converted_circuit = circuit
             elif convert_to == "dict":
                 converted_circuit = _cunqac_to_json(circuit)
+            elif convert_to == "qasm":
+                converted_circuit = _cunqac_to_qasm(circuit)
 
         elif isinstance(circuit, dict):
             if convert_to == "QuantumCircuit":
@@ -67,15 +73,40 @@ def convert(circuit : Union['QuantumCircuit', 'CunqaCircuit', dict], convert_to 
             elif convert_to == "dict":
                 logger.warning("Provided circuit was already a dict.")
                 converted_circuit = circuit
+            elif convert_to == "qasm":
+                converted_circuit = _json_to_qasm(circuit)
+        elif isinstance(circuit, str):
+            if convert_to == "QuantumCircuit":
+                converted_circuit = _qasm_to_qc(circuit)
+            elif convert_to == "CunqaCircuit":
+                converted_circuit = _qasm_to_cunqac(circuit)
+            elif convert_to == "dict":
+                converted_circuit = _qasm_to_json(circuit)
+            elif convert_to == "qasm":
+                logger.warning("Provided circuit was already a OpenQASM.")
+                converted_circuit = circuit
 
         else:
-            logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit or a dict [{TypeError.__name__}].")
+            logger.error(f"Provided circuit must be a QuantumCircuit, a CunqaCircuit, an OpenQASM or a dict [{TypeError.__name__}].")
             raise SystemExit
         
         return converted_circuit
     except Exception as error:
             logger.error(f" Unable to convert circuit to {convert_to} [{type(error).__name__}].")
             raise SystemExit
+
+
+def _qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
+    """
+    Converts a :py:class:`qiskit.QuantumCircuit` into a :py:class:`~cunqa.circuit.CunqaCircuit`.
+
+    Args:
+        qc (qiskit.QuantumCircuit): object that defines the quantum circuit.
+    Returns:
+        The corresponding :py:class:`~cunqa.circuit.CunqaCircuit` with the propper instructions and characteristics.
+    """
+    return _json_to_cunqac(_qc_to_json(qc))
+
 
 def _qc_to_json(qc : 'QuantumCircuit') -> dict:
     """
@@ -147,17 +178,35 @@ def _qc_to_json(qc : 'QuantumCircuit') -> dict:
     except Exception as error:
         logger.error(f"Some error occured during transformation from `qiskit.QuantumCircuit` to json dict [{type(error).__name__}].")
         raise ConvertersError
+    
 
-def _qc_to_cunqac(qc : 'QuantumCircuit') -> 'CunqaCircuit':
+def _qc_to_qasm(qc : 'QuantumCircuit', version = "3.0") -> str:
+    
+    try:
+        if (version == "2.0"):
+            return dumps2(qc)
+        elif (version == "3.0"):
+            return dumps3(qc)
+        else:
+            logger.error(f"OpenQASM{version} is not supported.")
+            raise SystemExit
+    except Exception as error:
+        logger.error(f" Unable to convert circuit to OpenQASM{version} [{type(error).__name__}].")
+        raise SystemExit
+    
+
+def _cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
     """
-    Converts a :py:class:`qiskit.QuantumCircuit` into a :py:class:`~cunqa.circuit.CunqaCircuit`.
+    Converts a :py:class:`~cunqa.circuit.CunqaCircuit` into a :py:class:`qiskit.QuantumCircuit`.
 
     Args:
-        qc (qiskit.QuantumCircuit): object that defines the quantum circuit.
+        cunqac (~cunqa.circuit.CunqaCircuit): object that defines the quantum circuit.
+
     Returns:
-        The corresponding :py:class:`~cunqa.circuit.CunqaCircuit` with the propper instructions and characteristics.
+        The corresponding :py:class:`qiskit.QuantumCircuit` with the propper instructions and characteristics.
     """
-    return _json_to_cunqac(_qc_to_json(qc))
+    return _json_to_qc(_cunqac_to_json(cunqac))
+
 
 def _cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
     circuit_json = {}
@@ -174,35 +223,9 @@ def _cunqac_to_json(cunqac : 'CunqaCircuit') -> dict:
 
     return circuit_json
 
-def _cunqac_to_qc(cunqac : 'CunqaCircuit') -> 'QuantumCircuit':
-    """
-    Converts a :py:class:`~cunqa.circuit.CunqaCircuit` into a :py:class:`qiskit.QuantumCircuit`.
 
-    Args:
-        cunqac (~cunqa.circuit.CunqaCircuit): object that defines the quantum circuit.
-
-    Returns:
-        The corresponding :py:class:`qiskit.QuantumCircuit` with the propper instructions and characteristics.
-    """
-    return _json_to_qc(_cunqac_to_json(cunqac))
-
-def _json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
-    """
-    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.circuit.CunqaCircuit`.
-
-    Args:
-        circuit_dict (dict): json with the propper structure for defining a quantum circuit.
-    
-    Returns:
-        An object :py:class:`~cunqa.circuit.CunqaCircuit` with the corresponding instructions and characteristics.
-    """
-    try:
-        cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
-        cunqac.from_instructions(circuit_dict["instructions"])
-        return cunqac
-    except Exception as error:
-        logger.error(f"Some error occured during transformation from json dict to `cunqa.circuit.CunqaCircuit` [{type(error).__name__}].")
-        raise ConvertersError
+def _cunqac_to_qasm(cunqac : 'CunqaCircuit') -> str:
+    return _qc_to_qasm(_cunqac_to_qc(cunqac))
     
 
 def _json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
@@ -296,6 +319,47 @@ def _json_to_qc(circuit_dict: dict) -> 'QuantumCircuit':
     except Exception as error:
         logger.error(f"Error when converting json dict to QuantumCircuit [{type(error).__name__}].")
         raise error
+
+
+def _json_to_cunqac(circuit_dict : dict) -> 'CunqaCircuit':
+    """
+    Converts a json :py:type:`dict` circuit into a :py:class:`~cunqa.circuit.CunqaCircuit`.
+
+    Args:
+        circuit_dict (dict): json with the propper structure for defining a quantum circuit.
+    
+    Returns:
+        An object :py:class:`~cunqa.circuit.CunqaCircuit` with the corresponding instructions and characteristics.
+    """
+    try:
+        cunqac = CunqaCircuit(circuit_dict["num_qubits"], circuit_dict["num_clbits"], circuit_dict["id"])
+        cunqac.from_instructions(circuit_dict["instructions"])
+        return cunqac
+    except Exception as error:
+        logger.error(f"Some error occured during transformation from json dict to `cunqa.circuit.CunqaCircuit` [{type(error).__name__}].")
+        raise ConvertersError
+
+
+def _json_to_qasm(circuit_json : dict) -> str:
+    return _qc_to_qasm(_json_to_qc(circuit_json))
+
+
+def _qasm_to_qc(circuit_qasm : str) -> 'QuantumCircuit':
+    
+    try:
+        return QuantumCircuit.from_qasm_str(circuit_qasm)
+    except Exception as error:
+        logger.error(f" Unable to convert OpenQASM to qiskit.QuantumCircuit [{type(error).__name__}].")
+        raise SystemExit
+    
+
+def _qasm_to_cunqac(circuit_qasm : str) -> 'CunqaCircuit':
+    return _qc_to_cunqac(_qasm_to_qc(circuit_qasm))
+
+
+def _qasm_to_json(circuit_qasm : str) -> dict:
+    return _qc_to_json(_qasm_to_qc(circuit_qasm))
+
     
 def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
     """
@@ -344,3 +408,5 @@ def _registers_dict(qc: 'QuantumCircuit') -> "list[dict]":
 
     return [quantum_registers, classical_registers]
 
+
+    
