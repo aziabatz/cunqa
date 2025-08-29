@@ -8,6 +8,7 @@
 
    .. autosummary::
       :toctree:
+      :recursive:
    {% for item in attributes %}
       {{ item }}
    {%- endfor %}
@@ -23,6 +24,7 @@
    .. autosummary::
       :toctree:
       :nosignatures:
+      :recursive:
    {% for item in functions %}
       {{ item }}
    {%- endfor %}
@@ -39,6 +41,7 @@
       :toctree:
       :template: custom-class-template.rst
       :nosignatures:
+      :recursive:
    {% for item in classes %}
       {{ item }}
    {%- endfor %}
@@ -53,6 +56,7 @@
 
    .. autosummary::
       :toctree:
+      :recursive:
    {% for item in exceptions %}
       {{ item }}
    {%- endfor %}
@@ -68,6 +72,7 @@
 .. autosummary::
    :toctree:
    :template: custom-module-template.rst
+   :recursive:
 
 {% for item in modules %}
    {{ item }}
