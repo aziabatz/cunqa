@@ -1,7 +1,6 @@
 {{ fullname | escape | underline}}
 
 .. automodule:: {{ fullname }}
-   :recursive:
 
    {% block attributes %}
    {% if attributes %}
@@ -69,7 +68,7 @@
 .. autosummary::
    :toctree:
    :template: custom-module-template.rst
-   :recursive:
+
 {% for item in modules %}
    {{ item }}
 {%- endfor %}
