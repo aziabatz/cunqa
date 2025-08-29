@@ -1,9 +1,11 @@
 {{ fullname | escape | underline}}
 
-CUNQA module
-=============
-
 .. automodule:: {{ fullname }}
+
+
+{% block modules %}
+{% if modules %}
+.. raw:: html
 
    <h2> {{ _('Modules') }} </h2>
 
