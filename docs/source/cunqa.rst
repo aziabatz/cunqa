@@ -1,4 +1,4 @@
-CUNQA python API
+``cunqa`` module
 ================
 .. autosummary::
    :toctree: _autosummary
