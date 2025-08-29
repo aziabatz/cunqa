@@ -1,25 +1,57 @@
 """
-    Contains the :py:class:`Result` class, which gathers the information about the output of a simulations, also other functions
+    Contains the :py:class:`~cunqa.result.Result` class, which gathers the information about the output of a simulations, also other functions
     to manage them.
 
-    Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`~cunqa.qjob.QJob.result`:
+    Once we have submmited a :py:class:`~cunqa.qjob.QJob`, for obtaining its results we call for its propperty :py:attr:`QJob.result`:
 
         >>> qjob.result
         <cunqa.result.Result object at XXXX>
+    
+    This object has two main attributes for out interest: the counts distribution from the simulation and the time that the simulation took in seconds:
+
+        >>> result = qjob.result
+        >>> result.counts
+        {'000':34, '111':66}
+        >>> result.time_taken
+        0.056
     
 
 """
 from cunqa.logger import logger
 
 class ResultError(Exception):
-    """Exception for error during job submission to QPUs."""
+    """Exception for error received from a simulation."""
     pass
 
 class Result:
     """
-    Class to describe the result of an experiment.
+    Class to describe the result of a simulation.
+
+    It has two main attributes:
+
+    - :py:attr:`Result.counts` : returns the distribution of counts from the sampling of the simulation.
+
+            >>> result.counts
+            {'000':34, '111':66}
+
+    .. note::
+        If the circuit sent has more than one classical register, bit strings corresponding to each one of them will be separated
+        by blank spaces in the order they were added:
+
+            >>> result.counts
+            {'001 11':23, '110 10':77}
+    
+    - :py:attr:`Result.time_taken` : the time that the simulation took.
+
+            >>> result.time_taken
+            0.056
+
+    Nevertheless, depending on the simulator used, more output data is provided. For checking all the information from the simulation as a ``dict``, one can
+    access the attribute :py:attr:`Result.result`.
+
+    If an error occurs at the simulation, an exception will be raised at the pyhton program, :py:exc:`ResultError`.
     """
-    _result: dict 
+    _result: dict
     _id: str
     _registers: dict
     
@@ -28,10 +60,11 @@ class Result:
         Initializes the Result class.
 
         Args:
-        -----------
-        result (dict): dictionary given as the result of the simulation.
+            result (dict): dictionary given as the output of the simulation.
 
-        registers (dict): in case the circuit has more than one classical register, dictionary for the lengths of the classical registers must be provided.
+            circ_id (str): circuit identificator.
+
+            registers (dict): dictionary specifying the classical registers defined for the circuit. This is neccessary for the correct formating of the counts bit strings.
         """
 
         self._result = {}
@@ -66,11 +99,13 @@ class Result:
 
     @property
     def result(self) -> dict:
+        """Raw output of the simulation, the ``dict`` format depends on the simulator used."""
         return self._result
     
 
     @property
     def counts(self) -> dict:
+        """Counts distribution from the sampling of the simulation, format is ``{"<bit string>":<number of counts as int>}``."""
         try:
             if "results" in list(self._result.keys()): # aer
                 counts = self._result["results"][0]["data"]["counts"]
@@ -92,6 +127,7 @@ class Result:
 
     @property
     def time_taken(self) -> str:
+        """Time that the simulation took in seconds, since it is recieved at the virtual QPU until it is finished."""
         try:
             if "results" in list(self._result.keys()): # aer
                 time = self._result["results"][0]["time_taken"]

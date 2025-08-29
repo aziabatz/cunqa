@@ -1,5 +1,5 @@
 """
-    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`cunqa.circuit.CunqaCircuit` and json :py:class:`dict`.
+    Holds functions for converting circuits into the different formats: :py:class:`qiskit.QuantumCircuit`, :py:class:`~cunqa.circuit.CunqaCircuit` and json :py:class:`dict`.
 
     There is the general :py:func:`convert` function, that identifies the input format and transforms according to the format desired by the variable *convert_to*.
 

@@ -1,5 +1,5 @@
 """
-    Contains the description of the :py:class:`QPU` class.
+    Contains the description of the :py:class:`~cunqa.qpu.QPU` class.
 
     These :py:class:`QPU` objects are the python representation of the virtual QPUs deployed.
     Each one has its :py:class:`QClient` object that communicates with the server of the corresponding virtual QPU.
