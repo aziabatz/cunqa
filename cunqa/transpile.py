@@ -44,7 +44,7 @@ class TranspileError(Exception):
 def transpiler(circuit, backend, opt_level = 1, initial_layout = None):
     """
     Function to transpile a circuit according to a given :py:class:`~cunqa.backend.Backend`.
-    The circuit is returned in the same format as it was originaly.
+    The circuit is returned in the same format as it was originally.
 
     Transpilation instructions are `opt_level`, which defines how optimal is the transpilation, default is ``1``; `initial_layout`
     specifies the set of "real" qubits to which the quantum registers of the circuit are assigned.
