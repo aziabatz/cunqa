@@ -27,7 +27,6 @@ cc_2.cx(0, 1)
 cc_2.measure(0,0)
 cc_2.measure(1,1)
 
-
 ########## List of circuits #########
 circs_QPE = [cc_1, cc_2]
 
