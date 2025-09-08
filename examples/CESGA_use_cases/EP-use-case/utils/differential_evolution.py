@@ -15,7 +15,7 @@ from qiskit import transpile
 aersim = AerSimulator()
 
 from qmiotools.integrations.qiskitqmio import FakeQmio
-fqmio=FakeQmio("/opt/cesga/qmio/hpc/calibrations/2025_04_10__12_00_02.json",gate_error=True, readout_error=True)
+fqmio=FakeQmio(gate_error=True, readout_error=True)
 
 
 from scipy.optimize import differential_evolution
@@ -120,8 +120,14 @@ class DifferentialEvolutionHVA:
             print()
             print()
             print()
-            self.qwc_circuits = transpile(circuit, fqmio, seed_transpiler=1,optimization_level=3)
+            self.qwc_circuits = transpile(circuit, fqmio, seed_transpiler=1,optimization_level=2, initial_layout = [15,16,25,26])
 
+        elif backend == "cunqa":
+            self.qwc_circuits = []
+            self.qpus = get_QPUs(local = True)
+            for c in circuit:
+                self.qwc_circuits.append(transpiler(c, self.qpus[0].backend,seed_transpiler=1,optimization_level=2, initial_layout = [15,16,25,26]))
+            
         else:
             self.qwc_circuits = circuit
 
@@ -141,14 +147,11 @@ class DifferentialEvolutionHVA:
         return suma.real
 
     def cost_sv(self,params):
-
         """
         Function that simulates the HVA associated with the given `hamiltonian` and estimates the energy of the resulting state.
         
         For now the circuit is initialized to state |->^n
         """
-
-        
 
         qc = self.qc.decompose().decompose().assign_parameters(params)
 
@@ -185,10 +188,11 @@ class DifferentialEvolutionHVA:
         return(sum(lista).real)
     
     def cost_shots_fq(self,params):
+        print("About to calculate cost!")
         lista = []
         TICK = time.time()
         for n,q in enumerate(self.qwc_circuits):
-            circuit_assembled=q.decompose().decompose().assign_parameters(params)
+            circuit_assembled=q.assign_parameters(params)
             result=fqmio.run(circuit_assembled,shots=self.shots).result()
             self.evaluations += 1
             counts=result.get_counts()
