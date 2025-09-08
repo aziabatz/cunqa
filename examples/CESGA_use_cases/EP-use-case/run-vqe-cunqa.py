@@ -17,20 +17,26 @@ qpus = get_QPUs(local=False)
 
 # describin the VQE problem with a Hardware Efficient Ansatz
 
-Hamiltonian = Ising_Hamiltonian(n = 4, J = 1)
+Hamiltonian = Ising_Hamiltonian(n = 10, J = 1)
 
-parametric_ansatz = hardware_efficient_ansatz(num_qubits=4, num_layers=2)
+parametric_ansatz = hardware_efficient_ansatz(num_qubits=10, num_layers=2)
 
-transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [15,16,25,26], seed_transpiler = 34)
+transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [19,20,23,30,29,28,31,22,21,13], seed_transpiler = 34)
 
-
+print(transpiled_parametric_ansatz.num_parameters)
 # now the cost function works with Result objects since the mapper will do the sending and gathering of the QJobs
 
 def cost_function(result):
 
     counts = result.counts
 
-    return estimate_observable(Hamiltonian, counts)
+    tick = time.time()
+    obs = estimate_observable(Hamiltonian, counts)
+    tack = time.time()
+
+    print("Estimation time: ", tack-tick)
+
+    return obs
 
 
 bounds=[]
@@ -41,12 +47,12 @@ for i in range(transpiled_parametric_ansatz.num_parameters):
 opt_path = []; params_path = []
 
 def cb(xk, convergence = 1e-50):
-    print(f"({time.strftime('%H:%M:%S')})")
+    print(f"({time.strftime('%H:%M:%S.%f')})")
     cost = mapper(cost_function, [xk])[0]
     params_path.append(list(xk))
     opt_path.append(cost)
 
-mapper = QPUCircuitMapper(qpus, transpiled_parametric_ansatz, shots = 1000)
+mapper = QPUCircuitMapper(qpus, transpiled_parametric_ansatz, shots = 1e4, seed = 34)
 
 tick = time.time()
 
@@ -54,7 +60,7 @@ result = differential_evolution(func = cost_function,
                                             popsize=1,
                                             strategy='best1bin',
                                             bounds=bounds,
-                                            maxiter=5000,
+                                            maxiter=1000,
                                             disp=True,
                                             init="halton", # halton, x0
                                             polish=False,

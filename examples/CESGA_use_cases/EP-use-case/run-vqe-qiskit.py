@@ -10,14 +10,13 @@ import json
 
 # choosing backend
 backend = FakeQmio("/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json", gate_error=True, thermal_relaxation=True, readout_error = True)
-
 # describin the VQE problem with a Hardware Efficient Ansatz
 
-Hamiltonian = Ising_Hamiltonian(n = 4, J = 1)
+Hamiltonian = Ising_Hamiltonian(n = 10, J = 1)
 
-parametric_ansatz = hardware_efficient_ansatz(num_qubits=4, num_layers=2)
+parametric_ansatz = hardware_efficient_ansatz(num_qubits=10, num_layers=2)
 
-transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [15,16,25,26])
+transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [19,20,23,30,29,28,31,22,21,13], seed_transpiler = 34)
 
 print(transpiled_parametric_ansatz.num_parameters)
 
@@ -25,11 +24,13 @@ def cost_function(params):
 
     assembled_circuit = transpiled_parametric_ansatz.assign_parameters(params)
 
-    job = backend.run(assembled_circuit, shots = 1000)
+    job = backend.run(assembled_circuit, shots = 1e4)
 
     result = job.result()
 
     counts = result.get_counts()
+
+    print(f"({time.strftime('%H:%M:%S')})"+"Simulation time: ", result.time_taken)
 
     return estimate_observable(Hamiltonian, counts)
 
@@ -58,7 +59,7 @@ result = differential_evolution(func = cost_function,
                                             popsize=1,
                                             strategy='best1bin',
                                             bounds=bounds,
-                                            maxiter=10,
+                                            maxiter=1000,
                                             disp=True,
                                             init="halton", # halton, x0
                                             polish=False,
