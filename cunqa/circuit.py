@@ -263,6 +263,7 @@ class CunqaCircuit:
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
         self.classical_regs = {}
         self.sending_to = []
+        self._telegate = None
 
         self.param_labels = []
         self.current_params = []
@@ -339,7 +340,11 @@ class CunqaCircuit:
         """
         try:
             self._check_instruction(instruction)
-            self.instructions.append(instruction)
+
+            if self._telegate is not None:
+                self._telegate.append(instruction)
+            else:
+                self.instructions.append(instruction)
 
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
@@ -396,21 +401,22 @@ class CunqaCircuit:
 
                 # checking qubits
                 if isinstance(instruction["qubits"], list):
-                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
-                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
+                    if not all([(isinstance(q, int) or isinstance(q,ControlContext)) for q in instruction["qubits"]]):
+                        logger.error(f"instruction qubits must be a list of ints and/or <class 'cunqa.circuit.ControlContext'>, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
+
                     elif (len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
-                    logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
+                    logger.error(f"instruction qubits must be a list of ints and/or <class 'cunqa.circuit.ControlContext'>, but {type(instruction['qubits'])} was provided.")
                     raise TypeError # I capture this at _add_instruction method
                 
                 if not (len(instruction["qubits"]) == gate_qubits):
                     logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not all([q in _flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                if not all([(q in _flatten([qr for qr in self.quantum_regs.values()]) or isinstance(q,ControlContext)) for q in instruction["qubits"]]):
                     logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {_flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
@@ -1463,6 +1469,42 @@ class CunqaCircuit:
             "params":params,
         })
 
+    def expose(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> None:
+        """
+        Class method to expose a qubit from the current circuit to another one for a telegate operation.
+        The exposed qubit will be used at the target circuit as the control qubit in controlled operations.
+        
+        Args:
+            qubit (int): qubit to be exposed.
+
+            target_circuit (str | CunqaCircuit): id of the circuit or circuit where the exposed qubit is used.
+        """
+
+        self.has_qc = True
+        self.is_dynamic = True
+        
+        if isinstance(qubit, int):
+            list_control_qubit = [qubit]
+        else:
+            logger.error(f"exposed qubit must be int, but {type(qubit)} was provided [TypeError].")
+            raise SystemExit
+        
+        if isinstance(target_circuit, str):
+            target_circuit_id = target_circuit
+
+        elif isinstance(target_circuit, CunqaCircuit):
+            target_circuit_id = target_circuit._id
+        else:
+            logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            raise SystemExit
+        
+
+        self._add_instruction({
+            "name": "expose",
+            "qubits": list_control_qubit,
+            "circuits": [target_circuit_id]
+        })
+
     def assign_parameters(self, **marked_params):
         """
         Plugs values into the intructions of parametric gates marked with a parameter name.
@@ -1490,6 +1532,33 @@ class CunqaCircuit:
         if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
             logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
 
+
+class ControlContext:
+    def __init__(self, circuit: 'CunqaCircuit') -> int:
+        if isinstance(circuit, CunqaCircuit):
+            self.circuit = circuit
+        else:
+            logger.error("Error instanciating ControlContext manager, a circuit with an exposed qubit must be provided.")
+            raise SystemExit
+
+    def __enter__(self):
+        self.circuit._telegate = []
+        return -1
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for instruction in self.circuit._telegate:
+            if instruction["name"] in ["qsend", "qrecv", "expose", "recv"]:
+                logger.error("Remote operations, quantum or classical, are not allowed within a telegate block.")
+                raise SystemExit
+        instr = {
+            "name": "rcontrol",
+            "qubits": [],  
+            "instructions": self.circuit._telegate,
+        }
+        self.circuit.instructions.append(instr)
+        self.circuit._telegate = None
+
+        return False
 
                 
 def _flatten(lists: "list[list]"):
