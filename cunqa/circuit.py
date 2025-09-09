@@ -147,7 +147,7 @@ class CunqaCircuit:
     :py:meth:`~CunqaCircuit.measure_and_send`, :py:meth:`~CunqaCircuit.remote_c_if`.
 
     **Remote operations for quantum comminications:**
-    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
+    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`, :py:meth:`~CunqaCircuit.expose`, :py:meth:`~CunqaCircuit.rcontrol`.
 
     Creating your first CunqaCircuit
     ---------------------------------
@@ -184,7 +184,7 @@ class CunqaCircuit:
     Classical communications among circuits
     ---------------------------------------
 
-    The strong part of CunqaCircuit is that it allows to define communication directives between circuits.
+    The strong part of :py:class:`CunqaCircuit` is that it allows to define communication directives between circuits.
     We can define the sending of a classical bit from one circuit to another by:
 
         >>> circuit_1 = CunqaCircuit(2)
@@ -195,7 +195,7 @@ class CunqaCircuit:
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
-    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`cunqa.mappers.run_distributed` function.
+    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`~cunqa.mappers.run_distributed` function.
 
     Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
 
@@ -207,11 +207,17 @@ class CunqaCircuit:
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
-    Sending qubits between circuits
-    --------------------------------
+    Teledata protocol
+    -----------------
+    .. image:: /_static/teledata.png
+        :align: center
+        :width: 150
+        :height: 300px
 
-    When quantum communications among the QPUs utilized are available, a qubit from one circuit can be sent to another.
-    In this scheme, generally an acilla qubit would be neccesary to perform the communication. Let's see an example for the creation of a Bell pair remotely:
+    The teledata protocol consists on the reconstruction of an unknown quantum state of a given physical system at a different location without actually transmitting the system [#]_.
+    Within :py:mod:`cunqa`, when quantum communications among the virtual QPUs utilized are available, a qubit from one circuit can be sent to another, the teledata protocol is implemented
+    at a lower level so there is no need for the user to implement it.
+    In this scheme, generally an acilla qubit would be neccesary to recieve the quantum state. Let's see an example for the creation of a Bell pair remotely:
 
         >>> circuit_1 = CunqaCircuit(2, 1, id = "1")
         >>> circuit_2 = CunqaCircuit(2, 2, id = "2")
@@ -226,6 +232,39 @@ class CunqaCircuit:
 
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
+
+    Telegate protocol
+    -----------------
+    .. image:: /_static/telegate.png
+        :align: center
+        :width: 150
+        :height: 300px
+
+    Quantum gate teleportation, also known as telegate, reduces the topological requirements by substituting two-qubit gates with other cost-effective resources: auxiliary entangled states, local
+    measurements, and single-qubit operations [#]_. This is another feature available in :py:mod:`cunqa` in the quantum communications scheme, managed by the :py:class:`~cunqa.circuit.ControlContext` class.
+    Here is an example analogous to the one presented above:
+
+        >>> circuit_1 = CunqaCircuit(2, id = "1")
+        >>> circuit_2 = CunqaCircuit(1, id = "2")
+        >>>
+        >>> circuit_1.h(0); circuit_1.cx(0,1)
+        >>>
+        >>> with circuit_1.expose(1, circuit_2) as rcontrol: # exposing qubit at circuit_1
+        >>>     circuit_2.cx(rcontol, 1) # applying telegate operation controlled by the exposed qubit
+        >>>
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
+
+    Here there is no need for an ancilla since the control is the exposed qubit from the other circuit/virtual QPU.
+
+    .. warning::
+        Note that the circuit specification in :py:meth:`CunqaCircuit.expose` cannot be done by passing the circuit :py:attr:`CunqaCircuit.id` since the
+        :py:class:`~cunqa.circuit.ControlContext` object needs the :py:class:`CunqaCircuit` object in order to manage the telegate block.
+
+    References:
+    ~~~~~~~~~~~
+    [#] `Review of Distributed Quantum Computing. From single QPU to High Performance Quantum Computing <https://arxiv.org/abs/2404.01265>`_
+
     """
     
     _id: str #: Circuit identificator.
@@ -1469,15 +1508,17 @@ class CunqaCircuit:
             "params":params,
         })
 
-    def expose(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> None:
+    def expose(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> 'ControlContext':
         """
         Class method to expose a qubit from the current circuit to another one for a telegate operation.
         The exposed qubit will be used at the target circuit as the control qubit in controlled operations.
         
         Args:
             qubit (int): qubit to be exposed.
-
             target_circuit (str | CunqaCircuit): id of the circuit or circuit where the exposed qubit is used.
+        
+        Returns:
+            A :py:class:`ControlContext` object to manage remotly controlled operations in the given circuit.
         """
 
         self.has_qc = True
@@ -1532,7 +1573,24 @@ class CunqaCircuit:
 
 
 class ControlContext:
+    """
+    Class to manage the controlled telegate operations from a circuit/virtual QPU to another.
+
+    An object of this class is returned by the :py:meth:`~cunqa.circuit.CunqaCircuit.expose` method.
+    Used as a context manager, it can be passed to controlled operations in order to implement telgate operations:
+
+        >>> with circuit_1.expose(0, circuit_2) as rcontrol:
+        >>>     circuit_2.cx(rcontrol, 0)
+    
+    Then, when the block ends, the :py:class:`ControlContext` adds the propper "rcontrol" instruction to the target circuit.
+    """
     def __init__(self, circuit: 'CunqaCircuit') -> int:
+        """Class constructor.
+        
+            Args:
+                circuit (`~cunqa.circuit.CunqaCircuit`): circuit in which the instructions are implemented.
+            
+        """
         if isinstance(circuit, CunqaCircuit):
             self.circuit = circuit
         else:
