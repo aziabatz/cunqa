@@ -92,7 +92,7 @@ def _generate_id(size: int = 4) -> str:
 
 
 
-SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "qsend", "qrecv"]
+SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "qsend", "qrecv","expose"]
 SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
 SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
@@ -401,7 +401,7 @@ class CunqaCircuit:
 
                 # checking qubits
                 if isinstance(instruction["qubits"], list):
-                    if not all([(isinstance(q, int) or isinstance(q,ControlContext)) for q in instruction["qubits"]]):
+                    if not all([(isinstance(q, int) or (q == -1)) for q in instruction["qubits"]]):
                         logger.error(f"instruction qubits must be a list of ints and/or <class 'cunqa.circuit.ControlContext'>, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
 
@@ -416,7 +416,7 @@ class CunqaCircuit:
                     logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not all([(q in _flatten([qr for qr in self.quantum_regs.values()]) or isinstance(q,ControlContext)) for q in instruction["qubits"]]):
+                if not all([(q in _flatten([qr for qr in self.quantum_regs.values()]) or (q == -1)) for q in instruction["qubits"]]):
                     logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {_flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
@@ -1489,13 +1489,10 @@ class CunqaCircuit:
             logger.error(f"exposed qubit must be int, but {type(qubit)} was provided [TypeError].")
             raise SystemExit
         
-        if isinstance(target_circuit, str):
-            target_circuit_id = target_circuit
-
-        elif isinstance(target_circuit, CunqaCircuit):
+        if isinstance(target_circuit, CunqaCircuit):
             target_circuit_id = target_circuit._id
         else:
-            logger.error(f"target_circuit must be str or <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            logger.error(f"target_circuit must be <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
             raise SystemExit
         
 
@@ -1504,6 +1501,7 @@ class CunqaCircuit:
             "qubits": list_control_qubit,
             "circuits": [target_circuit_id]
         })
+        return ControlContext(target_circuit)
 
     def assign_parameters(self, **marked_params):
         """
