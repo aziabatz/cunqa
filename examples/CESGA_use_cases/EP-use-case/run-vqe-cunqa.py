@@ -10,21 +10,29 @@ from cunqa.mappers import QPUCircuitMapper
 from qmiotools.integrations.qiskitqmio import FakeQmio
 from qiskit import transpile
 backend = FakeQmio("/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json", gate_error=True, thermal_relaxation=True, readout_error = True)
+import argparse
 
+parser = argparse.ArgumentParser(description="Quantum Optimization Script")
+parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
+args = parser.parse_args()
+
+n = int(args.num_qubits)
 
 # finding the virtual QPUs
-qpus = get_QPUs(local=False)
+qpus = get_QPUs(local=False, family=f"cunqa-{n}")
 
 # describin the VQE problem with a Hardware Efficient Ansatz
 
-Hamiltonian = Ising_Hamiltonian(n = 10, J = 1)
+Hamiltonian = Ising_Hamiltonian(n = n, J = 1)
 
-parametric_ansatz = hardware_efficient_ansatz(num_qubits=10, num_layers=2)
+parametric_ansatz = hardware_efficient_ansatz(num_qubits=n, num_layers=2)
 
-transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [19,20,23,30,29,28,31,22,21,13], seed_transpiler = 34)
+transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, seed_transpiler = 34)
 
 print(transpiled_parametric_ansatz.num_parameters)
 # now the cost function works with Result objects since the mapper will do the sending and gathering of the QJobs
+
+estaimation_times = []
 
 def cost_function(result):
 
@@ -35,6 +43,7 @@ def cost_function(result):
     tack = time.time()
 
     print("Estimation time: ", tack-tick)
+    estaimation_times.append(tack-tick)
 
     return obs
 
@@ -60,7 +69,7 @@ result = differential_evolution(func = cost_function,
                                             popsize=1,
                                             strategy='best1bin',
                                             bounds=bounds,
-                                            maxiter=1000,
+                                            maxiter=1,
                                             disp=True,
                                             init="halton", # halton, x0
                                             polish=False,
@@ -87,8 +96,13 @@ result = {
     "opt_path":opt_path,
     "params_path":params_path,
     "time_taken":time_taken,
-    "n_steps":len(opt_path)
+    "n_steps":len(opt_path),
+    "simulation_time":(time_taken-sum(estaimation_times))
 }
 
-with open("results/vqe-cunqa.json", "w") as f:
+with open(f"results/cunqa/vqe-cunqa_{n}.json", "w") as f:
     json.dump(result, f, indent=2)
+
+from cunqa.qutils import qdrop
+
+qdrop(f"cunqa-{n}")

@@ -11,28 +11,46 @@ import json
 # choosing backend
 backend = FakeQmio("/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json", gate_error=True, thermal_relaxation=True, readout_error = True)
 # describin the VQE problem with a Hardware Efficient Ansatz
+import argparse
 
-Hamiltonian = Ising_Hamiltonian(n = 10, J = 1)
+parser = argparse.ArgumentParser(description="Quantum Optimization Script")
+parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
+args = parser.parse_args()
 
-parametric_ansatz = hardware_efficient_ansatz(num_qubits=10, num_layers=2)
+n = int(args.num_qubits)
 
-transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, initial_layout = [19,20,23,30,29,28,31,22,21,13], seed_transpiler = 34)
+Hamiltonian = Ising_Hamiltonian(n = n, J = 1)
+
+parametric_ansatz = hardware_efficient_ansatz(num_qubits=n, num_layers=2)
+
+transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, seed_transpiler = 34)
 
 print(transpiled_parametric_ansatz.num_parameters)
+
+estimation_times = []
 
 def cost_function(params):
 
     assembled_circuit = transpiled_parametric_ansatz.assign_parameters(params)
 
-    job = backend.run(assembled_circuit, shots = 1e4)
+    job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
 
     result = job.result()
 
     counts = result.get_counts()
 
-    print(f"({time.strftime('%H:%M:%S')})"+"Simulation time: ", result.time_taken)
+    print(f"Simulation time: ", result.time_taken)
 
-    return estimate_observable(Hamiltonian, counts)
+    tick = time.time()
+
+    obs = estimate_observable(Hamiltonian, counts)
+
+    tack = time.time()
+
+    estimation_times.append(tack-tick)
+
+    return obs
+
 
 
 bounds=[]
@@ -59,7 +77,7 @@ result = differential_evolution(func = cost_function,
                                             popsize=1,
                                             strategy='best1bin',
                                             bounds=bounds,
-                                            maxiter=1000,
+                                            maxiter=1,
                                             disp=True,
                                             init="halton", # halton, x0
                                             polish=False,
@@ -85,10 +103,11 @@ result = {
     "opt_path":opt_path,
     "params_path":params_path,
     "time_taken":time_taken,
-    "n_steps":len(opt_path)
+    "n_steps":len(opt_path),
+    "simulation_time":(time_taken-sum(estimation_times))
 }
 
 print(result)
 
-with open("results/vqe-qiskit.json", "w") as f:
+with open(f"results/qiskit/vqe-qiskit_{n}.json", "w") as f:
     json.dump(result, f, indent=2)
