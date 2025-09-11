@@ -101,7 +101,10 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 
     // REMOTE CONTROLLED GATES
     {"qsend", QSEND},
-    {"qrecv", QRECV}
+    {"qrecv", QRECV},
+
+    {"expose", EXPOSE},
+    {"rcontrol", RCONTROL}
 };
 
 const std::vector<std::string> BASIS_GATES = {

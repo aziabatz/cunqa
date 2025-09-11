@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
         {
             LOGGER_DEBUG("Raising executor with Munich.");
             MunichExecutor executor;
+            LOGGER_DEBUG("Munich is up.");
             executor.run();
             break;
         }

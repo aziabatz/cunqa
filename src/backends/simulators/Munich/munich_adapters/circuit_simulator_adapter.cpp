@@ -214,7 +214,11 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         }
 
         std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
-        auto inst_type = constants::INSTRUCTIONS_MAP.at(inst.at("name"));
+
+        LOGGER_DEBUG("Antes de entrar en el switch"); 
+        LOGGER_DEBUG("A ejecutar puerta: {}", inst.at("name").get<std::string>());
+        auto inst_type = constants::INSTRUCTIONS_MAP.at(inst.at("name").get<std::string>());
+        
 
         switch (inst_type) {
         case constants::MEASURE:
@@ -444,7 +448,9 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             if (T.finished || T.blocked)
                 continue;
 
+            LOGGER_DEBUG("Antes de aplicar la puerta"); 
             apply_next_instr(T, {});
+            LOGGER_DEBUG("Después de aplicar la puerta"); 
 
             ++T.it;
             if (T.it != T.end)
