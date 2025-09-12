@@ -390,6 +390,19 @@ class CunqaCircuit:
                 elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
                     gate_qubits = 1
 
+                elif instruction["name"] == "save_state":
+                    gate_qubits = self.num_qubits
+
+                elif "num_ctrl_qubits" in instruction:
+                    # I'm not checking currently wether a multicontrolled gate has the correct number of parameters
+                    base_gate = instruction["name"][2:]
+                    if (base_gate in SUPPORTED_GATES_1Q):
+                        gate_qubits = 1 + len(instruction["num_ctrl_qubits"])
+                    elif (base_gate in SUPPORTED_GATES_2Q):
+                        gate_qubits = 2 + len(instruction["num_ctrl_qubits"])
+                    elif (base_gate in SUPPORTED_GATES_3Q):
+                        gate_qubits = 3 + len(instruction["num_ctrl_qubits"])   
+
                 else:
                     logger.error(f"instruction is not supported.")
                     raise ValueError # I capture this at _add_instruction method
@@ -435,7 +448,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0 and not ("num_ctrl_qubits" in instruction)):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
@@ -1104,6 +1117,27 @@ class CunqaCircuit:
             "qubits":[*qubits],
             "params":[matrix]
         })
+
+    def multicontrol(self, base_gate: str, num_ctrl_qubits: int, qubits: list[int], params: list[float, int, "Parameter"] = []):
+        """
+        Class method to apply a multicontrolled gate to the given qubits.
+
+        Args:
+            base_gate (str): name of the gate to convert to multicontrolled.
+            num_ctrl_qubits ( int): number of qubits that control the gate.
+            qubits (list[int]): qubits in which the gate is applied, first num_ctrl_qubits will be the control qubits and the remaining the target qubits.
+            params (list[float | int | Parameter]): list of parameters for the gate.
+        """
+        mgate_name = "mc" + base_gate
+
+        self._add_instruction({
+            "name": mgate_name,
+            "num_ctrl_qubits": num_ctrl_qubits,
+            "qubits": qubits,
+            "num_qubits": len(qubits),
+            "num_clbits": 0,
+            "params": params
+        })
         
     def measure(self, qubits: Union[int, "list[int]"], clbits: Union[int, "list[int]"]) -> None:
         """
@@ -1380,7 +1414,7 @@ class CunqaCircuit:
             "circuits": [control_circuit_id]
         })
 
-    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit'], matrix: Optional["list[list[list[complex]]]"] = None) -> None:
+    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit'], matrix: Optional["list[list[list[complex]]]"] = None, num_ctrl_qubits: int = None) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
 
@@ -1456,12 +1490,17 @@ class CunqaCircuit:
             "circuits": [control_circuit]
         })
 
-        self._add_instruction({
+        # Create the instruction's dictionary first incase we need to add the multicontrol key
+        instr_dict = {
             "name": gate,
             "qubits": qubits,
             "remote_conditional_reg":qubits,
             "params":params,
-        })
+        }
+        if num_ctrl_qubits is not None:
+            instr_dict["num_ctrl_qubits"] = num_ctrl_qubits
+
+        self._add_instruction(instr_dict)
 
     def assign_parameters(self, **marked_params):
         """
