@@ -14,12 +14,14 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Quantum Optimization Script")
 parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
+parser.add_argument("--cores", type=int, required=True, help="Number of qubits")
 args = parser.parse_args()
 
 n = int(args.num_qubits)
+cores = int(args.cores)
 
 # finding the virtual QPUs
-qpus = get_QPUs(local=False, family=f"cunqa-{n}")
+qpus = get_QPUs(local=False, family=f"cunqa-{n}-{cores}")
 
 # describin the VQE problem with a Hardware Efficient Ansatz
 
@@ -100,9 +102,12 @@ result = {
     "simulation_time":(time_taken-sum(estaimation_times))
 }
 
-with open(f"results/cunqa/vqe-cunqa_{n}.json", "w") as f:
+with open(f"results_{cores}/cunqa/vqe-cunqa_{n}.json", "w") as f:
     json.dump(result, f, indent=2)
 
 from cunqa.qutils import qdrop
 
-qdrop(f"cunqa-{n}")
+from subprocess import run
+
+run("ml load qmio/hpc gcc/12.3.0 hpcx-ompi flexiblas/3.3.0 boost cmake/3.27.6 pybind11/2.12.0-python-3.9.9 nlohmann_json/3.11.3 ninja/1.9.0 qiskit/1.2.4-python-3.9.9")
+run(f"qdrop cunqa-{n}-{cores}")

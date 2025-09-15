@@ -15,9 +15,11 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Quantum Optimization Script")
 parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
+parser.add_argument("--cores", type=int, required=True, help="Number of qubits")
 args = parser.parse_args()
 
 n = int(args.num_qubits)
+cores = int(args.cores)
 
 Hamiltonian = Ising_Hamiltonian(n = n, J = 1)
 
@@ -78,7 +80,7 @@ result = differential_evolution(func = cost_function,
                                             init="halton", # halton, x0
                                             polish=False,
                                             tol=1e-50,
-                                            seed=34,
+                                            seed=33,
                                             callback=cb,
                                             updating='deferred',
                                             workers = transpiled_parametric_ansatz.num_parameters)
@@ -104,5 +106,5 @@ result = {
     "simulation_time":(time_taken-sum(estimation_times)/len(estimation_times))
 }
 
-with open(f"results/pool/vqe-pool_{n}.json", "w") as f:
+with open(f"results_{cores}/pool/vqe-pool_{n}.json", "w") as f:
     json.dump(result, f, indent=2)
