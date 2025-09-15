@@ -397,11 +397,11 @@ class CunqaCircuit:
                     # I'm not checking currently wether a multicontrolled gate has the correct number of parameters
                     base_gate = instruction["name"][2:]
                     if (base_gate in SUPPORTED_GATES_1Q):
-                        gate_qubits = 1 + len(instruction["num_ctrl_qubits"])
+                        gate_qubits = 1 + instruction["num_ctrl_qubits"]
                     elif (base_gate in SUPPORTED_GATES_2Q):
-                        gate_qubits = 2 + len(instruction["num_ctrl_qubits"])
+                        gate_qubits = 2 + instruction["num_ctrl_qubits"]
                     elif (base_gate in SUPPORTED_GATES_3Q):
-                        gate_qubits = 3 + len(instruction["num_ctrl_qubits"])   
+                        gate_qubits = 3 + instruction["num_ctrl_qubits"]
 
                 else:
                     logger.error(f"instruction is not supported.")
@@ -1413,7 +1413,7 @@ class CunqaCircuit:
             "circuits": [control_circuit_id]
         })
 
-    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit'], matrix: Optional["list[list[list[complex]]]"] = None, num_ctrl_qubits: int = None) -> None:
+    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], control_circuit: Union[str, 'CunqaCircuit'], param: Optional[float] = None, matrix: Optional["list[list[list[complex]]]"] = None, num_ctrl_qubits: int = None) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
 
