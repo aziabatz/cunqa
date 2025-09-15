@@ -52,7 +52,7 @@ def distrGrover(target, n_nodes: int, qubits_per_circuit: list[int], n_layers: i
             circuits[f"circ_{i}"].x(j+1) # Exclude first qubit on each circuit as it is the communication one
             circuits[f"circ_{i}"].h(j+1)
 
-
+    print(circuits)
 
     for _ in range(n_layers): # The Oracle and Diffusion blocks are repeated n_layers times
 
@@ -86,7 +86,7 @@ def distrGrover(target, n_nodes: int, qubits_per_circuit: list[int], n_layers: i
 
 
     for i in range(n_nodes):
-        for j in range(qubits_per_circuit):
+        for j in range(qubits_per_circuit[i]):
             circuits[f"circ_{i}"].measure(j,j)
 
 
@@ -96,13 +96,15 @@ def distrGrover(target, n_nodes: int, qubits_per_circuit: list[int], n_layers: i
     ###################### EXECUTION PART ######################
 
     # Raise the required QPUs
-    qpus_to_drop = qraise(n_nodes+1, "00:10:00", cloud=True, simulator="Munich", quantum_comm=True)
+    qpus_to_drop = qraise(n_nodes+1, "00:10:00", cloud=True, quantum_comm=True)
     qpus_Grover = get_QPUs(local=False)
+    print("before run_distributed")
 
     # Distributed run
     distr_jobs = run_distributed([router] + list(circuits.values()), qpus_Grover, shots=1000) 
     result_list = gather(distr_jobs)
-
+    print("after run_distributed")
+    
     # Print counts
     for result in result_list:
         print(result)
@@ -120,26 +122,25 @@ def distrMCZ(router, circs):
         
         router.h(i)
         all_qubits = list(range(circs[f"circ_{i}"].num_qubits))
-        circs[f"circ_{i}"].MCZ(all_qubits)
+        circs[f"circ_{i}"].multicontrol(base_gate = "z", num_ctrl_qubits = len(all_qubits)-1, qubits = all_qubits)
 
         circs[f"circ_{i}"].h(0) # Used to change the measure basis to X
-        circs[f"circ_{i}"].measure_and_send(control_qubit = 0, target_circuit = router) 
-        router.remote_c_if("x", target_qubits = i, control_circuit = f"circ_{i}")
+        circs[f"circ_{i}"].measure_and_send(qubit = 0, target_circuit = router) 
+        router.remote_c_if("x", qubits = i, control_circuit = f"circ_{i}")
 
-    router.MCZ(list(range(router.num_qubits)))
+    router.multicontrol(base_gate = "z", num_ctrl_qubits = router.num_qubits-1, qubits = list(range(router.num_qubits)))
 
     for i in range(len(circs)):
         router.h(i) # Used to change the measure basis to X
-        router.measure_and_send(control_qubit = i, target_circuit = f"circ_{i}")
+        router.measure_and_send(qubit = i, target_circuit = f"circ_{i}")
         all_but_first_qubits =  list(range(circs[f"circ_{i}"].num_qubits))[1:]
-        circs[f"circ_{i}"].remote_c_if("mcz", target_qubits = all_but_first_qubits, control_circuit = router, num_ctrl_qubits = circs[f"circ_{i}"].num_qubits - 2 )
+        circs[f"circ_{i}"].remote_c_if("mcz", qubits = all_but_first_qubits, control_circuit = router, num_ctrl_qubits = circs[f"circ_{i}"].num_qubits - 2 )
 
         # Reseting qubits to entangle again
         circs[f"circ_{i}"].reset(0) 
         router.reset(i)
 
-def MCZ(circuit, qubits):
-    circuit.multicontrol(base_gate = "z", num_ctrl_qubits = len(qubits)-1, qubits = qubits)
+
 
 
 

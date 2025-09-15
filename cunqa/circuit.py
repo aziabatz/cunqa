@@ -1331,7 +1331,7 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
 
     # TODO: check if simulators accept reset instruction as native
-    def reset(self, *qubits: int):
+    def reset(self, qubits: Union[int, list]):
         """
         Class method to add reset instruction to a qubit or list of qubits.
 
@@ -1342,10 +1342,10 @@ class CunqaCircuit:
 
         if isinstance(qubits, list):
             for q in qubits:
-                self.c_if("x", q, q)
+                self.instructions.append({'name': 'c_if_x', 'qubits': [q, q], 'conditional_reg': [q], 'params': []})
 
         elif isinstance(qubits, int):
-            self.c_if("x", qubits, qubits)
+            self.instructions.append({'name': 'c_if_x', 'qubits': [qubits, qubits], 'conditional_reg': [qubits], 'params': []})
 
         else:
             logger.error(f"Argument for reset must be list or int, but {type(qubits)} was provided.")
