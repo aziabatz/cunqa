@@ -1135,7 +1135,6 @@ class CunqaCircuit:
             "num_ctrl_qubits": num_ctrl_qubits,
             "qubits": qubits,
             "num_qubits": len(qubits),
-            "num_clbits": 0,
             "params": params
         })
         
