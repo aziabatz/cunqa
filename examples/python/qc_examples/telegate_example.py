@@ -15,11 +15,10 @@ qpus_QPE  = get_QPUs(local=False)
 
 ########## Circuits to run ##########
 ########## First circuit ############
-cc_1 = CunqaCircuit(1, 1, id="First")
-cc_2 = CunqaCircuit(2, 2, id="Second")
+cc_1 = CunqaCircuit(1, id="First")
+cc_2 = CunqaCircuit(1, id="Second")
 
 cc_1.h(0)
-
 
 with cc_1.expose(0, cc_2) as rcontrol:
     cc_2.cx(rcontrol,0)
@@ -33,9 +32,13 @@ cc_2.measure_all()
 ########## List of circuits #########
 circs_QPE = [cc_1, cc_2]
 
+for circ in circs_QPE:
+    for c in circ.instructions:
+        print(c)
+    print()
 
 ########## Distributed run ##########
-distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=10) 
+distr_jobs = run_distributed(circs_QPE, qpus_QPE, shots=100) 
 
 ########## Collect the counts #######
 result_list = gather(distr_jobs)
@@ -45,4 +48,4 @@ for result in result_list:
     print(result)
 
 ########## Drop the deployed QPUs #
-qdrop(family)
+# qdrop(family)
