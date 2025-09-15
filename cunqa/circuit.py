@@ -1542,7 +1542,7 @@ class CunqaCircuit:
             "qubits": list_control_qubit,
             "circuits": [target_circuit_id]
         })
-        return ControlContext(target_circuit)
+        return ControlContext(self,target_circuit)
 
     def assign_parameters(self, **marked_params):
         """
@@ -1584,35 +1584,38 @@ class ControlContext:
     
     Then, when the block ends, the :py:class:`ControlContext` adds the propper "rcontrol" instruction to the target circuit.
     """
-    def __init__(self, circuit: 'CunqaCircuit') -> int:
+    def __init__(self, control_circuit: 'CunqaCircuit', target_circuit: 'CunqaCircuit') -> int:
         """Class constructor.
         
             Args:
-                circuit (`~cunqa.circuit.CunqaCircuit`): circuit in which the instructions are implemented.
+                control_circuit (`~cunqa.circuit.CunqaCircuit`): circuit which qubit is exposed.
             
+                target_circuit (`~cunqa.circuit.CunqaCircuit`): circuit in which the instructions are implemented.
         """
-        if isinstance(circuit, CunqaCircuit):
-            self.circuit = circuit
+        if isinstance(control_circuit, CunqaCircuit) and isinstance(target_circuit, CunqaCircuit):
+            self.control_circuit = control_circuit
+            self.target_circuit = target_circuit
         else:
-            logger.error("Error instanciating ControlContext manager, a circuit with an exposed qubit must be provided.")
+            logger.error(f"control_circuit and target_circuit must be <class 'cunqa.circuit.CunqaCircuit'>, but {type(num_qubits)} was provided [TypeError].")
             raise SystemExit
 
     def __enter__(self):
-        self.circuit._telegate = []
+        self.target_circuit._telegate = []
         return -1
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for instruction in self.circuit._telegate:
+        for instruction in self.target_circuit._telegate:
             if instruction["name"] in ["qsend", "qrecv", "expose", "recv"]:
                 logger.error("Remote operations, quantum or classical, are not allowed within a telegate block.")
                 raise SystemExit
         instr = {
             "name": "rcontrol",
             "qubits": [],  
-            "instructions": self.circuit._telegate,
+            "instructions": self.target_circuit._telegate,
+            "circuits": [self.control_circuit._id]
         }
-        self.circuit.instructions.append(instr)
-        self.circuit._telegate = None
+        self.target_circuit.instructions.append(instr)
+        self.target_circuit._telegate = None
 
         return False
 
