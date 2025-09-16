@@ -1519,6 +1519,11 @@ class CunqaCircuit:
         
         Returns:
             A :py:class:`ControlContext` object to manage remotly controlled operations in the given circuit.
+
+
+        .. warning::
+            In the current version, :py:meth:`~CunqaCircuit.expose` instruction is only supported for MQT DDSIM (Munich) simulator.
+            If circuits with such instructions are sent to other simulators, an error will occur at the virtual QPU.
         """
 
         self.has_qc = True
