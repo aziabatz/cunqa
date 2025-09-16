@@ -51,3 +51,4 @@ set(ZMQ_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libzmq/include"
     CACHE PATH "ZeroMQ include directory")
 
 set(CMAKE_CXX_FLAGS "${_old_CXX_FLAGS}")
+
