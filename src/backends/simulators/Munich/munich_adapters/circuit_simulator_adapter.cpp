@@ -167,7 +167,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
 
     for (auto &quantum_task : quantum_tasks)
     {
-        LOGGER_DEBUG("First QTId: {} has circuit: {}", quantum_task.id, quantum_task.circuit.dump());
         TaskState T;
         T.id = quantum_task.id;
         T.zero_qubit = G.n_qubits;
@@ -188,7 +187,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
     initializeSimulationAdapter(G.n_qubits);
 
     auto generate_entanglement_ = [&]() {
-        LOGGER_DEBUG("Inside generate_entanglement_");
+
         // Apply H to the first entanglement qubit
         auto std_op1 = std::make_unique<StandardOperation>(G.n_qubits - 2, OpType::H);
         applyOperationToStateAdapter(std::move(std_op1));
@@ -204,28 +203,22 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         // This is added to be able to add instructions outside the main loop
         const JSON& inst = instruction.empty() ? *T.it : instruction;
 
-        LOGGER_DEBUG("Inst: {}", inst.dump());
-        std::vector<int> qubits;
-
         if (inst.contains("conditional_reg")) {
             auto v = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-            if (!v.size()) //|| !G.creg[v[0]]) // Alvaro
+            if (!v.size() || !G.creg[v[0]])
                 return;
         } else if (inst.contains("remote_conditional_reg")) {
             auto v = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-            if (!v.size()) //|| !G.rcreg[v[0]]) // Alvaro
-                LOGGER_DEBUG("!v.size() || !G.rcreg[v[0]]");
+            if (!v.size() || !G.rcreg[v[0]])
                 return;
-        } else {
-            qubits = inst.at("qubits").get<std::vector<int>>();
         }
-         
 
-        //LOGGER_DEBUG("Before switch"); 
-        //LOGGER_DEBUG("A ejecutar puerta: {}", inst.at("name").get<std::string>());
+        LOGGER_DEBUG("Inst: {}", inst.dump());
+
+        std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
+
+
         auto inst_type = constants::INSTRUCTIONS_MAP.at(inst.at("name").get<std::string>());
-
-        //LOGGER_DEBUG("Inst_type: {}", inst_type);
         
 
         switch (inst_type) {
@@ -268,17 +261,9 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         case constants::CY:
         case constants::CZ:
         {
-            int ctrl;
-            if (qubits[0] == -1) {
-                ctrl = G.n_qubits - 1;
-            } else {
-                ctrl = qubits[0] + T.zero_qubit;
-            }
-            LOGGER_DEBUG("Control: {}", std::to_string(ctrl));
-            Control control(ctrl);
+            Control control(qubits[0] + T.zero_qubit);
             auto two_gate = std::make_unique<StandardOperation>(control, qubits[1] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
             applyOperationToStateAdapter(std::move(two_gate));
-            LOGGER_DEBUG("CX applied");
             break;
         }
         case constants::CRX:
@@ -319,17 +304,14 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             auto endpoint = inst.at("qpus").get<std::vector<std::string>>();
             char char_measurement = measureAdapter(qubits[0] + T.zero_qubit);
             int measurement = char_measurement - '0';
-            LOGGER_DEBUG("Send endpoint: {}", endpoint[0]);
             classical_channel->send_measure(measurement, endpoint[0]);
             break;
         }
         case constants::RECV:
         {
             auto endpoint = inst.at("qpus").get<std::vector<std::string>>();
-            LOGGER_DEBUG("Recv endpoint: {}", endpoint[0]);
             auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
             int measurement = classical_channel->recv_measure(endpoint[0]);
-            LOGGER_DEBUG("RECEIVED MEASUREMENT: {}", std::to_string(measurement));
             G.rcreg[conditional_reg[0]] = (measurement == 1);
             break;
         }
@@ -401,21 +383,15 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         }
         case constants::EXPOSE:
         {
-            LOGGER_DEBUG("Inside EXPOSE");
             if (!T.cat_entangled) {
-                LOGGER_DEBUG("NO CAT ENTANGLED");
                 generate_entanglement_();
-                LOGGER_DEBUG("Entanglement generated");
 
                 // CX to the entangled pair
                 Control control(qubits[0] + T.zero_qubit);
                 auto cx = std::make_unique<StandardOperation>(control, G.n_qubits - 2, OpType::X);
                 applyOperationToStateAdapter(std::move(cx));
-                LOGGER_DEBUG("Operation applied");
 
                 int result = measureAdapter(G.n_qubits - 2) - '0';
-
-                LOGGER_DEBUG("Measure result: {}", std::to_string(result));
 
                 G.qc_meas[T.id].push(result);
                 T.cat_entangled = true;
@@ -423,8 +399,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 Ts[inst.at("qpus")[0]].blocked = false;
                 return;
             } else {
-                LOGGER_DEBUG("CAT ENTANGLED");
-
                 int meas = G.qc_meas[inst.at("qpus")[0]].top();
                 G.qc_meas[inst.at("qpus")[0]].pop();
 
@@ -437,7 +411,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         }
         case constants::RCONTROL:
         {
-            LOGGER_DEBUG("Inside RCONTROL");
             if (!G.qc_meas.contains(inst.at("qpus")[0])) {
                 T.blocked = true;
                 return;
@@ -452,7 +425,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             }
 
             for(const auto& sub_inst: inst.at("instructions")) {
-                LOGGER_DEBUG("Subinstruction name: {}", sub_inst.at("name").get<std::string>());
                 apply_next_instr(T, sub_inst);
             }
 
@@ -475,7 +447,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         G.ended = true;
         for (auto& [id, T]: Ts)
         {
-            LOGGER_DEBUG("Last QTId: {}", T.id);
             if (T.finished || T.blocked)
                 continue;
 
@@ -489,7 +460,6 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             else
                 T.finished = true;
         }
-        
 
     } // End one shot
 
