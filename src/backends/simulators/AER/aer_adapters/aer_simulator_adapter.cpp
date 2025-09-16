@@ -448,6 +448,10 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
 
         JSON run_config_json(aer_quantum_task.config);
         run_config_json["seed_simulator"] = quantum_task.config.at("seed");
+        LOGGER_DEBUG("run config: {}", run_config_json.dump());
+        #ifdef _OPENMP
+        LOGGER_DEBUG("pasa por aqui _OPENMP");
+        #endif
         Config aer_config(run_config_json);
 
         Noise::NoiseModel noise_model(backend->config.at("noise_model"));

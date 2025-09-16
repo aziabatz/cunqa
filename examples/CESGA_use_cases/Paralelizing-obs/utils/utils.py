@@ -65,7 +65,7 @@ def hardware_efficient_ansatz(num_qubits, num_layers):
         param_idx += 1
         for qubit in range(num_qubits - 1):
             qc.cx(qubit, qubit + 1)
-    qc.measure_all()
+
     return qc
 
 

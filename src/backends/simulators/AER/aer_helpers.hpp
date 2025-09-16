@@ -24,6 +24,18 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
         // TODO: Tune in the different options of the AER simulator
     };
 
+    if (quantum_task.config.contains("max_parallel_threads")) {
+        new_config["max_parallel_threads"] = quantum_task.config.at("max_parallel_threads").get<int>();
+    }
+
+    if (quantum_task.config.contains("omp_enabled")) {
+        new_config["omp_enabled"] = quantum_task.config.at("omp_enabled").get<bool>();
+    }
+
+    if (quantum_task.config.contains("parallel_experiments")) {
+        new_config["parallel_experiments"] = quantum_task.config.at("parallel_experiments").get<int>();
+    }
+
     //JSON Object because if not it generates an array
     JSON new_circuit = {
         {"config", new_config},

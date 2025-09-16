@@ -7,6 +7,7 @@ from scipy.optimize import differential_evolution
 import numpy as np
 import time
 import json
+import os
 
 # choosing backend
 backend = FakeQmio("/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json", gate_error=True, thermal_relaxation=True, readout_error = True)
@@ -34,13 +35,15 @@ def cost_function(params):
 
     assembled_circuit = transpiled_parametric_ansatz.assign_parameters(params)
 
-    job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
+    job = backend.run(assembled_circuit, shots = 1e4, seed = 34, max_parallel_threads = 1)
 
     result = job.result()
 
     counts = result.get_counts()
 
     print(f"Simulation time: ", result.time_taken)
+
+    print(os.getenv("OMP_NUM_THREADS"))
 
     tick = time.time()
 
@@ -68,6 +71,8 @@ def cb(xk, convergence = 1e-50):
 
 
 # mapper = Pool(transpiled_parametric_ansatz.num_parameters).map
+
+print(os.getenv("OMP_NUM_THREADS"))
 
 tick = time.time()
 

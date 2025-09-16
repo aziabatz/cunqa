@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
     if (family == "default")
         family = std::getenv("SLURM_JOB_ID");
 
+    LOGGER_DEBUG("OMP_NUM_THREADS: {}", std::getenv("OMP_NUM_THREADS"));
+
     auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
                                      : JSON());
 

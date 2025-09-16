@@ -13,17 +13,19 @@ if [ "$mode" == "cunqa" ]; then
 
         echo $num_params
 
-        qraise -n $cores -t 06:00:00 -c 1 --cloud --fakeqmio=/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json --family_name=cunqa-$n-$cores
+        qraise -n $num_params -t 06:00:00 -c $cores --cloud --fakeqmio=/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json --family_name=cunqa-$n-$cores
+
+        num_cores_total=$(($num_params * $cores))
 
         sleep 30
 
-        sbatch --job-name="$mode-$n" \
+        sbatch --job-name="$mode$n" \
             --output="./logs/$mode-$n-%j.out" \
             --error="./logs/$mode-$n-%j.err" \
             --time=05:00:00 \
-            -c $cores \
+            -c $num_cores_total \
             --mem-per-cpu=4G \
-            --wrap="OMP_NUM_THREADS=$cores python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores\""
+            --wrap="OMP_NUM_THREADS=1 python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores\""
         
         sleep 15
     done
@@ -35,13 +37,15 @@ else
 
         echo $num_params
 
-        sbatch --job-name="$mode-$n" \
+        num_cores_total=$(($num_params * $cores))
+
+        sbatch --job-name="$mode$n" \
                --output="./logs/$mode-$n-%j.out" \
                --error="./logs/$mode-$n-%j.err" \
                --time=05:00:00 \
-               -c $cores \
+               -c $num_cores_total \
                --mem-per-cpu=4G \
-               --wrap="OMP_NUM_THREADS=$num_params python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores\""
+               --wrap="OMP_NUM_THREADS=1 python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores\""
         
         sleep 15
     done

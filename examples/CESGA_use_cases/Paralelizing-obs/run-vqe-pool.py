@@ -1,4 +1,4 @@
-from utils.utils import Ising_Hamiltonian, hardware_efficient_ansatz, estimate_observable
+from utils.utils import Heisenberg_Hamiltonian, hardware_efficient_ansatz, estimate_observable, qwc_circuits
 from multiprocessing.pool import Pool
 from qiskit import transpile
 from qiskit_aer import AerSimulator
@@ -16,45 +16,59 @@ import argparse
 parser = argparse.ArgumentParser(description="Quantum Optimization Script")
 parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
 parser.add_argument("--cores", type=int, required=True, help="Number of qubits")
+
 args = parser.parse_args()
 
 n = int(args.num_qubits)
 cores = int(args.cores)
 
-Hamiltonian = Ising_Hamiltonian(n = n, J = 1)
+Hamiltonian = Heisenberg_Hamiltonian(n = n, Jx=1, Jy=1, Jz=1, h=0)
 
 parametric_ansatz = hardware_efficient_ansatz(num_qubits=n, num_layers=2)
 
-transpiled_parametric_ansatz = transpile(parametric_ansatz, backend, optimization_level = 3, seed_transpiler = 34)
+qwc, ops = qwc_circuits(parametric_ansatz, Hamiltonian)
 
+print(ops)
+
+transpiled_parametric_ansatzes = []
+
+for qc in qwc:
+    transpiled_parametric_ansatzes.append(transpile(qc, backend, optimization_level = 3, seed_transpiler = 34))
+
+
+print(parametric_ansatz.num_parameters)
 
 estimation_times = []
 
 def cost_function(params):
 
-    assembled_circuit = transpiled_parametric_ansatz.assign_parameters(params)
+    energy = 0
 
-    job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
+    for qc, obs in zip(transpiled_parametric_ansatzes, ops):
 
-    result = job.result()
+        assembled_circuit = qc.assign_parameters(params)
 
-    counts = result.get_counts()
+        job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
 
-    print(f"Simulation time: ", result.time_taken)
+        result = job.result()
 
-    tick = time.time()
+        counts = result.get_counts()
 
-    obs = estimate_observable(Hamiltonian, counts)
+        print(f"Simulation time for {obs}: ", result.time_taken)
 
-    tack = time.time()
+        tick = time.time()
 
-    estimation_times.append(tack-tick)
+        energy+=estimate_observable(Hamiltonian,obs, counts)
 
-    return obs
+        tack = time.time()
+
+        estimation_times.append(tack-tick)
+
+    return energy
 
 
 bounds=[]
-for i in range(transpiled_parametric_ansatz.num_parameters):
+for i in range(transpiled_parametric_ansatzes[0].num_parameters):
     bounds.append((-np.pi,np.pi))
 
 

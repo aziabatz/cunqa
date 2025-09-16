@@ -15,10 +15,12 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Quantum Optimization Script")
 parser.add_argument("--num_qubits", type=int, required=True, help="Number of qubits")
+parser.add_argument("--cores", type=int, required=True, help="Number of qubits")
 
 args = parser.parse_args()
 
 n = int(args.num_qubits)
+cores = int(args.cores)
 
 Hamiltonian = Heisenberg_Hamiltonian(n = n, Jx=1, Jy=1, Jz=1, h=0)
 
@@ -86,14 +88,16 @@ mapper = None
 
 tick = time.time()
 
+x0 = np.random.uniform(-np.pi, np.pi, parametric_ansatz.num_parameters)
+
 result = minimize(fun=cost_function,
-                  x0 = np.zeros(parametric_ansatz.num_parameters),
-                  bounds = bounds,
+                  x0=x0,
+                  bounds=bounds,
                   tol=1e-50,
                   callback=cb,
-                  options={"maxiter":100,
-                            "disp":True,
-                            "catol":1e-50},
+                  options={"maxiter":1,
+                           "disp":True,
+                           "catol":1e-50},
                   method="COBYLA")
 
 
