@@ -52,7 +52,6 @@ def distrGrover(target, n_nodes: int, qubits_per_circuit: list[int], n_layers: i
             circuits[f"circ_{i}"].x(j+1) # Exclude first qubit on each circuit as it is the communication one
             circuits[f"circ_{i}"].h(j+1)
 
-    print(circuits)
 
     for _ in range(n_layers): # The Oracle and Diffusion blocks are repeated n_layers times
 
@@ -96,7 +95,7 @@ def distrGrover(target, n_nodes: int, qubits_per_circuit: list[int], n_layers: i
     ###################### EXECUTION PART ######################
 
     # Raise the required QPUs
-    qpus_to_drop = qraise(n_nodes+1, "00:10:00", cloud=True, quantum_comm=True)
+    qpus_to_drop = qraise(n_nodes+1, "00:10:00", cloud=True, simulator="Munich", quantum_comm=True)
     qpus_Grover = get_QPUs(local=False)
     print("before run_distributed")
 

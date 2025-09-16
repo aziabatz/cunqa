@@ -1172,6 +1172,8 @@ class CunqaCircuit:
             num_ctrl_qubits ( int): number of qubits that control the gate.
             qubits (list[int]): qubits in which the gate is applied, first num_ctrl_qubits will be the control qubits and the remaining the target qubits.
             params (list[float | int | Parameter]): list of parameters for the gate.
+            
+        .. warning:: This instructions is currently only running with AER.
         """
         mgate_name = "mc" + base_gate
 
