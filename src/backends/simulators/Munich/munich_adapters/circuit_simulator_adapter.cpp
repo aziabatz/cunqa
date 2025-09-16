@@ -213,10 +213,11 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 return;
         }
 
+        LOGGER_DEBUG("Inst: {}", inst.dump());
+
         std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
 
-        LOGGER_DEBUG("Antes de entrar en el switch"); 
-        LOGGER_DEBUG("A ejecutar puerta: {}", inst.at("name").get<std::string>());
+
         auto inst_type = constants::INSTRUCTIONS_MAP.at(inst.at("name").get<std::string>());
         
 
@@ -395,6 +396,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
                 G.qc_meas[T.id].push(result);
                 T.cat_entangled = true;
                 T.blocked = true;
+                Ts[inst.at("qpus")[0]].blocked = false;
                 return;
             } else {
                 int meas = G.qc_meas[inst.at("qpus")[0]].top();
@@ -429,7 +431,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             auto h = std::make_unique<StandardOperation>(G.n_qubits - 1, OpType::H);
             applyOperationToStateAdapter(std::move(h));
 
-            int result = measureAdapter(qubits[0] + T.zero_qubit) - '0';
+            int result = measureAdapter(G.n_qubits - 1) - '0';
             G.qc_meas[T.id].push(result);
 
             Ts[inst.at("qpus")[0]].blocked = false;
@@ -448,11 +450,11 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             if (T.finished || T.blocked)
                 continue;
 
-            LOGGER_DEBUG("Antes de aplicar la puerta"); 
             apply_next_instr(T, {});
-            LOGGER_DEBUG("Después de aplicar la puerta"); 
 
-            ++T.it;
+            if (!T.blocked)
+                ++T.it;
+
             if (T.it != T.end)
                 G.ended = false;
             else
