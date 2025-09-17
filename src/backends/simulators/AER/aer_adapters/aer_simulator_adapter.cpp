@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <stack>
 #include <chrono>
+#include <functional>
 
 #include "aer_simulator_adapter.hpp"
 
