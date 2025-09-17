@@ -60,12 +60,15 @@ struct ClassicalChannel::Impl
             LOGGER_ERROR("No connections were established with endpoint {}.", target);
             throw std::runtime_error("Error with endpoint connection.");
         }
+        LOGGER_DEBUG("In ZMQ with endpoint {} to send {} to {}", zmq_endpoint, data, target);
         zmq::message_t message(data.begin(), data.end());
         zmq_sockets[target].send(message, zmq::send_flags::none);
+        LOGGER_DEBUG("Measure sent in ZMQ");
     }
     
     std::string recv(const std::string& origin)
     {
+        LOGGER_DEBUG("Inside ZMQ recv with endpoint {} waiting from: {}", zmq_endpoint, origin);
         if (!message_queue[origin].empty()) {
             std::string stored_data = message_queue[origin].front();
             message_queue[origin].pop();
@@ -76,9 +79,12 @@ struct ClassicalChannel::Impl
                 zmq::message_t message;
                 
                 [[maybe_unused]] auto ret1 = zmq_comm_server.recv(id, zmq::recv_flags::none);
+                LOGGER_DEBUG("id received");
                 [[maybe_unused]] auto ret2 = zmq_comm_server.recv(message, zmq::recv_flags::none);
                 std::string id_str(static_cast<char*>(id.data()), id.size());
+                LOGGER_DEBUG("id: {}", id_str);
                 std::string data(static_cast<char*>(message.data()), message.size());
+                LOGGER_DEBUG("data: {}", data);
 
                 if (id_str == origin) {
                     return data;

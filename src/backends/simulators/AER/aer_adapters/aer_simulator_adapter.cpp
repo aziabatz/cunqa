@@ -558,11 +558,11 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 
     // This is for distinguising classical and quantum communications
     // TODO: Make it more clear
-    if (classical_channel && qc.quantum_tasks.size() == 1)
+    /* if (classical_channel && qc.quantum_tasks.size() == 1)
     {
         std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
         classical_channel->connect(connect_with);
-    }
+    } */
 
     auto shots = qc.quantum_tasks[0].config.at("shots").get<std::size_t>();
     std::string method = qc.quantum_tasks[0].config.at("method").get<std::string>();
