@@ -4,6 +4,7 @@
 #include <string>
 #include <bitset>
 #include <chrono>
+#include <vector>
 
 #include "utils/helpers/reverse_bitstring.hpp"
 
@@ -17,23 +18,18 @@ namespace sim {
 
 QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
 {
+    int n_clbits = quantum_task.config.at("num_clbits");
     JSON new_config = {
         {"method", quantum_task.config.at("method")},
         {"shots", quantum_task.config.at("shots")},
-        {"memory_slots", quantum_task.config.at("num_clbits")}
+        {"memory_slots", quantum_task.config.at("num_clbits")},
         // TODO: Tune in the different options of the AER simulator
     };
 
-    if (quantum_task.config.contains("max_parallel_threads")) {
-        new_config["max_parallel_threads"] = quantum_task.config.at("max_parallel_threads").get<int>();
-    }
-
-    if (quantum_task.config.contains("omp_enabled")) {
-        new_config["omp_enabled"] = quantum_task.config.at("omp_enabled").get<bool>();
-    }
-
-    if (quantum_task.config.contains("parallel_experiments")) {
-        new_config["parallel_experiments"] = quantum_task.config.at("parallel_experiments").get<int>();
+    if (quantum_task.config.at("avoid_parallelization").get<bool>()) {
+        LOGGER_DEBUG("Trhead parallelization canceled");
+        new_config["max_parallel_shots"] = 0;
+        new_config["max_parallel_threads"] = 1;
     }
 
     //JSON Object because if not it generates an array
@@ -42,6 +38,8 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
         {"instructions", JSON::parse(std::regex_replace(quantum_task.circuit.dump(),
                        std::regex("clbits"), "memory"))}
     };
+
+    LOGGER_DEBUG("Finishing quantum_task_to_AER");
 
     return QuantumTask(new_circuit, new_config);
 }

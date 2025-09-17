@@ -56,6 +56,14 @@ find_package(LAPACK REQUIRED)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/utils/logger" "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
 
+add_library(AerCPP INTERFACE)
+
+target_include_directories(AerCPP INTERFACE "{CMAKE_CURRENT_SOURCE_DIR}/src/third-party/aer-cpp")
+if(OpenMP_FOUND)
+  target_link_libraries(AerCPP INTERFACE OpenMP::OpenMP_CXX)
+  message(STATUS "Linked OpenMP to aer-cpp")
+endif()
+
 add_subdirectory(src)
 add_subdirectory(cunqa)
 add_subdirectory(examples)
@@ -70,6 +78,3 @@ if(NOT TARGET uninstall)
   add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
-
-
-add_compile_definitions(_OPENMP=201811)
