@@ -63,7 +63,7 @@ def cb(xk, convergence = 1e-50):
     params_path.append(list(xk))
     opt_path.append(cost)
 
-mapper = QPUCircuitMapper(qpus, transpiled_parametric_ansatz, shots = 1e4, seed = 34)
+mapper = QPUCircuitMapper(qpus, transpiled_parametric_ansatz, shots = 1e4, seed = 34, method = "statevector")
 
 tick = time.time()
 

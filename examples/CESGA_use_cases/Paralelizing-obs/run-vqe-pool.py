@@ -48,7 +48,7 @@ def cost_function(params):
 
         assembled_circuit = qc.assign_parameters(params)
 
-        job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
+        job = backend.run(assembled_circuit, shots = 1e4, seed = 34, method = "statevector", max_parallel_threads = 1)
 
         result = job.result()
 

@@ -49,11 +49,11 @@ def cost_function(params):
 
         assembled_circuit = qc.assign_parameters(params)
 
-        qjobs.append( qpu.run(assembled_circuit, shots = 1e4, seed = 34))
+        qjobs.append( qpu.run(assembled_circuit, shots = 1e4, seed = 34, method = "statevector"))
 
     results = gather(qjobs)
 
-    for result in results:
+    for result, obs in zip(results,ops):
 
         counts = result.counts
 

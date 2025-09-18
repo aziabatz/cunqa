@@ -48,7 +48,7 @@ def cost_function(params):
 
         assembled_circuit = qc.assign_parameters(params)
 
-        job = backend.run(assembled_circuit, shots = 1e4, seed = 34)
+        job = backend.run(assembled_circuit, shots = 1e4, seed = 34,  method = "statevector")
 
         result = job.result()
 
@@ -123,5 +123,5 @@ result = {
 
 print(result)
 
-with open(f"results/qiskit/vqe-qiskit_{n}.json", "w") as f:
+with open(f"results_{cores}/qiskit/vqe-qiskit_{n}.json", "w") as f:
     json.dump(result, f, indent=2)
