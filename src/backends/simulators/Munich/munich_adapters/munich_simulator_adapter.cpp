@@ -1,5 +1,5 @@
 
-#include "circuit_simulator_adapter.hpp"
+#include "munich_simulator_adapter.hpp"
 #include "munich_helpers.hpp"
 
 #include <unordered_map>
@@ -47,10 +47,6 @@ const std::unordered_map<int, OpType> MUNICH_INSTRUCTIONS_MAP = {
     {constants::CRY, OpType::RY},
     {constants::CRZ, OpType::RZ}
 };
-}
-
-namespace cunqa {
-namespace sim {
 
 struct TaskState {
     std::string id;
@@ -59,7 +55,7 @@ struct TaskState {
     bool finished = false;
     bool blocked = false;
     bool cat_entangled = false;
-    //std::stack<int> telep_meas; // !!!!!!
+    std::stack<int> telep_meas; // !!!!!!
 };
 
 struct GlobalState {
@@ -70,6 +66,11 @@ struct GlobalState {
     bool ended = false;
     comm::ClassicalChannel* chan = nullptr;
 };
+
+} // End of anonymous namespace
+
+namespace cunqa {
+namespace sim {
 
 std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask> &quantum_tasks, comm::ClassicalChannel *classical_channel)
 {

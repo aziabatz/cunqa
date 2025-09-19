@@ -21,14 +21,10 @@
 
 #include "logger.hpp"
 
-
-namespace cunqa {
-namespace sim {
-
-
+namespace {
 struct TaskState {
     std::string id;
-    JSON::const_iterator it, end;
+    cunqa::JSON::const_iterator it, end;
     unsigned long zero_qubit = 0;
     bool finished = false;
     bool blocked = false;
@@ -42,8 +38,12 @@ struct GlobalState {
     std::map<std::size_t, bool> cvalues;
     std::unordered_map<std::string, std::stack<uint_t>> qc_meas;
     bool ended = false;
-    comm::ClassicalChannel* chan = nullptr;
+    cunqa::comm::ClassicalChannel* chan = nullptr;
 };
+}
+
+namespace cunqa {
+namespace sim {
 
 std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel)
 {
