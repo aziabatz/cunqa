@@ -115,16 +115,16 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         // This is added to be able to add instructions outside the main loop
         
         const JSON& inst = instruction.empty() ? *T.it : instruction;
+        LOGGER_DEBUG("INSTRUCCIÓN: {}", inst.dump());
+
         // Check if the ifs below are really needed
-        /*if (inst.contains("conditional_reg")) {
+        if (inst.contains("conditional_reg")) {
             auto v = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-            if (!v.size() || !G.creg[v[0]])
-                return;
-        } else if (inst.contains("remote_conditional_reg")) {
+            if (!G.creg[v[0]]) return;
+        } else if (inst.contains("remote_conditional_reg") && inst.at("name") != "recv") { // TODO: Cambiar el nombre para el recv y para el resto
             auto v = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-            if (!v.size() || !G.rcreg[v[0]])
-                return;
-        } */
+            if (!G.rcreg[v[0]]) return;
+        }
 
         std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
 
@@ -157,20 +157,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             } else {
                 simple_gate = std::make_unique<StandardOperation>(qubits[0] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
             }
-            
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(simple_gate));
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(simple_gate));
-                }
-            } else {
-                applyOperationToStateAdapter(std::move(simple_gate));
-            }
+            applyOperationToStateAdapter(std::move(simple_gate));
             break;
         }
         case constants::ECR:
@@ -178,20 +165,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         {
             qc::Targets targets = {static_cast<unsigned int>(G.n_qubits - 1), static_cast<unsigned int>(qubits[0] + T.zero_qubit)};
             auto two_gate = std::make_unique<qc::StandardOperation>(targets, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
-
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else {
-                applyOperationToStateAdapter(std::move(two_gate));
-            }
+            applyOperationToStateAdapter(std::move(two_gate));
             break;
         }
         case constants::CX:
@@ -200,20 +174,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         {
             Control control(qubits[0] + T.zero_qubit);
             auto two_gate = std::make_unique<StandardOperation>(control, qubits[1] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
-
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else {
-                applyOperationToStateAdapter(std::move(two_gate));
-            }
+            applyOperationToStateAdapter(std::move(two_gate));
             break;
         }
         case constants::CRX:
@@ -223,19 +184,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             auto params = inst.at("params").get<std::vector<double>>();
             Control control(qubits[0] + T.zero_qubit);
             auto two_gate = std::make_unique<StandardOperation>(control, qubits[1] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type), params);
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    applyOperationToStateAdapter(std::move(two_gate));
-                }
-            } else {
-                applyOperationToStateAdapter(std::move(two_gate));
-            }
+            applyOperationToStateAdapter(std::move(two_gate));
             break;
         }
         case constants::C_IF_H:
@@ -266,6 +215,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
             auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<size_t>>();
             int measurement = classical_channel->recv_measure(endpoint[0]);
             G.rcreg[conditional_reg[0]] = (measurement == 1);
+            LOGGER_DEBUG("El índice {} tiene valor {}", conditional_reg[0], G.rcreg[conditional_reg[0]]);
             break;
         }
         case constants::QSEND:

@@ -84,8 +84,15 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         // This is added to be able to add instructions outside the main loop
         const JSON& inst = instruction.empty() ? *T.it : instruction;
 
-        std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
+        if (inst.contains("conditional_reg")) {
+            auto v = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
+            if (!G.creg[v[0]]) return;
+        } else if (inst.contains("remote_conditional_reg") && inst.at("name") != "recv") { // TODO: Cambiar el nombre para el recv y para el resto
+            auto v = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
+            if (!G.rcreg[v[0]]) return;
+        }
 
+        std::vector<int> qubits = inst.at("qubits").get<std::vector<int>>();
         auto inst_type = constants::INSTRUCTIONS_MAP.at(inst.at("name").get<std::string>());
 
         switch (inst_type)
@@ -102,250 +109,66 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             break;
         }
         case constants::X:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcx({qubits[0] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcx({qubits[0] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcx({qubits[0] + T.zero_qubit});
-            }
+            state->apply_mcx({qubits[0] + T.zero_qubit});
             break;
-        }
         case constants::Y:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcy({qubits[0] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcy({qubits[0] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcy({qubits[0] + T.zero_qubit});
-            }
+            state->apply_mcy({qubits[0] + T.zero_qubit});
             break;
-        }
         case constants::Z:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcz({qubits[0] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcz({qubits[0] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcz({qubits[0] + T.zero_qubit});
-            }
+            state->apply_mcz({qubits[0] + T.zero_qubit});
             break;
-        }
         case constants::H:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_h(qubits[0] + T.zero_qubit);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_h(qubits[0] + T.zero_qubit);
-                }
-            } else {
-                state->apply_h(qubits[0] + T.zero_qubit);
-            }
+            state->apply_h(qubits[0] + T.zero_qubit);
             break;
-        }
         case constants::SX:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcsx({qubits[0] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcsx({qubits[0] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcsx({qubits[0] + T.zero_qubit});
-            }
+            state->apply_mcsx({qubits[0] + T.zero_qubit});
             break;
-        }
         case constants::CX:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-            }
+            state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
             break;
-        }
         case constants::CY:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-            }
+            state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
             break;
-        }
         case constants::CZ:
-        {
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-                }
-            } else {
-                state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
-            }
+            state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
             break;
-        }
         case constants::ECR:
             // TODO
             break;
         case constants::RX:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcrx({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcrx({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcrx({qubits[0] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcrx({qubits[0] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::RY:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcry({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcry({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcry({qubits[0] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcry({qubits[0] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::RZ:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcrz({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcrz({qubits[0] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcrz({qubits[0] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcrz({qubits[0] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRX:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRY:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRZ:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            if (inst.contains("conditional_reg")) {
-                auto conditional_reg = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.creg[conditional_reg[0]]) {
-                    state->apply_mcrz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else if (inst.contains("remote_conditional_reg")) {
-                auto conditional_reg = inst.at("remote_conditional_reg").get<std::vector<std::uint64_t>>();
-                if (G.rcreg[conditional_reg[0]]) {
-                    state->apply_mcrz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-                }
-            } else {
-                state->apply_mcrz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
-            }
+            state->apply_mcrz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::C_IF_H:
@@ -384,7 +207,6 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             state->apply_mcx({G.n_qubits - 2, G.n_qubits - 1});
             //----------------------------------------------------
 
-
             // CX to the entangled pair
             state->apply_mcx({qubits[0] + T.zero_qubit, G.n_qubits - 2});
 
@@ -403,8 +225,7 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         }
         case constants::QRECV:
         {
-            if (!G.qc_meas.contains(inst.at("qpus")[0]))
-            {
+            if (!G.qc_meas.contains(inst.at("qpus")[0])) {
                 T.blocked = true;
                 return;
             }
@@ -416,12 +237,10 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             G.qc_meas[inst.at("qpus")[0]].pop();
 
             // Apply, conditioned to the measurement, the X and Z gates
-            if (meas1)
-            {
+            if (meas1) {
                 state->apply_mcx({G.n_qubits - 1});
             }
-            if (meas2)
-            {
+            if (meas2) {
                 state->apply_mcz({G.n_qubits - 1});
             }
 
@@ -556,15 +375,7 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
 JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 {
     std::map<std::string, std::size_t> meas_counter;
-
-    // This is for distinguising classical and quantum communications
-    // TODO: Make it more clear
-    /* if (classical_channel && qc.quantum_tasks.size() == 1)
-    {
-        std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
-    } */
-
+    
     auto shots = qc.quantum_tasks[0].config.at("shots").get<std::size_t>();
     std::string method = qc.quantum_tasks[0].config.at("method").get<std::string>();
 
