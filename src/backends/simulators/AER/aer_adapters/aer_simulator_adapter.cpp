@@ -301,7 +301,7 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             break;
         }
         default:
-            std::cerr << "Instruction not suported!" << "\n";
+            std::cerr << "Instruction not suported!" << "\n" << "Instruction that failed: " << inst.dump(4) << "\n";
         } // End switch
     };
 
