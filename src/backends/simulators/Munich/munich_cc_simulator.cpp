@@ -1,7 +1,7 @@
 #include <chrono>
 
 #include "munich_cc_simulator.hpp"
-#include "munich_adapters/circuit_simulator_adapter.hpp"
+#include "munich_adapters/munich_simulator_adapter.hpp"
 #include "munich_adapters/quantum_computation_adapter.hpp"
 
 #include "utils/constants.hpp"
