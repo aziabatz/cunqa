@@ -343,7 +343,7 @@ class CunqaCircuit:
 
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
-            raise error
+            raise SystemExit
 
     def _check_instruction(self, instruction):
         """
