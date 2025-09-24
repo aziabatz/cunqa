@@ -25,7 +25,8 @@ std::string get_qc_run_command(const CunqaArgs& args, const std::string& mode)
     int num_ports = args.n_qpus * 3;
     int qpu_task_mem = 1; //TODO
     int qpu_task_n_cores = 1; 
-    int simulator_task_mem = args.mem_per_qpu * args.n_qpus - args.n_qpus; //TODO
+    int mem_per_qpu = args.mem_per_qpu.has_value() ? args.mem_per_qpu.has_value() : get_mem_per_core() * args.cores_per_qpu; 
+    int simulator_task_mem = mem_per_qpu * args.n_qpus - args.n_qpus; //TODO
     int simulator_task_n_cores = args.cores_per_qpu * args.n_qpus; 
     run_command =  "srun -n " + std::to_string(args.n_qpus) + " -c " + std::to_string(qpu_task_n_cores) + " --mem-per-cpu=" + std::to_string(qpu_task_mem) + "G --resv-ports=" + std::to_string(num_ports) + " --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " +  subcommand + " &\n";
     LOGGER_DEBUG("Run command with ZMQ comm: {}", run_command);

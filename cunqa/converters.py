@@ -126,6 +126,8 @@ def _qc_to_json(qc : 'QuantumCircuit') -> dict:
             "id": "",
             "is_parametric": _is_parametric(qc),
             "is_dynamic": False,
+            "has_cc":False,
+            "has_qc":False,
             "instructions":[],
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
