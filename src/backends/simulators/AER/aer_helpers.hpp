@@ -18,7 +18,8 @@ namespace sim {
 
 QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
 {
-    int n_clbits = quantum_task.config.at("num_clbits");
+    int mem_slots = quantum_task.config.at("num_clbits");
+    LOGGER_DEBUG("Memory_slots: {}", std::to_string(mem_slots));
     JSON new_config = {
         {"method", quantum_task.config.at("method")},
         {"shots", quantum_task.config.at("shots")},
@@ -28,7 +29,7 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
 
     if (quantum_task.config.at("avoid_parallelization").get<bool>()) {
         LOGGER_DEBUG("Trhead parallelization canceled");
-        new_config["max_parallel_shots"] = 0;
+        //new_config["max_parallel_shots"] = 0;
         new_config["max_parallel_threads"] = 1;
     }
 
@@ -38,8 +39,6 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
         {"instructions", JSON::parse(std::regex_replace(quantum_task.circuit.dump(),
                        std::regex("clbits"), "memory"))}
     };
-
-    LOGGER_DEBUG("Finishing quantum_task_to_AER");
 
     return QuantumTask(new_circuit, new_config);
 }

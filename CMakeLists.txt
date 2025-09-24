@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
 
+
 message(STATUS "CMAKE BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE CONFIGURATION TYPE: ${CMAKE_CONFIGURATION_TYPES}")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -57,8 +58,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/utils/logger" "${CMAKE_CURR
 include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
 
 add_library(AerCPP INTERFACE)
-
-target_include_directories(AerCPP INTERFACE "{CMAKE_CURRENT_SOURCE_DIR}/src/third-party/aer-cpp")
+target_include_directories(AerCPP INTERFACE "{CMAKE_CURRENT_SOURCE_DIR}/src/third-party/#aer-cpp")
 if(OpenMP_FOUND)
   target_link_libraries(AerCPP INTERFACE OpenMP::OpenMP_CXX)
   message(STATUS "Linked OpenMP to aer-cpp")
@@ -67,6 +67,7 @@ endif()
 add_subdirectory(src)
 add_subdirectory(cunqa)
 add_subdirectory(examples)
+
 
 # uninstall target
 if(NOT TARGET uninstall)

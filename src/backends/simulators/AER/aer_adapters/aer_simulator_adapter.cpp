@@ -437,6 +437,9 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
 JSON AerSimulatorAdapter::simulate(const Backend* backend)
 {
     try {
+
+        /* int result = std::system("python /mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/aer_bench.py"); */
+
         auto quantum_task = qc.quantum_tasks[0];
 
         auto aer_quantum_task = quantum_task_to_AER(quantum_task);
