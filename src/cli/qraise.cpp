@@ -70,29 +70,29 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
         }
     }
 
-    int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
-    if (memory_specs == 1) {
-        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
-        return;
-    } else if (memory_specs == 2) {
-        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-qpu or increase the cores-per-qpu. Max mem-per-cpu = 4");
+    if (args.mem_per_qpu.has_value() && (args.mem_per_qpu.value()/args.cores_per_qpu > get_mem_per_core())) {
+        LOGGER_ERROR("Too much memory per QPU. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu: QMIO = 16, FT3 = 4)");
         return;
     }
 
-    int mem_per_qpu = args.mem_per_qpu;
-    int cores_per_qpu = args.cores_per_qpu;
     if (!args.qc) {
         if (args.mem_per_qpu.has_value() && check_mem_format(args.mem_per_qpu.value())) {
-            sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
+            sbatchFile << "#SBATCH --mem-per-cpu=" << args.mem_per_qpu.value()/args.cores_per_qpu << "G\n";
         } else if (args.mem_per_qpu.has_value() && !check_mem_format(args.mem_per_qpu.value())) {
             LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
             return;
         } else if (!args.mem_per_qpu.has_value()) {
-            sbatchFile << "#SBATCH --mem-per-cpu=" << 15 * cores_per_qpu << "G\n";
+            int mem_per_core = get_mem_per_core();
+            sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_core << "G\n";
         }
         
     } else {
-        sbatchFile << "#SBATCH --mem=" << mem_per_qpu * args.n_qpus << "G\n";
+        if (args.mem_per_qpu.has_value() && check_mem_format(args.mem_per_qpu.value())) {
+            sbatchFile << "#SBATCH --mem=" << args.mem_per_qpu.value() * args.n_qpus << "G\n";
+        } else {
+            int mem_per_core = get_mem_per_core();
+            sbatchFile << "#SBATCH --mem=" << mem_per_core * args.cores_per_qpu * args.n_qpus << "G\n";
+        }
     }
 
 

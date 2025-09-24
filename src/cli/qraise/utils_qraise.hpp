@@ -22,17 +22,17 @@ bool check_mem_format(const int& mem)
     return std::regex_match(mem_str, format);
 }
 
-int check_memory_specs(const int& mem_per_qpu, const int& cores_per_qpu)
+int get_mem_per_core()
 {
-    int mem_per_cpu = mem_per_qpu/cores_per_qpu;
     auto system_var = std::getenv("LMOD_SYSTEM_NAME");
-    if ((std::string(system_var) == "QMIO" && mem_per_cpu > 15)) {
-        return 1;
-    } else if ((std::string(system_var) == "FT3" && mem_per_cpu > 4)){
-        return 2;
+    if (std::string(system_var) == "QMIO") {
+        return 15;
+    } else if ((std::string(system_var) == "FT3")){
+        return 4;
     }
     return 0;
 }
+
 
 bool exists_family_name(const std::string& family, const std::string& info_path)
 {
