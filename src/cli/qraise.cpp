@@ -70,19 +70,31 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
         }
     }
 
-    if (check_mem_format(args.mem_per_qpu)){
-        int mem_per_qpu = args.mem_per_qpu;
-        int cores_per_qpu = args.cores_per_qpu;
-        if (!args.qc) {
+    int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
+    if (memory_specs == 1) {
+        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
+        return;
+    } else if (memory_specs == 2) {
+        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-qpu or increase the cores-per-qpu. Max mem-per-cpu = 4");
+        return;
+    }
+
+    int mem_per_qpu = args.mem_per_qpu;
+    int cores_per_qpu = args.cores_per_qpu;
+    if (!args.qc) {
+        if (args.mem_per_qpu.has_value() && check_mem_format(args.mem_per_qpu.value())) {
             sbatchFile << "#SBATCH --mem-per-cpu=" << mem_per_qpu/cores_per_qpu << "G\n";
-        } else {
-            sbatchFile << "#SBATCH --mem=" << mem_per_qpu * args.n_qpus << "G\n";
+        } else if (args.mem_per_qpu.has_value() && !check_mem_format(args.mem_per_qpu.value())) {
+            LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
+            return;
+        } else if (!args.mem_per_qpu.has_value()) {
+            sbatchFile << "#SBATCH --mem-per-cpu=" << 15 * cores_per_qpu << "G\n";
         }
         
     } else {
-        LOGGER_ERROR("Memory format is incorrect, must be: xG (where x is the number of Gigabytes).");
-        return;
+        sbatchFile << "#SBATCH --mem=" << mem_per_qpu * args.n_qpus << "G\n";
     }
+
 
     if (check_time_format(args.time))
         sbatchFile << "#SBATCH --time=" << args.time << "\n";
@@ -93,15 +105,6 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
 
     if (!check_simulator_name(args.simulator)){
         LOGGER_ERROR("Incorrect simulator name ({}).", args.simulator);
-        return;
-    }
-
-    int memory_specs = check_memory_specs(args.mem_per_qpu, args.cores_per_qpu);
-    if (memory_specs == 1) {
-        LOGGER_ERROR("Too much memory per QPU in QMIO. Please, decrease the mem-per-qpu or increase the cores-per-qpu. (Max mem-per-cpu = 16)");
-        return;
-    } else if (memory_specs == 2) {
-        LOGGER_ERROR("Too much memory per QPU in FT3. Please, decrease the mem-per-qpu or increase the cores-per-qpu. Max mem-per-cpu = 4");
         return;
     }
 
