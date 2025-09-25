@@ -69,6 +69,8 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
     if (size(quantum_tasks) > 1)
         G.n_qubits += 2;
 
+    LOGGER_DEBUG("Number of qubits in execute_shot_: {}", std::to_string(G.n_qubits));
+
     auto generate_entanglement_ = [&]() {
 
         // Apply H to the first entanglement qubit
@@ -83,6 +85,8 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
 
         // This is added to be able to add instructions outside the main loop
         const JSON& inst = instruction.empty() ? *T.it : instruction;
+
+        LOGGER_DEBUG("Instruction: {}", inst.dump());
 
         if (inst.contains("conditional_reg")) {
             auto v = inst.at("conditional_reg").get<std::vector<std::uint64_t>>();
@@ -325,6 +329,8 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         }
 
     } // End one shot
+
+    LOGGER_DEBUG("End one shot");
 
     std::string result_bits(G.n_clbits, '0');
     for (const auto &[bitIndex, value] : G.cvalues)

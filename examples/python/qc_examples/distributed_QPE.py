@@ -13,7 +13,7 @@ def get_rz_circuits(n_ancilla_qubits, angle_to_compute):
     ancilla_circuit = CunqaCircuit(n_ancilla_qubits, id = "ancilla_circuit")
     register_circuit = CunqaCircuit(1, id = "register_circuit")
 
-    register_circuit.x(1) # Rz statevector
+    register_circuit.x(0) # Rz statevector
 
     for i in range(n_ancilla_qubits): # TODO: counting from n_ancilla_qubits-1 to 0
         ancilla_circuit.h(i)
@@ -24,9 +24,9 @@ def get_rz_circuits(n_ancilla_qubits, angle_to_compute):
 
     
     if (n_ancilla_qubits % 2) == 0:
-        swap_range = n_ancilla_qubits / 2
+        swap_range = int(n_ancilla_qubits / 2)
     else:
-        swap_range = (n_ancilla_qubits - 1) / 2
+        swap_range = int((n_ancilla_qubits - 1) / 2)
 
     for i in range(swap_range):
         ancilla_circuit.swap(i, n_ancilla_qubits - 1 - i)
@@ -55,8 +55,8 @@ if __name__ == "__main__":
 
     QPE_circuits = get_rz_circuits(n_ancilla_qubits, angle_to_compute)
 
-    raised_qpus = qraise(2, "00:30:00", simulator="Aer", quantum_comm=True, cloud = True)
-    qpus  = get_QPUs(local=False, family = raised_qpus)
+    #raised_qpus = qraise(2, "00:30:00", simulator="Aer", quantum_comm=True, cloud = True)
+    qpus  = get_QPUs(local=False, family = "for_dQPE")
 
     jobs = run_distributed(QPE_circuits, qpus, shots=1000) 
 
