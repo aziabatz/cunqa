@@ -61,7 +61,7 @@ def QPE(phase, n):
     for i in range(n):
         rep = 2**i
         for j in range(rep):
-            qpe.rxx(phase, i, n)
+            qpe.cp(phase, i, n)
     
     print("Added cp gates...")
     
@@ -88,8 +88,9 @@ QPUs = get_QPUs(local = False, family=f"QPE-{num_qpus}")
 
 print("QPUs: ", QPUs)
 
+# print(complete_circuit.instructions)
 
-shots = 8
+shots = 1000
 
 par_shots = [shots // num_qpus for i in range(num_qpus)]
 
@@ -133,5 +134,5 @@ result = {
     "fidelity":fidelity
 }
 
-with open(f"results/QPE{n}_{num_qpus}QPUs.json", "w") as f:
+with open(f"/mnt/netapp1/Store_CESGA/home/cesga/mlosada/api/api-simulator/examples/CESGA_use_cases/Shots-parallelization/results/QPE{n}_{num_qpus}QPUs.json", "w") as f:
     json.dump(result, f, indent=2)

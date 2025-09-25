@@ -12,7 +12,7 @@ repetitions=100
 cores_per_qpu=4
 mem=$(($cores_per_qpu * 8))
 
-for ((n=27; n<=repetitions; n++)); do
+for ((n=29; n<=repetitions; n++)); do
 
     qraise -n $n -t 20:00:00 -c $cores_per_qpu --mem-per-qpu=${mem}G --cloud --fakeqmio=/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json --family_name=$mode-$n
 

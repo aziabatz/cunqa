@@ -451,6 +451,8 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
         run_config_json["seed_simulator"] = quantum_task.config.at("seed");
         Config aer_config(run_config_json);
 
+        LOGGER_DEBUG("Circiut: {}", circuit_json.dump());
+
         Noise::NoiseModel noise_model(backend->config.at("noise_model"));
 
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
