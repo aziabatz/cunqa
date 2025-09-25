@@ -7,7 +7,7 @@ repetitions=16
 
 if [ "$mode" == "cunqa" ]; then
 
-    for ((n=15; n<=repetitions; n++)); do
+    for ((n=12; n<=repetitions; n++)); do
 
         echo "Raising 3 qpus with $cores_per_qpu cores each"
 
@@ -25,7 +25,7 @@ if [ "$mode" == "cunqa" ]; then
             --time=90:00:00 \
             -c  $total\
             --mem-per-cpu=4G \
-            --wrap="OMP_NUM_THREADS=$num_params python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores_per_qpu\""
+            --wrap="OMP_NUM_THREADS=1 python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores_per_qpu\""
         
         sleep 15
     done
@@ -34,15 +34,15 @@ else
 
     for ((n=2; n<=repetitions; n++)); do
 
-        echo "hola"
+        total=$((3 * $cores_per_qpu))
 
-        sbatch --job-name="$mode-$n" \
+        sbatch --job-name="$mode$n" \
                --output="./logs/$mode-$n-%j.out" \
                --error="./logs/$mode-$n-%j.err" \
                --time=05:00:00 \
-               -c $cores \
-               --mem-per-cpu=4G \
-               --wrap="OMP_NUM_THREADS=$cores python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores\""
+               -c $total \
+               --mem-per-cpu=8G \
+               --wrap="OMP_NUM_THREADS=$total python -u run-vqe-$mode.py --num_qubits \"$n\" --cores \"$cores_per_qpu\""
         
         sleep 15
     done

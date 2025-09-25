@@ -132,7 +132,9 @@ def _qc_to_json(qc : 'QuantumCircuit') -> dict:
             "num_qubits":sum([q.size for q in qc.qregs]),
             "num_clbits": sum([c.size for c in qc.cregs]),
             "quantum_registers":quantum_registers,
-            "classical_registers":classical_registers
+            "classical_registers":classical_registers,
+            "has_cc":False,
+            "has_qc":False,
         }
         for instruction in qc.data:
             qreg = [r._register.name for r in instruction.qubits]
