@@ -59,10 +59,10 @@ def QPE(phase, n):
     for i in range(n):
         rep = 2**i
         for j in range(rep):
-            qpe.rzz(phase, i, n - 1)
+            qpe.rzz(phase, i, n)
 
     
-    print("Added cp gates...")
+    print("Added rzz gates...")
     
     qpe = merge_circuits(qpe, IQFT(n))
 
@@ -74,7 +74,7 @@ def QPE(phase, n):
     return qpe
 
 
-n = 3
+n = 16
 
 theta = 0
 
@@ -88,7 +88,7 @@ QPUs = get_QPUs(local = False, family=f"QPE-{num_qpus}")
 print("QPUs: ", QPUs)
 
 
-shots = 100
+shots = 10000
 
 par_shots = [shots // num_qpus for i in range(num_qpus)]
 

@@ -446,7 +446,7 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
         int n_clbits = quantum_task.config.at("num_clbits");
         JSON circuit_json = aer_quantum_task.circuit;
 
-        LOGGER_DEBUG("Circuit: {}", circuit_json.dump());
+        //LOGGER_DEBUG("Circuit: {}", circuit_json.dump());
 
         Circuit circuit(circuit_json);
         std::vector<std::shared_ptr<Circuit>> circuits;
@@ -461,6 +461,9 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
         Result result = controller_execute<Controller>(circuits, noise_model, aer_config);
 
         JSON result_json = result.to_json();
+
+        LOGGER_DEBUG("Result: {}", result_json.dump());
+
         convert_standard_results_Aer(result_json, n_clbits);
 
         return result_json;
