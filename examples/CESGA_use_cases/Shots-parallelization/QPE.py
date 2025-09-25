@@ -15,8 +15,6 @@ from cunqa import transpiler
 from qiskit import transpile
 from cunqa.qutils import qraise
 
-
-
 parser = argparse.ArgumentParser(description="Quantum Optimization Script")
 parser.add_argument("--num_qpus", type=int, required=True, help="Number of QPUs")
 parser.add_argument("--cores", type=int, required=True, help="Number of qubits")
@@ -36,15 +34,16 @@ print(f"\nEXECUTING PROGRAM FOR {num_qpus} QPUs with {cores} cores/QPU.")
 
 # creating QFT circuit for n qubits
 
-def QFT(n):
-    qft = CunqaCircuit(n)
+def IQFT(n):
+    iqft = CunqaCircuit(n)
+    for i in range(0, int(n/2)):
+        iqft.swap(i,n-1-i)
+    print("\tAdded swaps...")
     for i in range(n):
-        qft.h(n-1-i)
-        for j in range(0,n-1-i)[::-1]:
-            qft.cp(np.pi/(2**(n-1-i-j)), j, n-1-i)
-    for i in range(0,int(n/2)):
-        qft.swap(i,n-1-i)
-    return qft
+        for j in range(i):
+            iqft.cp(-np.pi/(2**(i-j)), j, i)
+        iqft.h(i)
+    return iqft
 
 
 def merge_circuits(circ1, circ2):
@@ -56,13 +55,19 @@ def QPE(phase, n):
 
     for i in range(n):
         qpe.h(i)
+
+    print("Added hadamard gates...")
     
     for i in range(n):
         rep = 2**i
         for j in range(rep):
-            qpe.rzz(phase, i, n)
+            qpe.rxx(phase, i, n)
     
-    qpe = merge_circuits(qpe, QFT(n))
+    print("Added cp gates...")
+    
+    qpe = merge_circuits(qpe, IQFT(n))
+
+    print("Added IQFT...")
 
     for i in range(n):
         qpe.measure(i,i)
@@ -70,18 +75,21 @@ def QPE(phase, n):
     return qpe
 
 
-
-n = 12
+n = 16
 
 theta = 0
 
+print("Creating circuit...")
 complete_circuit = QPE(theta,n)
 
-QPUs = get_QPUs(local = False, family=f"{num_qpus}QPUs")
+print("Circuit created!")
 
-transpiled_circuit = transpiler(complete_circuit,QPUs[0].backend, initial_layout=[30, 31, 28, 29, 23, 12, 9, 14, 10, 20, 11, 27]) # , 19, 24, 18, 17
+QPUs = get_QPUs(local = False, family=f"QPE-{num_qpus}")
 
-shots = 1e7
+print("QPUs: ", QPUs)
+
+
+shots = 8
 
 par_shots = [shots // num_qpus for i in range(num_qpus)]
 
@@ -93,7 +101,7 @@ qjobs = []
 
 tick = time.time()
 for par,qpu in zip(par_shots,QPUs):
-    qjobs.append(qpu.run(transpiled_circuit, shots = par, method = "statevector"))
+    qjobs.append(qpu.run(complete_circuit, shots = par, method = "statevector"))
 
 results = gather(qjobs)
 tack = time.time()
@@ -125,5 +133,5 @@ result = {
     "fidelity":fidelity
 }
 
-with open(f"results/QFT_n{n}_{num_qpus}QPUs.json", "w") as f:
+with open(f"results/QPE{n}_{num_qpus}QPUs.json", "w") as f:
     json.dump(result, f, indent=2)

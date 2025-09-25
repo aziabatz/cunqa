@@ -48,12 +48,12 @@ def QFT(n):
 
 def IQFT(n):
     iqft = CunqaCircuit(n)
-    # for i in range(0, int(n/2)):
-    #     iqft.swap(i,n-1-i)
-    # for i in range(n):
-    #     for j in range(i):
-    #         iqft.cp(-np.pi/(2**(i-j)), j, i)
-    #     iqft.h(i)
+    for i in range(0, int(n/2)):
+        iqft.swap(i,n-1-i)
+    for i in range(n):
+        for j in range(i):
+            iqft.cp(-np.pi/(2**(i-j)), j, i)
+        iqft.h(i)
     return iqft
 
 def merge_circuits(circ1, circ2):
@@ -62,10 +62,10 @@ def merge_circuits(circ1, circ2):
 
 n = 12
 
-complete_circuit = merge_circuits(QFT(n), IQFT(n))
+complete_circuit = QFT(n)
 complete_circuit.measure_all()
 
-QPUs = get_QPUs(local = False, family=f"{num_qpus}QPUs")
+QPUs = get_QPUs(local = False, family=f"QFT-{num_qpus}")
 
 transpiled_circuit = transpiler(complete_circuit,QPUs[0].backend, initial_layout=[30, 31, 28, 29, 23, 12, 9, 14, 10, 20, 11, 27]) # , 19, 24, 18, 17
 
@@ -108,7 +108,7 @@ result = {
     "total_time":total_time,
     "mean_simulation_time":mean_simulation_time,
     "maximum_simulation_time":maximum_simulation_time,
-    "overhead":abs(total_time-sequeltial_time),
+    "overhead":abs(total_time-maximum_simulation_time),
     "qubits":n,
     "fidelity":fidelity
 }
