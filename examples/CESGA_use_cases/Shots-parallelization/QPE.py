@@ -88,7 +88,7 @@ QPUs = get_QPUs(local = False, family=f"QPE-{num_qpus}")
 print("QPUs: ", QPUs)
 
 
-shots = 10000
+shots = 1000
 
 par_shots = [shots // num_qpus for i in range(num_qpus)]
 
