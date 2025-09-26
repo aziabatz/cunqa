@@ -9,17 +9,18 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
 
-def get_rz_circuits(n_ancilla_qubits, angle_to_compute):
+def get_rz_circuits(n_ancilla_qubits, phase_to_compute):
     ancilla_circuit = CunqaCircuit(n_ancilla_qubits, id = "ancilla_circuit")
     register_circuit = CunqaCircuit(1, id = "register_circuit")
 
     register_circuit.x(0) # Rz statevector
 
-    for i in range(n_ancilla_qubits): # TODO: counting from n_ancilla_qubits-1 to 0
+    for i in range(n_ancilla_qubits):
         ancilla_circuit.h(i)
-    
-        with ancilla_circuit.expose(i, register_circuit) as rcontrol:
-            param = (2**i) * angle_to_compute
+
+    for i in range(n_ancilla_qubits):
+        with ancilla_circuit.expose(n_ancilla_qubits - 1 - i, register_circuit) as rcontrol:
+            param = (2**i) * (2 * np.pi) * phase_to_compute
             register_circuit.crz(param, rcontrol, 0)
 
     
@@ -34,12 +35,13 @@ def get_rz_circuits(n_ancilla_qubits, angle_to_compute):
 
     for i in range(n_ancilla_qubits):
         for j in range(i):
-            angle  = (-4 * np.pi) / (2**(i + 1 - j)) 
+            angle  = (-np.pi) / (2**(i - j)) 
             ancilla_circuit.crz(angle, n_ancilla_qubits - 1 - j, n_ancilla_qubits - 1 - i)
         ancilla_circuit.h(n_ancilla_qubits - 1 - i)
 
 
     ancilla_circuit.measure_all()
+    #register_circuit.measure_all()
 
     circuits_list = [ancilla_circuit, register_circuit]
 
@@ -51,16 +53,15 @@ def get_rz_circuits(n_ancilla_qubits, angle_to_compute):
 if __name__ == "__main__":
     n_ancilla_qubits = 10
     n_register_qubits = 1
-    angle_to_compute = np.pi
+    phase_to_compute = 1/2**2
 
-    QPE_circuits = get_rz_circuits(n_ancilla_qubits, angle_to_compute)
+    QPE_circuits = get_rz_circuits(n_ancilla_qubits, phase_to_compute)
 
-    #raised_qpus = qraise(2, "00:30:00", simulator="Aer", quantum_comm=True, cloud = True)
+    #raised_qpus = qraise(2, "00:30:00", simulator="Aer", quantum_comm=True, cloud = True, family_name="for_dQPE")
     qpus  = get_QPUs(local=False, family = "for_dQPE")
 
-    jobs = run_distributed(QPE_circuits, qpus, shots=1000) 
+    jobs = run_distributed(QPE_circuits, qpus, shots=100) 
 
     results = gather(jobs)
 
-    for result in results:
-        print(result)
+    print(results[0])
