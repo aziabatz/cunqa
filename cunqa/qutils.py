@@ -206,7 +206,7 @@ def qraise(n, t, *,
         if cores is not None:
             command = command + f" --cores={str(cores)}"
         if mem_per_qpu is not None:
-            command = command + f" --mem_per_qpu={str(mem_per_qpu)}"
+            command = command + f" --mem-per-qpu={str(mem_per_qpu)}G"
         if n_nodes is not None:
             command = command + f" --n_nodes={str(n_nodes)}"
         if node_list is not None:
@@ -222,6 +222,8 @@ def qraise(n, t, *,
         if not os.path.exists(INFO_PATH):
            with open(INFO_PATH, "w") as file:
                 file.write("{}")
+
+        print(f"Command: {command}")
 
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)

@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
                     turn_ON_QPU<MunichQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
                     break;
                 case murmur::hash("Cunqa"): 
-                    LOGGER_DEBUG("QPU going to turn on with AerQCSimulator.");
+                    LOGGER_DEBUG("QPU going to turn on with CunqaQCSimulator.");
                     turn_ON_QPU<AerQCSimulator, QCConfig, QCBackend>(backend_json, mode, family);
                     break;
                 default:

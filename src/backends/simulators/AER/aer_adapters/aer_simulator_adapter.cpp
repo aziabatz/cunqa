@@ -125,17 +125,23 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             state->apply_mcsx({qubits[0] + T.zero_qubit});
             break;
         case constants::CX:
+        {
             unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
             state->apply_mcx({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::CY:
+        {
             unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
             state->apply_mcy({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::CZ:
+        {
             unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
             state->apply_mcz({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::ECR:
             // TODO
             break;
