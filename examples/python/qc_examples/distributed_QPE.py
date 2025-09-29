@@ -20,7 +20,7 @@ def get_rz_circuits(n_ancilla_qubits, phase_to_compute):
 
     for i in range(n_ancilla_qubits):
         with ancilla_circuit.expose(n_ancilla_qubits - 1 - i, register_circuit) as rcontrol:
-            param = (2**i) * (2 * np.pi) * phase_to_compute
+            param = (2**i) * phase_to_compute
             register_circuit.crz(param, rcontrol, 0)
 
     
@@ -53,7 +53,7 @@ def get_rz_circuits(n_ancilla_qubits, phase_to_compute):
 if __name__ == "__main__":
     n_ancilla_qubits = 10
     n_register_qubits = 1
-    phase_to_compute = 1/2**2
+    phase_to_compute = 2 * (2 * np.pi) / np.pi   # The first 2 is because we are using Rz whose eigenvalue is exp(i*theta/2)
 
     QPE_circuits = get_rz_circuits(n_ancilla_qubits, phase_to_compute)
 

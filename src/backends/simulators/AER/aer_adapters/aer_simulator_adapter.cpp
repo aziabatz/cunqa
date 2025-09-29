@@ -125,13 +125,16 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             state->apply_mcsx({qubits[0] + T.zero_qubit});
             break;
         case constants::CX:
-            state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcx({control, qubits[1] + T.zero_qubit});
             break;
         case constants::CY:
-            state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcy({control, qubits[1] + T.zero_qubit});
             break;
         case constants::CZ:
-            state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcz({control, qubits[1] + T.zero_qubit});
             break;
         case constants::ECR:
             // TODO
@@ -157,13 +160,15 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         case constants::CRX:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcrx({control, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRY:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcry({control, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRZ:

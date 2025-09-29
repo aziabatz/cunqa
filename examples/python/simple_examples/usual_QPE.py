@@ -16,7 +16,7 @@ def get_rz_circuit_for_QPE(n_ancilla_qubits, phase_to_compute):
     for i in range(n_ancilla_qubits):
         circuit.h(i)
     for i in range(n_ancilla_qubits):
-        param = (2**i) * (2*np.pi) * phase_to_compute
+        param = (2**i) * phase_to_compute
         circuit.crz(param, n_ancilla_qubits - 1 - i, n_ancilla_qubits)
     
     if (n_ancilla_qubits % 2) == 0:
@@ -42,13 +42,11 @@ def get_rz_circuit_for_QPE(n_ancilla_qubits, phase_to_compute):
 
 if __name__ == "__main__":
     n_ancilla_qubits = 10
-    phase_to_compute = 1/2**5
+    phase_to_compute = 2 * np.pi
     circuit = get_rz_circuit_for_QPE(n_ancilla_qubits, phase_to_compute)
-
-    print(circuit)
 
     simulator = AerSimulator()
 
     result = simulator.run(circuit, shots = 100, method = "statevector").result()
 
-    print(result.data()["counts"])
+    print(result.get_counts())
