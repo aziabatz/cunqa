@@ -30,6 +30,8 @@ def print_results(result_list, angle):
             exponent = i + 1
             estimated_theta += 1 / (2**exponent)
 
+    estimated_theta = 2 * np.pi * estimated_theta
+
     print(f"Measured output: {binary_string}")
     print(f"Estimated theta: {estimated_theta}")
     print(f"Real theta: {angle}")
@@ -53,7 +55,7 @@ def QPE_rz_circuits(angle_to_compute, n_qpus):
 
     circuits = {}
     for i in range(n_qpus): 
-        theta = 2 * angle_to_compute * np.pi * 2**(n_qpus - i)
+        theta = 2**(n_qpus - i) * angle_to_compute 
 
         circuits[f"cc_{i}"] = CunqaCircuit(2, 2, id= f"cc_{i}")
         circuits[f"cc_{i}"].h(0)
@@ -111,7 +113,7 @@ def QPE_rzxrz_circuits(angle, n_qpus):
 
     circuits = {}
     for i in range(n_qpus): 
-        theta = 2 * np.pi * 2**(n_qpus - i - 1) * angle
+        theta = 2**(n_qpus - i - 1) * angle
         #print(f"Theta: {theta}")
 
         circuits[f"cc_{i}"] = CunqaCircuit(3,3, id= f"cc_{i}") #we set the same number of quantum and classical bits because Cunqasimulator requires all qubits to be measured for them to be represented on the counts
@@ -140,16 +142,17 @@ def QPE_rzxrz_circuits(angle, n_qpus):
     return circuits
 
 
-def deploy_qpus(n_qpus, simulator = "Aer"):
-    family = qraise(n_qpus, "00:10:00", simulator=simulator, classical_comm=True, cloud = True)
+
+def deploy_qpus(n_qpus, cores_per_qpu, mem_per_qpu, simulator = "Aer"):
+    family = qraise(n_qpus, "03:00:00", simulator=simulator, classical_comm=True, cloud = True, cores = cores_per_qpu, mem_per_qpu = mem_per_qpu)
     return family
 
 
-def run_distributed_QPE(circuits, qpus_name, seed = 1234):
+def run_iterative_QPE(circuits, qpus_name, shots, seed = 1234):
 
     qpus_QPE  = get_QPUs(local = False, family = qpus_name)
     algorithm_starts = time.time()
-    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=2000, seed=seed)
+    distr_jobs = run_distributed(list(circuits.values()), qpus_QPE, shots=shots, seed=seed)
     
     result_list = gather(distr_jobs)
     algorithm_ends = time.time()
@@ -158,16 +161,17 @@ def run_distributed_QPE(circuits, qpus_name, seed = 1234):
     return result_list, algorithm_time
         
 
-def iqpe_benchmarking(angles_list, n_qpus_list):
+def iqpe_benchmarking(angles_list, n_qpus_list, shots, cores_per_qpu, mem_per_qpu, seed):
     for angle in angles_list:
         for n_qpus in n_qpus_list:
-            qpus = deploy_qpus(n_qpus)
+            qpus = deploy_qpus(n_qpus, cores_per_qpu, mem_per_qpu)
             list_computed_angles = []
             list_times = []
-            for _ in range(100):
-                seed = random.randrange(1, 10000)
-                circuits = QPE_rzxrz_circuits(angle, n_qpus)
-                results, time_taken = run_distributed_QPE(circuits, qpus, seed)
+            for it in range(10):
+                print(f"IQPE: iteration {it} for angle {angle}")
+                rand_seed = random.randrange(1, 10000)
+                circuits = QPE_rz_circuits(angle, n_qpus)
+                results, time_taken = run_iterative_QPE(circuits, qpus, shots, rand_seed)
                 computed_angle = get_computed_angle(results)
                 list_computed_angles.append(computed_angle)
                 list_times.append(time_taken)
@@ -176,22 +180,34 @@ def iqpe_benchmarking(angles_list, n_qpus_list):
             angles_stdv = st.stdev(list_computed_angles)
             times_mean = st.mean(list_times)
             times_stdv = st.stdev(list_times)
-            to_write = [angle, n_qpus, angles_mean, angles_stdv, times_mean, times_stdv]
-            to_write_str = ','.join(map(str, to_write))
-            with open(f"iqpe_bench_{angle}.txt", "a") as f:
-                f.write(to_write_str + "\n")
+            dict_data = {
+                "num_qpus":n_qpus,
+                "total_time":times_mean,
+                "qubits_per_QPU":2,
+                "shots":shots,
+                "input_theta":angle,
+                "estimated_theta": angles_mean, 
+            }
+            
+            str_data =str(dict_data)
+            with open(f"/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/python/cc_examples/results_iterative_QPE/iQPE_results.txt", "a") as f:
+                f.write(str_data)
 
             qdrop(qpus)
             time.sleep(30)
 
 
 if __name__ == "__main__":
-    angle = 1/2**10
-    n_qpus = 10
+    angles_list = [(2 * 2*np.pi)/2**10, (2 * 2*np.pi)/np.pi]
+    n_qpus = [16]
+    shots = 1e5
+    cores_per_qpu = 8
+    mem_per_qpu = 120 # en GB
+    seed = 13
 
-    circuits = QPE_rzxrz_circuits(angle, n_qpus)
-    qpus_name = deploy_qpus(n_qpus)
-    results, time_taken = run_distributed_QPE(circuits, qpus_name)
+    iqpe_benchmarking(angles_list, n_qpus, shots, cores_per_qpu, mem_per_qpu, seed)
 
-    print_results(results, angle)
+
+    
+
 

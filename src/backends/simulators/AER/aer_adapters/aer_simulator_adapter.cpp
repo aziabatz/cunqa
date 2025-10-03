@@ -70,7 +70,8 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         G.n_qubits += 2;
 
     auto generate_entanglement_ = [&]() {
-
+        state->apply_reset({G.n_qubits - 1});
+        state->apply_reset({G.n_qubits - 2});
         // Apply H to the first entanglement qubit
         state->apply_h(G.n_qubits - 2);
 
@@ -124,14 +125,23 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             state->apply_mcsx({qubits[0] + T.zero_qubit});
             break;
         case constants::CX:
-            state->apply_mcx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcx({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::CY:
-            state->apply_mcy({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcy({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::CZ:
-            state->apply_mcz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcz({control, qubits[1] + T.zero_qubit});
             break;
+        }
         case constants::ECR:
             // TODO
             break;
@@ -156,19 +166,22 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         case constants::CRX:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            state->apply_mcrx({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcrx({control, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRY:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            state->apply_mcry({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcry({control, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::CRZ:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            state->apply_mcrz({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit}, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            state->apply_mcrz({control, qubits[1] + T.zero_qubit}, params[0]);
             break;
         }
         case constants::C_IF_H:
@@ -182,8 +195,13 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
         case constants::C_IF_RX:
         case constants::C_IF_RY:
         case constants::C_IF_RZ:
-            // //TODO: Look how Aer natively applies C_IFs operations
+            // Managed by use
             break;
+        case constants::SWAP:
+        {
+            state->apply_mcswap({qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit});
+            break;
+        }
         case constants::MEASURE_AND_SEND:
         {
             auto endpoint = inst.at("qpus").get<std::vector<std::string>>();
@@ -269,8 +287,10 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
                 G.qc_meas[inst.at("qpus")[0]].pop();
 
                 if (meas) {
-                    state->apply_mcz({G.n_qubits - 1});
+                    state->apply_mcz({qubits[0] + T.zero_qubit}); 
                 }
+
+                T.cat_entangled = false;
             }
             break;
         }
@@ -298,6 +318,7 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
             G.qc_meas[T.id].push(result);
 
             Ts[inst.at("qpus")[0]].blocked = false;
+            size_t erased_elements = G.qc_meas.erase(inst.at("qpus")[0]); 
             break;
         }
         default:
@@ -333,7 +354,6 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
     }
 
     return result_bits;
-
 }
 
 
@@ -395,7 +415,6 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         n_qubits += 2;
 
     reg_t qubit_ids;
-    LOGGER_DEBUG("Before shots");
     auto start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < shots; i++)
     {
@@ -404,12 +423,12 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         meas_counter[execute_shot_(state, qc.quantum_tasks, classical_channel)]++;
         state->clear();
     } // End all shots
-
-    delete state;
-
+    
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<float> duration = end - start;
     float time_taken = duration.count();
+
+    delete state;
 
     reverse_bitstring_keys_json(meas_counter);
     JSON result_json = {

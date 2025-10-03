@@ -115,7 +115,7 @@ std::string CircuitSimulatorAdapter::execute_shot_(const std::vector<QuantumTask
         // This is added to be able to add instructions outside the main loop
         
         const JSON& inst = instruction.empty() ? *T.it : instruction;
-        LOGGER_DEBUG("INSTRUCCIÓN: {}", inst.dump());
+        //LOGGER_DEBUG("INSTRUCCIÓN: {}", inst.dump());
 
         // Check if the ifs below are really needed
         if (inst.contains("conditional_reg")) {

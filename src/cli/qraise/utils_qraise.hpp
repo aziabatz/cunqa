@@ -17,7 +17,7 @@ bool check_time_format(const std::string& time)
 bool check_mem_format(const int& mem) 
 {
     std::string mem_str = std::to_string(mem) + "G";
-    std::regex format("^(\\d{1,2})G$");
+    std::regex format("^(\\d{1,4})G$");
     return std::regex_match(mem_str, format);
 }
 
@@ -75,13 +75,15 @@ bool check_simulator_name(const std::string& sim_name)
     }
 }
 
-int number_of_nodes(const int& number_of_qpus, const int& cores_per_qpu, const int& number_of_nodes, const int& cores_per_node)
+int number_of_nodes(const int& number_of_qpus, const int& cores_per_qpu, const int& number_of_nodes, const int& cores_per_node, const bool has_qc = false)
 {
-    if (number_of_qpus * cores_per_qpu < number_of_nodes * cores_per_node) {
+    int available_cores = number_of_nodes * cores_per_node;;
+    int needed_cores = has_qc ? number_of_qpus * cores_per_qpu + number_of_qpus : number_of_qpus * cores_per_qpu;
+
+    if (needed_cores < available_cores) {
         return number_of_nodes;
     } else {
-        float aprox_number_of_nodes = ((float)number_of_qpus * (float)cores_per_qpu)/(float)cores_per_node;
+        float aprox_number_of_nodes = needed_cores/(float)cores_per_node;
         return static_cast<int>(std::ceil(aprox_number_of_nodes));
-
     }
 }

@@ -75,7 +75,7 @@ public:
 
     inline JSON execute(const QuantumTask& quantum_task) const override
     {
-        LOGGER_DEBUG("Vamos a ejecutar.");
+        LOGGER_DEBUG("Let's execute.");
         return simulator_->execute(*this, quantum_task);
     }
 
