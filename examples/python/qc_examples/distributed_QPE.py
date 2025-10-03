@@ -67,22 +67,20 @@ def run_distributed_QPE(circuits, qpus_name, shots, seed = 1234):
 
 def get_estimated_angle(results):
     counts = results[0].counts
-    print(counts)
 
-    binary_string = ""
     most_frequent_output = max(counts, key=counts.get)
+    print(most_frequent_output)
 
     estimated_theta = 0.0
-    for i, digit in enumerate(reversed(most_frequent_output)):
+    for i, digit in enumerate(most_frequent_output):
         if digit == '1':
-            exponent = i + 1
-            estimated_theta += 1 / (2**exponent)
+            estimated_theta += 1 / (2 ** (i + 1))
 
     return estimated_theta
 
 
 def deploy_qpus(n_qpus, cores_per_qpu, mem_per_qpu, simulator = "Aer"):
-    family = qraise(n_qpus, "03:00:00", simulator=simulator, quantum_comm = True, cloud = True, cores = cores_per_qpu, mem_per_qpu = mem_per_qpu)
+    family = qraise(n_qpus, "10:00:00", simulator=simulator, quantum_comm = True, cloud = True, cores = cores_per_qpu, mem_per_qpu = mem_per_qpu)
     return family
 
 
@@ -90,32 +88,25 @@ def deploy_qpus(n_qpus, cores_per_qpu, mem_per_qpu, simulator = "Aer"):
 def dist_qpe_benchmarking(angles_list, n_ancilla_qubits, shots, cores_per_qpu, mem_per_qpu, seed):
     for angle in angles_list:
         qpus = deploy_qpus(2, cores_per_qpu, mem_per_qpu)
-        list_estimated_angles = []
-        list_times = []
-        for it in range(10):
-            print(f"dist_QPE: iteration {it} for angle {angle}")
-            rand_seed = random.randrange(1, 10000)
-            circuits = dist_QPE_rz_circuits(n_ancilla_qubits, angle)
-            results, time_taken = run_distributed_QPE(circuits, qpus, shots, rand_seed)
-            estimated_angle = get_estimated_angle(results)
-            list_estimated_angles.append(estimated_angle)
-            list_times.append(time_taken)
 
-        estimated_angle_mean = st.mean(list_estimated_angles)
-        estimated_angles_stdv = st.stdev(list_estimated_angles)
-        times_mean = st.mean(list_times)
-        times_stdv = st.stdev(list_times)
+        circuits = dist_QPE_rz_circuits(n_ancilla_qubits, 2 * 2 * np.pi * angle) # The first 2 is because we are using Rz whose eigenvalue is exp(i*theta/2)
+        results, time_taken = run_distributed_QPE(circuits, qpus, shots, seed)
+        estimated_angle = get_estimated_angle(results)
+
         dict_data = {
             "num_qpus":2,
-            "total_time":times_mean,
+            "total_time":time_taken,
             "n_ancilla_qubits":n_ancilla_qubits,
+            "cores_per_qpu":cores_per_qpu,
+            "mem_per_qpu":mem_per_qpu,
             "shots":shots,
             "input_theta":angle,
-            "estimated_theta": estimated_angle_mean, 
+            "estimated_theta": estimated_angle, 
+            "counts": results[0].counts
         }
         
         str_data =str(dict_data)
-        with open(f"/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/python/cc_examples/results_iterative_QPE/dist_QPE_results.txt", "a") as f:
+        with open(f"/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/python/qc_examples/results_distributed_QPE/dist_QPE_results.txt", "a") as f:
             f.write(str_data)
 
         qdrop(qpus)
@@ -125,10 +116,10 @@ def dist_qpe_benchmarking(angles_list, n_ancilla_qubits, shots, cores_per_qpu, m
 if __name__ == "__main__":
     n_ancilla_qubits = 16
     n_register_qubits = 1
-    angles_to_compute = [2 * (2 * np.pi) / 2**10, 2 * (2 * np.pi) / np.pi]   # The first 2 is because we are using Rz whose eigenvalue is exp(i*theta/2)
-    shots = 1e5
-    cores_per_qpu = 8
-    mem_per_qpu = 120 # en GB
+    angles_to_compute = [1 / 2**10, 1 / np.pi]   
+    shots = 1e4
+    cores_per_qpu = 4
+    mem_per_qpu = 60 # en GB
     seed = 13
 
     dist_qpe_benchmarking(angles_to_compute, n_ancilla_qubits, shots, cores_per_qpu, mem_per_qpu, seed)

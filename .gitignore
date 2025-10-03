@@ -307,3 +307,5 @@ bash/
 examples/CESGA_use_cases/EP-use-case/qiskit_*
 examples/CESGA_use_cases/EP-use-case/pool_*
 examples/CESGA_use_cases/EP-use-case/cunqa_*
+
+results*/

@@ -161,32 +161,36 @@ def run_iterative_QPE(circuits, qpus_name, shots, seed = 1234):
     return result_list, algorithm_time
         
 
+def get_total_counts(results):
+    total_counts = {}
+    for result in results:
+        for binary_string, counts in result.counts.items():
+            if binary_string in total_counts:
+                total_counts[binary_string] += counts
+            else:
+                total_counts[binary_string] = counts
+
+    return total_counts 
+
 def iqpe_benchmarking(angles_list, n_qpus_list, shots, cores_per_qpu, mem_per_qpu, seed):
     for angle in angles_list:
         for n_qpus in n_qpus_list:
             qpus = deploy_qpus(n_qpus, cores_per_qpu, mem_per_qpu)
-            list_computed_angles = []
-            list_times = []
-            for it in range(10):
-                print(f"IQPE: iteration {it} for angle {angle}")
-                rand_seed = random.randrange(1, 10000)
-                circuits = QPE_rz_circuits(angle, n_qpus)
-                results, time_taken = run_iterative_QPE(circuits, qpus, shots, rand_seed)
-                computed_angle = get_computed_angle(results)
-                list_computed_angles.append(computed_angle)
-                list_times.append(time_taken)
+            circuits = QPE_rz_circuits(2*np.pi * angle, n_qpus)
+            results, time_taken = run_iterative_QPE(circuits, qpus, shots, seed)
+            computed_angle = get_computed_angle(results)
+            #total_counts = get_total_counts(results)
 
-            angles_mean = st.mean(list_computed_angles)
-            angles_stdv = st.stdev(list_computed_angles)
-            times_mean = st.mean(list_times)
-            times_stdv = st.stdev(list_times)
             dict_data = {
                 "num_qpus":n_qpus,
-                "total_time":times_mean,
+                "total_time":time_taken,
                 "qubits_per_QPU":2,
+                "cores_per_qpu":cores_per_qpu,
+                "mem_per_qpu":mem_per_qpu,
                 "shots":shots,
                 "input_theta":angle,
-                "estimated_theta": angles_mean, 
+                "estimated_theta": computed_angle, 
+                #"counts":total_counts
             }
             
             str_data =str(dict_data)
@@ -198,11 +202,11 @@ def iqpe_benchmarking(angles_list, n_qpus_list, shots, cores_per_qpu, mem_per_qp
 
 
 if __name__ == "__main__":
-    angles_list = [(2 * 2*np.pi)/2**10, (2 * 2*np.pi)/np.pi]
+    angles_list = [1/2**10, 1/np.pi]
     n_qpus = [16]
-    shots = 1e5
-    cores_per_qpu = 8
-    mem_per_qpu = 120 # en GB
+    shots = 1e6
+    cores_per_qpu = 4
+    mem_per_qpu = 60 # en GB
     seed = 13
 
     iqpe_benchmarking(angles_list, n_qpus, shots, cores_per_qpu, mem_per_qpu, seed)
