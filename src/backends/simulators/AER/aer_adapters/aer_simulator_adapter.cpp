@@ -346,7 +346,7 @@ std::string execute_shot_(AER::AerState* state, const std::vector<QuantumTask>& 
                 auto endpoint = instruction.at("qpus").get<std::vector<std::string>>();
                 uint_t measurement = state->apply_measure({qubits[0] + zero_qubit[i]});
                 int measurement_as_int = static_cast<int>(measurement);
-                classical_channel->send_measure(measurement_as_int, endpoint[0]); 
+                classical_channel->send_measure(measurement_as_int, endpoint[0]);
                 break;
             }
             case cunqa::constants::RECV:
@@ -472,12 +472,10 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
 {
     std::map<std::string, std::size_t> meas_counter;
 
-    // This is for distinguising classical and quantum communications
-    // TODO: Make it more clear
-    if (classical_channel && qc.quantum_tasks.size() == 1)
-    {
-        std::vector<std::string> connect_with = qc.quantum_tasks[0].sending_to;
-        classical_channel->connect(connect_with);
+    // Enables the possibility of classical communications between qc_QPU with cc_QPU
+    for (const auto& quantum_task : qc.quantum_tasks) {
+        std::vector<std::string> connect_with = quantum_task.sending_to;
+        classical_channel->connect(connect_with, true);
     }
 
     auto shots = qc.quantum_tasks[0].config.at("shots").get<std::size_t>();
@@ -488,7 +486,6 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     state->configure("device", "CPU");
     state->configure("precision", "double");
     state->configure("seed_simulator", std::to_string(qc.quantum_tasks[0].config.at("seed").get<int>()));
-
 
     unsigned long n_qubits = 0;
     for (auto &quantum_task : qc.quantum_tasks)

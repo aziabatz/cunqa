@@ -15,6 +15,7 @@
 #include "qraise/simple_conf_qraise.hpp"
 #include "qraise/cc_conf_qraise.hpp"
 #include "qraise/qc_conf_qraise.hpp"
+#include "qraise/infrastructure_conf_qraise.hpp"
 
 #include "logger.hpp"
 
@@ -23,6 +24,7 @@ namespace {
 }
 
 using namespace std::literals;
+using namespace cunqa;
 
 namespace {
 
@@ -31,11 +33,14 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     // Escribir el contenido del script SBATCH
     sbatchFile << "#!/bin/bash\n";
     sbatchFile << "#SBATCH --job-name=qraise \n";
-    int max_cores_per_task = !args.qc ? args.cores_per_qpu : args.cores_per_qpu * args.n_qpus;
-    sbatchFile << "#SBATCH -c " << max_cores_per_task << "\n";
-    int tasks = args.qc ? args.n_qpus + 1 : args.n_qpus;
-    sbatchFile << "#SBATCH --ntasks=" << tasks << "\n";
-    int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE);
+
+    int n_tasks = args.qc ? args.n_qpus * args.cores_per_qpu + args.n_qpus : args.n_qpus;    
+    sbatchFile << "#SBATCH --ntasks=" << n_tasks << "\n";
+
+    if (!args.qc) 
+        sbatchFile << "#SBATCH -c " << args.cores_per_qpu << "\n";
+
+    int n_nodes = number_of_nodes(args.n_qpus, args.cores_per_qpu, args.number_of_nodes.value(), CORES_PER_NODE, args.qc);
     sbatchFile << "#SBATCH -N " << n_nodes << "\n";
     
     if (args.qpus_per_node.has_value()) {
@@ -175,26 +180,34 @@ int main(int argc, char* argv[])
     const char* store = std::getenv("STORE");
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
-    // Setting and checking mode and family name, respectively
-    std::string mode = args.cloud ? "cloud" : "hpc";
-    std::string family = args.family_name;
-    if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
-        LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
-        std::system("rm qraise_sbatch_tmp.sbatch");
-        return -1;
+    if (args.infrastructure.has_value()) {
+            LOGGER_DEBUG("Raising infrastructure");
+            std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
+            write_sbatch_file_from_infrastructure(sbatchFile, args);
+            sbatchFile.close();
+    } else {
+        // Setting and checking mode and family name, respectively
+        std::string mode = args.cloud ? "cloud" : "hpc";
+        std::string family = args.family_name;
+        if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
+            LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
+            std::system("rm qraise_sbatch_tmp.sbatch");
+            return -1;
+        }
+
+        // Writing the sbatch file
+        std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
+        write_sbatch_header(sbatchFile, args);
+        write_env_variables(sbatchFile);
+        write_run_command(sbatchFile, args, mode);
+        sbatchFile.close();
+
     }
 
-    // Writing the sbatch file
-    std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-    write_sbatch_header(sbatchFile, args);
-    write_env_variables(sbatchFile);
-    write_run_command(sbatchFile, args, mode);
-    sbatchFile.close();
-
-    
     // Executing and deleting the file
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");
-
+    
+    
     return 0;
 }

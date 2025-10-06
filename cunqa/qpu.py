@@ -91,14 +91,15 @@ class QPU:
     This communication is stablished trough the :py:attr:`QPU.qclient`.
 
     """
-    _id: int #: Id string assigned to the object.
-    _qclient: 'QClient'  #: Object that holds the information to communicate with the server endpoint of the corresponding virtual QPU.
-    _backend: 'Backend' #: Object that provides the characteristics that the simulator at the virtual QPU uses to emulate a real device.
-    _family: str #: Name of the family to which the corresponding virtual QPU belongs.
-    _endpoint: "tuple[str, int]" #: String refering to the endpoint of the corresponding virtual QPU.
-    _connected: bool #: Weather if the :py:class:`QClient` is already connected.
+    _id: int 
+    _qclient: 'QClient' 
+    _backend: 'Backend'
+    _name: str 
+    _family: str
+    _endpoint: "tuple[str, int]" 
+    _connected: bool 
     
-    def __init__(self, id: int, qclient: 'QClient', backend: Backend, family: str, endpoint: "tuple[str, int]"):
+    def __init__(self, id: int, qclient: 'QClient', backend: Backend, name: str, family: str, endpoint: "tuple[str, int]"):
         """
         Initializes the :py:class:`QPU` class.
 
@@ -120,6 +121,7 @@ class QPU:
         self._id = id
         self._qclient = qclient
         self._backend = backend
+        self._name = name
         self._family = family
         self._endpoint = endpoint
         self._connected = False
@@ -130,6 +132,10 @@ class QPU:
     def id(self) -> int:
         """Id string assigned to the object."""
         return self._id
+    
+    @property
+    def name(self) -> str:
+        return self._name
     
     @property
     def backend(self) -> Backend:

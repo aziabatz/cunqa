@@ -43,4 +43,4 @@ for result in result_list:
     print(result)
 
 ########## Drop the deployed QPUs #
-qdrop(family)
+#qdrop(family)
