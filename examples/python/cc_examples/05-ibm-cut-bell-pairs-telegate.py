@@ -10,7 +10,7 @@ sys.path.append(os.getenv("HOME"))
 examples_path: str = str(Path(__file__).resolve().parent.parent)
 
 from cunqa.logger import logger
-from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.qutils import get_QPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.mappers import run_distributed
 from cunqa.qjob import gather
@@ -29,9 +29,9 @@ def how_big_a_combination(k):
     return 4**(k)-2**(k) + 2**(2**k)-1
 
 
-# Raise QPUs (allocates classical resources for the simulation job) and retrieve them using getQPUs #
+# Raise QPUs (allocates classical resources for the simulation job) and retrieve them using get_QPUs #
 family = qraise(2,"00:10:00", simulator="Munich", classical_comm=True, cloud = True)
-qpus  = getQPUs(local = False, family = family)
+qpus  = get_QPUs(local = False, family = family)
 
 # Params for the gates in the Cut Bell Pair Factory #
 with open(examples_path + "/cc_examples/two_qpd_bell_pairs_param_values.txt") as fin:

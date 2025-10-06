@@ -1,8 +1,59 @@
-<h1 style="font-size:8em;" style="text-align: center;"> CUNQA </h1>
-<h2> A platform to simulate distributed quantum computing on CESGA HPC enviroment. </h2>
+
+<p align="center">
+  <a>
+    <img src="https://img.shields.io/badge/os-linux-blue" alt="Python version" height="18">
+  </a>
+  <a>
+    <img src="https://img.shields.io/badge/python-3.9-blue.svg" alt="Python version" height="18">
+  </a>
+  <a href="cesga-quantum-spain.github.io/cunqa/">
+    <img src="https://img.shields.io/badge/docs-blue.svg" alt="Python version" height="18">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://cesga-quantum-spain.github.io/cunqa/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cunqa_white.png" width="600" height="150">
+    <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logo_cunqa_black.png" width="600" height="150">
+    <img src="docs/source/_static/logo_cunqa_black.png" width="30%" style="display: inline-block;" alt="CUNQA logo">
+  </picture>
+  </a>
+</p>
+
+<p align="center">
+  A HPC platform to simulate Distributed Quantum Computing. 
+</p>
+
+<br>
+
+<p align="center">
+  <a href="https://cesga-quantum-spain.github.io/cunqa/">
+  <img width=30% src="https://img.shields.io/badge/documentation-black?style=for-the-badge&logo=read%20the%20docs" alt="Documentation">
+  </a>
+</p>
 
 
-<h2> Authors </h2>
+<p>
+    <div align="center">
+      <a href="https://www.cesga.es/">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cesga_blanco.png" width="200" height="50">
+          <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logo_cesga_negro.png" width="200" height="50">
+          <img src="docs/source/_static/logo_cesga_negro.png" width="30%" style="display: inline-block;" alt="CESGA logo">
+        </picture>
+      </a>
+      <a href="https://quantumspain-project.es/">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/QuantumSpain_logo_white.png" width="240" height="50">
+          <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/QuantumSpain_logo_color.png" width="240" height="50">
+          <img src="docs/source/_static/QuantumSpain_logo_white.png" width="30%" style="display: inline-block;" alt="QuantumSpain logo">
+        </picture>
+      </a>
+    </div>
+</p>
+
+## Authors 
 <ul>
   <li> <a href="https://github.com/martalosada">Marta Losada Estévez </a> </li>
   <li> <a href="https://github.com/jorgevazquezperez">Jorge Vázquez Pérez </a></li>
@@ -10,17 +61,6 @@
   <li> <a href="https://github.com/D-Exposito">Daniel Expósito Patiño </a></li>
   <br> 
 </ul>
-
-<a href="https://www.cesga.es/">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/source/_static/logo_cesga_blanco.png" width="250" height="60">
-    <source media="(prefers-color-scheme: light)" srcset="docs/source/_static/logotipo_CESGA_negro.png" width="200" height="60">
-    <img alt="CESGA Logo" src="docs/source/_static/logotipo_CESGA_negro.png" width="200" height="60">
-  </picture>
-</a> 
-
-<br> 
-<br>
 
 # Table of contents
   - [USE AS LMOD MODULE](#use-as-lmod-module)
@@ -225,7 +265,7 @@ The personalized backend has to be a *json* file with the following structure:
 > The "noise" key must be filled with a json with noise instructions supported by the chosen simulator.
 
 > [!IMPORTANT]  
-> Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `getQPUs()` method presented in the section below will collect all the raised QPUs.
+> Several `qraise` commands can be executed one after another to raise as many QPUs as desired, each one having its own configuration, independently of the previous ones. The `get_QPUs()` method presented in the section below will collect all the raised QPUs.
 
 ### 2. Python Program Example
 Once the QPUs are raised, they are ready to execute any quantum circuit. The following script shows a basic workflow.
@@ -254,9 +294,9 @@ import sys
 sys.path.append(os.getenv("HOME"))
 
 # Let's get the raised QPUs
-from cunqa.qutils import getQPUs
+from cunqa.qutils import get_QPUs
 
-qpus  = getQPUs() # List of raised QPUs
+qpus  = get_QPUs() # List of raised QPUs
 for q in qpus:
     print(f"QPU {q.id}, name: {q.backend.name}, backend: {q.backend.simulator}, version: {q.backend.version}.")
 

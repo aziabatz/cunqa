@@ -4,7 +4,7 @@ home = os.getenv("HOME")
 sys.path.append(home)
 
 from cunqa.mappers import run_distributed
-from cunqa.qutils import getQPUs, qraise, qdrop
+from cunqa.qutils import get_QPUs, qraise, qdrop
 from cunqa.circuit import CunqaCircuit
 from cunqa.qjob import gather
 
@@ -21,7 +21,7 @@ circuit2.qrecv(0, "circuit1")
 circuit1.measure_all()
 circuit2.measure_all()
 
-qpus = getQPUs(local=False)
+qpus = get_QPUs(local=False)
 
 qjobs = run_distributed([circuit1, circuit2], qpus, shots = 100)
 
