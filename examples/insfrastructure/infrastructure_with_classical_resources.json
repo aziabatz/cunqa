@@ -36,9 +36,6 @@
                 "memory": 2,
                 "cores_per_qpu": 2
             }
-        },
-        "infrastructure": {
-            "time": "01:00:00"
         }
     }
 }

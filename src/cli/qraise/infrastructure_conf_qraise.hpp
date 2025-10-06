@@ -69,8 +69,7 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
     }
     
     int n_nodes = std::ceil(total_number_of_cores/64.0);
-    std::string time = classical_resources.at("infrastructure").at("time").get<std::string>(); 
-    if (!check_time_format(time)) {
+    if (!check_time_format(args.time)) {
         LOGGER_ERROR("Time format is incorrect, must be: xx:xx:xx.");
         return;
     }
@@ -81,7 +80,7 @@ void write_sbatch_file_from_infrastructure(std::ofstream& sbatchFile, const Cunq
     sbatchFile << "#SBATCH --ntasks=" << std::to_string(total_number_of_cores) << "\n";
     sbatchFile << "#SBATCH --mem=" << std::to_string(total_memory_in_gb) << "G\n";
     sbatchFile << "#SBATCH -N " << std::to_string(n_nodes) << "\n";
-    sbatchFile << "#SBATCH --time=" << time << "\n";
+    sbatchFile << "#SBATCH --time=" << args.time << "\n";
     sbatchFile << "#SBATCH --output=qraise_%j\n";
     //sbatchFile << "#SBATCH --ntasks-per-node=" << 1 << "\n";
     //sbatchFile << "#SBATCH -c " << std::to_string(cores_per_task) << "\n"; 
