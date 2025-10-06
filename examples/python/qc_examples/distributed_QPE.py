@@ -106,7 +106,7 @@ def dist_qpe_benchmarking(angles_list, n_ancilla_qubits, shots, cores_per_qpu, m
         }
         
         str_data =str(dict_data)
-        with open(f"/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/python/qc_examples/results_distributed_QPE/dist_QPE_results.txt", "a") as f:
+        with open(f"/mnt/netapp1/Store_CESGA/home/cesga/acarballido/repos/api-simulator/examples/python/qc_examples/dist_QPE_results.txt", "a") as f:
             f.write(str_data)
 
         qdrop(qpus)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     n_ancilla_qubits = 16
     n_register_qubits = 1
     angles_to_compute = [1 / 2**10, 1 / np.pi]   
-    shots = 1e4
+    shots = 10
     cores_per_qpu = 4
     mem_per_qpu = 60 # en GB
     seed = 13
