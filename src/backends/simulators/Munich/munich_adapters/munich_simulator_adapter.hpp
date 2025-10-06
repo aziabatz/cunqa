@@ -28,9 +28,7 @@ public:
     JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
 private:
 
-    void apply_gate_(const JSON& instruction, std::unique_ptr<qc::Operation>&& std_op, std::map<std::size_t, bool>& classic_reg, std::map<std::size_t, bool>& r_classic_reg);
     std::string execute_shot_(const std::vector<QuantumTask>& quantum_tasks, comm::ClassicalChannel* classical_channel);
-    void generate_entanglement_(const int& n_qubits);
     
 };
 

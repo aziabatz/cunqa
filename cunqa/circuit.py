@@ -92,7 +92,7 @@ def _generate_id(size: int = 4) -> str:
 
 
 
-SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "qsend", "qrecv"]
+SUPPORTED_GATES_1Q = ["id","x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg", "u1", "u2", "u3", "u", "p", "r", "rx", "ry", "rz", "measure_and_send", "qsend", "qrecv","expose"]
 SUPPORTED_GATES_2Q = ["swap", "cx", "cy", "cz", "csx", "cp", "cu", "cu1", "cu3", "rxx", "ryy", "rzz", "rzx", "crx", "cry", "crz", "ecr", "c_if_h", "c_if_x","c_if_y","c_if_z","c_if_rx","c_if_ry","c_if_rz"]
 SUPPORTED_GATES_3Q = [ "ccx","ccy", "ccz","cswap"]
 SUPPORTED_GATES_PARAMETRIC_1 = ["u1", "p", "rx", "ry", "rz", "rxx", "ryy", "rzz", "rzx","cp", "crx", "cry", "crz", "cu1","c_if_rx","c_if_ry","c_if_rz"]
@@ -147,7 +147,7 @@ class CunqaCircuit:
     :py:meth:`~CunqaCircuit.measure_and_send`, :py:meth:`~CunqaCircuit.remote_c_if`.
 
     **Remote operations for quantum comminications:**
-    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`.
+    :py:meth:`~CunqaCircuit.qsend`, :py:meth:`~CunqaCircuit.qrecv`, :py:meth:`~CunqaCircuit.expose`, :py:meth:`~CunqaCircuit.rcontrol`.
 
     Creating your first CunqaCircuit
     ---------------------------------
@@ -184,7 +184,7 @@ class CunqaCircuit:
     Classical communications among circuits
     ---------------------------------------
 
-    The strong part of CunqaCircuit is that it allows to define communication directives between circuits.
+    The strong part of :py:class:`CunqaCircuit` is that it allows to define communication directives between circuits.
     We can define the sending of a classical bit from one circuit to another by:
 
         >>> circuit_1 = CunqaCircuit(2)
@@ -195,7 +195,7 @@ class CunqaCircuit:
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
-    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`cunqa.mappers.run_distributed` function.
+    Then, circuits can be sent to QPUs that support classical communications using the :py:meth:`~cunqa.mappers.run_distributed` function.
 
     Circuits can also be referend to through their *id* string. When a CunqaCircuit is created, by default a random *id* is assigned, but it can also be personalized:
 
@@ -207,11 +207,17 @@ class CunqaCircuit:
         >>> circuit_1.measure_all()
         >>> circuit_2.measure_all()
 
-    Sending qubits between circuits
-    --------------------------------
+    Teledata protocol
+    -----------------
+    .. image:: /_static/teledata.png
+        :align: center
+        :width: 150
+        :height: 300px
 
-    When quantum communications among the QPUs utilized are available, a qubit from one circuit can be sent to another.
-    In this scheme, generally an acilla qubit would be neccesary to perform the communication. Let's see an example for the creation of a Bell pair remotely:
+    The teledata protocol consists on the reconstruction of an unknown quantum state of a given physical system at a different location without actually transmitting the system [#]_.
+    Within :py:mod:`cunqa`, when quantum communications among the virtual QPUs utilized are available, a qubit from one circuit can be sent to another, the teledata protocol is implemented
+    at a lower level so there is no need for the user to implement it.
+    In this scheme, generally an acilla qubit would be neccesary to recieve the quantum state. Let's see an example for the creation of a Bell pair remotely:
 
         >>> circuit_1 = CunqaCircuit(2, 1, id = "1")
         >>> circuit_2 = CunqaCircuit(2, 2, id = "2")
@@ -226,6 +232,39 @@ class CunqaCircuit:
 
     It is important to note that the qubit used for the communication, the one send, after the operation it is reset, so in a general basis it wouldn't need to be measured.
     If we want to send more qubits afer, we can use it since it is reset to zero.
+
+    Telegate protocol
+    -----------------
+    .. image:: /_static/telegate.png
+        :align: center
+        :width: 150
+        :height: 300px
+
+    Quantum gate teleportation, also known as telegate, reduces the topological requirements by substituting two-qubit gates with other cost-effective resources: auxiliary entangled states, local
+    measurements, and single-qubit operations [#]_. This is another feature available in :py:mod:`cunqa` in the quantum communications scheme, managed by the :py:class:`~cunqa.circuit.ControlContext` class.
+    Here is an example analogous to the one presented above:
+
+        >>> circuit_1 = CunqaCircuit(2, id = "1")
+        >>> circuit_2 = CunqaCircuit(1, id = "2")
+        >>>
+        >>> circuit_1.h(0); circuit_1.cx(0,1)
+        >>>
+        >>> with circuit_1.expose(1, circuit_2) as rcontrol: # exposing qubit at circuit_1
+        >>>     circuit_2.cx(rcontol, 1) # applying telegate operation controlled by the exposed qubit
+        >>>
+        >>> circuit_1.measure_all()
+        >>> circuit_2.measure_all()
+
+    Here there is no need for an ancilla since the control is the exposed qubit from the other circuit/virtual QPU.
+
+    .. warning::
+        Note that the circuit specification in :py:meth:`CunqaCircuit.expose` cannot be done by passing the circuit :py:attr:`CunqaCircuit.id` since the
+        :py:class:`~cunqa.circuit.ControlContext` object needs the :py:class:`CunqaCircuit` object in order to manage the telegate block.
+
+    References:
+    ~~~~~~~~~~~
+    [#] `Review of Distributed Quantum Computing. From single QPU to High Performance Quantum Computing <https://arxiv.org/abs/2404.01265>`_
+
     """
     
     _id: str #: Circuit identificator.
@@ -263,6 +302,7 @@ class CunqaCircuit:
         self.quantum_regs = {'q0':[q for q in range(num_qubits)]}
         self.classical_regs = {}
         self.sending_to = []
+        self._telegate = None
 
         self.param_labels = []
         self.current_params = []
@@ -339,7 +379,11 @@ class CunqaCircuit:
         """
         try:
             self._check_instruction(instruction)
-            self.instructions.append(instruction)
+
+            if self._telegate is not None:
+                self._telegate.append(instruction)
+            else:
+                self.instructions.append(instruction)
 
         except Exception as error:
             logger.error(f"Error during processing of instruction {instruction} [{CunqaCircuitError.__name__}] [{type(error).__name__}].")
@@ -390,27 +434,41 @@ class CunqaCircuit:
                 elif (instruction["name"] in instructions_with_clbits) and ({"qubits", "clbits"}.issubset(instruction)):
                     gate_qubits = 1
 
+                elif instruction["name"] == "save_state":
+                    gate_qubits = self.num_qubits
+
+                elif "num_ctrl_qubits" in instruction:
+                    # I'm not checking currently wether a multicontrolled gate has the correct number of parameters
+                    base_gate = instruction["name"][2:]
+                    if (base_gate in SUPPORTED_GATES_1Q):
+                        gate_qubits = 1 + instruction["num_ctrl_qubits"]
+                    elif (base_gate in SUPPORTED_GATES_2Q):
+                        gate_qubits = 2 + instruction["num_ctrl_qubits"]
+                    elif (base_gate in SUPPORTED_GATES_3Q):
+                        gate_qubits = 3 + instruction["num_ctrl_qubits"]
+
                 else:
                     logger.error(f"instruction is not supported.")
                     raise ValueError # I capture this at _add_instruction method
 
                 # checking qubits
                 if isinstance(instruction["qubits"], list):
-                    if not all([isinstance(q, int) for q in instruction["qubits"]]):
-                        logger.error(f"instruction qubits must be a list of ints, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
+                    if not all([(isinstance(q, int) or (q == -1)) for q in instruction["qubits"]]):
+                        logger.error(f"instruction qubits must be a list of ints and/or <class 'cunqa.circuit.ControlContext'>, but a list of {[type(q) for q in instruction['qubits'] if not isinstance(q,int)]} was provided.")
                         raise TypeError
+
                     elif (len(set(instruction["qubits"])) != len(instruction["qubits"])):
                         logger.error(f"qubits provided for instruction cannot be repeated.")
                         raise ValueError
                 else:
-                    logger.error(f"instruction qubits must be a list of ints, but {type(instruction['qubits'])} was provided.")
+                    logger.error(f"instruction qubits must be a list of ints and/or <class 'cunqa.circuit.ControlContext'>, but {type(instruction['qubits'])} was provided.")
                     raise TypeError # I capture this at _add_instruction method
                 
                 if not (len(instruction["qubits"]) == gate_qubits):
                     logger.error(f"instruction number of qubits ({gate_qubits}) is not cosistent with qubits provided ({len(instruction['qubits'])}).")
                     raise ValueError # I capture this at _add_instruction method
 
-                if not all([q in _flatten([qr for qr in self.quantum_regs.values()]) for q in instruction["qubits"]]):
+                if not all([(q in _flatten([qr for qr in self.quantum_regs.values()]) or (q == -1)) for q in instruction["qubits"]]):
                     logger.error(f"instruction qubits out of range: {instruction['qubits']} not in {_flatten([qr for qr in self.quantum_regs.values()])}.")
                     raise ValueError # I capture this at _add_instruction method
 
@@ -435,7 +493,7 @@ class CunqaCircuit:
                     raise ValueError
                 
                 # checking params
-                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0):
+                if ("params" in instruction) and (not instruction["name"] in {"unitary", "c_if_unitary", "remote_c_if_unitary"}) and (len(instruction["params"]) != 0 and not ("num_ctrl_qubits" in instruction)):
                     self.is_parametric = True
 
                     if (instruction["name"] in SUPPORTED_GATES_PARAMETRIC_1):
@@ -1104,6 +1162,28 @@ class CunqaCircuit:
             "qubits":[*qubits],
             "params":[matrix]
         })
+
+    def multicontrol(self, base_gate: str, num_ctrl_qubits: int, qubits: list[int], params: list[float, int, "Parameter"] = []):
+        """
+        Class method to apply a multicontrolled gate to the given qubits.
+
+        Args:
+            base_gate (str): name of the gate to convert to multicontrolled.
+            num_ctrl_qubits ( int): number of qubits that control the gate.
+            qubits (list[int]): qubits in which the gate is applied, first num_ctrl_qubits will be the control qubits and the remaining the target qubits.
+            params (list[float | int | Parameter]): list of parameters for the gate.
+            
+        .. warning:: This instructions is currently only running with AER.
+        """
+        mgate_name = "mc" + base_gate
+
+        self._add_instruction({
+            "name": mgate_name,
+            "num_ctrl_qubits": num_ctrl_qubits,
+            "qubits": qubits,
+            "num_qubits": len(qubits),
+            "params": params
+        })
         
     def measure(self, qubits: Union[int, "list[int]"], clbits: Union[int, "list[int]"]) -> None:
         """
@@ -1253,7 +1333,7 @@ class CunqaCircuit:
             # TODO: maybe in the future this can be check at the begining for a more efficient processing 
 
     # TODO: check if simulators accept reset instruction as native
-    def reset(self, *qubits: int):
+    def reset(self, qubits: Union[int, list]):
         """
         Class method to add reset instruction to a qubit or list of qubits.
 
@@ -1264,10 +1344,10 @@ class CunqaCircuit:
 
         if isinstance(qubits, list):
             for q in qubits:
-                self.c_if("x", q, q)
+                self.instructions.append({'name': 'c_if_x', 'qubits': [q, q], 'conditional_reg': [q], 'params': []})
 
         elif isinstance(qubits, int):
-            self.c_if("x", qubits, qubits)
+            self.instructions.append({'name': 'c_if_x', 'qubits': [qubits, qubits], 'conditional_reg': [qubits], 'params': []})
 
         else:
             logger.error(f"Argument for reset must be list or int, but {type(qubits)} was provided.")
@@ -1380,7 +1460,7 @@ class CunqaCircuit:
             "circuits": [control_circuit_id]
         })
 
-    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], param: Optional[float], control_circuit: Union[str, 'CunqaCircuit'], matrix: Optional["list[list[list[complex]]]"] = None) -> None:
+    def remote_c_if(self, gate: str, qubits: Union[int, "list[int]"], control_circuit: Union[str, 'CunqaCircuit'], param: Optional[float] = None, matrix: Optional["list[list[list[complex]]]"] = None, num_ctrl_qubits: int = None) -> None:
         """
         Class method to apply a distributed instruction as a gate condioned by a non local classical measurement from a remote circuit and applied locally.
 
@@ -1456,12 +1536,58 @@ class CunqaCircuit:
             "circuits": [control_circuit]
         })
 
-        self._add_instruction({
+        # Create the instruction's dictionary first incase we need to add the multicontrol key
+        instr_dict = {
             "name": gate,
             "qubits": qubits,
             "remote_conditional_reg":qubits,
             "params":params,
+        }
+        if num_ctrl_qubits is not None:
+            instr_dict["num_ctrl_qubits"] = num_ctrl_qubits
+
+        self._add_instruction(instr_dict)
+
+    def expose(self, qubit: int, target_circuit: Union[str, 'CunqaCircuit']) -> 'ControlContext':
+        """
+        Class method to expose a qubit from the current circuit to another one for a telegate operation.
+        The exposed qubit will be used at the target circuit as the control qubit in controlled operations.
+        
+        Args:
+            qubit (int): qubit to be exposed.
+            target_circuit (str | CunqaCircuit): id of the circuit or circuit where the exposed qubit is used.
+        
+        Returns:
+            A :py:class:`ControlContext` object to manage remotly controlled operations in the given circuit.
+
+
+        .. warning::
+            In the current version, :py:meth:`~CunqaCircuit.expose` instruction is only supported for MQT DDSIM (Munich) simulator.
+            If circuits with such instructions are sent to other simulators, an error will occur at the virtual QPU.
+        """
+
+        self.has_qc = True
+        self.is_dynamic = True
+        
+        if isinstance(qubit, int):
+            list_control_qubit = [qubit]
+        else:
+            logger.error(f"exposed qubit must be int, but {type(qubit)} was provided [TypeError].")
+            raise SystemExit
+        
+        if isinstance(target_circuit, CunqaCircuit):
+            target_circuit_id = target_circuit._id
+        else:
+            logger.error(f"target_circuit must be <class 'cunqa.circuit.CunqaCircuit'>, but {type(target_circuit)} was provided [TypeError].")
+            raise SystemExit
+        
+
+        self._add_instruction({
+            "name": "expose",
+            "qubits": list_control_qubit,
+            "circuits": [target_circuit_id]
         })
+        return ControlContext(self,target_circuit)
 
     def assign_parameters(self, **marked_params):
         """
@@ -1490,6 +1616,53 @@ class CunqaCircuit:
         if not all([len(value)==0 for value in marked_params.values() if isinstance(value, list)]):
             logger.warning(f"Some of the given parameters were not used, check name or lenght of the following keys: {[value for value in marked_params.values() if len(value)!=0]}.")
 
+
+class ControlContext:
+    """
+    Class to manage the controlled telegate operations from a circuit/virtual QPU to another.
+
+    An object of this class is returned by the :py:meth:`~cunqa.circuit.CunqaCircuit.expose` method.
+    Used as a context manager, it can be passed to controlled operations in order to implement telgate operations:
+
+        >>> with circuit_1.expose(0, circuit_2) as rcontrol:
+        >>>     circuit_2.cx(rcontrol, 0)
+    
+    Then, when the block ends, the :py:class:`ControlContext` adds the propper "rcontrol" instruction to the target circuit.
+    """
+    def __init__(self, control_circuit: 'CunqaCircuit', target_circuit: 'CunqaCircuit') -> int:
+        """Class constructor.
+        
+            Args:
+                control_circuit (`~cunqa.circuit.CunqaCircuit`): circuit which qubit is exposed.
+            
+                target_circuit (`~cunqa.circuit.CunqaCircuit`): circuit in which the instructions are implemented.
+        """
+        if isinstance(control_circuit, CunqaCircuit) and isinstance(target_circuit, CunqaCircuit):
+            self.control_circuit = control_circuit
+            self.target_circuit = target_circuit
+        else:
+            logger.error(f"control_circuit and target_circuit must be <class 'cunqa.circuit.CunqaCircuit'>, but {type(num_qubits)} was provided [TypeError].")
+            raise SystemExit
+
+    def __enter__(self):
+        self.target_circuit._telegate = []
+        return -1
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for instruction in self.target_circuit._telegate:
+            if instruction["name"] in ["qsend", "qrecv", "expose", "recv"]:
+                logger.error("Remote operations, quantum or classical, are not allowed within a telegate block.")
+                raise SystemExit
+        instr = {
+            "name": "rcontrol",
+            "qubits": [],  
+            "instructions": self.target_circuit._telegate,
+            "circuits": [self.control_circuit._id]
+        }
+        self.target_circuit.instructions.append(instr)
+        self.target_circuit._telegate = None
+
+        return False
 
                 
 def _flatten(lists: "list[list]"):

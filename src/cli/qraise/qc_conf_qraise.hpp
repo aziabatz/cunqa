@@ -3,6 +3,7 @@
 #include "argparse.hpp"
 #include "utils/constants.hpp"
 #include "args_qraise.hpp"
+#include "utils_qraise.hpp"
 #include "logger.hpp"
 
 std::string get_qc_run_command(const CunqaArgs& args, const std::string& mode)
@@ -23,7 +24,7 @@ std::string get_qc_run_command(const CunqaArgs& args, const std::string& mode)
 
     int num_ports = args.n_qpus * 3;
     int simulator_n_cores = args.cores_per_qpu * args.n_qpus; 
-    int simulator_memory = args.mem_per_qpu.value() * args.n_qpus;
+    int simulator_memory = args.mem_per_qpu.has_value() ? args.mem_per_qpu.value() * args.n_qpus : get_mem_per_core() * args.cores_per_qpu * args.n_qpus;
     
     run_command =  "srun -n " + std::to_string(args.n_qpus) + " -c 1 --mem-per-cpu=1G --resv-ports=" + std::to_string(num_ports) + " --exclusive --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " +  subcommand + " &\n";
 

@@ -30,7 +30,7 @@ struct Server::Impl {
             zmq::message_t message;
             auto size = socket_.recv(message, zmq::recv_flags::none);
             std::string data(static_cast<char*>(message.data()), size.value());
-            LOGGER_DEBUG("Received data: {}", data);
+            //LOGGER_DEBUG("Received data: {}", data);
             
             rid_queue_.push(message.routing_id());
             return data;
@@ -48,7 +48,7 @@ struct Server::Impl {
             rid_queue_.pop();
             
             socket_.send(message, zmq::send_flags::none);
-            LOGGER_DEBUG("Sent result: {}", result);
+            //LOGGER_DEBUG("Sent result: {}", result);
         } catch (const zmq::error_t& e) {
             LOGGER_ERROR("Error sending result: {}", e.what());
             throw;

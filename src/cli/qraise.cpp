@@ -93,10 +93,10 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
         
     } else {
         if (args.mem_per_qpu.has_value() && check_mem_format(args.mem_per_qpu.value())) {
-            sbatchFile << "#SBATCH --mem=" << args.mem_per_qpu.value() * args.n_qpus << "G\n";
+            sbatchFile << "#SBATCH --mem=" << args.mem_per_qpu.value() * args.n_qpus + args.n_qpus << "G\n";
         } else {
             int mem_per_core = get_mem_per_core();
-            sbatchFile << "#SBATCH --mem=" << mem_per_core * args.cores_per_qpu * args.n_qpus << "G\n";
+            sbatchFile << "#SBATCH --mem=" << mem_per_core * args.cores_per_qpu * args.n_qpus + args.n_qpus << "G\n";
         }
     }
 

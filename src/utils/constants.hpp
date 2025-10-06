@@ -43,7 +43,9 @@ enum INSTRUCTIONS {
     MEASURE_AND_SEND,
     RECV,
     QSEND,
-    QRECV
+    QRECV,
+    EXPOSE,
+    RCONTROL
 };
 
 const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
@@ -99,7 +101,10 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 
     // REMOTE CONTROLLED GATES
     {"qsend", QSEND},
-    {"qrecv", QRECV}
+    {"qrecv", QRECV},
+
+    {"expose", EXPOSE},
+    {"rcontrol", RCONTROL}
 };
 
 const std::vector<std::string> BASIS_GATES = {

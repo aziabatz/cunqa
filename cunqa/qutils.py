@@ -101,28 +101,6 @@ class QRaiseError(Exception):
     """Exception for errors during qraise slurm command."""
     pass
 
-def are_QPUs_raised(family: Optional[str] = None) -> bool:
-    """
-    Checks availability of QPUs, filtering by `family` if desired.
-
-    Args:
-        family (str): name of the family of the QPUs whose availability is checked.
-    
-    Returns:
-        ``True`` if those are deployed, ``False`` if not.
-    """
-    last_modification = os.stat(INFO_PATH).st_mtime 
-    while True:
-        if last_modification != os.stat(INFO_PATH).st_mtime: 
-            last_modification = os.stat(INFO_PATH).st_mtime
-            if family == None:
-                return True
-            else:
-                with open(INFO_PATH, "r") as qpus_json:
-                    data = json.load(qpus_json)
-                    for value in data.values():
-                        if value["family"] == family:
-                            return True
                         
 def qraise(n, t, *, 
            classical_comm = False, 
@@ -206,7 +184,7 @@ def qraise(n, t, *,
         if cores is not None:
             command = command + f" --cores={str(cores)}"
         if mem_per_qpu is not None:
-            command = command + f" --mem_per_qpu={str(mem_per_qpu)}"
+            command = command + f" --mem-per-qpu={str(mem_per_qpu)}G"
         if n_nodes is not None:
             command = command + f" --n_nodes={str(n_nodes)}"
         if node_list is not None:
@@ -222,6 +200,8 @@ def qraise(n, t, *,
         if not os.path.exists(INFO_PATH):
            with open(INFO_PATH, "w") as file:
                 file.write("{}")
+
+        print(f"Command: {command}")
 
         output = run(command, shell=True, capture_output=True, text=True).stdout #run the command on terminal and capture its output on the variable 'output'
         logger.info(output)
