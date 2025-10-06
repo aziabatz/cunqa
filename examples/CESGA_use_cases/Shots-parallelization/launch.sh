@@ -8,15 +8,15 @@ if [ -z "$1" ]; then
     exit 1
 fi
 mode=$1
-repetitions=100
+repetitions=128
 cores_per_qpu=4
-mem=$(($cores_per_qpu * 8))
+mem=$(($cores_per_qpu * 15))
 
-for ((n=29; n<=repetitions; n++)); do
+for ((n=1; n<=repetitions; n++)); do
 
-    qraise -n $n -t 20:00:00 -c $cores_per_qpu --mem-per-qpu=${mem}G --cloud --fakeqmio=/opt/cesga/qmio/hpc/calibrations/2025_04_02__12_00_02.json --family_name=$mode-$n
+    qraise -n $n -t 20:00:00 -c $cores_per_qpu --mem-per-qpu=${mem}G --cloud  --family_name=$mode-$n
 
-    sleep 30
+    sleep 15
 
     sbatch --job-name="$mode-$n" \
         --output="./logs/$mode-$n-%j.out" \
@@ -24,7 +24,7 @@ for ((n=29; n<=repetitions; n++)); do
         -t 20:00:00 \
         -c 2\
         --mem-per-cpu 4000 \
-        --wrap="python -u $mode.py --num_qpus \"$n\" --cores \"$cores_per_qpu\""
+        --wrap="python -u $mode.py --num_qpus \"$n\""
     
     sleep 15
 done

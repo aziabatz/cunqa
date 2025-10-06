@@ -1,9 +1,0 @@
-{
-  "num_qpus": 8,
-  "total_time": 2.949561834335327,
-  "mean_simulation_time": 0.555881313625,
-  "maximum_simulation_time": 0.579219562,
-  "overhead": 1.4974886746646732,
-  "qubits": 16,
-  "fidelity": 1.0
-}
