@@ -33,14 +33,17 @@ JSON convert_to_backend(const JSON& backend_paths)
 {
     JSON qpu_properties;
     if (backend_paths.size() == 1) {
-        std::ifstream f(backend_paths.begin().value()); // try-catch?
+        auto it = backend_paths.begin();
+        std::string path = it.value().get<std::string>();
+        std::ifstream f(path); // try-catch?
         qpu_properties = JSON::parse(f);
     } else if (backend_paths.size() > 1) {
         std::string str_local_id = std::getenv("SLURM_LOCALID");
         int local_id = std::stoi(str_local_id);
         auto qpu = backend_paths.begin();
         std::advance(qpu, local_id);
-        std::ifstream f(qpu.value()); // try-catch?
+        std::string path = qpu.value().get<std::string>();
+        std::ifstream f(path); // try-catch?
         qpu_properties = JSON::parse(f);
     } else {
         LOGGER_ERROR("No backends provided");
