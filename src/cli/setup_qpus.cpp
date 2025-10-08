@@ -122,7 +122,18 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
                                    
 
     LOGGER_DEBUG("Command: {}", command);
-    std::system(("ml load qmio/hpc gcc/12.3.0 qiskit/1.2.4-python-3.9.9 2> /dev/null\n"s + command).c_str());
+
+    if (SYSTEM_NAME == "QMIO") {
+        std::system(("ml load QMIO_NEEDED_MODULES 2> /dev/null\n"s + command).c_str());
+    } else if (SYSTEM_NAME == "FT3") {
+        std::system(("ml load FT3_NEEDED_MODULES 2> /dev/null\n"s + command).c_str());
+    } else if (SYSTEM_NAME == "MY_CLUSTER") {
+        std::system(("ml load NEEDED_MODULES 2> /dev/null\n"s + command).c_str());
+    } else {
+        LOGGER_ERROR("SYSTEM_NAME MACRO is not defined.");
+        throw;
+    }
+
     try {
         // Try to open the generated noisy backend file to check if it exists and is readable
         std::ifstream infile(std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json");
