@@ -249,8 +249,8 @@ _autosummary/
 
 # Logging
 logs/
-/results/
-/results*/
+**/results*/
+
 
 # vscode
 .vscode
@@ -307,8 +307,8 @@ build_improvements/
 bash/
 
 
-/EP-use-case/
-/Paralelizing-obs/
+/examples/CESGA_use_cases/EP-use-case/
+/examples/CESGA_use_cases/Paralelizing-obs/
 aer-cpp-0-15-1/
 launch_tests.sh
 
