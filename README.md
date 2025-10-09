@@ -182,7 +182,7 @@ ml load cesga/2022 gcc/system flexiblas/3.3.0 openmpi/5.0.5 boost pybind11 cmake
 * **Standard way**
 ```console
 cmake -B build/ 
-cmake --build build/
+cmake --build build/ --parallel $(nproc)
 cmake --install build/
 ```
 
