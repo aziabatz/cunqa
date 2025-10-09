@@ -400,7 +400,8 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     std::string method = qc.quantum_tasks[0].config.at("method").get<std::string>();
 
     AER::AerState* state = new AER::AerState();
-    state->configure("method", method);
+    std::string sim_method = (method == "automatic") ? "statevector" : method;
+    state->configure("method", sim_method);
     state->configure("device", "CPU");
     state->configure("precision", "double");
     state->configure("seed_simulator", std::to_string(qc.quantum_tasks[0].config.at("seed").get<int>()));
