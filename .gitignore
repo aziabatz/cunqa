@@ -249,6 +249,8 @@ _autosummary/
 
 # Logging
 logs/
+results/
+results*/
 
 # vscode
 .vscode
@@ -312,3 +314,4 @@ launch_tests.sh
 
 hybrid_qc-cc.py
 distr_Grover.py
+QFT.py
