@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
 
+
 message(STATUS "CMAKE BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE CONFIGURATION TYPE: ${CMAKE_CONFIGURATION_TYPES}")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -76,6 +77,7 @@ endif()
 add_subdirectory(src)
 add_subdirectory(cunqa)
 add_subdirectory(examples)
+
 
 # uninstall target
 if(NOT TARGET uninstall)
