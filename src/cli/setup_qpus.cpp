@@ -4,6 +4,9 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <fcntl.h>
+#include <sys/file.h>
+#include <unistd.h>
 
 #include "qpu.hpp"
 #include "backends/simple_backend.hpp"
@@ -134,16 +137,6 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
         throw;
     }
 
-    try {
-        // Try to open the generated noisy backend file to check if it exists and is readable
-        std::ifstream infile(std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json");
-        if (!infile.good()) {
-            throw std::runtime_error("Failed to open noise model JSON file.");
-        }
-    } catch (const std::exception& e) {
-        LOGGER_ERROR("Exception in generate_noise_instructions: {}", e.what());
-        throw;
-    }
     return "";
 }
 
@@ -158,27 +151,25 @@ int main(int argc, char *argv[])
     if (family == "default")
         family = std::getenv("SLURM_JOB_ID");
 
-    LOGGER_DEBUG("OMP_NUM_THREADS: {}", std::getenv("OMP_NUM_THREADS"));
-
     auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
                                      : JSON());
 
     JSON backend_json;
     std::string name = family + "_" + std::getenv("SLURM_PROCID");
     if (back_path_json.contains("noise_properties_path")) {
-        // Define the file path
         std::string fpath = std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json";
-        LOGGER_DEBUG("SLURM_PROCID: {}", std::getenv("SLURM_PROCID"));
+
         if (std::getenv("SLURM_PROCID") && std::string(std::getenv("SLURM_PROCID")) == "0") {
-            LOGGER_DEBUG("Task 0 about to generate noise isntructions");
             generate_noise_instructions(back_path_json, family);
+            LOGGER_DEBUG("Correctly created tmp noise intructions file.");
         } else {
-            // Other tasks wait until the file exists
-            while (true) {
-            std::ifstream fin(fpath);
-            if (fin.good()) break;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            int fd = open(fpath.c_str(), O_RDONLY);
+            while (fd == -1 || flock(fd, LOCK_SH) != 0) {
+                if (fd != -1) close(fd);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                fd = open(fpath.c_str(), O_RDONLY);
             }
+            close(fd);
         }
 
         std::ifstream f(fpath);
