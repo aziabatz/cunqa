@@ -38,7 +38,7 @@ JSON convert_to_backend(const JSON& backend_paths)
         std::ifstream f(path); // try-catch?
         qpu_properties = JSON::parse(f);
     } else if (backend_paths.size() > 1) {
-        std::string str_local_id = std::getenv("SLURM_LOCALID");
+        std::string str_local_id = std::getenv("SLURM_PROCID");
         int local_id = std::stoi(str_local_id);
         auto qpu = backend_paths.begin();
         std::advance(qpu, local_id);
@@ -75,7 +75,7 @@ std::string get_qpu_name(const JSON& backend_paths)
     if (backend_paths.size() == 1) {
         qpu_name = backend_paths.begin().key();
     } else {
-        std::string str_local_id = std::getenv("SLURM_LOCALID");
+        std::string str_local_id = std::getenv("SLURM_PROCID");
         int local_id = std::stoi(str_local_id);
         auto qpu = backend_paths.begin();
         std::advance(qpu, local_id);
@@ -144,7 +144,7 @@ std::string generate_noise_instructions(JSON back_path_json, std::string& family
         LOGGER_ERROR("Exception in generate_noise_instructions: {}", e.what());
         throw;
     }
-    return std::getenv("STORE") + "/.cunqa/tmp_noisy_backend_"s + std::getenv("SLURM_JOB_ID") + ".json"s;
+    return "";
 }
 
 int main(int argc, char *argv[])
@@ -164,9 +164,24 @@ int main(int argc, char *argv[])
                                      : JSON());
 
     JSON backend_json;
-    std::string name = family + "_" + std::getenv("SLURM_LOCALID");
+    std::string name = family + "_" + std::getenv("SLURM_PROCID");
     if (back_path_json.contains("noise_properties_path")) {
-        std::ifstream f(generate_noise_instructions(back_path_json, family));
+        // Define the file path
+        std::string fpath = std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json";
+        LOGGER_DEBUG("SLURM_PROCID: {}", std::getenv("SLURM_PROCID"));
+        if (std::getenv("SLURM_PROCID") && std::string(std::getenv("SLURM_PROCID")) == "0") {
+            LOGGER_DEBUG("Task 0 about to generate noise isntructions");
+            generate_noise_instructions(back_path_json, family);
+        } else {
+            // Other tasks wait until the file exists
+            while (true) {
+            std::ifstream fin(fpath);
+            if (fin.good()) break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+        }
+
+        std::ifstream f(fpath);
         backend_json = JSON::parse(f);
     } else if (back_path_json.contains("backend_path")) {
         std::ifstream f(back_path_json.at("backend_path").get<std::string>());
