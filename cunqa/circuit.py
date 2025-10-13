@@ -1,25 +1,12 @@
 """
-    Holds Cunqa's custom circuit class and functions to translate its instructions into other formats for circuit definition.
+    Holds CUNQA's custom circuit class and functions to translate its instructions into other formats for circuit definition.
 
     Building circuits
     =================
 
-    Users can define a circuit using :py:class:`~CunqaCircuit` to then send it to the virtual QPUs. Nevertheless, for the case in which no communications are needed among the circuits sent, other formats are allowed.
-
-    This module also provides global functions that translate form :py:class:`qiskit.QuantumCircuit` [#]_ to a instructions json (:py:meth:`~qc_to_json`) and the other way around (:py:meth:`~from_json_to_qc`).
-
-    For example, if a user wants to transform a :py:class:`qiskit.QuantumCircuit` into a :py:class:`~CunqaCircuit`, one can obtain the instructions and then add them to the :py:class:`~CunqaCircuit` object:
-
-    >>> qc = QuantumCircuit(4)
-    >>> ...
-    >>> circuit_json = qc_to_json(qc)
-    >>> instruction_set = circuit_json["instructions"]
-    >>> num_qubits = circuit_json["num_qubits"]
-    >>> cunqacirc = CunqaCircuit(num_qubits)
-    >>> cunqacirc.from_instructions(instruction_set)
-
+    Users can define a circuit using :py:class:`~CunqaCircuit` to then send it to the virtual QPUs.
+    Nevertheless, for the case in which no communications are needed among the circuits sent,  :py:class:`qiskit.QuantumCircuit` [#]_ is also allowed.
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
-
     
     Circuits by json ``dict`` format
     ================================
