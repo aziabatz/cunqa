@@ -7,7 +7,8 @@
     Users can define a circuit using :py:class:`~CunqaCircuit` to then send it to the virtual QPUs.
     Nevertheless, for the case in which no communications are needed among the circuits sent,  :py:class:`qiskit.QuantumCircuit` [#]_ is also allowed.
     Be aware that some instructions might not be supported for :py:class:`~CunqaCircuit`, for the list of supported instructions check its documentation.
-    
+    Module py:mod:`cunqa.converters` contains functions to transform between circuit formats.
+
     Circuits by json ``dict`` format
     ================================
 
@@ -41,7 +42,7 @@
 
     For classical and quantum communications among circuits, we do not recomend working at such low level format, users rather
     describe this operations through the :py:class:`~cunqa.circuit.CunqaCircuit` class. If curious, you can always
-    create the :py:class:`~cunqa.circuit.Circuit` and obtain its intructions by its attribute :py:attr:`~cunqa.circuit.CunqaCircuit.instructions`,
+    create the :py:class:`~cunqa.circuit.CunqaCircuit` and obtain its intructions by its attribute :py:attr:`~cunqa.circuit.CunqaCircuit.instructions`,
     or you can convert it to the json `dict` format by the :py:func:`~cunqa.converters.convert` function.
 
     References:
