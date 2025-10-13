@@ -17,14 +17,15 @@
     This structe is presented below:
 
     .. code-block:: python
-        {"id":str, # circuit identificator
-         "is_parametric":bool, # weather if the circuit has parametric instructions that can be updated
-         "is_dynamic":bool, # weather if the circuit has intermediate measurements and/or classically conditioned operations
-         "instructions":list[dict], # list of instructions of the circuit in dict format
-         "num_qubits":int, # number of qubits of the circuit
-         "num_clbits":int, # number of classical bits of the circuit
-         "quantum_registers":dict, # dict specifying the grouping of the qubits in registers
-         "classical_registers":dict # dict specifying the grouping of the classical bits in registers
+    
+       {"id":str, # circuit identificator
+        "is_parametric":bool, # weather if the circuit has parametric instructions that can be updated
+        "is_dynamic":bool, # weather if the circuit has intermediate measurements and/or classically conditioned operations
+        "instructions":list[dict], # list of instructions of the circuit in dict format
+        "num_qubits":int, # number of qubits of the circuit
+        "num_clbits":int, # number of classical bits of the circuit
+        "quantum_registers":dict, # dict specifying the grouping of the qubits in registers
+        "classical_registers":dict # dict specifying the grouping of the classical bits in registers
         }
 
     On the other hand, instructions have some mandatory and optional keys:
@@ -1620,9 +1621,9 @@ class ControlContext:
         """Class constructor.
         
             Args:
-                control_circuit (`~cunqa.circuit.CunqaCircuit`): circuit which qubit is exposed.
+                control_circuit (~cunqa.circuit.CunqaCircuit): circuit which qubit is exposed.
             
-                target_circuit (`~cunqa.circuit.CunqaCircuit`): circuit in which the instructions are implemented.
+                target_circuit (~cunqa.circuit.CunqaCircuit): circuit in which the instructions are implemented.
         """
         if isinstance(control_circuit, CunqaCircuit) and isinstance(target_circuit, CunqaCircuit):
             self.control_circuit = control_circuit
