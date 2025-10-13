@@ -11,17 +11,17 @@
     Circuits by json ``dict`` format
     ================================
 
-    A low level way of representing a circuit is by a json ``dict`` with specefic fields that geather the information
+    A low level way of representing a circuit is by a json ``dict`` with specefic fields that gather the information
     needed by the simulator in order to run the circuit.
 
     This structe is presented below:
 
-    .. codeblock:: python
+    .. code-block:: python
         {"id":str, # circuit identificator
          "is_parametric":bool, # weather if the circuit has parametric instructions that can be updated
          "is_dynamic":bool, # weather if the circuit has intermediate measurements and/or classically conditioned operations
          "instructions":list[dict], # list of instructions of the circuit in dict format
-         "num_qubitst":int, # number of qubits of the circuit
+         "num_qubits":int, # number of qubits of the circuit
          "num_clbits":int, # number of classical bits of the circuit
          "quantum_registers":dict, # dict specifying the grouping of the qubits in registers
          "classical_registers":dict # dict specifying the grouping of the classical bits in registers
@@ -29,7 +29,7 @@
 
     On the other hand, instructions have some mandatory and optional keys:
 
-    .. codeblock:: python
+    .. code-block:: python
         {"name":str, # MANDATORY, name of the instruction, has to be accepted by the simulator
          "qubits":list[int], # MANDATORY, qubits on which the instruction acts
          "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates and for \'unitary\' instruction, which accepts a metrix of the desired dimension limmited by the number of qubits in which it acts.
