@@ -17,10 +17,10 @@
     This structe is presented below:
 
     .. code-block:: python
-    
+
        {"id":str, # circuit identificator
         "is_parametric":bool, # weather if the circuit has parametric instructions that can be updated
-        "is_dynamic":bool, # weather if the circuit has intermediate measurements and/or classically conditioned operations
+        "is_dynamic":bool, # weather if the circuit has intermediate measurements or conditioned operations
         "instructions":list[dict], # list of instructions of the circuit in dict format
         "num_qubits":int, # number of qubits of the circuit
         "num_clbits":int, # number of classical bits of the circuit
@@ -31,9 +31,10 @@
     On the other hand, instructions have some mandatory and optional keys:
 
     .. code-block:: python
+
         {"name":str, # MANDATORY, name of the instruction, has to be accepted by the simulator
          "qubits":list[int], # MANDATORY, qubits on which the instruction acts
-         "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates and for \'unitary\' instruction, which accepts a metrix of the desired dimension limmited by the number of qubits in which it acts.
+         "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates and for \'unitary\' instruction.
          "clbits":list[int], # OPTINAL, any classical bits used in the instruction
         }
 
