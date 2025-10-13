@@ -34,7 +34,8 @@
 
         {"name":str, # MANDATORY, name of the instruction, has to be accepted by the simulator
          "qubits":list[int], # MANDATORY, qubits on which the instruction acts
-         "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates and for \'unitary\' instruction.
+         "params":list[int|float] | list[list[...[int|float]]], # OPTIONAL, only required for parametric gates
+                                                                # and for \'unitary\' instruction.
          "clbits":list[int], # OPTINAL, any classical bits used in the instruction
         }
 
