@@ -14,6 +14,7 @@ import argparse
 import json
 
 from qiskit_aer.noise import NoiseModel
+import fcntl
 
 schema_noise_properties = os.getenv("STORE") + "/.cunqa/json_schema/calibrations_schema.json"
 schema_backend = os.getenv("STORE") + "/.cunqa/json_schema/backend_schema.json"
@@ -164,4 +165,8 @@ logger.debug(f"Created noisy backend: {description}")
 os.makedirs(os.path.dirname(tmp_file), exist_ok=True)
 
 with open(tmp_file, 'w') as file:
+    fcntl.flock(file.fileno(), fcntl.LOCK_EX)
     json.dump(backend_json, file)
+    file.flush()
+    os.fsync(file.fileno())
+    fcntl.flock(file.fileno(), fcntl.LOCK_UN)
