@@ -32,7 +32,7 @@ struct CunqaArgs : public argparse::Args
     bool& cloud                          = flag("cloud", "CLOUD mode. The user can connect with any deployed QPU.");
     bool& cc                             = flag("classical_comm", "Enable classical communications.");
     bool& qc                             = flag("quantum_comm", "Enable quantum communications.");
-    std::optional<std::string>& infrastructure = kwarg("infrastructure", "Infrastructure of QPUs.");
+    std::optional<std::string>& infrastructure = kwarg("infrastructure", "Path to a infrastructure of QPUs.");
 
     void welcome() {
         std::cout << "Welcome to qraise command, a command responsible for turning on the required QPUs.\n" << std::endl;
