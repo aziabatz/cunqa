@@ -1,0 +1,42 @@
+services:
+  cunqa-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    init: true
+    tty: true
+    stdin_open: true
+    environment:
+      STORE: /workspace/runtime
+    volumes:
+      - ./:/opt/cunqa
+      - ./build:/opt/build
+      - ./workspace:/workspace
+      - ./runtime:/workspace/runtime
+    working_dir: /workspace
+    user: "${UID:-0}:${GID:-0}"
+    command: /bin/bash -lc "tail -f /dev/null"
+    networks:
+      - mpi-net
+    ports:
+      - "55000-55100:55000-55100"
+
+  cunqa-build:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - cunqa-node
+    volumes:
+      - ./:/opt/cunqa
+      - ./build:/opt/build
+    working_dir: /opt/build
+    user: "${UID:-0}:${GID:-0}"
+    command: >
+      /bin/bash -lc "cmake -S /opt/cunqa -B /opt/build -DCUNQA_SLURMLESS=ON -DBLA_VENDOR=OpenBLAS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF && cmake --build /opt/build --parallel 2 && cmake --install /opt/build"
+    networks:
+      - mpi-net
+
+networks:
+  mpi-net:
+    driver: bridge
