@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
 
+option(CUNQA_SLURMLESS "Build without SLURM integration; not intended for HPC environment!" OFF)
+if(CUNQA_SLURMLESS)
+  add_compile_definitions(CUNQA_SLURMLESS)
+endif()
+
 
 message(STATUS "CMAKE BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE CONFIGURATION TYPE: ${CMAKE_CONFIGURATION_TYPES}")
@@ -20,8 +25,6 @@ if(${CMAKE_VERSION} VERSION_EQUAL "3.27.6")
 endif()
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
-# Set INSTALL paths
-# TODO: I put this if 
 if(NOT DEFINED CMAKE_INSTALL_PREFIX OR CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
     set(CMAKE_INSTALL_PREFIX "$ENV{HOME}" CACHE PATH "Install prefix" FORCE)
 endif()
@@ -63,8 +66,11 @@ elseif(${SYSTEM_NAME} STREQUAL "FT3")
   find_package(pybind11 2.12 REQUIRED)
   find_package(nlohmann_json 3.7.3 REQUIRED)
   set(PYBIND11_PYTHON_VERSION 3.10 CACHE STRING "")
-elseif(${SYSTEM_NAME} STREQUAL "MY_CLUSTER") # Other clusters
-  message(FATAL_ERROR "Remains to set Python, pybind and nlhomann libraries")
+# TODO: revert back MY_CLUSTER to unknown platform and create DOCKER config branch
+elseif(${SYSTEM_NAME} STREQUAL "MY_CLUSTER")
+  message(STATUS "using system python...")
+  find_package(Python 3 COMPONENTS Interpreter Development REQUIRED)
+  find_package(pybind11 REQUIRED)
 endif()
 
 find_package(Threads REQUIRED)
