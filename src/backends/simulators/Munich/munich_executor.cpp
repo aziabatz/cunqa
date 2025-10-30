@@ -10,6 +10,7 @@
 
 #include "utils/json.hpp"
 #include "logger.hpp"
+#include "utils/helpers/runtime_env.hpp"
 
 namespace cunqa {
 namespace sim {
@@ -29,7 +30,7 @@ MunichExecutor::MunichExecutor() : classical_channel{"executor"}
         in >> j;
     in.close();
 
-    std::string job_id = std::getenv("SLURM_JOB_ID");
+    std::string job_id = runtime_env::job_id();
 
     for (const auto& [key, value]: j.items()) {
         if (key.rfind(job_id, 0) == 0) {

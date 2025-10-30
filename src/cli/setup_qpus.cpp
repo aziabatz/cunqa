@@ -23,6 +23,7 @@
 
 #include "utils/json.hpp"
 #include "utils/helpers/murmur_hash.hpp"
+#include "utils/helpers/runtime_env.hpp"
 #include "logger.hpp"
 
 using namespace std::string_literals;
@@ -41,7 +42,10 @@ JSON convert_to_backend(const JSON& backend_paths)
         std::ifstream f(path); // try-catch?
         qpu_properties = JSON::parse(f);
     } else if (backend_paths.size() > 1) {
-        std::string str_local_id = std::getenv("SLURM_PROCID");
+        std::string str_local_id = cunqa::runtime_env::proc_id();
+        if (str_local_id.empty()) {
+            str_local_id = "0";
+        }
         int local_id = std::stoi(str_local_id);
         auto qpu = backend_paths.begin();
         std::advance(qpu, local_id);
@@ -78,7 +82,10 @@ std::string get_qpu_name(const JSON& backend_paths)
     if (backend_paths.size() == 1) {
         qpu_name = backend_paths.begin().key();
     } else {
-        std::string str_local_id = std::getenv("SLURM_PROCID");
+        std::string str_local_id = cunqa::runtime_env::proc_id();
+        if (str_local_id.empty()) {
+            str_local_id = "0";
+        }
         int local_id = std::stoi(str_local_id);
         auto qpu = backend_paths.begin();
         std::advance(qpu, local_id);
@@ -149,17 +156,21 @@ int main(int argc, char *argv[])
     std::string sim_arg(argv[5]);
 
     if (family == "default")
-        family = std::getenv("SLURM_JOB_ID");
+        family = cunqa::runtime_env::job_id();
 
     auto back_path_json = (argc == 7 ? JSON::parse(std::string(argv[6]))
                                      : JSON());
 
     JSON backend_json;
-    std::string name = family + "_" + std::getenv("SLURM_PROCID");
+    std::string proc_id = cunqa::runtime_env::proc_id();
+    if (proc_id.empty()) {
+        proc_id = "0";
+    }
+    std::string name = family + "_" + proc_id;
     if (back_path_json.contains("noise_properties_path")) {
-        std::string fpath = std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + std::getenv("SLURM_JOB_ID") + ".json";
+        std::string fpath = std::getenv("STORE") + std::string("/.cunqa/tmp_noisy_backend_") + cunqa::runtime_env::job_id() + ".json";
 
-        if (std::getenv("SLURM_PROCID") && std::string(std::getenv("SLURM_PROCID")) == "0") {
+        if (proc_id == "0") {
             generate_noise_instructions(back_path_json, family);
             LOGGER_DEBUG("Correctly created tmp noise intructions file.");
         } else {

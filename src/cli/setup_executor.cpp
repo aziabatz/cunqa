@@ -12,6 +12,7 @@
 
 #include "utils/json.hpp"
 #include "utils/helpers/murmur_hash.hpp"
+#include "utils/helpers/runtime_env.hpp"
 #include "logger.hpp"
 
 using namespace std::string_literals;
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
     }
 
     if (family_name == "default")
-        family_name = std::getenv("SLURM_JOB_ID");
+        family_name = cunqa::runtime_env::job_id();
 
     switch(murmur::hash(sim_arg)) {
         case murmur::hash("Aer"): 

@@ -9,6 +9,7 @@
 #include "comm/server.hpp"
 #include "backends/backend.hpp"
 #include "utils/json.hpp"
+#include "utils/helpers/runtime_env.hpp"
 
 using namespace std::string_literals;
 
@@ -40,7 +41,7 @@ private:
             {"net", server_json},
             {"name", obj.name_},
             {"family", obj.family_},
-            {"slurm_job_id", std::getenv("SLURM_JOB_ID")}
+            {"slurm_job_id", runtime_env::job_id()}
         };
     }
 };

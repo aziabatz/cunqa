@@ -5,6 +5,8 @@
 #include <sys/file.h>
 #include <unistd.h>
 
+#include "utils/helpers/runtime_env.hpp"
+
 namespace cunqa {
 namespace sim {
 
@@ -59,10 +61,10 @@ void AerQCSimulator::write_executor_endpoint(const std::string endpoint, const s
         if (file_in.peek() != std::ifstream::traits_type::eof())
             file_in >> j;
         file_in.close();
-
-        // This two SLURM variables conform the ID of the process
-        std::string local_id = std::getenv("SLURM_TASK_PID");
-        std::string job_id = std::getenv("SLURM_JOB_ID");
+        
+        // This two (SLURM) variables conform the ID of the process
+        std::string local_id = runtime_env::task_pid();
+        std::string job_id = runtime_env::job_id();
         auto task_id = (group_id == "") ? job_id + "_" + local_id : job_id + "_" + local_id + "_" + group_id;
         
         j[task_id]["executor_endpoint"] = endpoint;

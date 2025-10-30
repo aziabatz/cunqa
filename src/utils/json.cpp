@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "json.hpp"
+#include "utils/helpers/runtime_env.hpp"
 
 namespace cunqa {
 
@@ -26,9 +27,9 @@ void write_on_file(JSON local_data, const std::string &filename, const std::stri
             file_in >> j;
         file_in.close();
 
-        // This two SLURM variables conform the ID of the process
-        std::string local_id = std::getenv("SLURM_TASK_PID");
-        std::string job_id = std::getenv("SLURM_JOB_ID");
+        // These variables identify the process within the job
+        std::string local_id = runtime_env::task_pid();
+        std::string job_id = runtime_env::job_id();
         auto task_id = (suffix == "") ? job_id + "_" + local_id : job_id + "_" + local_id + "_" + suffix;
         
         j[task_id] = local_data;
