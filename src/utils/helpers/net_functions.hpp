@@ -8,9 +8,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
+#include <stdexcept>
 
 #include "logger.hpp"
 #include "utils/constants.hpp"
+#include "utils/helpers/runtime_env.hpp"
 
 using namespace std::string_literals;
 
@@ -35,10 +37,7 @@ inline std::string get_hostname(){
 }
 
 inline std::string get_nodename(){
-    auto nodename = std::getenv("SLURMD_NODENAME");
-    if (!nodename)
-        return "login"s;
-    return nodename;
+    return cunqa::runtime_env::node_name();
 }
 
 inline std::string get_IP_address(const std::string& mode) 
@@ -94,28 +93,25 @@ inline std::string get_global_IP_address()
  
 inline std::string get_port(const bool comm = false) 
 {
-    auto id = std::getenv("SLURM_PROCID");
-    auto ports = std::getenv("SLURM_STEP_RESV_PORTS");
+    const std::string id = cunqa::runtime_env::proc_id();
+    const std::string ports_str = cunqa::runtime_env::port_range();
 
-    if(ports && id) {
-        std::string ports_str(ports);
+    if(!ports_str.empty() && !id.empty()) {
         size_t pos = ports_str.find('-');
         if (pos != std::string::npos) {
+            int numeric_id = std::stoi(id);
             if (comm) {
                 std::string base_port_str = ports_str.substr(pos + 1);
                 int base_port = std::stoi(base_port_str);
-                
-                return std::to_string(base_port - std::stoi(id));
+                return std::to_string(base_port - numeric_id);
             } else {
                 std::string base_port_str = ports_str.substr(0, pos);
                 int base_port = std::stoi(base_port_str);
-                
-                return std::to_string(base_port + std::stoi(id));
+                return std::to_string(base_port + numeric_id);
             }
-            
+
         }
         throw std::runtime_error("Not a valid expression format of the ports.");
     }
-    throw std::runtime_error("The required environment variables are not set (not in a SLURM job).");
-    return std::string();
+    throw std::runtime_error("The required environment variables are not set (expected SLURM_STEP_RESV_PORTS or CUNQA_PORT_RANGE).");
 }
