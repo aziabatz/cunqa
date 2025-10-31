@@ -21,5 +21,8 @@ ENV PYTHONPATH="/usr/local:${PYTHONPATH}"
 ENV STORE="/usr/local"
 
 WORKDIR /opt/cunqa
-COPY . /opt/cunqa
+#COPY . /opt/cunqa
+ADD https://github.com/aziabatz/cunqa.git /opt/cunqa/
 RUN if [ -f .gitmodules ]; then git submodule update --init --recursive || true; fi
+
+RUN cmake -S /opt/cunqa -B /opt/build -DCUNQA_SLURMLESS=ON -DBLA_VENDOR=OpenBLAS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF && cmake --build /opt/build --parallel 2 && cmake --install /opt/build
