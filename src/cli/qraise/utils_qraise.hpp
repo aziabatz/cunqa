@@ -91,3 +91,20 @@ int number_of_nodes(const int& number_of_qpus, const int& cores_per_qpu, const i
         return static_cast<int>(std::ceil(aprox_number_of_nodes));
     }
 }
+
+#ifdef CUNQA_SLURMLESS
+inline std::string allocate_port_range(int count)
+{
+    static int next_port = 55000;
+    if (count <= 0) {
+        return {};
+    }
+    if (next_port + count >= 65000) {
+        next_port = 55000;
+    }
+    int low = next_port;
+    next_port += count + 10;
+    int high = low + count - 1;
+    return std::to_string(low) + "-" + std::to_string(high);
+}
+#endif
