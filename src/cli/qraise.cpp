@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
 
     if (run_command.empty()) {
         LOGGER_ERROR("Aborting qraise: invalid run_command.");
-        std::system("rm qraise_run_tmp.sh");
+        (void)std::system("rm qraise_run_tmp.sh");
         return -1;
     }
 
@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
     if (ret != 0) {
         LOGGER_ERROR("qraise run script exited with status {}.", ret);
     }
-    std::system("rm qraise_run_tmp.sh");
+    (void)std::system("rm qraise_run_tmp.sh");
 #endif
 
     return 0;

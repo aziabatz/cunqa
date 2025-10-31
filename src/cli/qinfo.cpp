@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         }
     } else if (args.my_node) {
         std::string current_nodename = cunqa::runtime_env::node_name();
-        if (current_nodename == nullptr) 
+        if (current_nodename.empty()) 
         {
             std::cerr << "\033[31mProblem accessing to the QPUs on the current node. Probably the command was run on a login node.\033[0m" << "\n";
             return 1;

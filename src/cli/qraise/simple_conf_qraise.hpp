@@ -18,7 +18,7 @@ std::string get_simple_run_command(const CunqaArgs& args, const std::string& mod
     if (args.backend.has_value()) {
         if(args.backend.value() == "etiopia_computer.json") {
             LOGGER_ERROR("Terrible mistake. Possible solution: {}", cafe);
-            std::system("rm qraise_sbatch_tmp.sbatch");
+            (void)std::system("rm qraise_sbatch_tmp.sbatch");
             return "0";
         } else {
             backend_path = std::any_cast<std::string>(args.backend.value());
