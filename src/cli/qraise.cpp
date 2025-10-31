@@ -5,6 +5,9 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <chrono>
+#include <sstream>
+#include <unistd.h>
 
 #include "argparse.hpp"
 
@@ -21,6 +24,18 @@
 
 namespace {
     const int CORES_PER_NODE = 64; // For both QMIO and FT3
+#ifdef CUNQA_SLURMLESS
+
+    /// Generate a unique LOCAL job ID from timestamp
+    std::string generate_slurmless_job_id()
+    {
+        const auto now = std::chrono::system_clock::now();
+        const auto epoch_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+        std::ostringstream oss;
+        oss << "local-" << epoch_ms << '-' << ::getpid();
+        return oss.str();
+    }
+#endif
 }
 
 using namespace std::literals;
@@ -129,7 +144,7 @@ void write_env_variables(std::ofstream& sbatchFile)
     sbatchFile << "export COMM_PATH=" << store << "/.cunqa/communications.json\n";
 }
 
-void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const std::string& mode)
+std::string write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const std::string& mode)
 {
     std::string run_command;
     if (args.noise_properties.has_value() || args.fakeqmio.has_value()){
@@ -139,7 +154,7 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const s
         }
         if (args.cc || args.qc){
             LOGGER_ERROR("Personalized noise models not supported for classical/quantum communications schemes.");
-            return;
+            return "";
         }
 
         if (args.backend.has_value()){
@@ -151,7 +166,7 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const s
 
     } else if ((!args.noise_properties.has_value() || !args.fakeqmio.has_value()) && (args.no_thermal_relaxation || args.no_gate_error || args.no_readout_error)){
         LOGGER_ERROR("noise_properties flags where provided but --noise_properties nor --fakeqmio args were not included.");
-        return;
+        return "";
 
     } else {
         if (args.cc) {
@@ -168,6 +183,7 @@ void write_run_command(std::ofstream& sbatchFile, const CunqaArgs& args, const s
 
     LOGGER_DEBUG("Run command: {}", run_command);
     sbatchFile << run_command;
+    return run_command;
 }
 
 }
@@ -177,36 +193,78 @@ int main(int argc, char* argv[])
 {
     auto args = argparse::parse<CunqaArgs>(argc, argv, true); //true ensures an error is raised if we feed qraise an unrecognized flag
     const char* store = std::getenv("STORE");
+    if (!store) {
+        LOGGER_ERROR("STORE environment variable is not defined; no runtime directory.");
+        return -1;
+    }
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
 
     if (args.infrastructure.has_value()) {
-            LOGGER_DEBUG("Raising infrastructure");
-            std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-            write_sbatch_file_from_infrastructure(sbatchFile, args);
-            sbatchFile.close();
-    } else {
-        // Setting and checking mode and family name, respectively
-        std::string mode = args.cloud ? "cloud" : "hpc";
-        std::string family = args.family_name;
-        if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
-            LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
-            std::system("rm qraise_sbatch_tmp.sbatch");
-            return -1;
-        }
-
-        // Writing the sbatch file
+#ifdef CUNQA_SLURMLESS
+        LOGGER_ERROR("Not supported without Slurm.");
+        return -1;
+#else
+        LOGGER_DEBUG("Raising infrastructure");
         std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
-        write_sbatch_header(sbatchFile, args);
-        write_env_variables(sbatchFile);
-        write_run_command(sbatchFile, args, mode);
+        write_sbatch_file_from_infrastructure(sbatchFile, args);
         sbatchFile.close();
-
+        std::system("sbatch qraise_sbatch_tmp.sbatch");
+        std::system("rm qraise_sbatch_tmp.sbatch");
+        return 0;
+#endif
     }
 
-    // Executing and deleting the file
+    std::string mode = args.cloud ? "cloud" : "hpc";
+    std::string family = args.family_name;
+    if (exists_family_name(family, info_path)) { //Check if there exists other QPUs with same family name
+        LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", family);
+#ifndef CUNQA_SLURMLESS
+        std::system("rm qraise_sbatch_tmp.sbatch");
+#endif
+        return -1;
+    }
+
+#ifndef CUNQA_SLURMLESS
+    std::ofstream sbatchFile("qraise_sbatch_tmp.sbatch");
+    write_sbatch_header(sbatchFile, args);
+    write_env_variables(sbatchFile);
+    std::string run_command = write_run_command(sbatchFile, args, mode);
+    sbatchFile.close();
+
+    if (run_command.empty()) {
+        LOGGER_ERROR("Aborting qraise: invalid run_command.");
+        std::system("rm qraise_sbatch_tmp.sbatch");
+        return -1;
+    }
+
     std::system("sbatch qraise_sbatch_tmp.sbatch");
     std::system("rm qraise_sbatch_tmp.sbatch");
-    
-    
+#else
+    const int total_tasks = args.qc ? args.n_qpus * args.cores_per_qpu + args.n_qpus : args.n_qpus;
+    const std::string job_id = generate_slurmless_job_id();
+
+    std::ofstream runFile("qraise_run_tmp.sh");
+    runFile << "#!/bin/bash\n";
+    runFile << "set -e\n";
+    write_env_variables(runFile);
+    runFile << "export CUNQA_JOB_ID=\"" << job_id << "\"\n";
+    runFile << "export SLURM_JOB_ID=\"" << job_id << "\"\n";
+    runFile << "export SLURM_NTASKS=\"" << total_tasks << "\"\n";
+    std::string run_command = write_run_command(runFile, args, mode);
+    runFile.close();
+
+    if (run_command.empty()) {
+        LOGGER_ERROR("Aborting qraise: invalid run_command.");
+        std::system("rm qraise_run_tmp.sh");
+        return -1;
+    }
+
+    int ret = std::system("bash qraise_run_tmp.sh");
+    if (ret != 0) {
+        LOGGER_ERROR("qraise run script exited with status {}.", ret);
+    }
+    std::system("rm qraise_run_tmp.sh");
+#endif
+
     return 0;
 }
