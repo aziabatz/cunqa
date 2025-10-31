@@ -12,7 +12,7 @@
 	url = https://github.com/cda-tum/mqt-ddsim.git
 [submodule "cunqasimulator"]
 	path = src/third-party/cunqasimulator
-	url = https://github.com/CESGA-Quantum-Spain/cunqasimulator.git
+	url = https://github.com/aziabatz/cunqasimulator.git
 [submodule "zmq"]
 	path = src/third-party/zmq
 	url = https://github.com/CESGA-Quantum-Spain/cppzmq.git
@@ -21,4 +21,4 @@
 	url = https://github.com/CESGA-Quantum-Spain/libzmq.git
 [submodule "cunqasimulator"]
 	path = src/third-party/cunqasimulator
-	url = https://github.com/CESGA-Quantum-Spain/cunqasimulator.git
+	url = https://github.com/aziabatz/cunqasimulator.git
