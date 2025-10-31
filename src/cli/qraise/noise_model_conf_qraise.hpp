@@ -2,6 +2,7 @@
 
 #include <string>
 #include <any>
+#include <cstdlib>
 
 #include "argparse.hpp"
 #include "utils/constants.hpp"
@@ -32,7 +33,16 @@ std::string get_noise_model_run_command(const CunqaArgs& args, const std::string
                + R"(","fakeqmio":")" +  std::to_string(fakeqmio)+ R"("})" ;
 
     subcommand = mode + " no_comm " + std::any_cast<std::string>(args.family_name) + " Aer \'" + noise_properties + "\'" + "\n";
+#ifdef CUNQA_SLURMLESS
+    std::string mpi_cmd = "mpirun --allow-run-as-root -np " + std::to_string(args.n_qpus);
+    if (const char* extra = std::getenv("CUNQA_MPI_FLAGS")) {
+        mpi_cmd += " ";
+        mpi_cmd += extra;
+    }
+    run_command = mpi_cmd + " setup_qpus $INFO_PATH " + subcommand;
+#else
     run_command =  "srun --task-epilog=$EPILOG_PATH setup_qpus $INFO_PATH " + subcommand;
+#endif
     LOGGER_DEBUG("Qraise noisy CunqaBackend. \n");
     LOGGER_DEBUG("Run command: {}", run_command);
 
