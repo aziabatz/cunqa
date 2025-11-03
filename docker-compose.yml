@@ -1,0 +1,21 @@
+services:
+  head:
+    build: .
+    init: true
+    tty: true
+    stdin_open: true
+    environment:
+      PATH: /usr/local/bin:/root/bin:${PATH}
+      PYTHONPATH: /root:/usr/local
+      STORE: /workspace/runtime
+      INFO_PATH: /workspace/runtime/.cunqa/qpus.json
+      COMM_PATH: /workspace/runtime/.cunqa/communications.json
+      SLURM_STEP_RESV_PORTS: 55000-55010
+    volumes:
+      - ./workspace:/workspace
+      - ./runtime:/workspace/runtime
+    working_dir: /workspace
+    user: "${UID:-0}:${GID:-0}"
+    command: /bin/bash -lc "tail -f /dev/null"
+
+

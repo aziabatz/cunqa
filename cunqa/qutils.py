@@ -82,13 +82,11 @@ from typing import Union, Optional
 from subprocess import run
 from json import load
 import json
-from cunqa.qclient import QClient
 from cunqa.backend import Backend
 from cunqa.logger import logger
 from cunqa.qpu import QPU
 
-# Adding python folder path to detect modules
-sys.path.append(os.getenv("HOME"))
+from cunqa.qclient import QClient
 
 STORE: Optional[str] = os.getenv("STORE")
 if STORE is not None:

@@ -17,8 +17,8 @@ target_link_libraries(quantum_task PUBLIC json
                                    PRIVATE logger_qpu)
 
 add_library(qpu qpu.cpp)
-target_link_libraries(qpu PUBLIC server 
-                          PRIVATE json quantum_task logger_qpu)
+target_link_libraries(qpu PUBLIC server json 
+                          PRIVATE quantum_task logger_qpu)
 
 add_subdirectory(cli)
 

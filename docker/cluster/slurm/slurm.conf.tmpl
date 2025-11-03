@@ -1,0 +1,32 @@
+ClusterName=__CLUSTER_NAME__
+SlurmctldHost=__CONTROL_MACHINE__
+
+SlurmUser=root
+SlurmdUser=root
+
+SlurmctldPidFile=/var/run/slurmctld.pid
+SlurmdPidFile=/var/run/slurmd.pid
+SlurmdSpoolDir=__SLURMD_SPOOL_DIR__
+StateSaveLocation=__STATE_SAVE_DIR__
+
+SlurmctldPort=6817
+SlurmdPort=6818
+
+SlurmctldDebug=info
+SlurmdDebug=info
+
+ReturnToService=2
+
+ProctrackType=proctrack/linuxproc
+TaskPlugin=task/none
+SwitchType=switch/none
+
+SelectType=select/cons_tres
+SelectTypeParameters=CR_Core
+
+MailProg=/bin/false
+
+ 
+
+NodeName=__NODE_PREFIX__[__NODE_RANGE__] CPUs=__CPUS_PER_NODE__ State=UNKNOWN
+PartitionName=__PARTITION_NAME__ Nodes=__NODE_PREFIX__[__NODE_RANGE__] Default=YES MaxTime=INFINITE State=UP

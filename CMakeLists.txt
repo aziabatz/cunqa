@@ -64,7 +64,11 @@ elseif(${SYSTEM_NAME} STREQUAL "FT3")
   find_package(nlohmann_json 3.7.3 REQUIRED)
   set(PYBIND11_PYTHON_VERSION 3.10 CACHE STRING "")
 elseif(${SYSTEM_NAME} STREQUAL "MY_CLUSTER") # Other clusters
-  message(FATAL_ERROR "Remains to set Python, pybind and nlhomann libraries")
+  #message( "Remains to set Python, pybind and nlhomann libraries")
+  message(STATUS "using system python...")
+  find_package(Python 3 COMPONENTS Interpreter Development REQUIRED)
+  find_package(pybind11 REQUIRED)
+  #find_package(nlohmann_json REQUIRED)
 endif()
 
 find_package(Threads REQUIRED)

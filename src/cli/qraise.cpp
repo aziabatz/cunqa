@@ -114,6 +114,11 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     }
 
     sbatchFile << "#SBATCH --output=qraise_%j\n";
+
+    const char* store_env = std::getenv("STORE");
+    if (store_env != nullptr) {
+        sbatchFile << "#SBATCH --export=ALL,STORE=" << store_env << "\n";
+    }
 }
 
 void write_env_variables(std::ofstream& sbatchFile)
@@ -121,9 +126,10 @@ void write_env_variables(std::ofstream& sbatchFile)
     auto store = std::getenv("STORE");
 
     sbatchFile << "\n";
-    sbatchFile << "if [ ! -d \"$STORE/.cunqa\" ]; then\n";
-    sbatchFile << "mkdir $STORE/.cunqa\n";
-    sbatchFile << "fi\n";
+    if (store != nullptr) {
+        sbatchFile << "export STORE=" << store << "\n";
+    }
+    sbatchFile << "mkdir -p $STORE/.cunqa\n";
 
     sbatchFile << "EPILOG_PATH=" << store << "/.cunqa/epilog.sh\n";
     sbatchFile << "export INFO_PATH=" << store << "/.cunqa/qpus.json\n";

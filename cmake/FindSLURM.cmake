@@ -70,13 +70,19 @@ The following cache variables may also be set:
 find_package(PkgConfig)
 pkg_check_modules(PC_SLURM QUIET SLURM)
 
+if(NOT DEFINED SLURM_ROOT AND DEFINED ENV{SLURM_ROOT})
+  set(SLURM_ROOT "$ENV{SLURM_ROOT}")
+endif()
+
 find_path(
   SLURM_INCLUDE_DIR
   NAMES
     "slurm/slurm.h"
     "slurm/spank.h"
   PATHS
+    ${SLURM_ROOT}
     "/usr"
+    "/usr/local"
   PATH_SUFFIXES
     "include"
   DOC
@@ -87,10 +93,14 @@ find_library(
   NAMES
     slurm
   PATHS
+    ${SLURM_ROOT}
+    "/usr/lib/x86_64-linux-gnu"       # Debian/Ubuntu multiarch lib path
     "/usr"
+    "/usr/local"
   PATH_SUFFIXES
     "lib"
     "lib64"
+    "lib/x86_64-linux-gnu"            # Multiarch within a prefix
   DOC
     "Path to the SLURM include directory")
 

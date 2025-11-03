@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  controller:
+    image: ${CUNQA_IMAGE:-cunqa:dev}
+    hostname: controller
+    init: true
+    tty: true
+    environment:
+      STORE: /workspace/runtime
+      INFO_PATH: /workspace/runtime/.cunqa/qpus.json
+      COMM_PATH: /workspace/runtime/.cunqa/communications.json
+      # Slurm cluster config
+      SLURM_CLUSTER_NAME: ${SLURM_CLUSTER_NAME:-cunqa}
+      SLURM_CONTROL_MACHINE: controller
+      N_WORKERS: ${WORKER_REPLICAS:-2}
+      CPUS_PER_NODE: ${CPUS_PER_NODE:-2}
+      SLURM_PARTITION_NAME: ${SLURM_PARTITION_NAME:-debug}
+      COMPUTE_NODES: ${COMPUTE_NODES:-}
+    volumes:
+      - cunqa_shared:/workspace/runtime
+      - controller_state:/var/spool/slurmctld
+    networks:
+      - cunqa-net
+    secrets:
+      - source: munge_key
+        target: munge_key
+    command: [ "/opt/cunqa/docker/cluster/controller-entrypoint.sh" ]
+    ports:
+      - "8888:8888"
+
+  worker:
+    image: ${CUNQA_IMAGE:-cunqa:dev}
+    hostname: "worker-{{.Task.Slot}}"
+    init: true
+    tty: true
+    environment:
+      STORE: /workspace/runtime
+      INFO_PATH: /workspace/runtime/.cunqa/qpus.json
+      COMM_PATH: /workspace/runtime/.cunqa/communications.json
+      SLURM_CONTROL_MACHINE: controller
+      CPUS_PER_NODE: ${CPUS_PER_NODE:-2}
+      N_WORKERS: ${WORKER_REPLICAS:-2}
+      COMPUTE_NODES: ${COMPUTE_NODES:-}
+    volumes:
+      - cunqa_shared:/workspace/runtime
+      - worker_state:/var/spool/slurmd
+    networks:
+      - cunqa-net
+    secrets:
+      - source: munge_key
+        target: munge_key
+    command: [ "/opt/cunqa/docker/cluster/worker-entrypoint.sh" ]
+    deploy:
+      replicas: ${WORKER_REPLICAS:-2}
+
+volumes:
+  cunqa_shared:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=${NFS_SERVER},vers=${NFS_VERSION:-4.2},rw,soft,timeo=600,retrans=2
+      device: :${NFS_EXPORT_PATH:-/}
+  controller_state:
+  worker_state:
+
+
+networks:
+  cunqa-net:
+    external: true
+
+secrets:
+  munge_key:
+    external: true
