@@ -13,8 +13,8 @@ services:
       # Slurm cluster config
       SLURM_CLUSTER_NAME: ${SLURM_CLUSTER_NAME:-cunqa}
       SLURM_CONTROL_MACHINE: controller
-      N_WORKERS: ${WORKER_REPLICAS:-2}
-      CPUS_PER_NODE: ${CPUS_PER_NODE:-2}
+      N_WORKERS: ${WORKER_REPLICAS:-1}        #Set to yout system preferences
+      CPUS_PER_NODE: ${CPUS_PER_NODE:-6}
       SLURM_PARTITION_NAME: ${SLURM_PARTITION_NAME:-debug}
       COMPUTE_NODES: ${COMPUTE_NODES:-}
     volumes:
@@ -39,8 +39,8 @@ services:
       INFO_PATH: /workspace/runtime/.cunqa/qpus.json
       COMM_PATH: /workspace/runtime/.cunqa/communications.json
       SLURM_CONTROL_MACHINE: controller
-      CPUS_PER_NODE: ${CPUS_PER_NODE:-2}
-      N_WORKERS: ${WORKER_REPLICAS:-2}
+      CPUS_PER_NODE: ${CPUS_PER_NODE:-6}       #Set to your system preferences
+      N_WORKERS: ${WORKER_REPLICAS:-1}
       COMPUTE_NODES: ${COMPUTE_NODES:-}
     volumes:
       - cunqa_shared:/workspace/runtime

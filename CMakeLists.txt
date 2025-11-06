@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
-
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 message(STATUS "CMAKE BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE CONFIGURATION TYPE: ${CMAKE_CONFIGURATION_TYPES}")
@@ -72,7 +72,7 @@ elseif(${SYSTEM_NAME} STREQUAL "MY_CLUSTER") # Other clusters
 endif()
 
 find_package(Threads REQUIRED)
-find_package(MPI REQUIRED)
+find_package(MPI REQUIRED CXX)
 find_package(OpenMP REQUIRED)
 find_package(Boost REQUIRED)
 find_package(BLAS REQUIRED)
