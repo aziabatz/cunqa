@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-
+#include <stdexcept> //añadido para std::runtime_error
 #include "qpu.hpp"
 #include "logger.hpp"
 
@@ -13,17 +13,25 @@ using namespace std::string_literals;
 // }
 
 namespace {
-    const char* store_env = getenv("STORE");
-    if (!store_env) {
-        // fallback razonable: usar HOME o lanzar error controlado
-        const char* home_env = getenv("HOME");
-        if (!home_env) {
-            throw std::runtime_error("STORE environment variable not set and HOME not available");
+    // 1. Se crea una función para encapsular la lógica
+    std::string get_qpus_json_path() {
+        const char* store_env = getenv("STORE");
+        if (!store_env) {
+            // fallback razonable: usar HOME o lanzar error controlado
+            const char* home_env = getenv("HOME");
+            if (!home_env) {
+                throw std::runtime_error("STORE environment variable not set and HOME not available");
+            }
+            return std::string(home_env) + "/.cunqa/qpus.json";
+        } else {
+            return std::string(store_env) + "/.cunqa/qpus.json";
         }
-        const std::string filepath = std::string(home_env) + "/.cunqa/qpus.json";
-    } else {
-        const std::string filepath = std::string(store_env) + "/.cunqa/qpus.json";
     }
+
+    // 2. Se declara 'filepath' en el ámbito del namespace,
+    //    inicializándola con la función.
+    //    Ahora 'filepath' es visible para el resto del fichero.
+    const std::string filepath = get_qpus_json_path();
 }
 
 namespace cunqa {
