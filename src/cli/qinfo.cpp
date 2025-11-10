@@ -30,7 +30,11 @@ int main(int argc, char* argv[]) {
 
     const char* store = std::getenv("STORE");
     std::string info_path = std::string(store) + "/.cunqa/qpus.json";
-
+    
+    // ------------------------------------
+    printf("Info path: %s\n", info_path.c_str()); //debug
+    // ------------------------------------
+    
     std::ifstream file(info_path);
     if (!file.is_open()) {
         std::cerr << "\033[31mCould not open the QPUs info file! Check if there are deployed QPUs. \033[0m " << "\n";

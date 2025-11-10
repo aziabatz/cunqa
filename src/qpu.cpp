@@ -6,10 +6,24 @@
 
 using namespace std::string_literals;
 
+// namespace {
+//      TODO: not having this hardcoded here is an improvement for other supercomputing centers
+//     const auto store = getenv("STORE");
+//     const std::string filepath = store + "/.cunqa/qpus.json"s;
+// }
+
 namespace {
-    // TODO: not having this hardcoded here is an improvement for other supercomputing centers
-    const auto store = getenv("STORE");
-    const std::string filepath = store + "/.cunqa/qpus.json"s;
+    const char* store_env = getenv("STORE");
+    if (!store_env) {
+        // fallback razonable: usar HOME o lanzar error controlado
+        const char* home_env = getenv("HOME");
+        if (!home_env) {
+            throw std::runtime_error("STORE environment variable not set and HOME not available");
+        }
+        const std::string filepath = std::string(home_env) + "/.cunqa/qpus.json";
+    } else {
+        const std::string filepath = std::string(store_env) + "/.cunqa/qpus.json";
+    }
 }
 
 namespace cunqa {

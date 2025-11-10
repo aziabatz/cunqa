@@ -21,7 +21,9 @@
 #include "logger.hpp"
 
 namespace {
-    const int CORES_PER_NODE = 64; // For both QMIO and FT3
+    //const int CORES_PER_NODE = 64; // For both QMIO and FT3
+    const int CORES_PER_NODE = 4; // For testing in local machines(FakeLusiVM)
+
 }
 
 using namespace std::literals;
@@ -36,6 +38,7 @@ void write_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args)
     sbatchFile << "#SBATCH --job-name=qraise \n";
 
     int n_tasks = args.qc ? args.n_qpus * args.cores_per_qpu + args.n_qpus : args.n_qpus;    
+    printf("Number of tasks asigned at the beginning of qraise.write_sbatch_header: %d\n", n_tasks);
     sbatchFile << "#SBATCH --ntasks=" << n_tasks << "\n";
 
     if (!args.qc) 
