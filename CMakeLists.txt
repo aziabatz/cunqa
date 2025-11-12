@@ -1,5 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
 
+# --- INICIO DETECCIÓN LUSITANIA (PARA COMPILADOR) ---
+# Detecta Lusitania por sus rutas únicas
+if(EXISTS "/lusitania_apps" AND EXISTS "/lusitania_homes")
+    set(SYSTEM_NAME "LUSITANIA")
+    # Forzar el compilador MPI ANTES de que el proyecto se inicialice
+    set(CMAKE_CXX_COMPILER "/lusitania_apps/openmpi-4.1.2/bin/mpicxx" CACHE PATH "Compilador CXX de MPI" FORCE)
+else()
+    # Lógica original para otros sistemas
+    set(SYSTEM_NAME $ENV{LMOD_SYSTEM_NAME})
+    if(NOT SYSTEM_NAME OR NOT (SYSTEM_NAME STREQUAL "QMIO" OR SYSTEM_NAME STREQUAL "FT3"))
+        set(SYSTEM_NAME "MY_CLUSTER")
+    endif()
+endif()
+# --- FIN DETECCIÓN ---
+
 project(CUNQA VERSION 0.0.1 LANGUAGES CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -35,13 +50,19 @@ set(PYBIND_PATH "$ENV{EBROOTPYBIND11}/lib64/python3.9/site-packages/pybind11")
 set(pybind11_DIR "$ENV{EBROOTPYBIND11}/lib64/python3.9/site-packages/pybind11/share/cmake/pybind11")
 
 # System name to identify cluster
-set(SYSTEM_NAME $ENV{LMOD_SYSTEM_NAME})
-if(NOT SYSTEM_NAME OR NOT (SYSTEM_NAME STREQUAL "QMIO" OR SYSTEM_NAME STREQUAL "FT3"))
-    set(SYSTEM_NAME "MY_CLUSTER")
-endif()
+# set(SYSTEM_NAME $ENV{LMOD_SYSTEM_NAME})
+# if(NOT SYSTEM_NAME OR NOT (SYSTEM_NAME STREQUAL "QMIO" OR SYSTEM_NAME STREQUAL "FT3"))
+#     set(SYSTEM_NAME "MY_CLUSTER")
+# endif()
+# message(STATUS "SYSTEM NAME: ${SYSTEM_NAME}")
+# add_compile_definitions(SYSTEM_NAME="${SYSTEM_NAME}")
+
+# # System name to identify cluster
+# set(SYSTEM_NAME $ENV{LMOD_SYSTEM_NAME})
+
+# El SYSTEM_NAME se define al inicio del fichero
 message(STATUS "SYSTEM NAME: ${SYSTEM_NAME}")
 add_compile_definitions(SYSTEM_NAME="${SYSTEM_NAME}")
-
 
 #if("$ENV{LMOD_SYSTEM_NAME}" STREQUAL "QMIO")
 #    set(PYBIND_PATH "/opt/cesga/qmio/hpc/software/Compiler/gcccore/12.3.0/pybind11/2.12.0-python-3.9.9/lib64/python3.9/site-packages/pybind11")
@@ -69,6 +90,21 @@ elseif(${SYSTEM_NAME} STREQUAL "MY_CLUSTER") # Other clusters
   find_package(Python 3 COMPONENTS Interpreter Development REQUIRED)
   find_package(pybind11 REQUIRED)
   #find_package(nlohmann_json REQUIRED)
+elseif(${SYSTEM_NAME} STREQUAL "LUSITANIA")
+message(STATUS "Configurando para Lusitania (Conda Env)")
+  
+  # --- Arreglos de Compilación para Lusitania ---
+  # El CMAKE_CXX_COMPILER ya se definió al inicio del fichero.
+  set(BLA_VENDOR OpenBLAS)
+  set(LAPACK_INCLUDE_DIRS "/lusitania_apps/openblas-0.3.24/include")
+  set(FETCHCONTENT_SOURCE_DIR_MQT-CORE "${CMAKE_CURRENT_SOURCE_DIR}/src/third-party/mqt-ddsim" CACHE INTERNAL "")
+  
+  # --- Dependencias de Conda ---
+  # Asegúrate de que la versión de Python coincide con la de tu entorno
+  find_package(Python 3.11.13 EXACT COMPONENTS Interpreter Development REQUIRED) 
+  find_package(pybind11 REQUIRED)
+  find_package(nlohmann_json 3.7.3 REQUIRED)
+  set(PYBIND11_PYTHON_VERSION 3.11 CACHE STRING "")
 endif()
 
 find_package(Threads REQUIRED)
@@ -79,7 +115,18 @@ find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src/utils/logger" "${CMAKE_CURRENT_SOURCE_DIR}/src")
-include_directories("${Python_INCLUDE_DIRS}" "${MPI_INCLUDE_PATH}")
+
+if(Python_INCLUDE_DIRS)
+    include_directories(${Python_INCLUDE_DIRS})
+else()
+    message(WARNING "Python_INCLUDE_DIRS está vacía.")
+endif()
+
+if(MPI_INCLUDE_PATH)
+    include_directories(${MPI_INCLUDE_PATH})
+else()
+    message(WARNING "MPI_INCLUDE_PATH está vacía.")
+endif()
 
 # To link OpenMP with Aer:
 add_library(AerCPP INTERFACE)
