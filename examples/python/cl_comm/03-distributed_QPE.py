@@ -14,7 +14,7 @@ from cunqa.circuit import CunqaCircuit
 from cunqa.qjob import gather
 
 # Global variables
-N_QPUS = 7                  # Determines the number of bits of the phase that will be computed
+N_QPUS = 16                  # Determines the number of bits of the phase that will be computed
 PHASE_TO_COMPUTE = 1/2**5 
 SHOTS = 1024
 SEED = 18                   # Set seed for reproducibility
@@ -22,13 +22,13 @@ SEED = 18                   # Set seed for reproducibility
 try:
 
     # 1. QPU deployment
-    family_name = qraise(N_QPUS, "03:00:00", classical_comm=True, co_located = True)
+    family_name = qraise(N_QPUS, "03:00:00", simulator="Aer", classical_comm=True, co_located = True)
     qpus  = get_QPUs(co_located = True, family = family_name)
 
     # 2. Circuit design: multiple circuits implementing the classically distributed Iterative Phase Estimation
     circuits = []
     for i in range(N_QPUS): 
-        theta = 2**(N_QPUS - i) * PHASE_TO_COMPUTE 
+        theta = 2**(N_QPUS - 1 - i) * PHASE_TO_COMPUTE 
 
         circuits.append(CunqaCircuit(2, 2, id= f"cc_{i}"))
         circuits[i].h(0)
@@ -38,6 +38,9 @@ try:
 
         for j in range(i):
             param = -np.pi * 2**(-j - 1)
+            print("---------")
+            print(f"param: {param}")
+            print("---------")
             recv_id = i - j - 1
   
             circuits[i].recv(0, sending_circuit = f"cc_{recv_id}")
@@ -72,6 +75,8 @@ try:
         # Extract the most frequent measurement (the best estimate of theta)
         most_frequent_output = max(counts, key=counts.get)
         binary_string += most_frequent_output[0]
+
+    print(binary_string)
 
     estimated_theta = 0.0
     for i, digit in enumerate(reversed(binary_string)):

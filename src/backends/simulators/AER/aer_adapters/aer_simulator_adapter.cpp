@@ -432,6 +432,8 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
 
+    LOGGER_DEBUG("Circuit: {}", qc.quantum_tasks[0].circuit.dump(4));
+    
     reg_t qubit_ids;
     auto start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < shots; i++)
