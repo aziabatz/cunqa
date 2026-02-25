@@ -6,7 +6,7 @@ import numpy as np
 from typing import Union, Optional
 from sympy.core.sympify import sympify, SympifyError
 
-from cunqa.circuit.helpers import generate_id
+from cunqa.utils import generate_id
 from cunqa.circuit.parameter import Param
 
 from cunqa.logger import logger
