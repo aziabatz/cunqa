@@ -50,7 +50,6 @@ try:
 
         circuits[i].measure(0, 0)
         for j in range(N_QPUS - i - 1):
-
             circuits[i].send(0, recving_circuit = f"cc_{i + j + 1}")
 
         circuits[i].measure(1, 1)

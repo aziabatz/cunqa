@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     } catch (const std::exception& e) {
         sbatchFile.close();
         LOGGER_ERROR("Error writing the sbatch file. Aborting. {}", e.what());
-        std::system("rm qraise_sbatch_tmp.sbatch");
+        remove_tmp_files();
         return 1;
     }
     sbatchFile.close();
