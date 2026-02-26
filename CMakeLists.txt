@@ -24,7 +24,6 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 # GPU MACROS
 set(COMPILATION_FOR_GPU FALSE)
 set(GPU_ARCH "")
-set(MAX_GPUS_PER_NODE "")
 
 # Check that $STORE exists
 if(NOT DEFINED ENV{STORE})
@@ -185,8 +184,8 @@ install(TARGETS "_zmq" DESTINATION "${CMAKE_INSTALL_PREFIX}/zmq/backend/cython")
 find_or_fetch_package(
   cunqasimulator
   "git@github.com:CESGA-Quantum-Spain/cunqasimulator.git"
-  "0.1.1"
-  "v0.1.1"
+  "0.1.2"
+  "v0.1.2"
 )
 
 # =====================================================================
@@ -241,7 +240,6 @@ if (DEFINED AER_GPU)
   # Hopper                 H100                   90
   
   set(GPU_ARCH 80)
-  set(MAX_GPUS_PER_NODE 8) # Dependent on GPU_ARCH and CLUSTER
   set(CMAKE_CUDA_ARCHITECTURES ${GPU_ARCH})
   enable_language(CUDA)
   set(CMAKE_CUDA_STANDARD 20)
