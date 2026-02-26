@@ -20,9 +20,12 @@ SHOTS = 1024
 SEED = 18                   # Set seed for reproducibility
 
 try:
-
     # 1. QPU deployment
     family_name = qraise(N_QPUS, "03:00:00", simulator="Aer", classical_comm=True, co_located = True)
+except Exception as error:
+    raise error
+
+try:
     qpus  = get_QPUs(co_located = True, family = family_name)
 
     # 2. Circuit design: multiple circuits implementing the classically distributed Iterative Phase Estimation

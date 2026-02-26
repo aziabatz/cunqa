@@ -11,6 +11,10 @@ try:
     # 1. Deploy QPU
     # If GPU execution is desired, just add "gpu = True" as another qraise argument
     family = qraise(1, "00:10:00",  co_located = True)
+except Exception as error:
+    raise error
+
+try:
     qpu = get_QPUs(co_located = True, family = family)
 
     # ---------------------------

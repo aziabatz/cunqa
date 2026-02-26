@@ -8,6 +8,10 @@ from cunqa.circuit import CunqaCircuit
 try:
     # 1. Deploy QMIO QPU
     family = qraise(1, "00:10:00", qmio = True)
+except Exception as error:
+    raise error
+
+try:
     qpus = get_QPUs(co_located = True, family = family)
     qmio = qpus[0]
 

@@ -181,8 +181,8 @@ install(TARGETS "_zmq" DESTINATION "${CMAKE_INSTALL_LIBDIR}/zmq/backend/cython")
 find_or_fetch_package(
   cunqasimulator
   "git@github.com:CESGA-Quantum-Spain/cunqasimulator.git"
-  "0.1.1"
-  "v0.1.1"
+  "0.1.2"
+  "v0.1.2"
 )
 
 # =====================================================================
@@ -338,8 +338,8 @@ install(TARGETS maestro DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 # =====================================================================
 FetchContent_Declare(
     qulacs
-    GIT_REPOSITORY "git@github.com:usendon/usendon_qulacs.git"
-    GIT_TAG "228f617b9e31007b54488f467c031ebbf07efcdb"
+    GIT_REPOSITORY "git@github.com:usendon/qulacs.git"
+    GIT_TAG "6065d9ac8d30bd8a16b41b1e93776968ecc5b6d4"
 )
 
 set(USE_PYTHON OFF CACHE BOOL "" FORCE)

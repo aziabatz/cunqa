@@ -403,16 +403,22 @@ def qraise(n, t, *,
     print(f"Requested QPUs with command:\n\t{command}")
 
         #run the command on terminal and capture its output on the variable 'output'
-    try:
-        output = subprocess.run(command, 
-                                capture_output = True, 
-                                shell = True, 
-                                text = True,
-                                check = True).stdout.rstrip("\n")
-    except subprocess.CalledProcessError as error:
-        raise RuntimeError(f"Error executing {command}:\n {error.stderr}.")
+    cmd_result = subprocess.run(command, 
+                            capture_output = True, 
+                            shell = True, 
+                            text = True,
+                            check = True)
+    stdout = cmd_result.stdout.strip()
+    stderr = cmd_result.stderr.strip()
+    if cmd_result.returncode != 0 or not stdout.isdigit():
+        raise RuntimeError(
+            f"sbatch submission failed\n"
+            f"stdout: {stdout}\n"
+            f"stderr: {stderr}"
+        )
 
     #sees the output on the console and selects the job_id
+    output = cmd_result.stdout.rstrip("\n")
     job_id = output.split(";", 1)[0]
 
     cmd_getstate = ["squeue", "-h", "-j", job_id, "-o", "%T"]
