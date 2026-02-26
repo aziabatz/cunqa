@@ -22,7 +22,6 @@ except Exception:
 
 
 ZMQ_ENDPOINT = os.getenv("ZMQ_SERVER")
-#ZMQ_ENDPOINT = "tcp://127.0.0.1:8888" 
 PREFERRED_NETWORK_IFACE = "ib"
 
 def _get_qmio_config(family : str, endpoint : str) -> dict:
@@ -173,7 +172,6 @@ class QMIOLinker:
                 client_id = self.client_ids_queue.get()
                 self.qmio_comm_socket.send_pyobj(quantum_task)
                 results = self.qmio_comm_socket.recv_pyobj()
-                #results = {"results": {"c": {"00": 100}}}
                 ser_results = pickle.dumps(results)
                 self.client_comm_socket.send_multipart([client_id, ser_results])
             except zmq.ZMQError as e:
