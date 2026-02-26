@@ -406,9 +406,12 @@ def qraise(n, t, *,
     cmd_result = subprocess.run(command, 
                             capture_output = True, 
                             shell = True, 
-                            text = True,
-                            check = True)
-    stdout = cmd_result.stdout.strip()
+                            text = True)
+    
+    stdout_text = (cmd_result.stdout or "").strip()
+    first_line = stdout_text.splitlines()[0].strip() if stdout_text else ""
+    stdout = first_line.split(";", 1)[0].strip() if first_line else ""
+    
     stderr = cmd_result.stderr.strip()
     if cmd_result.returncode != 0 or not stdout.isdigit():
         raise RuntimeError(

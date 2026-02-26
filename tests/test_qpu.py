@@ -327,6 +327,7 @@ def _subprocess_run_side_effect_ok(job_id="12345"):
         if kwargs.get("shell", False):  # qraise call
             proc = Mock()
             proc.stdout = f"{job_id};my_cluster\n" #this is what "sbatch --parsable" returns
+            proc.returncode = 0
             return proc
         # squeue calls
         proc = Mock()
@@ -487,23 +488,24 @@ def test_qraise_retries_on_jsondecodeerror_until_valid_json(monkeypatch):
 def test_qraise_raises_runtimeerror_on_subprocess_error(monkeypatch):
     n, t = 1, "00:05:00"
 
-    error = qpu_mod.subprocess.CalledProcessError(
+    # Simula que el comando falla (sin check=True)
+    completed = qpu_mod.subprocess.CompletedProcess(
+        args="qraise",
         returncode=1,
-        cmd="qraise",
+        stdout="",
         stderr="boom",
     )
 
     monkeypatch.setattr(qpu_mod.os.path, "exists", lambda _: True)
     monkeypatch.setattr("builtins.open", mock_open())
 
-    run_mock = Mock(side_effect=error)
+    run_mock = Mock(return_value=completed)
     monkeypatch.setattr(qpu_mod.subprocess, "run", run_mock)
 
     with pytest.raises(RuntimeError) as excinfo:
         qraise(n, t)
 
     msg = str(excinfo.value)
-    assert "An error was encoutered while qraising" in msg
     assert "boom" in msg
 
 
