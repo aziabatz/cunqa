@@ -7,11 +7,7 @@ from cunqa.circuit import CunqaCircuit
 
 try:
     # 1. Deploy QMIO QPU
-    family = qraise(1, "00:10:00", qmio = True)
-except Exception as error:
-    raise error
-
-try:
+    family = qraise(1, "00:10:00", qmio = True, family = "qmio_job_fake")
     qpus = get_QPUs(co_located = True, family = family)
     qmio = qpus[0]
 
@@ -39,7 +35,7 @@ try:
     print(f"Result from QMIO: {result1}")
 
     # 4. Relinquish resources
-    qdrop(family)
+    #qdrop(family)
 
 except Exception as error:
     qdrop(family)
