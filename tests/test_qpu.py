@@ -246,7 +246,7 @@ def test_run_updates_remote_instructions_sending_to_and_ids(monkeypatch):
     assert "circuits" not in remote_instr
 
     assert circuit_ir["sending_to"] == [10]
-    assert circuit_ir["id"] == 10
+    assert circuit_ir["id"][1] == 10
 
     qpu.execute.assert_called_once_with(circuit_ir, None)
     assert result is job
@@ -275,7 +275,7 @@ def test_run_does_not_touch_instructions_without_remote_gates_but_remaps_ids(mon
     assert "qpus" not in original_instr
 
     assert circuit_ir["sending_to"] == [7]
-    assert circuit_ir["id"] == 7
+    assert circuit_ir["id"][1] == 7
 
 def test_run_passes_param_values_to_execute(monkeypatch):
     circuit = "c1"
