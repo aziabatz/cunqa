@@ -324,6 +324,11 @@ endif()
 set(AER_INCLUDE_DIR "${maestro-aer_SOURCE_DIR}/src")
 
 # -- Maestro ----------------------------------------------------------
+set(ENV{EIGEN5_INCLUDE_DIR} "${EIGEN5_INCLUDE_DIR}")
+set(ENV{JSON_INCLUDE_DIR}   "${JSON_INCLUDE_DIR}")
+set(ENV{QCSIM_INCLUDE_DIR}  "${QCSIM_INCLUDE_DIR}")
+set(ENV{AER_INCLUDE_DIR}    "${AER_INCLUDE_DIR}")
+set(ENV{BOOST_ROOT}         "${Boost_DIR}/../../../")
 
 FetchContent_Declare(
     maestro
@@ -332,6 +337,10 @@ FetchContent_Declare(
 )
 set(BUILD_PYTHON_BINDINGS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(maestro)
+
+if(UNIX AND NOT APPLE)
+    target_link_options(maestro PRIVATE -Wl,-Bsymbolic-functions)
+endif()
 
 target_include_directories(maestro PUBLIC "${maestro_SOURCE_DIR}")
 install(TARGETS maestro DESTINATION "${CMAKE_INSTALL_LIBDIR}")

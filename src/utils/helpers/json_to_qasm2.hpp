@@ -40,7 +40,7 @@ inline std::string json_to_qasm2(const JSON& instructions, const JSON& config)
 
     // Quantum and classical register declaration
     qasm_circt += "qreg q[" + to_string(config.at("num_qubits")) + "];";
-    qasm_circt += "creg c[" + to_string(config.at("num_clbits")) + "];";
+    qasm_circt += "creg c[" + to_string(config.at("num_clbits")) + "];\n";
 
     // Instruction processing
     for (const auto& instruction : instructions) {
