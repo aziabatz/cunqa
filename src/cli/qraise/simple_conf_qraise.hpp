@@ -115,13 +115,6 @@ bool write_simple_sbatch_header(std::ofstream& sbatchFile, const CunqaArgs& args
 
 bool write_simple_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
 {
-    std::vector<std::string> simple_simulators = {"Cunqa", "Aer", "Munich", "Maestro", "Qulacs"};
-    bool is_available_simulator = std::find(simple_simulators.begin(), simple_simulators.end(), std::string(args.simulator)) != simple_simulators.end();
-    if (!is_available_simulator) {
-        LOGGER_ERROR("Available simple simulators are \"Aer\", \"Cunqa\", \"Munich\", \"Maestro\" and \"Qulacs\" , but the following was provided: {}", std::string(args.simulator));
-        return false;
-    } 
-
     std::string run_command;
     std::string subcommand;
     std::string backend_path;
@@ -150,14 +143,20 @@ bool write_simple_run_command(std::ofstream& sbatchFile, const CunqaArgs& args)
     return true;
 }
 
-void write_simple_sbatch(std::ofstream& sbatchFile,const CunqaArgs& args)
+void write_simple_sbatch(std::ofstream& sbatchFile, const CunqaArgs& args, const std::vector<std::string>& supported_simple_simulators)
 {
     if (args.n_qpus == 0 || args.time == "") {
         LOGGER_ERROR("qraise needs two mandatory arguments:\n \t -n: number of vQPUs to be raised\n\t -t: maximum time vQPUs will be raised (hh:mm:ss)\n");
         throw std::runtime_error("Bad arguments.");
+
+    } else if (std::find(supported_simple_simulators.begin(), supported_simple_simulators.end(), std::string(args.simulator)) == supported_simple_simulators.end()) {
+        LOGGER_ERROR("Simulator {} is not available for simple simulation. Aborting. ", std::string(args.simulator));
+        throw std::runtime_error("Error.");
+
     } else if (exists_family_name(args.family_name, constants::QPUS_FILEPATH)) {
         LOGGER_ERROR("There are QPUs with the same family name as the provided: {}.", args.family_name.c_str());
         throw std::runtime_error("Bad family name.");
+        
     } else if (!write_simple_sbatch_header(sbatchFile, args) || !write_simple_run_command(sbatchFile, args)) {
         LOGGER_ERROR("Error writing simple sbatch file.");
         throw std::runtime_error("Error.");
