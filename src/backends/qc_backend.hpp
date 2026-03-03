@@ -20,9 +20,34 @@ struct QCConfig {
     int n_qubits = 32;
     std::string description = "Backend with quantum communications.";
     std::vector<std::vector<int>> coupling_map;
-    std::vector<std::string> basis_gates = constants::BASIS_GATES;
+    std::vector<std::string> basis_gates;
     std::string custom_instructions;
     std::vector<std::string> gates;
+
+    void set_basis_gates(const std::string simulator)
+    {
+        switch (constants::SIMULATORS_MAP.at(simulator))
+        {
+        case constants::AER:
+            basis_gates = constants::AER_BASIS_GATES;
+            break;
+        case constants::MUNICH:
+            basis_gates = constants::MUNICH_BASIS_GATES;
+            break;
+        case constants::MAESTRO:
+            basis_gates = constants::MAESTRO_BASIS_GATES;
+            break;
+        case constants::QULACS:
+            basis_gates = constants::QULACS_BASIS_GATES;
+            break;
+        case constants::CUNQASIM:
+            basis_gates = constants::CUNQASIM_BASIS_GATES;
+            break;
+        default:
+            LOGGER_ERROR("Simulator {} not supported. Basis gates are empty.", simulator);
+            break;
+        }
+    }
 
     friend void from_json(const JSON& j, QCConfig &obj)
     {
