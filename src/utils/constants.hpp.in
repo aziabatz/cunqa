@@ -248,16 +248,19 @@ const std::vector<std::string> MUNICH_BASIS_GATES = {
   "dcx", 
   "ccx", "cswap", "ccz", 
   "mcx", "mcxgraycode", "mcxrecursive", "mcxvchain", "mcp", "mcu1", 
-  "reset", "barrier"
+  "reset", "barrier",
 };
 
 const std::vector<std::string> MAESTRO_BASIS_GATES = {
   "measure",
-  "x", "y", "z", "h", "s", "sdg", "t", "tdg", "sx", 
+  "x", "y", "z", "h", "s", "sdg", "t", "tdg", "sx", "sxdg", "k",
   "p", "rx", "ry", "rz", 
   "u", 
-  "cx", "cy", "cz", "swap", 
-  "cp", "crx", "cry", "crz"
+  "cx", "cy", "cz", "ch", "csx", "csxdg", "swap", 
+  "cp", "crx", "cry", "crz",
+  "ccx", "cswap",
+  "cu",
+  "reset",
 };
 
 const std::vector<std::string> QULACS_BASIS_GATES = {
@@ -270,7 +273,6 @@ const std::vector<std::string> QULACS_BASIS_GATES = {
   "cp", "cptp",
   "toffoli",
   "amplitudedampingdoise", "bitflipnoise", "densematrix", "dephasingnoise", "depolarizingnoise", "diagonalmatrix", "independentxznoise", "randomunitary", "sparsematrix", "twoqubitdepolarizingnoise",
-
 };
 
 const std::vector<std::string> CUNQASIM_BASIS_GATES = {
@@ -278,7 +280,7 @@ const std::vector<std::string> CUNQASIM_BASIS_GATES = {
   "id", "x", "y", "z", "h", "sx",
   "rx", "ry", "rz", 
   "swap", "cx", "cy", "cz", "ecr", 
-  "crx", "cry", "crz"
+  "crx", "cry", "crz",
 };
 
 
