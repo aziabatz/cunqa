@@ -216,17 +216,6 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"save_state", SAVE_STATE}
 };
 
-const std::vector<std::string> BASIS_GATES = {
-    "unitary",
-    "id", "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
-    "u1", "p", "rx", "ry", "rz",
-    "u2", "r",
-    "u3", "u",
-    "ecr", "swap", "cx", "cy", "cz", "csx",
-    "cp", "cu1", "crx", "cry", "crz", "rxx", "ryy", "rzz", "rzx", 
-    "cu", "cu3",
-    "cswap", "ccx", "ccz",
-};
 
 const std::vector<std::string> AER_BASIS_GATES = {
     "measure", 
