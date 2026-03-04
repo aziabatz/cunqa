@@ -220,9 +220,9 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 const std::vector<std::string> AER_BASIS_GATES = {
     "measure", 
     "id", "x", "y", "z", "h", "s", "sdg", "sx", "sxdg", "t", "tdg",
-    "u1", "gp", "p", "rx", "ry", "rz",
+    "u1", "gp", "rx", "ry", "rz",
     "u2", "r", 
-    "u3", "u", 
+    "u3",
     "swap", "cx", "cy", "cz", "csx", "ecr",
     "cp", "cu1", "crx", "cry", "crz", "rxx", "ryy", "rzz", "rzx",
     "cu2", 
@@ -231,9 +231,9 @@ const std::vector<std::string> AER_BASIS_GATES = {
     "mcx", "mcy", "mcz", "mcsx",  
     "mcp", "mcphase", "mcu1", "mcrx", "mcry", "mcrz", 
     "mcu2", "mcr",
-    "mcu3", "mcu", 
+    "mcu3",
     "mcswap", 
-    "unitary", "diagonal", "multiplexer", "pauli",
+    "unitary", "diagonal", "multiplexer",
 };
 
 const std::vector<std::string> MUNICH_BASIS_GATES = {
@@ -242,12 +242,13 @@ const std::vector<std::string> MUNICH_BASIS_GATES = {
   "u1", "gp", "p", "rx", "ry", "rz", 
   "u2", 
   "u3", 
-  "cx", "cy", "cz", "ch", "csx", "cs", "csdg", "swap", "iswap", "ecr",  
+  "u",
+  "cx", "cy", "cz", "ch", "csx", "cs", "csdg", "swap", "iswap", "ecr", "dcx",  
   "cu1", "cp", "crx", "cry", "crz", "rxx", "ryy", "rzz", "rzx", "xxmyy", "xxpyy", 
-  "cu3", 
-  "dcx", 
-  "ccx", "cswap", "ccz", 
-  "mcx", "mcxgraycode", "mcxrecursive", "mcxvchain", "mcp", "mcu1", 
+  "cu3",
+  "cu",
+  "cswap", 
+  "mcx", "mcp",
   "reset", "barrier",
 };
 
@@ -265,13 +266,12 @@ const std::vector<std::string> MAESTRO_BASIS_GATES = {
 
 const std::vector<std::string> QULACS_BASIS_GATES = {
   "measure",
-  "id", "x", "y", "z", "h", "s", "sdg", "t", "tdg", "p0", "p1", "sx", "sxdg", "sy", "sydg", "pauli",
-  "u1", "rx", "ry", "rz", "rotinvx", "rotinvy", "rotinvz", "rotx", "roty", "rotz", "parametricrx", "parametricry", "parametricrz", "paulirotation", "parametricpaulirotation",
+  "id", "x", "y", "z", "h", "s", "sdg", "t", "tdg", "p0", "p1", "sx", "sxdg", "sy", "sydg", "multipauli",
+  "u1", "rx", "ry", "rz", "rotinvx", "rotinvy", "rotinvz", "rotx", "roty", "rotz", "parametricrx", "parametricry", "parametricrz", "multipaulirotation",
   "u2", 
   "u3",
   "cx", "cz", "swap", "fusedswap", "ecr",
-  "cp", "cptp",
-  "toffoli",
+  "cp",
   "amplitudedampingdoise", "bitflipnoise", "densematrix", "dephasingnoise", "depolarizingnoise", "diagonalmatrix", "independentxznoise", "randomunitary", "sparsematrix", "twoqubitdepolarizingnoise",
 };
 
