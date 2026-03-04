@@ -123,9 +123,54 @@ std::string execute_shot_(
         case cunqa::constants::H:
             ApplyH(simulator, qubits[0] + T.zero_qubit);
             break;
+        case cunqa::constants::S:
+            ApplyS(simulator, qubits[0] + T.zero_qubit);
+            break;
+        case cunqa::constants::SDG:
+            ApplySDG(simulator, qubits[0] + T.zero_qubit);
+            break;
+        case cunqa::constants::T:
+            ApplyT(simulator, qubits[0] + T.zero_qubit);
+            break;
+        case cunqa::constants::TDG:
+            ApplyTDG(simulator, qubits[0] + T.zero_qubit);
+            break;
         case cunqa::constants::SX:
             ApplySX(simulator, qubits[0] + T.zero_qubit);
             break;
+        case cunqa::constants::K:
+            ApplyK(simulator, qubits[0] + T.zero_qubit);
+            break;
+        case cunqa::constants::P:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            ApplyP(simulator, qubits[0] + T.zero_qubit, params[0]);
+            break;
+        }
+        case cunqa::constants::RX:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            ApplyRx(simulator, qubits[0] + T.zero_qubit, params[0]);
+            break;
+        }
+        case cunqa::constants::RY:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            ApplyRy(simulator, qubits[0] + T.zero_qubit, params[0]);
+            break;
+        }
+        case cunqa::constants::RZ:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            ApplyRz(simulator, qubits[0] + T.zero_qubit, params[0]);
+            break;
+        }
+        case cunqa::constants::U:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            ApplyU(simulator, qubits[0] + T.zero_qubit, params[0], params[1], params[2], params[3]);
+            break;
+        }
         case cunqa::constants::CX:
         {
             unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
@@ -144,25 +189,37 @@ std::string execute_shot_(
             ApplyCZ(simulator, control, qubits[1] + T.zero_qubit);
             break;
         }
+        case cunqa::constants::CH:
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCH(simulator, control, qubits[1] + T.zero_qubit);
+            break;
+        }
+        case cunqa::constants::CSX:
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCSX(simulator, control, qubits[1] + T.zero_qubit);
+            break;
+        }
+        case cunqa::constants::CSXDG:
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCSXDG(simulator, control, qubits[1] + T.zero_qubit);
+            break;
+        }
+        case cunqa::constants::SWAP:
+        {
+            ApplySwap(simulator, qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit);
+            break;
+        }
         case cunqa::constants::ECR:
             // TODO
             break;
-        case cunqa::constants::RX:
+        case cunqa::constants::CP:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            ApplyRx(simulator, qubits[0] + T.zero_qubit, params[0]);
-            break;
-        }
-        case cunqa::constants::RY:
-        {
-            auto params = inst.at("params").get<std::vector<double>>();
-            ApplyRy(simulator, qubits[0] + T.zero_qubit, params[0]);
-            break;
-        }
-        case cunqa::constants::RZ:
-        {
-            auto params = inst.at("params").get<std::vector<double>>();
-            ApplyRz(simulator, qubits[0] + T.zero_qubit, params[0]);
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCP(simulator, control, qubits[1] + T.zero_qubit, params[0]);
             break;
         }
         case cunqa::constants::CRX:
@@ -186,9 +243,30 @@ std::string execute_shot_(
             ApplyCRz(simulator, control, qubits[1] + T.zero_qubit, params[0]);
             break;
         }
-        case cunqa::constants::SWAP:
+        case cunqa::constants::CCX:
         {
-            ApplySwap(simulator, qubits[0] + T.zero_qubit, qubits[1] + T.zero_qubit);
+            std::vector<unsigned long> ctrls;
+            for (int i = 0; i < qubits.size() - 1; i++) {
+                if (qubits[i] == -1) {
+                    ctrls[i] = G.n_qubits - 1;
+                } else {
+                    ctrls[i] = qubits[i];
+                }
+            }
+            ApplyCCX(simulator, ctrls[0], ctrls[1], qubits[1] + T.zero_qubit);
+            break;
+        }
+        case cunqa::constants::CSWAP:
+        {
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCSwap(simulator, control, qubits[1] + T.zero_qubit, qubits[2] + T.zero_qubit);
+            break;
+        }
+        case cunqa::constants::CU:
+        {
+            auto params = inst.at("params").get<std::vector<double>>();
+            unsigned long control = (qubits[0] == -1) ? G.n_qubits - 1 : qubits[0] + T.zero_qubit;
+            ApplyCU(simulator, control, qubits[0] + T.zero_qubit, params[0], params[1], params[2], params[3]);
             break;
         }
         case cunqa::constants::SEND:

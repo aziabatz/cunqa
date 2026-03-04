@@ -19,9 +19,23 @@ const std::string INSTALL_PATH = "@CMAKE_INSTALL_PREFIX@";
 
 enum INSTRUCTIONS {
     UNITARY,
+    DIAGONAL,
+    MULTIPLEXER,
+    MULTIPAULI,
+    AMPLITUDEDAMPINGNOISE,
+    BITFLIPNOISE,
+    DENSEMATRIX,
+    DEPHASINGNOISE,
+    DEPOLARIZINGNOISE,
+    INDEPENDENTXZNOISE,
+    RANDOMUNITARY,
+    SPARSEMATRIX,
+    TWOQUBITDEPOLARIZINGNOISE,
+    COPY,
+    RESET,
+    BARRIER,
 
     MEASURE,
-    COPY,
 
     ID,
     X,
@@ -29,54 +43,78 @@ enum INSTRUCTIONS {
     Z,
     H,
     S,
-    SDAG,
+    SDG,
     T,
-    TDAG,
+    TDG,
     SX,
     SY, 
     SZ,
-    SXDAG,
-    SYDAG,
-    SZDAG,
+    SXDG,
+    SYDG,
+    SZDG,
     P0,
     P1,
-    RESET,
+    V,
+    VDG,
+    K,
 
     RX,
     RY,
     RZ,
+    GLOBALP,
     P,
+    U1,
     ROTINVX,
     ROTINVY,
     ROTINVZ,
-    U1,
+    ROTX,
+    ROTY,
+    ROTZ,
+    MULTIPAULIROTATION,
 
     U2,
     R,
 
     U3,
+
     U,
 
     ECR,
-    CU1,
-    CU3,
     SWAP,
+    ISWAP,
+    FUSEDSWAP,
     CX,
     CY,
     CZ,
+    CH,
     CSX,
+    CSXDG,
     CSY, 
     CSZ,
+    CS,
+    CSDG,
     CT,
-
-    CP,
+    DCX,
+    
     CRX,
     CRY,
     CRZ,
+    CP,
+    CPTP,
+    CU1,
     RXX,
     RYY,
     RZZ,
     RZX,
+    XXMYY,
+    XXPYY,
+
+    CU2,
+    CR,
+
+    CU3,
+
+    CU,
 
     CECR,
     CSWAP,
@@ -84,10 +122,27 @@ enum INSTRUCTIONS {
     CCY,
     CCZ,
 
-    CU2,
-    CR,
+    MCX,
+    MCY,
+    MCZ,
+    MCSX,
 
-    CU,
+    MCPHASE,
+    MCRX,
+    MCRY,
+    MCRZ,
+    MCP,
+    MCU1,
+
+    MCU2,
+    MCR,
+
+    MCU3,
+
+    MCU,
+
+    MCSWAP,
+
 
     CIF,
     SEND,
@@ -101,12 +156,27 @@ enum INSTRUCTIONS {
 };
 
 const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
-    // UNITARY
+    // SPECIAL
     {"unitary", UNITARY},
+    {"diagonal", DIAGONAL},
+    {"multiplexer", MULTIPLEXER},
+    {"multipauli", MULTIPAULI},
+    {"amplitudedampingnoise", AMPLITUDEDAMPINGNOISE},
+    {"bitflipnoise", BITFLIPNOISE},
+    {"densematrix", DENSEMATRIX},
+    {"dephasingnoise", DEPHASINGNOISE},
+    {"depolarizingnoise", DEPOLARIZINGNOISE},
+    {"independentxznoise", INDEPENDENTXZNOISE},
+    {"randomunitary", RANDOMUNITARY},
+    {"sparsematrix", SPARSEMATRIX},
+    {"twoqubitdepolarizingnoise", TWOQUBITDEPOLARIZINGNOISE},
+    {"copy", COPY},
+    {"reset", RESET},
+    {"barrier", BARRIER},
+
 
     // MEASURE
     {"measure", MEASURE},
-    {"copy", COPY},
 
     // ONE QUBIT NO PARAM
     {"id", ID},
@@ -118,26 +188,32 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
     {"sx", SX},
     {"sy", SY},
     {"sz", SZ},
-    {"sdag", SDAG},
-    {"sxdag", SXDAG},
-    {"sydag", SYDAG},
-    {"szdag", SZDAG},
+    {"sdg", SDG},
+    {"sxdg", SXDG},
+    {"sydg", SYDG},
+    {"szdg", SZDG},
     {"t", T},
-    {"tdag", TDAG},
+    {"tdg", TDG},
     {"p0", P0},
     {"p1", P1},
-    {"reset", RESET},
+    {"v", V},
+    {"vdg", VDG},
+    {"k", K},
 
     // ONE QUBIT ONE PARAM
-    {"u1", U1},
-    {"p", P},
     {"rx", RX},
     {"ry", RY},
     {"rz", RZ},
+    {"gp", GLOBALP},
+    {"p", P},
     {"u1", U1},
     {"rotinvx", ROTINVX},
     {"rotinvy", ROTINVY},
     {"rotinvz", ROTINVZ},
+    {"rotx", ROTX},
+    {"roty", ROTY},
+    {"rotz", ROTZ},
+    {"multipaulirotation", MULTIPAULIROTATION},
 
     // ONE QUBIT TWO PARAM
     {"u2", U2},
@@ -145,42 +221,86 @@ const std::unordered_map<std::string, int> INSTRUCTIONS_MAP = {
 
     // ONE QUBIT THREE PARAM
     {"u3", U3},
+
+    // ONE QUBIT FOUR PARAM
     {"u", U},
 
     // TWO QUBIT NO PARAM
+    {"ecr", ECR},
     {"swap", SWAP},
+    {"iswap", ISWAP},
+    {"fusedswap", FUSEDSWAP},
     {"cx", CX},
     {"cy", CY},
     {"cz", CZ},
+    {"ch", CH},
     {"csx", CSX},
+    {"csxdg", CSXDG},
     {"csy", CSY},
     {"csz", CSZ},
+    {"cs", CS},
+    {"csdg", CSDG},
     {"ct", CT}, 
-    {"ecr", ECR},
+    {"dcx", DCX},
 
     // TWO QUBIT ONE PARAM
-    {"cu1", CU1},
-    {"cp", CP},
     {"crx", CRX},
     {"cry", CRY},
     {"crz", CRZ},
+    {"cp", CP},
+    {"cptp", CPTP},
+    {"cu1", CU1},
     {"rxx", RXX},
     {"ryy", RYY},
     {"rzz", RZZ},
     {"rzx", RZX},
+    {"xxmyy", XXMYY},
+    {"xxpyy", XXPYY},
 
-    // TWO QUBIT THREE PARAM
+    // TWO QUBIT TWO PARAM
     {"cu2", CU2},
     {"cr", CR},
-    {"cu", CU},
+
+    // TWO QUBIT THREE PARAM
     {"cu3", CU3},
+    
+    //TWO QUBIT FOUR PARAM
+    {"cu", CU},
+
 
     // THREE QUBIT NO PARAM
+    {"cecr", CECR},
+    {"cswap", CSWAP},
     {"ccx", CCX},
     {"ccy", CCY},
     {"ccz", CCZ},
-    {"cecr", CECR},
-    {"cswap", CSWAP},
+
+    // MULTICONTROLED ONE QUBIT NO PARAM
+    {"mcx", MCX},
+    {"mcy", MCY},
+    {"mcz", MCZ},
+    {"mcsx", MCSX},
+
+    // MULTICONTROLED ONE QUBIT ONE PARAM
+    {"mcphase", MCPHASE},
+    {"mcrx", MCRX},
+    {"mcry", MCRY},
+    {"mcrz", MCRZ},
+    {"mcp", MCP},
+    {"mcu1", MCU1},
+
+    // MULTICONTROLED ONE QUBIT TWO PARAM
+    {"mcu2", MCU2},
+    {"mcr", MCR},
+
+    // MULTICONTROLED ONE QUBIT THREE PARAM
+    {"mcu3", MCU3},
+
+    // MULTICONTROLED ONE QUBIT FOUR PARAM
+    {"mcu", MCU},
+
+    // MULTICONTROLED TWO QUBIT NO PARAM
+    {"mcswap", MCSWAP},
 
     // CLASSICAL IF
     {"cif", CIF},
