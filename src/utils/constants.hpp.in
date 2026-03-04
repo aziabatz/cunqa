@@ -265,7 +265,7 @@ const std::vector<std::string> MAESTRO_BASIS_GATES = {
 
 const std::vector<std::string> QULACS_BASIS_GATES = {
   "measure",
-  "id", "x", "y", "z", "h", "s", "sdag", "t", "tdag", "p0", "p1", "sqrtx", "sqrtxdag", "sqrty", "sqrtydag", "pauli",
+  "id", "x", "y", "z", "h", "s", "sdg", "t", "tdg", "p0", "p1", "sx", "sxdg", "sy", "sydg", "pauli",
   "u1", "rx", "ry", "rz", "rotinvx", "rotinvy", "rotinvz", "rotx", "roty", "rotz", "parametricrx", "parametricry", "parametricrz", "paulirotation", "parametricpaulirotation",
   "u2", 
   "u3",
