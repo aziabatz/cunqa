@@ -6,8 +6,8 @@
 #include "quantum_task.hpp"
 #include "simulators/simulator_strategy.hpp"
 
-#include "utils/constants.hpp"
 #include "utils/json.hpp"
+#include "utils/helpers/basis_gates.hpp"
 #include "logger.hpp"
 
 
@@ -24,29 +24,9 @@ struct CCConfig {
     std::string custom_instructions;
     std::vector<std::string> gates;
 
-    void set_basis_gates(const std::string simulator)
+    void set_basis_gates(const std::vector<std::string> basis_gates)
     {
-        switch (constants::SIMULATORS_MAP.at(simulator))
-        {
-        case constants::AER:
-            basis_gates = constants::AER_BASIS_GATES;
-            break;
-        case constants::MUNICH:
-            basis_gates = constants::MUNICH_BASIS_GATES;
-            break;
-        case constants::MAESTRO:
-            basis_gates = constants::MAESTRO_BASIS_GATES;
-            break;
-        case constants::QULACS:
-            basis_gates = constants::QULACS_BASIS_GATES;
-            break;
-        case constants::CUNQASIM:
-            basis_gates = constants::CUNQASIM_BASIS_GATES;
-            break;
-        default:
-            LOGGER_ERROR("Simulator {} not supported. Basis gates are empty.", simulator);
-            break;
-        }
+        this->basis_gates = basis_gates;
     }
 
     friend void from_json(const JSON& j, CCConfig &obj)
