@@ -388,9 +388,9 @@ std::string execute_shot_(
         {
             // state->flush_ops();
             //------------- Generate Entanglement ---------------
-            state->apply_h(G.n_qubits - 2);
-            state->apply_mcx({G.n_qubits - 2, G.n_qubits - 1});
-            //generate_entanglement_();
+            //state->apply_h(G.n_qubits - 2);
+            //state->apply_mcx({G.n_qubits - 2, G.n_qubits - 1});
+            generate_entanglement_();
             //----------------------------------------------------
 
             // CX to the entangled pair
@@ -502,8 +502,12 @@ std::string execute_shot_(
         G.ended = true;
         for (auto& [id, T]: Ts)
         {
-            if (T.finished || T.blocked)
+            if (T.finished)
                 continue;
+            else if(T.blocked) {
+                G.ended = false;
+                continue;
+            }
 
             apply_next_instr(T, {});
 
