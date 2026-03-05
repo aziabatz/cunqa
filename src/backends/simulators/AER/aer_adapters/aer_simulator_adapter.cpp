@@ -310,7 +310,7 @@ std::string execute_shot_(
         case cunqa::constants::DIAGONAL:
         case cunqa::constants::MULTIPLEXER:
         {
-            LOGGER_ERROR("DenseMatrix, SparseMatrix and DiagonalMatrix not supported yet.");
+            LOGGER_ERROR("Unitary, Diagonal and Multiplexer are not supported yet.");
             break;
         }
         case cunqa::constants::SEND:

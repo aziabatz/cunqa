@@ -335,7 +335,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::BITFLIPNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::BitFlipNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -346,7 +346,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DEPHASINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::DephasingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -357,7 +357,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::INDEPENDENTXZNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::IndependentXZNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -368,7 +368,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DEPOLARIZINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::DepolarizingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -379,7 +379,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::TWOQUBITDEPOLARIZINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::TwoQubitDepolarizingNoise(qubits[0], qubits[1], prob, seed)->update_quantum_state(&state);
@@ -390,7 +390,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::AMPLITUDEDAMPINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::AmplitudeDampingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
