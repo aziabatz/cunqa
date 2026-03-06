@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.24)
 
 file(READ "${CMAKE_SOURCE_DIR}/VERSION.txt" PROJECT_VERSION)
 string(STRIP "${PROJECT_VERSION}" PROJECT_VERSION)
@@ -98,6 +98,15 @@ function(find_or_fetch_package PACKAGE_NAME GIT_REPOSITORY VERSION TAG)
     set(${PACKAGE_NAME}_BINARY_DIR "${${PACKAGE_NAME}_BINARY_DIR}" PARENT_SCOPE)
   else()
     message(STATUS "Found package ${PACKAGE_NAME}: ${PACKAGE_NAME}_DIR = ${${PACKAGE_NAME}_DIR}")
+    # Mark as populated in FetchContent's registry without downloading anything.
+    # This blocks any downstream FetchContent_Declare for the same name.
+    #FetchContent_Declare(
+    #    ${PACKAGE_NAME}
+    #    GIT_REPOSITORY ${GIT_REPOSITORY}
+    #    GIT_TAG        ${TAG}
+    #    FIND_PACKAGE_ARGS ${VERSION}
+    #)
+    #FetchContent_SetPopulated(${PACKAGE_NAME})
   endif()
 endfunction()
 
@@ -108,12 +117,37 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 # =====================================================================
 #  NLOHMANN JSON - json management library
 # =====================================================================
-find_or_fetch_package(
-  nlohmann_json
-  "git@github.com:nlohmann/json.git"
-  "3.11.3"
-  "v3.11.3"
-)
+find_package(nlohmann_json "3.12.0" QUIET)
+  if(NOT nlohmann_json_FOUND)
+    message(STATUS "Package nlohmann_json not found, fetching from "git@github.com:nlohmann/json.git"")
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY "git@github.com:nlohmann/json.git"
+        GIT_TAG        "v3.12.0"
+    )
+    FetchContent_MakeAvailable(nlohmann_json)
+    set(nlohmann_json_POPULATED "${nlohmann_json_POPULATED}" PARENT_SCOPE)
+    set(nlohmann_json_SOURCE_DIR "${nlohmann_json_SOURCE_DIR}" PARENT_SCOPE)
+    set(nlohmann_json_BINARY_DIR "${nlohmann_json_BINARY_DIR}" PARENT_SCOPE)
+  else()
+    message(STATUS "Found package nlohmann_json: nlohmann_json_DIR = ${nlohmann_json_DIR}")
+    # Mark as populated in FetchContent's registry without downloading anything.
+    # This blocks any downstream FetchContent_Declare for the same name.
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY "git@github.com:nlohmann/json.git"
+        GIT_TAG        "v3.12.0"
+        FIND_PACKAGE_ARGS "3.12.0"
+    )
+    FetchContent_SetPopulated(nlohmann_json)
+  endif()
+
+#find_or_fetch_package(
+#  nlohmann_json
+#  "git@github.com:nlohmann/json.git"
+#  "3.12.0"
+#  "v3.12.0"
+#)
 
 # =====================================================================
 #  SPDLOG - logging backend
@@ -136,8 +170,8 @@ install(TARGETS spdlog DESTINATION "${CMAKE_INSTALL_LIBDIR}") # does this fails 
 find_or_fetch_package(
   mqt-ddsim
   "git@github.com:munich-quantum-toolkit/ddsim.git"
-  "1.24.0"
-  "v1.24.0"
+  "2.2.0"
+  "v2.2.0"
 )
 
 # =====================================================================

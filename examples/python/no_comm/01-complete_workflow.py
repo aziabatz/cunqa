@@ -11,7 +11,7 @@ from cunqa.circuit import CunqaCircuit
 try:
     # 1. Deploy vQPUs (allocates classical resources for the simulation job) and retrieve them using get_QPUs
     # If GPU execution is desired, just add "gpu = True" as another qraise argument
-    family = qraise(2, "00:10:00", simulator = "Maestro", co_located = True)
+    family = qraise(2, "00:10:00", simulator = "Qulacs", co_located = True)
 except Exception as error:
     raise error
 
@@ -28,6 +28,7 @@ try:
     qc.h(0)
     qc.cx(0, 1)
     qc.measure_all()
+    #qc.is_dynamic = True
 
     # 3. Execute the same circuit on both deployed QPUs
     qjobs = run([qc, qc], qpus, shots = 10) # non-blocking call

@@ -86,6 +86,7 @@ void Server::accept()
 
 std::string Server::recv_data() 
 { 
+    LOGGER_DEBUG("Receiving data...");
     return pimpl_->recv();
 }
 
