@@ -478,7 +478,6 @@ JSON MunichSimulatorAdapter::simulate(const Backend* backend)
             time_taken = duration.count();
 
             if (!result.empty()) {
-                LOGGER_DEBUG("Result non empty");
                 return {{"counts", result}, {"time_taken", time_taken}};
             }
             throw std::runtime_error("QASM format is not correct.");
