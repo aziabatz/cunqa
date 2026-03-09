@@ -147,7 +147,7 @@ if(NOT Eigen3_FOUND)
   FetchContent_Declare(
       Eigen3
       GIT_REPOSITORY "https://gitlab.com/libeigen/eigen.git"
-      GIT_TAG        "v5.0.1"
+      GIT_TAG        "5.0.1"
   )
   FetchContent_MakeAvailable(Eigen3)
 else()
