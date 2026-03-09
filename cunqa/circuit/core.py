@@ -279,6 +279,8 @@ class CunqaCircuit:
     classical_regs: dict #: Dictionary of classical registers of the circuit as ``{"name": [assigned clbits]}``.
     sending_to: set[str] #: Set of circuit ids to which the current circuit is sending measurement outcomes or qubits. 
     params: list[Param] #: Ordered list of the parameters names that the circuit currently has.
+    _has_cc: bool # True if the circuit has classical communications instructions
+    _has_cc: bool # True if the circuit has quantum communications instructions
 
     def __init__(
             self, 
@@ -292,6 +294,8 @@ class CunqaCircuit:
         self.quantum_regs = {}
         self.classical_regs = {}        
         self.sending_to = set()
+        self._has_cc = False
+        self._has_qc = False
 
         self.add_q_register("q0", num_qubits)
         
@@ -326,7 +330,9 @@ class CunqaCircuit:
             "quantum_registers": self.quantum_regs,
             "is_dynamic": self.is_dynamic, 
             "sending_to": list(self.sending_to),
-            "params": self.params
+            "params": self.params,
+            "has_cc":self._has_cc,
+            "has_qc":self._has_qc,
         }
 
     @property
@@ -1835,6 +1841,7 @@ class CunqaCircuit:
 
         """
         self.is_dynamic = True
+        self._has_cc = True
         
         if isinstance(clbits, int):
             clbits = [clbits]
@@ -1866,6 +1873,7 @@ class CunqaCircuit:
         """
 
         self.is_dynamic = True
+        self._has_cc = True
 
         if isinstance(clbits, int):
             clbits = [clbits]
@@ -1892,6 +1900,7 @@ class CunqaCircuit:
                                                  sent.
         """
         self.is_dynamic = True
+        self._has_qc = True
         
         if isinstance(recving_circuit, str):
             recving_circuit_id = recving_circuit
@@ -1914,6 +1923,7 @@ class CunqaCircuit:
             control_circuit (str | CunqaCircuit): id of the circuit from which the qubit is received.
         """
         self.is_dynamic = True
+        self._has_qc = True
         
         if isinstance(control_circuit, str):
             control_circuit_id = control_circuit
@@ -1950,6 +1960,7 @@ class CunqaCircuit:
             
         """ 
         self.is_dynamic = True
+        self._has_qc = True
         
         if isinstance(target_circuit, str):
             target_circuit_id = target_circuit

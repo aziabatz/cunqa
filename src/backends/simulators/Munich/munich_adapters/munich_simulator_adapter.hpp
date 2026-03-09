@@ -34,7 +34,8 @@ private:
 
     std::string execute_shot_(
         const std::vector<QuantumTask>& quantum_tasks, 
-        comm::ClassicalChannel* classical_channel
+        comm::ClassicalChannel* classical_channel,
+        const bool has_qc
     );
     
 };
