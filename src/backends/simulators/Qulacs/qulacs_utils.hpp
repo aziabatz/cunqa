@@ -15,18 +15,17 @@
 
 namespace cunqa {
 
-inline void update_qulacs_circuit(QuantumCircuit& circuit, JSON& circuit_json)
+inline void update_qulacs_circuit(QuantumCircuit& circuit, const JSON& circuit_json)
 {
     for (const auto& instruction : circuit_json) {
         std::string name = instruction.at("name").get<std::string>();
 
-        auto inst_type = constants::INSTRUCTIONS_MAP.at(instruction.at("name").get<std::string>());
+        auto inst_type = constants::INSTRUCTIONS_MAP.at(name);
         std::vector<UINT> qubits = instruction.at("qubits").get<std::vector<UINT>>();
 
         switch (inst_type)
         {
         case constants::MEASURE:
-            circuit.add_X_gate(qubits[0]);
             break;
         case constants::X:
             circuit.add_X_gate(qubits[0]);
@@ -202,7 +201,7 @@ inline JSON convert_to_counts(const std::vector<ITYPE>& result, int n_qubits)
     size_t max_position = (1 << n_qubits) - 1;
 
     for (auto& value : result) {
-        std::bitset<64> bs(max_position - value);
+        std::bitset<64> bs(value);
         std::string bitstring = bs.to_string();
 
         if (n_qubits <= 0) {

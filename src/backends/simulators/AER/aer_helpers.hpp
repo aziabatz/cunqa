@@ -25,7 +25,6 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
         {"memory_slots", quantum_task.config.at("num_clbits")},
         {"device", device},
         {"target_gpus", target_gpus},
-        {"method", "statevector"},
         // TODO: Tune in the different options of the AER simulator
     };
 
