@@ -352,7 +352,7 @@ std::string MunichSimulatorAdapter::execute_shot_(
                     .recvr = Ts[qpu_id].id
                 }; 
                 for (auto& clbit : clbits) {
-                    G.local_cc_queue[local_cc_ids].push(clbit);
+                    G.local_cc_queue[local_cc_ids].push(G.creg[clbit + T.zero_clbit]);
                 }
             } else {
                 for (const auto& clbit: clbits) {
