@@ -453,8 +453,10 @@ std::string execute_shot_(
                         G.creg[clbit + T.zero_clbit] = (G.local_cc_queue.at(local_cc_ids).front() == 1);
                         G.local_cc_queue.at(local_cc_ids).pop();
                     }
+                    T.blocked = false;
+                } else {
+                    T.blocked = true;
                 }
-                
             } else {
                 for (const auto& clbit: clbits) {
                     int measurement = classical_channel->recv_measure(qpu_id);

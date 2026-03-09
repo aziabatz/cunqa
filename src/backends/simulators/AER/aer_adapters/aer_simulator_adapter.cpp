@@ -359,21 +359,23 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();
 
-            state->flush_ops(); // Execute operations to empty the buffer 
-
             if (has_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = Ts[qpu_id].id, 
                     .recvr = T.id
                 };
                 if (G.local_cc_queue.contains(local_cc_ids) && !G.local_cc_queue.at(local_cc_ids).empty()) {
+                    state->flush_ops(); // Execute operations to empty the buffer 
                     for (const auto& clbit: clbits) {
                         G.creg[clbit + T.zero_clbit] = (G.local_cc_queue.at(local_cc_ids).front() == 1);
                         G.local_cc_queue.at(local_cc_ids).pop();
                     }
-                }
-                
+                    T.blocked = false;
+                } else {
+                    T.blocked = true;
+                }   
             } else {
+                state->flush_ops(); // Execute operations to empty the buffer 
                 for (const auto& clbit: clbits) {
                     int measurement = classical_channel->recv_measure(qpu_id);
                     G.creg[clbit + T.zero_clbit] = (measurement == 1);
