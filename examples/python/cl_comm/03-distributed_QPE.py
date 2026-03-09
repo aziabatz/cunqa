@@ -21,7 +21,7 @@ SEED = 18                   # Set seed for reproducibility
 
 try:
     # 1. QPU deployment
-    family_name = qraise(N_QPUS, "03:00:00", simulator="Aer", classical_comm=True, co_located = True)
+    family_name = qraise(N_QPUS, "00:10:00", simulator="Aer", classical_comm=True, co_located = True)
 except Exception as error:
     raise error
 
