@@ -141,18 +141,46 @@ endif()
 # =====================================================================
 #  Eigen
 # =====================================================================
+# Prevent finding Eigen from other builds
+set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY ON)
+
 find_package(Eigen3 5.0 QUIET)
 if(NOT Eigen3_FOUND)
-  message(STATUS "Package Eigen3 not found, fetching from https://gitlab.com/libeigen/eigen.git")
   FetchContent_Declare(
-      Eigen3
-      GIT_REPOSITORY "https://gitlab.com/libeigen/eigen.git"
-      GIT_TAG        "5.0.1"
+    Eigen3
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG        5.0.0 
+    GIT_SHALLOW    OFF
   )
   FetchContent_MakeAvailable(Eigen3)
+  
+  set(EIGEN_INSTALL_DIR "${CMAKE_BINARY_DIR}/eigen_install")
+  
+  if(NOT EXISTS "${EIGEN_INSTALL_DIR}/include/eigen3/Eigen/Core")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND}
+        -DCMAKE_INSTALL_PREFIX=${EIGEN_INSTALL_DIR}
+        -DEIGEN_BUILD_BLAS=OFF
+        -DEIGEN_BUILD_LAPACK=OFF
+        -S ${eigen3_SOURCE_DIR}
+        -B ${eigen3_BINARY_DIR}
+      RESULT_VARIABLE _eigen_configure_result
+    )
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} --install ${eigen3_BINARY_DIR}
+        --prefix ${EIGEN_INSTALL_DIR}
+      RESULT_VARIABLE _eigen_install_result
+    )
+  endif()
+
+  set(Eigen3_DIR "${EIGEN_INSTALL_DIR}/share/eigen3/cmake")
+  find_package(Eigen3 5.0 REQUIRED NO_CMAKE_PACKAGE_REGISTRY NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH)
+  include_directories("${CMAKE_BINARY_DIR}/eigen_install/include/eigen3")
 else()
   message(STATUS "Package Eigen3 5.0 found.")
 endif()
+
+
 
 # =====================================================================
 #  ZeroMQ stack (libzmq + cppzmq)
@@ -416,6 +444,9 @@ if(NOT qulacs_POPULATED)
     set(BUILD_QULACS_WITH_MPI OFF CACHE BOOL "" FORCE)
 
     # EXCLUDE_FROM_ALL to not build their benchmarks/tests
+    set(EIGEN3_INCLUDE_DIR "${eigen3_SOURCE_DIR}" CACHE PATH "" FORCE)
+    set(EIGEN3_INCLUDE_DIRS "${eigen3_SOURCE_DIR}" CACHE PATH "" FORCE)
+    set(EIGEN3_FOUND TRUE CACHE BOOL "" FORCE)
     add_subdirectory(${qulacs_SOURCE_DIR} ${qulacs_BINARY_DIR} EXCLUDE_FROM_ALL)
 
     # RESTORE paths to fix the "File /CMakeLists.cmake.in does not exist" error
