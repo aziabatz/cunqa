@@ -29,13 +29,13 @@ public:
     }
 
     JSON simulate(const Backend* backend);
-    JSON simulate(comm::ClassicalChannel* classical_channel = nullptr);
+    JSON simulate(comm::ClassicalChannel* classical_channel = nullptr, const bool allows_qc = false);
 private:
 
     std::string execute_shot_(
         const std::vector<QuantumTask>& quantum_tasks, 
         comm::ClassicalChannel* classical_channel,
-        const bool has_qc
+        const bool allows_qc
     );
     
 };

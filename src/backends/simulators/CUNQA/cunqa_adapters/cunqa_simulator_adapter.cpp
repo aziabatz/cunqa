@@ -60,7 +60,7 @@ std::string execute_shot_(
     Executor& executor, 
     const std::vector<cunqa::QuantumTask>& quantum_tasks, 
     cunqa::comm::ClassicalChannel* classical_channel,
-    const bool has_qc
+    const bool allows_qc
 )
 {
     std::unordered_map<std::string, TaskState> Ts;
@@ -179,7 +179,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();  
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = T.id, 
                     .recvr = Ts[qpu_id].id
@@ -199,7 +199,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = Ts[qpu_id].id, 
                     .recvr = T.id
@@ -402,7 +402,7 @@ JSON CunqaSimulatorAdapter::simulate([[maybe_unused]] const Backend* backend)
 
 }
 
-JSON CunqaSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
+JSON CunqaSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel, const bool allows_qc)
 {
     LOGGER_DEBUG("Cunqa dynamic simulation");
     std::map<std::string, std::size_t> meas_counter;
@@ -418,18 +418,11 @@ JSON CunqaSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
 
-    bool has_qc = false;
-    for (auto& quantum_task : qc.quantum_tasks) {
-        if (quantum_task.config.at("has_qc")) {
-            has_qc = true;
-        }
-    }
-
     Executor executor(n_qubits);
     auto start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < shots; i++)
     {
-        meas_counter[execute_shot_(executor, qc.quantum_tasks, classical_channel, has_qc)]++;
+        meas_counter[execute_shot_(executor, qc.quantum_tasks, classical_channel, allows_qc)]++;
         executor.restart_statevector();
         
     } // End all shots

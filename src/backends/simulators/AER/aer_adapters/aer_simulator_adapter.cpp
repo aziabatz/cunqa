@@ -65,7 +65,7 @@ std::string execute_shot_(
     AER::AerState* state, 
     const std::vector<cunqa::QuantumTask>& quantum_tasks, 
     cunqa::comm::ClassicalChannel* classical_channel,
-    const bool has_qc
+    const bool allows_qc
 )
 {
     std::unordered_map<std::string, TaskState> Ts;
@@ -339,7 +339,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();   
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = T.id, 
                     .recvr = Ts[qpu_id].id
@@ -359,7 +359,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = Ts[qpu_id].id, 
                     .recvr = T.id
@@ -578,7 +578,7 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
     return {};
 }
 
-JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
+JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel, const bool allows_qc)
 {
     LOGGER_DEBUG("Aer dynamic simulation");
 
@@ -604,12 +604,6 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
     if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
     
-    bool has_qc = false;
-    for (auto& quantum_task : qc.quantum_tasks) {
-        if (quantum_task.config.at("has_qc")) {
-            has_qc = true;
-        }
-    }
     reg_t qubit_ids;
     auto start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < shots; i++)
@@ -618,7 +612,7 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
         state.initialize();
         /* WARNING. The "set_target_gpus" method is particular of CUNQA-Aer fork. Comment it if you are using another Aer version. */
         state.set_target_gpus(target_gpus);
-        meas_counter[execute_shot_(&state, qc.quantum_tasks, classical_channel, has_qc)]++;
+        meas_counter[execute_shot_(&state, qc.quantum_tasks, classical_channel, allows_qc)]++;
         state.clear();
     } // End all shots
     

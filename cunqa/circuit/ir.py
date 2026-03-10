@@ -63,7 +63,6 @@ def _(c: QuantumCircuit) -> dict:
         "id": "QuantumCircuit_" + generate_id(),
         "is_dynamic": False,
         "has_cc": False,
-        "has_qc": False,
         "instructions":[],
         "sending_to":[],
         "num_qubits":sum([q.size for q in c.qregs]),

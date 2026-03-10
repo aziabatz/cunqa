@@ -143,7 +143,7 @@ namespace sim {
 std::string MunichSimulatorAdapter::execute_shot_(
     const std::vector<QuantumTask> &quantum_tasks, 
     comm::ClassicalChannel *classical_channel,
-    const bool has_qc
+    const bool allows_qc
 )
 {
     std::unordered_map<std::string, TaskState> Ts;
@@ -346,7 +346,7 @@ std::string MunichSimulatorAdapter::execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();   
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = T.id, 
                     .recvr = Ts[qpu_id].id
@@ -366,7 +366,7 @@ std::string MunichSimulatorAdapter::execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = Ts[qpu_id].id, 
                     .recvr = T.id
@@ -615,7 +615,7 @@ JSON MunichSimulatorAdapter::simulate(const Backend* backend)
     return {}; // To avoid no-return warning
 }
 
-JSON MunichSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel)
+JSON MunichSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel, const bool allows_qc)
 {
     LOGGER_DEBUG("Munich dynamic simulation");
     // TODO: Avoid the static casting?
@@ -632,18 +632,11 @@ JSON MunichSimulatorAdapter::simulate(comm::ClassicalChannel *classical_channel)
     if (size(p_qca->quantum_tasks) > 1)
         n_qubits += 2;
 
-    bool has_qc = false;
-    for (auto& quantum_task : p_qca->quantum_tasks) {
-        if (quantum_task.config.at("has_qc")) {
-            has_qc = true;
-        }
-    }
-
     auto start = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i < shots; i++)
     {   
         initializeSimulationAdapter(n_qubits);
-        meas_counter[execute_shot_(p_qca->quantum_tasks, classical_channel, has_qc)]++;
+        meas_counter[execute_shot_(p_qca->quantum_tasks, classical_channel, allows_qc)]++;
     } // End all shots
 
     auto end = std::chrono::high_resolution_clock::now();

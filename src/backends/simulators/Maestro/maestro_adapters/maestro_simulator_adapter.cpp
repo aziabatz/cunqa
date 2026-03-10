@@ -60,7 +60,7 @@ std::string execute_shot_(
     void* simulator, 
     const std::vector<cunqa::QuantumTask>& quantum_tasks, 
     cunqa::comm::ClassicalChannel* classical_channel,
-    const bool has_qc
+    const bool allows_qc
 )
 {
     std::unordered_map<std::string, TaskState> Ts;
@@ -297,7 +297,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();  
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = T.id, 
                     .recvr = Ts[qpu_id].id
@@ -317,7 +317,7 @@ std::string execute_shot_(
             auto qpu_id = inst.at("qpus").get<std::vector<std::string>>()[0];
             auto clbits = inst.at("clbits").get<std::vector<int>>();
 
-            if (has_qc) {
+            if (allows_qc) {
                 LocalCCIDs local_cc_ids = {
                     .sendr = Ts[qpu_id].id, 
                     .recvr = T.id
@@ -643,7 +643,7 @@ JSON MaestroSimulatorAdapter::simulate(const Backend* backend)
     return {};
 }
 
-JSON MaestroSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel)
+JSON MaestroSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel, const bool allows_qc)
 {
     LOGGER_DEBUG("Maestro dynamic simulation");
     std::map<std::string, std::size_t> meas_counter;
@@ -657,13 +657,6 @@ JSON MaestroSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel
     }
     if (size(qc.quantum_tasks) > 1)
         n_qubits += 2;
-
-    bool has_qc = false;
-    for (auto& quantum_task : qc.quantum_tasks) {
-        if (quantum_task.config.at("has_qc")) {
-            has_qc = true;
-        }
-    }
 
     std::string method = qc.quantum_tasks[0].config.at("method").get<std::string>();
     // is qcsim or gpu specified?
@@ -737,7 +730,7 @@ JSON MaestroSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel
     {
         AllocateQubits(simulator, n_qubits); // From CUNQA: Maybe allocate after shots and restart the state in each shot for better performance?
         InitializeSimulator(simulator);
-        meas_counter[execute_shot_(simulator, qc.quantum_tasks, classical_channel, has_qc)]++;
+        meas_counter[execute_shot_(simulator, qc.quantum_tasks, classical_channel, allows_qc)]++;
         ClearSimulator(simulator);
     } // End all shots
     auto end = std::chrono::high_resolution_clock::now();

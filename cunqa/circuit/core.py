@@ -294,8 +294,6 @@ class CunqaCircuit:
         self.quantum_regs = {}
         self.classical_regs = {}        
         self.sending_to = set()
-        self._has_cc = False
-        self._has_qc = False
 
         self.add_q_register("q0", num_qubits)
         
@@ -331,8 +329,6 @@ class CunqaCircuit:
             "is_dynamic": self.is_dynamic, 
             "sending_to": list(self.sending_to),
             "params": self.params,
-            "has_cc":self._has_cc,
-            "has_qc":self._has_qc,
         }
 
     @property
@@ -1900,7 +1896,6 @@ class CunqaCircuit:
                                                  sent.
         """
         self.is_dynamic = True
-        self._has_qc = True
         
         if isinstance(recving_circuit, str):
             recving_circuit_id = recving_circuit
@@ -1923,7 +1918,6 @@ class CunqaCircuit:
             control_circuit (str | CunqaCircuit): id of the circuit from which the qubit is received.
         """
         self.is_dynamic = True
-        self._has_qc = True
         
         if isinstance(control_circuit, str):
             control_circuit_id = control_circuit
@@ -1960,7 +1954,6 @@ class CunqaCircuit:
             
         """ 
         self.is_dynamic = True
-        self._has_qc = True
         
         if isinstance(target_circuit, str):
             target_circuit_id = target_circuit
