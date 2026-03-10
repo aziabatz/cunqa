@@ -33,6 +33,11 @@ const std::unordered_map<std::string, int> SIMULATORS_MAP {
   {"Cunqa", CUNQASIM},
 };
 
+inline const std::vector<std::string> SUPPORTED_SIMPLE_SIMULATORS = {"Aer", "Munich", "Maestro", "Qulacs", "Cunqa"};
+inline const std::vector<std::string> SUPPORTED_CC_SIMULATORS = {"Aer", "Munich", "Maestro", "Qulacs", "Cunqa"};
+inline const std::vector<std::string> SUPPORTED_QC_SIMULATORS = {"Aer", "Munich", "Maestro", "Qulacs", "Cunqa"};
+inline const std::vector<std::string> SUPPORTED_NOISY_SIMULATORS = {"Aer", "Munich"};
+
 
 enum INSTRUCTIONS {
     UNITARY,
