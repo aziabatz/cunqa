@@ -14,6 +14,12 @@ using namespace AER;
 
 namespace {
 
+using CunqaAerComplex = std::vector<double>;
+using CunqaAerDiagonalMatrix = std::vector<CunqaAerComplex>;
+using CunqaAerRow = std::vector<CunqaAerComplex>;
+using CunqaAerMatrix = std::vector<CunqaAerRow>;
+using AerComplexVector = std::vector<complex_t>;
+
 const std::vector<std::string> AER_CONFIG_KEYS = {
     "shots",
     "method",
@@ -128,8 +134,9 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
     //JSON Object because if not it generates an array
     JSON new_circuit = {
         {"config", new_config},
-        {"instructions", JSON::parse(std::regex_replace(quantum_task.circuit.dump(),
-                       std::regex("clbits"), "memory"))}
+        {"instructions", JSON::parse(std::regex_replace(
+                        std::regex_replace(quantum_task.circuit.dump(), std::regex("clbits"), "memory"),
+                        std::regex("matrix"), "params"))}
     };
 
     return QuantumTask(new_circuit, new_config);
@@ -177,6 +184,25 @@ void convert_standard_results_Aer(JSON& res, const int& num_clbits)
     }
 
     res.at("results")[0].at("data").at("counts") = modified_counts;
+}
+
+
+inline void convert_cunqadiagonal_to_aerdiagonal(const CunqaAerDiagonalMatrix& cunqa_diagonal, cvector_t& aer_diagonal)
+{
+    for (auto& z : cunqa_diagonal) {
+        std::complex<double> complex = z[0] + std::complex<double>(0, z[1]);
+        aer_diagonal.push_back(complex);
+    }
+}
+
+inline void convert_cunqa_matrix_to_complex_vector(const CunqaAerMatrix& cunqa_matrix, AerComplexVector& matrix_data)
+{
+    for (auto& row : cunqa_matrix) {
+        for (auto& z : row) {
+            std::complex<double> complex = z[0] + std::complex<double>(0, z[1]);
+            matrix_data.push_back(complex);
+        }
+    }
 }
 
 } // End of sim namespace
