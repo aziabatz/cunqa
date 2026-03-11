@@ -13,12 +13,72 @@
 
 #include "logger.hpp"
 
+
+
+namespace {
+
+using CunqaQulacsComplex = std::vector<double>;
+using CunqaQulacsDiagonalMatrix = std::vector<CunqaQulacsComplex>;
+using CunqaQulacsRow = std::vector<CunqaQulacsComplex>;
+using CunqaQulacsMatrix = std::vector<CunqaQulacsRow>;
+
+
+} // End namespace
+
 namespace cunqa {
+namespace sim {
+
+
+inline ComplexMatrix cunqamatrix_to_qulacsdensematrix(const CunqaQulacsMatrix& cunqa_matrix)
+{
+    size_t rows = cunqa_matrix.size();
+    size_t cols = rows > 0 ? cunqa_matrix[0].size() : 0;
+
+    ComplexMatrix qulacs_matrix(rows, cols);
+
+    for (size_t i = 0; i < rows; ++i)
+        for (size_t j = 0; j < cols; ++j)
+            qulacs_matrix(i, j) = std::complex<double>(cunqa_matrix[i][j][0], cunqa_matrix[i][j][1]);  
+
+    return qulacs_matrix;
+}
+
+
+inline SparseComplexMatrix cunqamatrix_to_sparse(const CunqaQulacsMatrix& cunqa_matrix)
+{
+    size_t rows = cunqa_matrix.size();
+    size_t cols = rows > 0 ? cunqa_matrix[0].size() : 0;
+
+    std::vector<Eigen::Triplet<CPPCTYPE>> triplets;
+
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            CPPCTYPE val(cunqa_matrix[i][j][0], cunqa_matrix[i][j][1]);
+            if (val != CPPCTYPE(0.0, 0.0))
+                triplets.emplace_back(i, j, val);
+        }
+    }
+
+    SparseComplexMatrix qulacs_sparse(rows, cols);
+    qulacs_sparse.setFromTriplets(triplets.begin(), triplets.end());
+    return qulacs_sparse;
+}
+
+
+inline ComplexVector cunqadiagonal_to_qulacsdiagonal(const CunqaQulacsDiagonalMatrix& cunqa_diagonal)
+{
+    ComplexVector qulacs_diagonal(cunqa_diagonal.size());
+
+    for (size_t i = 0; i < cunqa_diagonal.size(); ++i)
+        qulacs_diagonal(i) = CPPCTYPE(cunqa_diagonal[i][0], cunqa_diagonal[i][1]);
+
+    return qulacs_diagonal;
+}
+
 
 inline void update_qulacs_circuit(QuantumCircuit& circuit, const JSON& circuit_json)
 {
     for (const auto& instruction : circuit_json) {
-        std::string name = instruction.at("name").get<std::string>();
 
         auto inst_type = constants::INSTRUCTIONS_MAP.at(name);
         std::vector<UINT> qubits = instruction.at("qubits").get<std::vector<UINT>>();
@@ -172,11 +232,16 @@ inline void update_qulacs_circuit(QuantumCircuit& circuit, const JSON& circuit_j
             circuit.add_multi_Pauli_rotation_gate(qubits, pauli_id_list, params[0]);
             break;
         }
-        case cunqa::constants::DENSEMATRIX:
-        case cunqa::constants::SPARSEMATRIX:
-        case cunqa::constants::DIAGONAL:
-        {   
-            LOGGER_ERROR("DenseMatrix, SparseMatrix and DiagonalMatrix not supported yet.");
+        case cunqa::constants::UNITARY:
+        {
+            auto cunqa_matrix = instruction.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
+            ComplexMatrix qulacs_matrix = cunqa::sim::cunqamatrix_to_qulacsdensematrix(cunqa_matrix);
+
+            if (qubits.size() > 1) {
+                circuit.add_dense_matrix_gate(qubits, qulacs_matrix);
+            } else {
+                circuit.add_dense_matrix_gate(qubits[0], qulacs_matrix);
+            }
             break;
         }
         case cunqa::constants::RANDOMUNITARY:
@@ -220,4 +285,6 @@ inline JSON convert_to_counts(const std::vector<ITYPE>& result, int n_qubits)
     return result_in_counts;
 }
 
+
 } // End namespace cunqa
+} // End namespace sim

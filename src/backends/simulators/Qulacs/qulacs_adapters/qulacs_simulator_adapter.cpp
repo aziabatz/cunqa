@@ -6,12 +6,12 @@
 #include <cstdlib>
 
 #include "qulacs_simulator_adapter.hpp"
-#include "qulacs_utils.hpp"
 
 #include "cppsim/circuit.hpp"
 #include "cppsim/gate_factory.hpp"
 #include "cppsim/utility.hpp"
 
+#include "qulacs_utils.hpp"
 #include "utils/constants.hpp"
 
 #include "logger.hpp"
@@ -50,13 +50,6 @@ UINT measure_adapter(QuantumState& state, UINT target_index)
     delete buffer;
 
     return index;
-}
-
-void reset_qubit(QuantumState& state, UINT target_index)
-{
-    UINT measurement = measure_adapter(state, target_index);
-    if (measurement == 1)
-        gate::X(target_index)->update_quantum_state(&state);
 }
 
 
@@ -107,8 +100,14 @@ std::string execute_shot_(
         G.n_qubits += 2;
 
     auto generate_entanglement_ = [&]() {
-        reset_qubit(state, G.n_qubits - 1);
-        reset_qubit(state, G.n_qubits - 2);
+        UINT meas1 = measure_adapter(state, G.n_qubits - 1);
+        if (meas1) {
+            gate::X(G.n_qubits - 1)->update_quantum_state(&state);
+        }
+        UINT meas2 = measure_adapter(state, G.n_qubits - 2);
+        if (meas2) {
+            gate::X(G.n_qubits - 2)->update_quantum_state(&state);
+        }
         gate::H(G.n_qubits - 2)->update_quantum_state(&state);
         gate::CNOT(G.n_qubits - 2, G.n_qubits - 1)->update_quantum_state(&state);
     };
@@ -119,9 +118,9 @@ std::string execute_shot_(
     {
         const cunqa::JSON& inst = instruction.empty() ? *T.it : instruction;
 
-        std::vector<unsigned int> qubits;
+        std::vector<int> qubits;
         if (inst.contains("qubits"))
-            qubits = inst.at("qubits").get<std::vector<unsigned int>>();
+            qubits = inst.at("qubits").get<std::vector<int>>();
         auto inst_type = cunqa::constants::INSTRUCTIONS_MAP.at(inst.at("name").get<std::string>());
 
         switch (inst_type)
@@ -295,44 +294,80 @@ std::string execute_shot_(
         case cunqa::constants::MULTIPAULI:
         {
             auto pauli_id_list = inst.at("pauli_id_list").get<std::vector<unsigned int>>();
-            std::vector<unsigned int> target_qubits;
+            std::vector<unsigned int> uiqubits;
             for (int i = 0; i < qubits.size(); i++) {
-                target_qubits[i] = qubits[i] + T.zero_qubit;
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
             }
-            gate::Pauli(target_qubits, pauli_id_list)->update_quantum_state(&state);
+            gate::Pauli(uiqubits, pauli_id_list)->update_quantum_state(&state);
             break;
         }
         case cunqa::constants::MULTIPAULIROTATION:
         {
             auto params = inst.at("params").get<std::vector<double>>();
             auto pauli_id_list = inst.at("pauli_id_list").get<std::vector<unsigned int>>();
-            std::vector<unsigned int> target_qubits;
+            std::vector<unsigned int> uiqubits;
             for (int i = 0; i < qubits.size(); i++) {
-                target_qubits[i] = qubits[i] + T.zero_qubit;
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
             }
-            gate::PauliRotation(target_qubits, pauli_id_list, params[0])->update_quantum_state(&state);
+            gate::PauliRotation(uiqubits, pauli_id_list, params[0])->update_quantum_state(&state);
             break;
         }
-        case cunqa::constants::DENSEMATRIX:
+        case cunqa::constants::UNITARY:
+        {
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
+            ComplexMatrix qulacs_matrix = cunqa::sim::cunqamatrix_to_qulacsdensematrix(cunqa_matrix);
+
+            if (qubits.size() > 1) {
+                std::vector<unsigned int> uiqubits;
+                for (int i = 0; i < qubits.size(); i++) {
+                    uiqubits.push_back(qubits[i] + T.zero_qubit);
+                }
+                gate::DenseMatrix(uiqubits, qulacs_matrix)->update_quantum_state(&state);
+            } else {
+                gate::DenseMatrix(qubits[0] + T.zero_qubit, qulacs_matrix)->update_quantum_state(&state);
+            }
+            break;
+        }
         case cunqa::constants::SPARSEMATRIX:
+        {
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
+            SparseComplexMatrix qulacs_sparse = cunqa::sim::cunqamatrix_to_sparse(cunqa_matrix);
+
+            std::vector<unsigned int> uiqubits;
+            for (int i = 0; i < qubits.size(); i++) {
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
+            }
+            gate::SparseMatrix(uiqubits, qulacs_sparse)->update_quantum_state(&state);
+            break;
+        }
         case cunqa::constants::DIAGONAL:
         {   
-            LOGGER_ERROR("DenseMatrix, SparseMatrix and DiagonalMatrix not supported yet.");
+            auto cunqa_diagonal = inst.at("matrix").get<std::vector<CunqaQulacsDiagonalMatrix>>()[0];
+            ComplexVector qulacs_diagonal = cunqa::sim::cunqadiagonal_to_qulacsdiagonal(cunqa_diagonal);
+            std::vector<unsigned int> uiqubits;
+            for (int i = 0; i < qubits.size(); i++) {
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
+            }
+            gate::DiagonalMatrix(uiqubits, qulacs_diagonal)->update_quantum_state(&state);
             break;
         }
         case cunqa::constants::RANDOMUNITARY:
         {
+            std::vector<unsigned int> uiqubits;
+            for (int i = 0; i < qubits.size(); i++) {
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
+            }
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
-                gate::RandomUnitary(qubits, seed)->update_quantum_state(&state);
+                gate::RandomUnitary(uiqubits, seed)->update_quantum_state(&state);
             } else {
-                gate::RandomUnitary(qubits)->update_quantum_state(&state);
+                gate::RandomUnitary(uiqubits)->update_quantum_state(&state);
             }
             break;
         }
         case cunqa::constants::BITFLIPNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::BitFlipNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -343,7 +378,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DEPHASINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::DephasingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -354,7 +389,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::INDEPENDENTXZNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::IndependentXZNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -365,7 +400,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DEPOLARIZINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::DepolarizingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -376,7 +411,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::TWOQUBITDEPOLARIZINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::TwoQubitDepolarizingNoise(qubits[0], qubits[1], prob, seed)->update_quantum_state(&state);
@@ -387,7 +422,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::AMPLITUDEDAMPINGNOISE:
         {
-            auto prob = inst.at("prob").get<double>();
+            auto prob = inst.at("params").get<double>();
             if (inst.contains("seed")) {
                 auto seed = inst.at("seed").get<unsigned int>();
                 gate::AmplitudeDampingNoise(qubits[0], prob, seed)->update_quantum_state(&state);
@@ -429,7 +464,7 @@ std::string execute_shot_(
         case cunqa::constants::QSEND:
         {
             //------------- Generate Entanglement ---------------
-           generate_entanglement_();
+            generate_entanglement_();
             //----------------------------------------------------
 
             // CX to the entangled pair
@@ -438,13 +473,14 @@ std::string execute_shot_(
             // H to the sent qubit
             gate::H(qubits[0] + T.zero_qubit)->update_quantum_state(&state);
 
-            UINT result0 = measure_adapter(state, qubits[0] + T.zero_qubit);
-            UINT result1 = measure_adapter(state, G.n_qubits - 2);
+            UINT result = measure_adapter(state, qubits[0] + T.zero_qubit);
 
-            G.qc_meas[T.id].push(result0);
-            G.qc_meas[T.id].push(result1);
-            reset_qubit(state, G.n_qubits - 2);
-            reset_qubit(state, qubits[0] + T.zero_qubit);
+            G.qc_meas[T.id].push(result);
+            G.qc_meas[T.id].push(measure_adapter(state, G.n_qubits - 2));
+
+            if (result) {
+                gate::X(qubits[0] + T.zero_qubit)->update_quantum_state(&state);
+            }
 
             // Unlock QRECV
             Ts[inst.at("qpus")[0]].blocked = false;
@@ -473,7 +509,6 @@ std::string execute_shot_(
 
             // Swap the value to the desired qubit
             gate::SWAP(G.n_qubits - 1, qubits[0] + T.zero_qubit)->update_quantum_state(&state);
-            reset_qubit(state, G.n_qubits - 1);
             break;
         }
         case cunqa::constants::EXPOSE:

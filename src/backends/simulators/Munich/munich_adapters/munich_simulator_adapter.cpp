@@ -207,41 +207,30 @@ std::string MunichSimulatorAdapter::execute_shot_(
         }
         case constants::MCX:
         {
-            std::vector<int> ctrls;
-            for (int i = 0; i < qubits.size() - 1; i++) {
-                if (qubits[i] == -1) {
-                    ctrls.push_back(G.n_qubits - 1);
-                } else {
-                    ctrls.push_back(qubits[i] + T.zero_qubit); 
-                }
+            for (size_t i = 0; i < qubits.size(); i++) {
+                qubits[i] = (qubits[i] == -1) ? G.n_qubits - 1 : qubits[i] + T.zero_qubit;
             }
-            Controls controls(ctrls.begin(), ctrls.end());
-            int target_indx = qubits.size() - 1;
-            auto mc_gate = std::make_unique<StandardOperation>(controls, qubits[target_indx] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
+            Controls controls(qubits.begin(), qubits.end() - 1);
+            auto mc_gate = std::make_unique<StandardOperation>(controls, qubits[qubits.size() - 1], MUNICH_INSTRUCTIONS_MAP.at(inst_type));
             applyOperationToStateAdapter(std::move(mc_gate));
             break;
         }
         case constants::MCP:
         {
             auto params = inst.at("params").get<std::vector<double>>();
-            std::vector<int> ctrls;
-            for (int i = 0; i < qubits.size() - 1; i++) {
-                if (qubits[i] == -1) {
-                    ctrls.push_back(G.n_qubits - 1);
-                } else {
-                    ctrls.push_back(qubits[i] + T.zero_qubit); 
-                }
+            for (size_t i = 0; i < qubits.size(); i++) {
+                qubits[i] = (qubits[i] == -1) ? G.n_qubits - 1 : qubits[i] + T.zero_qubit;
             }
-            Controls controls(ctrls.begin(), ctrls.end());
-            int target_indx = qubits.size() - 1;
-            auto mc_gate = std::make_unique<StandardOperation>(controls, qubits[target_indx] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type), params);
+            Controls controls(qubits.begin(), qubits.end() - 1);
+            auto mc_gate = std::make_unique<StandardOperation>(controls, qubits[qubits.size() - 1], MUNICH_INSTRUCTIONS_MAP.at(inst_type), params);
             applyOperationToStateAdapter(std::move(mc_gate));
             break;
         }
         case constants::RESET:
         {
-            auto reset = std::make_unique<StandardOperation>(qubits[0] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
-            applyOperationToStateAdapter(std::move(reset));
+            LOGGER_ERROR("RESET not supported because the following error raises: DD for gatereset not available!");
+            //auto reset = std::make_unique<StandardOperation>(qubits[0] + T.zero_qubit, MUNICH_INSTRUCTIONS_MAP.at(inst_type));
+            //applyOperationToStateAdapter(std::move(reset));
             break;
         }
         case constants::BARRIER:
@@ -303,8 +292,6 @@ std::string MunichSimulatorAdapter::execute_shot_(
             {
                 auto reset_teleported = std::make_unique<StandardOperation>(qubits[0] + T.zero_qubit, OpType::X);
                 applyOperationToStateAdapter(std::move(reset_teleported));
-                auto reset_epr = std::make_unique<StandardOperation>(G.n_qubits - 2, OpType::X);
-                applyOperationToStateAdapter(std::move(reset_epr));
             }
 
             // Unlock QRECV
@@ -339,11 +326,6 @@ std::string MunichSimulatorAdapter::execute_shot_(
             auto swap = std::make_unique<StandardOperation>(targets, OpType::SWAP);
             applyOperationToStateAdapter(std::move(swap));
 
-            int result = measureAdapter(G.n_qubits - 1) - '0';
-            if (result) {
-                auto reset_epr = std::make_unique<StandardOperation>(G.n_qubits - 1, OpType::X);
-                applyOperationToStateAdapter(std::move(reset_epr));
-            }
             break;
         }
         case constants::EXPOSE:
@@ -468,7 +450,7 @@ JSON MunichSimulatorAdapter::simulate(const Backend* backend)
         if (!noise_model_json.empty()) {
             LOGGER_DEBUG("Noise model execution");
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
-            StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, quantum_task.config["seed"], "APD", noise_model_json["noise_prob"],
+            StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, seed, "APD", noise_model_json["noise_prob"],
                                             noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
 
             auto start = std::chrono::high_resolution_clock::now();
