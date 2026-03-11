@@ -90,8 +90,7 @@ class QJob:
             "avoid_parallelization": False,
             "num_clbits": circuit_ir["num_clbits"], 
             "num_qubits": circuit_ir["num_qubits"], 
-            "seed": 123123,
-            "device": self._device,
+            "device": self._device
         }
 
         if (run_parameters == None) or (len(run_parameters) == 0):

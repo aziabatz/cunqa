@@ -573,11 +573,12 @@ JSON MunichSimulatorAdapter::simulate(const Backend* backend)
 
         float time_taken;
         int n_qubits = quantum_task.config.at("num_qubits");
+        size_t seed = quantum_task.config.contains("seed") ? quantum_task.config.at("seed").get<size_t>() : 0;
 
         JSON noise_model_json = backend->config.at("noise_model");
         if (!noise_model_json.empty()) {
             const ApproximationInfo approx_info{noise_model_json["step_fidelity"], noise_model_json["approx_steps"], ApproximationInfo::FidelityDriven};
-            StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, quantum_task.config["seed"], "APD", noise_model_json["noise_prob"],
+            StochasticNoiseSimulator sim(std::move(mqt_circuit), approx_info, seed, "APD", noise_model_json["noise_prob"],
                                             noise_model_json["noise_prob_t1"], noise_model_json["noise_prob_multi"]);
 
             auto start = std::chrono::high_resolution_clock::now();

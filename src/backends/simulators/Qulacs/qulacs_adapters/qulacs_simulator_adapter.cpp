@@ -7,12 +7,12 @@
 #include <cstdlib>
 
 #include "qulacs_simulator_adapter.hpp"
-#include "qulacs_utils.hpp"
 
 #include "cppsim/circuit.hpp"
 #include "cppsim/gate_factory.hpp"
 #include "cppsim/utility.hpp"
 
+#include "qulacs_utils.hpp"
 #include "utils/constants.hpp"
 
 #include "logger.hpp"
@@ -331,11 +331,43 @@ std::string execute_shot_(
             gate::PauliRotation(uiqubits, pauli_id_list, params[0])->update_quantum_state(&state);
             break;
         }
-        case cunqa::constants::DENSEMATRIX:
+        case cunqa::constants::UNITARY:
+        {
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
+            ComplexMatrix qulacs_matrix = cunqa::sim::cunqamatrix_to_qulacsdensematrix(cunqa_matrix);
+
+            if (qubits.size() > 1) {
+                std::vector<unsigned int> uiqubits;
+                for (int i = 0; i < qubits.size(); i++) {
+                    uiqubits.push_back(qubits[i] + T.zero_qubit);
+                }
+                gate::DenseMatrix(uiqubits, qulacs_matrix)->update_quantum_state(&state);
+            } else {
+                gate::DenseMatrix(qubits[0] + T.zero_qubit, qulacs_matrix)->update_quantum_state(&state);
+            }
+            break;
+        }
         case cunqa::constants::SPARSEMATRIX:
+        {
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
+            SparseComplexMatrix qulacs_sparse = cunqa::sim::cunqamatrix_to_sparse(cunqa_matrix);
+
+            std::vector<unsigned int> uiqubits;
+            for (int i = 0; i < qubits.size(); i++) {
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
+            }
+            gate::SparseMatrix(uiqubits, qulacs_sparse)->update_quantum_state(&state);
+            break;
+        }
         case cunqa::constants::DIAGONAL:
         {   
-            LOGGER_ERROR("DenseMatrix, SparseMatrix and DiagonalMatrix not supported yet.");
+            auto cunqa_diagonal = inst.at("matrix").get<std::vector<CunqaQulacsDiagonalMatrix>>()[0];
+            ComplexVector qulacs_diagonal = cunqa::sim::cunqadiagonal_to_qulacsdiagonal(cunqa_diagonal);
+            std::vector<unsigned int> uiqubits;
+            for (int i = 0; i < qubits.size(); i++) {
+                uiqubits.push_back(qubits[i] + T.zero_qubit);
+            }
+            gate::DiagonalMatrix(uiqubits, qulacs_diagonal)->update_quantum_state(&state);
             break;
         }
         case cunqa::constants::RANDOMUNITARY:
