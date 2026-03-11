@@ -23,6 +23,7 @@
 #include "logger.hpp"
 
 namespace {
+
 struct TaskState {
     std::string id;
     cunqa::JSON::const_iterator it, end;
@@ -307,10 +308,34 @@ std::string execute_shot_(
             break;
         }
         case cunqa::constants::UNITARY:
+        {
+            auto cunqa_matrix = inst.at("matrix").get<CunqaAerMatrix>();
+            AerComplexVector matrix_data;
+            cunqa::sim::convert_cunqa_matrix_to_complex_vector(cunqa_matrix, matrix_data);
+            size_t dim = cunqa_matrix.size();
+            matrix<complex_t> aer_matrix(dim, dim, matrix_data.data());
+            reg_t unsigned_qubits;
+            for (size_t i = 0; i < qubits.size(); i++) {
+                unsigned_qubits.push_back((qubits[i] == -1) ? G.n_qubits - 1 : qubits[i] + T.zero_qubit);
+            }
+            state->apply_unitary(unsigned_qubits, aer_matrix);
+            break;
+        }
         case cunqa::constants::DIAGONAL:
+        {
+            auto cunqa_diagonal = inst.at("diagonal").get<CunqaAerDiagonalMatrix>();
+            AER::cvector_t aer_diagonal;
+            cunqa::sim::convert_cunqadiagonal_to_aerdiagonal(cunqa_diagonal, aer_diagonal);
+            reg_t unsigned_qubits;
+            for (size_t i = 0; i < qubits.size(); i++) {
+                unsigned_qubits.push_back((qubits[i] == -1) ? G.n_qubits - 1 : qubits[i] + T.zero_qubit);
+            }
+            state->apply_diagonal_matrix(unsigned_qubits, aer_diagonal);
+            break;
+        }
         case cunqa::constants::MULTIPLEXER:
         {
-            LOGGER_ERROR("Unitary, Diagonal and Multiplexer are not supported yet.");
+            LOGGER_ERROR("Multiplexer instruction is not supported in CUNQA-AER");
             break;
         }
         case cunqa::constants::SEND:

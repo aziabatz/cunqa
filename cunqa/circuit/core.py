@@ -1489,8 +1489,48 @@ class CunqaCircuit:
         self.add_instructions({
             "name":"unitary",
             "qubits":[*qubits],
-            "matrix":[matrix]
+            "matrix":matrix
         })
+
+    # Alias
+    densematrix = unitary
+
+    def sparsematrix(self, matrix: list[list[complex]], *qubits: int) -> None:
+        """
+        Class method to apply a unitary gate created from an unitary sparse matrix provided. 
+
+        Args:
+            matrix (list | numpy.ndarray): sparse munitary operator in matrix form to be applied to the 
+                                           given qubits.
+
+            qubits (int): qubits to which the unitary operator will be applied.
+
+        """
+        if (isinstance(matrix, np.ndarray) and 
+            (matrix.shape[0] == matrix.shape[1]) and 
+            (matrix.shape[0]%2 == 0)):
+            
+            matrix = list(matrix)
+
+        elif (isinstance(matrix, list) and 
+              isinstance(matrix[0], list) and 
+              all([len(matrix) == len(m) for m in matrix]) and 
+              (len(matrix)%2 == 0)):
+            
+            matrix = matrix
+
+        else:
+            raise ValueError(f"matrix must be a list of lists or <class 'numpy.ndarray'> of shape "
+                             f"(2^n,2^n) [TypeError].")
+            
+        matrix = [list(map(lambda z: [z.real, z.imag], row)) for row in matrix]
+
+        self.add_instructions({
+            "name":"sparsematrix",
+            "qubits":[*qubits],
+            "matrix":matrix
+        })
+    
 
     def randomunitary(self, *qubits: int,  seed = None) -> None:
         """
@@ -1531,35 +1571,10 @@ class CunqaCircuit:
         expanded_diagonal = [[z.real, z.imag] for z in diagonal]
 
         self.add_instructions({
-            "name":"unitary",
+            "name":"diagonal",
             "qubits":[*qubits],
-            "matrix":[expanded_diagonal]
+            "matrix":expanded_diagonal
         })
-
-    def multiplexer(self, matrices: list[list[list[complex]]], *qubits: int) -> None:
-        """
-        Class method to apply a multiplexer gate created from a list of complex matrices.
-
-        Args:
-            matrices (list | numpy.ndarray): list of matrices.
-
-            qubits (int): qubits to which the unitary operator will be applied.
-
-        """
-        pass
-
-    def sparsematrix(self, matrix: list[list[complex]], *qubits: int) -> None:
-        """
-        Class method to apply a multiplexer gate created from a complex sparse matrix.
-
-        Args:
-            matrix (list | numpy.ndarray): sparse matrix.
-
-            qubits (int): qubits to which the unitary operator will be applied.
-
-        """
-        pass
-
 
 
     def multipauli(self, pauli_id_list: list[int], *qubits: int) -> None:
