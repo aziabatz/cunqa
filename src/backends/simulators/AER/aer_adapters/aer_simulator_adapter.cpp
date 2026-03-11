@@ -309,7 +309,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::UNITARY:
         {
-            auto cunqa_matrix = inst.at("matrix").get<CunqaAerMatrix>();
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaAerMatrix>>()[0];
             AerComplexVector matrix_data;
             cunqa::sim::convert_cunqa_matrix_to_complex_vector(cunqa_matrix, matrix_data);
             size_t dim = cunqa_matrix.size();
@@ -323,7 +323,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DIAGONAL:
         {
-            auto cunqa_diagonal = inst.at("diagonal").get<CunqaAerDiagonalMatrix>();
+            auto cunqa_diagonal = inst.at("matrix").get<std::vector<CunqaAerDiagonalMatrix>>()[0];
             AER::cvector_t aer_diagonal;
             cunqa::sim::convert_cunqadiagonal_to_aerdiagonal(cunqa_diagonal, aer_diagonal);
             reg_t unsigned_qubits;
@@ -535,7 +535,6 @@ JSON AerSimulatorAdapter::simulate(const Backend* backend)
         circuits.push_back(std::make_shared<Circuit>(circuit));
 
         JSON run_config_json(aer_quantum_task.config);
-        LOGGER_DEBUG("run_config_json: {}", run_config_json.dump());
         Config aer_config(run_config_json);
         Noise::NoiseModel noise_model(backend->config.at("noise_model"));
 

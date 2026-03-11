@@ -312,9 +312,9 @@ std::string execute_shot_(
             gate::PauliRotation(uiqubits, pauli_id_list, params[0])->update_quantum_state(&state);
             break;
         }
-        case cunqa::constants::DENSEMATRIX:
+        case cunqa::constants::UNITARY:
         {
-            auto cunqa_matrix = inst.at("matrix").get<CunqaQulacsMatrix>();
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
             ComplexMatrix qulacs_matrix = cunqa::sim::cunqamatrix_to_qulacsdensematrix(cunqa_matrix);
 
             if (qubits.size() > 1) {
@@ -330,7 +330,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::SPARSEMATRIX:
         {
-            auto cunqa_matrix = inst.at("matrix").get<CunqaQulacsMatrix>();
+            auto cunqa_matrix = inst.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
             SparseComplexMatrix qulacs_sparse = cunqa::sim::cunqamatrix_to_sparse(cunqa_matrix);
 
             std::vector<unsigned int> uiqubits;
@@ -342,7 +342,7 @@ std::string execute_shot_(
         }
         case cunqa::constants::DIAGONAL:
         {   
-            auto cunqa_diagonal = inst.at("diagonal").get<CunqaQulacsDiagonalMatrix>();
+            auto cunqa_diagonal = inst.at("matrix").get<std::vector<CunqaQulacsDiagonalMatrix>>()[0];
             ComplexVector qulacs_diagonal = cunqa::sim::cunqadiagonal_to_qulacsdiagonal(cunqa_diagonal);
             std::vector<unsigned int> uiqubits;
             for (int i = 0; i < qubits.size(); i++) {

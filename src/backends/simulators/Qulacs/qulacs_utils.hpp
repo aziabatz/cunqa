@@ -235,7 +235,7 @@ inline void update_qulacs_circuit(QuantumCircuit& circuit, JSON& circuit_json)
         }
         case cunqa::constants::UNITARY:
         {
-            auto cunqa_matrix = instruction.at("matrix").get<CunqaQulacsMatrix>();
+            auto cunqa_matrix = instruction.at("matrix").get<std::vector<CunqaQulacsMatrix>>()[0];
             ComplexMatrix qulacs_matrix = cunqa::sim::cunqamatrix_to_qulacsdensematrix(cunqa_matrix);
 
             if (qubits.size() > 1) {

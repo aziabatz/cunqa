@@ -134,8 +134,9 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
     //JSON Object because if not it generates an array
     JSON new_circuit = {
         {"config", new_config},
-        {"instructions", JSON::parse(std::regex_replace(quantum_task.circuit.dump(),
-                       std::regex("clbits"), "memory"))}
+        {"instructions", JSON::parse(std::regex_replace(
+                        std::regex_replace(quantum_task.circuit.dump(), std::regex("clbits"), "memory"),
+                        std::regex("matrix"), "params"))}
     };
 
     return QuantumTask(new_circuit, new_config);

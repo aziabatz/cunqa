@@ -1489,7 +1489,7 @@ class CunqaCircuit:
         self.add_instructions({
             "name":"unitary",
             "qubits":[*qubits],
-            "matrix":matrix
+            "matrix":[matrix]
         })
 
     # Alias
@@ -1528,7 +1528,7 @@ class CunqaCircuit:
         self.add_instructions({
             "name":"sparsematrix",
             "qubits":[*qubits],
-            "matrix":matrix
+            "matrix":[matrix]
         })
     
 
@@ -1573,7 +1573,7 @@ class CunqaCircuit:
         self.add_instructions({
             "name":"diagonal",
             "qubits":[*qubits],
-            "matrix":expanded_diagonal
+            "matrix":[expanded_diagonal]
         })
 
 
