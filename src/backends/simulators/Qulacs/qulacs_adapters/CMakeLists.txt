@@ -10,4 +10,6 @@ target_link_libraries(qulacs_adapters PUBLIC classical_channel
                                         cppsim_static
                                         csim_static
                                         vqcsim_static
-                                        Eigen3::Eigen)
+                                        Eigen3::Eigen
+                                        OpenMP::OpenMP_CXX)
+target_compile_definitions(qulacs_adapters PRIVATE OPENMP_IN_QC)
