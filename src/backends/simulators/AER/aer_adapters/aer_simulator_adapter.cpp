@@ -114,7 +114,7 @@ std::string execute_shot_(
             break;
         }
         case cunqa::constants::X:
-            state->apply_mcx({qubits[0] + T.zero_qubit});
+            state->apply_x(qubits[0] + T.zero_qubit);
             break;
         case cunqa::constants::Y:
             state->apply_y(qubits[0] + T.zero_qubit);

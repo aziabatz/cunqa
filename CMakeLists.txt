@@ -115,7 +115,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
 # =====================================================================
 find_package(nlohmann_json "3.12.0" QUIET)
 if(NOT nlohmann_json_FOUND)
-  message(STATUS "Package nlohmann_json not found, fetching from "git@github.com:nlohmann/json.git"")
+  message(STATUS "Package nlohmann_json not found, fetching from git@github.com:nlohmann/json.git")
   FetchContent_Declare(
       nlohmann_json
       GIT_REPOSITORY "git@github.com:nlohmann/json.git"
