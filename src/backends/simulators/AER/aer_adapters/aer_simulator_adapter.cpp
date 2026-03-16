@@ -616,7 +616,9 @@ JSON AerSimulatorAdapter::simulate(comm::ClassicalChannel* classical_channel, co
     state.configure("method", sim_method);
     state.configure("device", device);
     state.configure("precision", "double");
-    state.configure("seed_simulator", std::to_string(qc.quantum_tasks[0].config.at("seed").get<int>()));
+    if (qc.quantum_tasks[0].config.contains("seed")) {
+        state.configure("seed_simulator", std::to_string(qc.quantum_tasks[0].config.at("seed").get<int>()));
+    }
     reg_t target_gpus = (device == "GPU") ? qc.quantum_tasks[0].config.at("device")["target_devices"].get<reg_t>() : reg_t();
 
     unsigned long n_qubits = 0;

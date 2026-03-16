@@ -137,10 +137,8 @@ bool write_cc_run_command(std::ofstream& sbatchFile,const CunqaArgs& args)
 
 #ifdef USE_MPI_BTW_QPU
     run_command =  "srun --mpi=pmix --task-epilog=$EPILOG_PATH setup_qpus " +  subcommand;
-    LOGGER_DEBUG("Run command with MPI comm: {}", run_command);
 #elif defined(USE_ZMQ_BTW_QPU)
     run_command =  "srun --task-epilog=$EPILOG_PATH setup_qpus " +  subcommand;
-    LOGGER_DEBUG("Run command with ZMQ comm: {}", run_command);
 #endif
 
     sbatchFile << run_command;
