@@ -126,9 +126,11 @@ QuantumTask quantum_task_to_AER(const QuantumTask& quantum_task)
     new_config["memory_slots"] = mem_slots;
 
     // Avoid parallelization. Not recommended.
-    if (quantum_task.config.at("avoid_parallelization").get<bool>()) {
-        LOGGER_DEBUG("Trhead parallelization canceled");
-        new_config["max_parallel_threads"] = 1;
+    if (quantum_task.config.contains("avoid_parallelization")) {
+        if (quantum_task.config.at("avoid_parallelization").get<bool>()) {
+            LOGGER_DEBUG("Trhead parallelization canceled");
+            new_config["max_parallel_threads"] = 1;
+        }
     }
 
     //JSON Object because if not it generates an array

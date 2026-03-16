@@ -151,30 +151,57 @@ find_or_fetch_package(
 # =====================================================================
 
 # -- libzmq -----------------------------------------------------------
-set(WITH_DOCS OFF               CACHE BOOL "Disable docs"               FORCE)
-set(ENABLE_CPACK OFF            CACHE BOOL "Disable CPACK"              FORCE)
-set(WITH_PERF_TOOL OFF          CACHE BOOL "Disable performance tool"   FORCE)
-set(ZMQ_BUILD_TESTS OFF         CACHE BOOL "Disable tests"              FORCE)
-set(ENABLE_DRAFTS ON            CACHE BOOL "Enable drafts"              FORCE)
-set(BUILD_SHARED ON             CACHE BOOL "Build shared library"       FORCE)
-set(BUILD_STATIC OFF            CACHE BOOL "Build static library"       FORCE)
+include(FetchContent)
 
-find_or_fetch_package(
-  libzmq
-  "git@github.com:zeromq/libzmq.git"
-  "4.3.5"
-  "v4.3.5"
-)
+find_package(libzmq 4.3.5 QUIET)
+if(NOT ${PACKAGE_NAME}_FOUND)
+# Force options for minimal libzmq build
+  set(WITH_DOCS OFF CACHE BOOL "" FORCE)
+  set(WITH_PERF_TOOL OFF CACHE BOOL "" FORCE)
+  set(ZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  set(WITH_GNUTLS OFF CACHE BOOL "" FORCE)  # avoid optional TLS dependency
+  set(BUILD_SHARED ON CACHE BOOL "" FORCE)
+  set(BUILD_STATIC OFF CACHE BOOL "" FORCE)
 
-# -- cppzmq -----------------------------------------------------------
-set(CPPZMQ_BUILD_TESTS OFF      CACHE BOOL "Disable tests"              FORCE)
+  # Fetch libzmq
+  FetchContent_Declare(
+    libzmq
+    GIT_REPOSITORY https://github.com/zeromq/libzmq.git
+    GIT_TAG v4.3.5
+  )
 
-find_or_fetch_package(
-  cppzmq
-  "git@github.com:zeromq/cppzmq.git"
-  "4.11.0"
-  "v4.11.0"
-)
+  FetchContent_GetProperties(libzmq)
+  if(NOT libzmq_POPULATED)
+    FetchContent_Populate(libzmq)
+    add_subdirectory(${libzmq_SOURCE_DIR} ${libzmq_BINARY_DIR})
+  endif()
+  if(TARGET libzmq)
+    message(STATUS "libzmq target exists")
+  else()
+    message(STATUS "libzmq target DOES NOT exist")
+  endif()
+else()
+  message(STATUS "Found package libzmq: libzmq_DIR = ${libzmq_DIR}")
+endif()
+
+#-- cppzmq ------------------------------------------------------------
+find_package(cppzmq 4.9.0 QUIET)
+if(NOT cppzmq_FOUND)
+  set(CPPZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+  FetchContent_Declare(
+    cppzmq
+    GIT_REPOSITORY https://github.com/zeromq/cppzmq.git
+    GIT_TAG v4.9.0
+  )
+
+  FetchContent_GetProperties(cppzmq)
+  if(NOT cppzmq_POPULATED)
+    FetchContent_Populate(cppzmq)
+    add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR})
+  endif()
+else()
+  message(STATUS "Found package cppzmq: cppzmq_DIR = ${cppzmq_DIR}")
+endif()
 
 # -- pyzmq -----------------------------------------------------------
 set(ZeroMQ_DIR "${libzmq_BINARY_DIR}" CACHE PATH "Path to ZeroMQConfig.cmake" FORCE)
