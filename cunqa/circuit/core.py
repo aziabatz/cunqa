@@ -279,7 +279,7 @@ class CunqaCircuit:
     classical_regs: dict #: Dictionary of classical registers of the circuit as ``{"name": [assigned clbits]}``.
     sending_to: set[str] #: Set of circuit ids to which the current circuit is sending measurement outcomes or qubits. 
     params: list[Param] #: Ordered list of the parameters names that the circuit currently has.
-
+    
     def __init__(
             self, 
             num_qubits: int, 
