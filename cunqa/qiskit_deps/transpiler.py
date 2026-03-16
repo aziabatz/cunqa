@@ -92,10 +92,6 @@ def transpiler(
             qc = circuit
 
         elif isinstance(circuit, CunqaCircuit):
-            # if circuit.has_cc or circuit.has_qc:
-            #     raise TypeError(f"CunqaCircuit with distributed instructions was provided, for ""
-            #                     f"which transpilation is not avaliable at the moment.")
-            
             qc = _from_ir_to_qc(circuit.info)
 
         elif isinstance(circuit, dict):
