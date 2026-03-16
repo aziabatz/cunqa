@@ -62,7 +62,6 @@ def _(c: QuantumCircuit) -> dict:
     json_data = {
         "id": "QuantumCircuit_" + generate_id(),
         "is_dynamic": False,
-        "has_cc": False,
         "instructions":[],
         "sending_to":[],
         "num_qubits":sum([q.size for q in c.qregs]),

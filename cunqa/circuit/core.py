@@ -279,9 +279,7 @@ class CunqaCircuit:
     classical_regs: dict #: Dictionary of classical registers of the circuit as ``{"name": [assigned clbits]}``.
     sending_to: set[str] #: Set of circuit ids to which the current circuit is sending measurement outcomes or qubits. 
     params: list[Param] #: Ordered list of the parameters names that the circuit currently has.
-    _has_cc: bool # True if the circuit has classical communications instructions
-    _has_cc: bool # True if the circuit has quantum communications instructions
-
+    
     def __init__(
             self, 
             num_qubits: int, 
@@ -328,7 +326,7 @@ class CunqaCircuit:
             "quantum_registers": self.quantum_regs,
             "is_dynamic": self.is_dynamic, 
             "sending_to": list(self.sending_to),
-            "params": self.params,
+            "params": self.params
         }
 
     @property
@@ -1852,7 +1850,6 @@ class CunqaCircuit:
 
         """
         self.is_dynamic = True
-        self._has_cc = True
         
         if isinstance(clbits, int):
             clbits = [clbits]
@@ -1884,7 +1881,6 @@ class CunqaCircuit:
         """
 
         self.is_dynamic = True
-        self._has_cc = True
 
         if isinstance(clbits, int):
             clbits = [clbits]
